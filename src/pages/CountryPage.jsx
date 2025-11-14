@@ -16,7 +16,7 @@ import {
 import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
-import { fetchAllPackagesForCountry } from '../../services/esimAccessApi';
+import { fetchAllPackagesForCountry } from '../services/esimAccessApi.js';
 import { calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
