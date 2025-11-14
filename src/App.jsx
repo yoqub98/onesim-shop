@@ -20,7 +20,7 @@ import { ChevronRight, Menu, X, Globe, Zap, Shield } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
-import CountryPage from './pages/CountryPage';
+import CountryPage from './pages/CountryPage.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
 
 // Navigation Component
