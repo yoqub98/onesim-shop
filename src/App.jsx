@@ -527,6 +527,7 @@ const HomePage = () => {
 function App() {
   return (
     <Router>
+        {console.log("🟧 <Router> mounted")}
       <Box fontFamily="'Inter Tight', sans-serif">
         {/* Google Fonts Import */}
         <style>
@@ -534,12 +535,28 @@ function App() {
             @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
           `}
         </style>
-        
+         {console.log("🟨 Rendering Navigation")}
         <Navigation />
-        
+          {console.log("🟪 Defining routes")}
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/country/:countryCode" element={<CountryPage />} />
+          <Route
+            path="/"
+            element={
+              <>
+                {console.log("🟩 ROUTE: / matched")}
+                <HomePage />
+              </>
+            }
+          />
+          <Route
+            path="/country/:countryCode"
+            element={
+              <>
+                {console.log("🟥 ROUTE: /country/:countryCode matched")}
+                <CountryPage />
+              </>
+            }
+          />
         </Routes>
         
         <Footer />
