@@ -1,6 +1,6 @@
 // src/config/pricing.js
 
-// Pricing configuration
+// Pricing configuration with environment variable support
 export const PRICING_CONFIG = {
   USD_TO_UZS_RATE: parseInt(process.env.REACT_APP_USD_TO_UZS_RATE) || 12000,
   PROFIT_MARGIN: parseInt(process.env.REACT_APP_PROFIT_MARGIN) || 50, // percentage
@@ -13,15 +13,21 @@ export const API_CONFIG = {
   SECRET_KEY: process.env.REACT_APP_ESIMACCESS_SECRET_KEY,
 };
 
-// Country mappings for our landing page
+// Country mappings for our landing page - UPDATED with new countries
 export const COUNTRY_MAPPINGS = {
   ASIA: [
-    { name: 'ОАЭ', code: 'AE', displayName: 'ОАЭ' },
-    // Add more Asian countries here later
+    { code: 'TH', displayName: 'Thailand', name: 'Thailand' },
+    { code: 'AE', displayName: 'UAE', name: 'United Arab Emirates' },
+    { code: 'VN', displayName: 'Vietnam', name: 'Vietnam' },
+    { code: 'MY', displayName: 'Malaysia', name: 'Malaysia' },
+    { code: 'CN', displayName: 'China', name: 'China' },
   ],
   EUROPE: [
-    { name: 'Турция', code: 'TR', displayName: 'Турция' },
-    // Add more European countries here later
+    { code: 'TR', displayName: 'Turkey', name: 'Turkey' },
+    { code: 'GE', displayName: 'Georgia', name: 'Georgia' },
+    { code: 'IT', displayName: 'Italy', name: 'Italy' },
+    { code: 'FR', displayName: 'France', name: 'France' },
+    { code: 'AZ', displayName: 'Azerbaijan', name: 'Azerbaijan' },
   ],
 };
 
@@ -43,4 +49,74 @@ export const calculateFinalPrice = (usdPrice) => {
  */
 export const formatPrice = (price) => {
   return price.toLocaleString('en-US').replace(/,/g, ' ');
+};
+
+/**
+ * Filter packages to get the best one per country
+ * Strategy: 
+ * 1. Prefer 20GB, 30-day plans
+ * 2. If no 20GB, get the next higher GB plan
+ * 3. Prefer 30-day duration, otherwise get closest available
+ * @param {Array} packages - Array of package objects
+ * @returns {Object|null} Best package or null
+ */
+export const selectBestPackage = (packages) => {
+  if (!packages || packages.length === 0) return null;
+
+  // Target: 20GB, 30 days
+  const TARGET_GB = 20;
+  const TARGET_DAYS = 30;
+
+  // First, try to find exact match: 20GB, 30 days
+  let bestPackage = packages.find(
+    pkg => pkg.dataGB === TARGET_GB && pkg.days === TARGET_DAYS
+  );
+
+  if (bestPackage) return bestPackage;
+
+  // Second, try to find 20GB with any duration (prefer 30 days, then closest)
+  const twentyGBPackages = packages.filter(pkg => pkg.dataGB === TARGET_GB);
+  if (twentyGBPackages.length > 0) {
+    // Sort by how close to 30 days
+    twentyGBPackages.sort((a, b) => {
+      const diffA = Math.abs(a.days - TARGET_DAYS);
+      const diffB = Math.abs(b.days - TARGET_DAYS);
+      return diffA - diffB;
+    });
+    return twentyGBPackages[0];
+  }
+
+  // Third, find packages with GB >= 20, prefer 30-day duration
+  const higherGBPackages = packages.filter(pkg => pkg.dataGB >= TARGET_GB);
+  if (higherGBPackages.length > 0) {
+    // Sort by GB (ascending) and days (prefer 30)
+    higherGBPackages.sort((a, b) => {
+      // First priority: closest to 30 days
+      const daysDiffA = Math.abs(a.days - TARGET_DAYS);
+      const daysDiffB = Math.abs(b.days - TARGET_DAYS);
+      
+      if (daysDiffA !== daysDiffB) {
+        return daysDiffA - daysDiffB;
+      }
+      
+      // Second priority: lowest GB (but still >= 20)
+      return a.dataGB - b.dataGB;
+    });
+    return higherGBPackages[0];
+  }
+
+  // Fourth, if no 20GB+ available, get the highest GB with closest to 30 days
+  packages.sort((a, b) => {
+    // First priority: highest GB
+    if (a.dataGB !== b.dataGB) {
+      return b.dataGB - a.dataGB;
+    }
+    
+    // Second priority: closest to 30 days
+    const daysDiffA = Math.abs(a.days - TARGET_DAYS);
+    const daysDiffB = Math.abs(b.days - TARGET_DAYS);
+    return daysDiffA - daysDiffB;
+  });
+
+  return packages[0];
 };

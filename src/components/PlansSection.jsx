@@ -11,63 +11,68 @@ import {
   Badge,
   HStack,
   VStack,
+  Spinner,
+  Stack,
 } from '@chakra-ui/react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { fetchPackagesForCountries } from '../services/esimAccessApi';
 import { COUNTRY_MAPPINGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 
-// Plan Card Component
-const PlanCard = ({ plan }) => {
+// Enhanced Plan Card Component
+const PlanCard = ({ plan, delay = 0 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Card.Root
       position="relative"
       cursor="pointer"
+      bg="white"
+      borderRadius="2xl"
+      overflow="hidden"
+      border="2px solid"
+      borderColor={isHovered ? 'purple.200' : 'gray.100'}
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-      height={isHovered ? 'auto' : '280px'}
-      _hover={{
-        transform: 'translateY(-8px)',
-        shadow: '0 20px 40px rgba(99, 102, 241, 0.3)',
-      }}
+      transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
+      shadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="animate__animated animate__fadeInUp"
-      borderRadius="3xl"
-      overflow="hidden"
+      style={{
+        animationDelay: `${delay}ms`,
+      }}
     >
-      <Card.Body p={8}>
-        {/* 5G Badge */}
-        <Badge
-          position="absolute"
-          top={6}
-          right={6}
-          colorPalette="purple"
-          fontSize="xs"
-          fontWeight="bold"
-          px={4}
-          py={2}
-          borderRadius="full"
-          textTransform="uppercase"
-        >
-          {plan.speed}
-        </Badge>
+      {/* Gradient overlay on hover */}
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        height="6px"
+        background="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
+        opacity={isHovered ? 1 : 0}
+        transition="opacity 0.3s"
+      />
 
-        {/* Card Content */}
-        <VStack align="flex-start" gap={5}>
-          <Box width="220pt">
+      <Card.Body p={8}>
+        <VStack align="stretch" gap={6} height="100%">
+          {/* Header Section */}
+          <Box>
             {/* Country with Flag */}
-            <HStack gap={3} mb={2}>
+            <HStack gap={4} mb={4}>
               <Box
-                borderRadius="lg"
+                borderRadius="xl"
                 overflow="hidden"
-                shadow="sm"
-                width="40px"
-                height="30px"
+                shadow="md"
+                width="56px"
+                height="42px"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
+                border="2px solid"
+                borderColor="gray.100"
+                transition="all 0.3s"
+                transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
               >
                 <Flag 
                   code={plan.countryCode} 
@@ -78,112 +83,188 @@ const PlanCard = ({ plan }) => {
                   }} 
                 />
               </Box>
-              <Heading size="xl" fontWeight="bold">
-                {plan.country}
-              </Heading>
+              <VStack align="flex-start" gap={1}>
+                <HStack>
+                  <MapPin size={16} color="#9333ea" />
+                  <Heading size="xl" fontWeight="800" color="gray.900">
+                    {plan.country}
+                  </Heading>
+                </HStack>
+              </VStack>
             </HStack>
-            
-            <Text fontSize="xl" color="gray.600" fontWeight="semibold" mt={2}>
+
+            {/* Speed Badge */}
+            <Badge
+              colorPalette="purple"
+              fontSize="xs"
+              fontWeight="800"
+              px={3}
+              py={1.5}
+              borderRadius="full"
+              textTransform="uppercase"
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
+            >
+              <Wifi size={12} />
+              {plan.speed}
+            </Badge>
+          </Box>
+
+          {/* Data Amount */}
+          <Box
+            bg="purple.50"
+            p={4}
+            borderRadius="xl"
+            border="1px solid"
+            borderColor="purple.100"
+          >
+            <Text 
+              fontSize="3xl" 
+              fontWeight="800" 
+              color="purple.700"
+              textAlign="center"
+              letterSpacing="tight"
+            >
               {plan.data}
+            </Text>
+            <Text 
+              fontSize="xs" 
+              color="purple.600" 
+              textAlign="center"
+              fontWeight="600"
+              mt={1}
+            >
+              ИНТЕРНЕТ
             </Text>
           </Box>
 
-          <HStack gap={2} color="gray.600">
-            <Calendar size={18} />
-            <Text fontSize="sm" fontWeight="medium">
-              {plan.days} ДНЕЙ
-            </Text>
+          {/* Duration */}
+          <HStack 
+            gap={3} 
+            color="gray.600"
+            p={3}
+            bg="gray.50"
+            borderRadius="lg"
+          >
+            <Calendar size={20} color="#9333ea" />
+            <VStack align="flex-start" gap={0}>
+              <Text fontSize="lg" fontWeight="700" color="gray.900">
+                {plan.days} дней
+              </Text>
+              <Text fontSize="xs" color="gray.500" fontWeight="600">
+                ДЕЙСТВИТЕЛЕН
+              </Text>
+            </VStack>
           </HStack>
 
-          <Heading
-            fontSize="2xl"
-            fontWeight="bold"
-            background="linear-gradient(to right, #6366f1, #8b5cf6)"
-            backgroundClip="text"
+          {/* Price */}
+          <Box
+            mt="auto"
+            pt={4}
+            borderTop="2px dashed"
+            borderColor="gray.200"
           >
-            {plan.price} UZS
-          </Heading>
-        </VStack>
+            <HStack justify="space-between" align="center">
+              <VStack align="flex-start" gap={0}>
+                <Text fontSize="xs" color="gray.500" fontWeight="600">
+                  ЦЕНА
+                </Text>
+                <Heading
+                  fontSize="3xl"
+                  fontWeight="800"
+                  background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  backgroundClip="text"
+                  letterSpacing="tight"
+                >
+                  {plan.price}
+                </Heading>
+                <Text fontSize="xs" color="gray.500" fontWeight="600">
+                  UZS
+                </Text>
+              </VStack>
 
-        {/* Bottom Text Button - Appears on Hover */}
-        <Box
-          mt={6}
-          pt={4}
-          borderTop="1px solid"
-          borderColor="gray.100"
-          opacity={isHovered ? 1 : 0}
-          maxHeight={isHovered ? '60px' : '0'}
-          overflow="hidden"
-          transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-        >
-          <Text
-            color="purple.600"
-            fontWeight="bold"
-            fontSize="md"
-            textAlign="center"
-            cursor="pointer"
-            _hover={{
-              color: 'purple.700',
-              textDecoration: 'underline',
-            }}
-            transition="all 0.2s"
-          >
-            Подробнее →
-          </Text>
-        </Box>
+              {/* CTA Button */}
+              <Button
+                size="sm"
+                bg={isHovered ? 'purple.600' : 'gray.100'}
+                color={isHovered ? 'white' : 'gray.700'}
+                _hover={{
+                  bg: 'purple.700',
+                  color: 'white',
+                }}
+                transition="all 0.3s"
+                borderRadius="lg"
+                fontWeight="700"
+                px={4}
+                rightIcon={<ArrowRight size={16} />}
+              >
+                Купить
+              </Button>
+            </HStack>
+          </Box>
+        </VStack>
       </Card.Body>
     </Card.Root>
   );
 };
 
 // Loading Skeleton Component
-const PlanCardSkeleton = () => {
+const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
     <Card.Root
-      borderRadius="3xl"
+      borderRadius="2xl"
       overflow="hidden"
-      height="280px"
+      border="2px solid"
+      borderColor="gray.100"
+      className="animate__animated animate__fadeIn"
+      style={{
+        animationDelay: `${delay}ms`,
+      }}
     >
       <Card.Body p={8}>
-        <VStack align="flex-start" gap={5}>
-          <Box width="220pt">
-            <HStack gap={3} mb={2}>
+        <VStack align="stretch" gap={6}>
+          <Box>
+            <HStack gap={4} mb={4}>
               <Box
-                borderRadius="lg"
-                width="40px"
-                height="30px"
+                borderRadius="xl"
+                width="56px"
+                height="42px"
                 bg="gray.200"
                 animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               />
               <Box
-                width="120px"
-                height="24px"
+                width="140px"
+                height="28px"
                 bg="gray.200"
-                borderRadius="md"
+                borderRadius="lg"
                 animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               />
             </HStack>
             <Box
-              width="80px"
-              height="20px"
+              width="60px"
+              height="24px"
               bg="gray.200"
-              borderRadius="md"
-              mt={2}
+              borderRadius="full"
               animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
             />
           </Box>
           <Box
-            width="100px"
-            height="16px"
-            bg="gray.200"
-            borderRadius="md"
+            height="80px"
+            bg="gray.100"
+            borderRadius="xl"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            width="150px"
-            height="28px"
-            bg="gray.200"
-            borderRadius="md"
+            height="60px"
+            bg="gray.100"
+            borderRadius="lg"
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+          />
+          <Box
+            height="80px"
+            bg="gray.100"
+            borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
@@ -205,10 +286,10 @@ const PlansSection = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch packages for Asia countries
+        // Fetch packages for Asia countries (one per country)
         const asiaPackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA);
         
-        // Fetch packages for Europe countries
+        // Fetch packages for Europe countries (one per country)
         const europePackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE);
 
         // Transform packages with pricing
@@ -238,79 +319,138 @@ const PlansSection = () => {
   }, []);
 
   return (
-    <Box as="section" py={20} bg="gray.50" id="plans">
-      <Container maxW="8xl">
-        <VStack gap={12}>
-          <Heading
-            as="h2"
-            fontSize={{ base: '3xl', md: '4xl' }}
-            fontWeight="extrabold"
-            textAlign="center"
-            background="linear-gradient(to right, #1f2937, #4b5563)"
-            backgroundClip="text"
-            className="animate__animated animate__fadeIn"
-          >
-            Тарифные планы
-          </Heading>
+    <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
+      {/* Background decoration */}
+      <Box
+        position="absolute"
+        top="10%"
+        left="-10%"
+        width="500px"
+        height="500px"
+        bg="purple.50"
+        borderRadius="full"
+        filter="blur(100px)"
+        opacity="0.5"
+        pointerEvents="none"
+      />
+      <Box
+        position="absolute"
+        bottom="10%"
+        right="-10%"
+        width="500px"
+        height="500px"
+        bg="blue.50"
+        borderRadius="full"
+        filter="blur(100px)"
+        opacity="0.4"
+        pointerEvents="none"
+      />
+
+      <Container maxW="8xl" position="relative">
+        <VStack gap={16}>
+          {/* Section Header */}
+          <VStack gap={4} textAlign="center" className="animate__animated animate__fadeIn">
+            <Badge
+              colorPalette="purple"
+              fontSize="sm"
+              fontWeight="800"
+              px={5}
+              py={2}
+              borderRadius="full"
+              textTransform="uppercase"
+            >
+              Наши тарифы
+            </Badge>
+            <Heading
+              as="h2"
+              fontSize={{ base: '4xl', md: '5xl' }}
+              fontWeight="800"
+              color="gray.900"
+              letterSpacing="tight"
+            >
+              Выберите идеальный{' '}
+              <Box
+                as="span"
+                background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                backgroundClip="text"
+              >
+                план
+              </Box>
+            </Heading>
+            <Text
+              fontSize={{ base: 'lg', md: 'xl' }}
+              color="gray.600"
+              maxW="2xl"
+              fontWeight="500"
+            >
+              Гибкие тарифные планы для каждой страны с высокоскоростным интернетом
+            </Text>
+          </VStack>
 
           {/* Custom Tabs */}
-          <Box className="animate__animated animate__fadeIn">
-            <HStack
-              bg="gray.200"
+          <Box className="animate__animated animate__fadeIn" style={{ animationDelay: '200ms' }}>
+            <Stack
+              direction={{ base: 'column', md: 'row' }}
+              bg="white"
               p={2}
-              borderRadius="3xl"
+              borderRadius="2xl"
               gap={2}
               mx="auto"
               width="fit-content"
-              shadow="sm"
+              shadow="lg"
+              border="1px solid"
+              borderColor="gray.200"
             >
               <Button
                 onClick={() => setActiveTab('ASIA')}
-                bg={activeTab === 'ASIA' ? 'purple.600' : 'transparent'}
+                bg={activeTab === 'ASIA' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'}
                 color={activeTab === 'ASIA' ? 'white' : 'gray.700'}
-                borderRadius="3xl"
+                borderRadius="xl"
                 _hover={{
-                  bg: activeTab === 'ASIA' ? 'purple.700' : 'gray.300',
+                  bg: activeTab === 'ASIA' ? 'linear-gradient(135deg, #5568d3 0%, #6941a3 100%)' : 'gray.50',
                   transform: 'scale(1.02)',
                 }}
-                transition="all 0.3s"
-                fontWeight="bold"
-                px={10}
-                py={6}
-                shadow={activeTab === 'ASIA' ? 'md' : 'none'}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                fontWeight="800"
+                px={12}
+                py={7}
+                fontSize="lg"
+                shadow={activeTab === 'ASIA' ? 'lg' : 'none'}
               >
                 АЗИЯ
               </Button>
               <Button
                 onClick={() => setActiveTab('EUROPE')}
-                bg={activeTab === 'EUROPE' ? 'purple.600' : 'transparent'}
+                bg={activeTab === 'EUROPE' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'}
                 color={activeTab === 'EUROPE' ? 'white' : 'gray.700'}
-                borderRadius="3xl"
+                borderRadius="xl"
                 _hover={{
-                  bg: activeTab === 'EUROPE' ? 'purple.700' : 'gray.300',
+                  bg: activeTab === 'EUROPE' ? 'linear-gradient(135deg, #5568d3 0%, #6941a3 100%)' : 'gray.50',
                   transform: 'scale(1.02)',
                 }}
-                transition="all 0.3s"
-                fontWeight="bold"
-                px={10}
-                py={6}
-                shadow={activeTab === 'EUROPE' ? 'md' : 'none'}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                fontWeight="800"
+                px={12}
+                py={7}
+                fontSize="lg"
+                shadow={activeTab === 'EUROPE' ? 'lg' : 'none'}
               >
                 ЕВРОПА
               </Button>
-            </HStack>
+            </Stack>
 
             {/* Error Message */}
             {error && (
               <Box
-                mt={6}
-                p={4}
+                mt={8}
+                p={6}
                 bg="red.50"
-                borderRadius="lg"
-                border="1px solid"
+                borderRadius="xl"
+                border="2px solid"
                 borderColor="red.200"
+                className="animate__animated animate__shakeX"
               >
-                <Text color="red.600" textAlign="center">
+                <Text color="red.600" textAlign="center" fontWeight="600">
                   {error}
                 </Text>
               </Box>
@@ -318,29 +458,49 @@ const PlansSection = () => {
 
             {/* Plans Grid */}
             <Grid
-              templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
-              gap={8}
-              mt={10}
+              templateColumns={{ 
+                base: '1fr', 
+                md: 'repeat(2, 1fr)', 
+                lg: 'repeat(3, 1fr)',
+                xl: 'repeat(5, 1fr)' 
+              }}
+              gap={6}
+              mt={12}
             >
               {loading ? (
                 // Show loading skeletons
                 <>
-                  <PlanCardSkeleton />
-                  <PlanCardSkeleton />
-                  <PlanCardSkeleton />
-                  <PlanCardSkeleton />
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <PlanCardSkeleton key={i} delay={i * 100} />
+                  ))}
                 </>
               ) : plansData[activeTab].length > 0 ? (
                 // Show actual plans
-                plansData[activeTab].map((plan) => (
-                  <PlanCard key={plan.id} plan={plan} />
+                plansData[activeTab].map((plan, index) => (
+                  <PlanCard key={plan.id} plan={plan} delay={index * 100} />
                 ))
               ) : (
                 // Show empty state
-                <Box gridColumn="1 / -1" textAlign="center" py={10}>
-                  <Text fontSize="lg" color="gray.500">
-                    Планы для этого региона скоро появятся
-                  </Text>
+                <Box gridColumn="1 / -1" textAlign="center" py={16}>
+                  <VStack gap={4}>
+                    <Box
+                      w="80px"
+                      h="80px"
+                      bg="gray.100"
+                      borderRadius="full"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <MapPin size={40} color="#9ca3af" />
+                    </Box>
+                    <Heading size="lg" color="gray.700">
+                      Планы скоро появятся
+                    </Heading>
+                    <Text fontSize="md" color="gray.500" fontWeight="500">
+                      Мы работаем над добавлением тарифов для этого региона
+                    </Text>
+                  </VStack>
                 </Box>
               )}
             </Grid>

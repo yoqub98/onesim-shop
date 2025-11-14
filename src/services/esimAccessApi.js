@@ -1,7 +1,7 @@
 // src/services/esimAccessApi.js
-// Automatically detects environment and uses correct API URL
+// Enhanced API service with improved filtering
 
-import { API_CONFIG } from '../config/pricing';
+import { selectBestPackage } from '../config/pricing';
 
 // Smart API URL detection
 const getApiUrl = () => {
@@ -16,7 +16,7 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl();
 
-console.log('🔗 API URL:', API_URL); // Debug log
+console.log('🔗 API URL:', API_URL);
 
 /**
  * Fetch packages for a specific country from esimAccess API
@@ -32,44 +32,6 @@ export const fetchPackagesByCountry = async (locationCode) => {
       },
       body: JSON.stringify({
         locationCode: locationCode,
-        type: '',
-        slug: '',
-        packageCode: '',
-        iccid: '',
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.success && data.obj && data.obj.packageList) {
-      return data.obj.packageList;
-    } else {
-      console.error('API Error:', data.errorMsg);
-      return [];
-    }
-  } catch (error) {
-    console.error('Failed to fetch packages:', error);
-    return [];
-  }
-};
-
-/**
- * Fetch all packages (no country filter)
- * @returns {Promise<Array>} Array of all package objects
- */
-export const fetchAllPackages = async () => {
-  try {
-    const response = await fetch(`${API_URL}/packages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        locationCode: '',
         type: '',
         slug: '',
         packageCode: '',
@@ -130,32 +92,10 @@ export const transformPackageData = (apiPackage, countryName, countryCode) => {
 };
 
 /**
- * Filter packages to get the best ones for display
- * Strategy: Get packages with good data/price ratio
- * @param {Array} packages - Array of package objects
- * @param {number} limit - Maximum number of packages to return
- * @returns {Array} Filtered array of packages
- */
-export const filterBestPackages = (packages, limit = 4) => {
-  if (!packages || packages.length === 0) return [];
-
-  // Calculate value score (GB per USD)
-  const packagesWithScore = packages.map(pkg => ({
-    ...pkg,
-    valueScore: pkg.dataGB / pkg.priceUSD,
-  }));
-
-  // Sort by value score (best value first)
-  packagesWithScore.sort((a, b) => b.valueScore - a.valueScore);
-
-  // Return top packages
-  return packagesWithScore.slice(0, limit);
-};
-
-/**
  * Fetch and transform packages for multiple countries
+ * Returns only ONE package per country based on selection criteria
  * @param {Array} countries - Array of country objects {name, code, displayName}
- * @returns {Promise<Array>} Array of transformed package objects
+ * @returns {Promise<Array>} Array of transformed package objects (one per country)
  */
 export const fetchPackagesForCountries = async (countries) => {
   try {
@@ -165,14 +105,17 @@ export const fetchPackagesForCountries = async (countries) => {
       const packages = await fetchPackagesByCountry(country.code);
       
       if (packages.length > 0) {
-        // Transform each package
+        // Transform all packages for this country
         const transformedPackages = packages.map(pkg => 
           transformPackageData(pkg, country.displayName, country.code)
         );
         
-        // Get best packages for this country (e.g., top 2)
-        const bestPackages = filterBestPackages(transformedPackages, 2);
-        allPackages.push(...bestPackages);
+        // Select the BEST single package for this country
+        const bestPackage = selectBestPackage(transformedPackages);
+        
+        if (bestPackage) {
+          allPackages.push(bestPackage);
+        }
       }
     }
 
