@@ -11,9 +11,8 @@ import {
   VStack,
   Badge,
   IconButton,
-  Spinner,
 } from '@chakra-ui/react';
-import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar, Wifi, MapPin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi.js';
@@ -21,9 +20,8 @@ import { calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
 const PLANS_PER_PAGE = 12;
-const DEFAULT_DURATION_FILTER = 30; // Default to 30 days
 
-// Plan Card Component
+// Plan Card Component (optimized - no animations on load)
 const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
@@ -42,6 +40,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
       boxShadow={isHovered ? '0 20px 40px rgba(102, 126, 234, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      minWidth="280px"
     >
       <Box
         position="absolute"
@@ -55,7 +54,8 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
       />
 
       <Box p={6}>
-        <VStack align="stretch" gap={4}>
+        <VStack align="stretch" gap={4} height="100%">
+          {/* Speed Badge */}
           <HStack justify="space-between">
             <Badge
               colorScheme="purple"
@@ -73,6 +73,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             </Badge>
           </HStack>
 
+          {/* Data Amount */}
           <Box
             bg="purple.50"
             p={3}
@@ -98,6 +99,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </Box>
 
+          {/* Duration */}
           <HStack 
             gap={2} 
             p={2}
@@ -111,7 +113,9 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </HStack>
 
+          {/* Price */}
           <Box
+            mt="auto"
             pt={3}
             borderTop="2px dashed"
             borderColor="gray.200"
@@ -129,7 +133,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
                   {plan.price}
                 </Heading>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  UZS
+                  {t('plans.card.currency') || 'USD'}
                 </Text>
               </VStack>
 
@@ -159,7 +163,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
   );
 };
 
-// Loading Skeleton
+// Minimal Loading Skeleton
 const PlanCardSkeleton = () => {
   return (
     <Box
@@ -167,32 +171,67 @@ const PlanCardSkeleton = () => {
       overflow="hidden"
       border="2px solid"
       borderColor="gray.100"
+      minWidth="280px"
       bg="white"
     >
       <Box p={6}>
         <VStack align="stretch" gap={4}>
-          {[20, 60, 40, 60].map((height, i) => (
-            <Box
-              key={i}
-              height={`${height}px`}
-              bg="gray.200"
-              borderRadius="lg"
-              sx={{
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%': { opacity: 0.5 },
-                },
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
-            />
-          ))}
+          <Box
+            width="50px"
+            height="20px"
+            bg="gray.200"
+            borderRadius="full"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s ease-in-out infinite',
+            }}
+          />
+          <Box
+            height="60px"
+            bg="gray.100"
+            borderRadius="lg"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s ease-in-out infinite',
+            }}
+          />
+          <Box
+            height="40px"
+            bg="gray.100"
+            borderRadius="md"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s ease-in-out infinite',
+            }}
+          />
+          <Box
+            height="60px"
+            bg="gray.100"
+            borderRadius="lg"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s ease-in-out infinite',
+            }}
+          />
         </VStack>
       </Box>
     </Box>
   );
 };
 
-// Pagination Component
+// Compact Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
@@ -214,7 +253,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     <HStack gap={2} justify="center" mt={8}>
       <IconButton
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        isDisabled={currentPage === 1}
         variant="ghost"
         size="sm"
         aria-label="Previous"
@@ -258,7 +297,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       
       <IconButton
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        isDisabled={currentPage === totalPages}
         variant="ghost"
         size="sm"
         aria-label="Next"
@@ -280,14 +319,13 @@ const CountryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Default to 30 days filter
   const [selectedData, setSelectedData] = useState('all');
-  const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER.toString());
+  const [selectedDuration, setSelectedDuration] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   
   const countryName = getCountryName(countryCode, lang);
 
-  // Load plans once on mount
+  // Load plans once
   useEffect(() => {
     let isMounted = true;
     
@@ -296,27 +334,23 @@ const CountryPage = () => {
         setLoading(true);
         setError(null);
 
+        console.log('📡 Loading packages for:', countryCode);
         const packages = await fetchAllPackagesForCountry(countryCode, lang);
         
         if (!isMounted) return;
         
-        if (packages.length === 0) {
-          setError('No plans available for this country');
-          setAllPlans([]);
-          return;
-        }
-
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
 
         setAllPlans(transformedPackages);
+        console.log('✅ Loaded', transformedPackages.length, 'packages');
         
       } catch (err) {
         if (!isMounted) return;
         console.error('❌ Error:', err);
-        setError('Failed to load plans. Please try again.');
+        setError(t('plans.error') || 'Error loading plans');
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -331,9 +365,9 @@ const CountryPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [countryCode, lang]);
+  }, [countryCode, lang, t]);
 
-  // Get unique filter options
+  // Compute filter options
   const dataOptions = useMemo(() => {
     return [...new Set(allPlans.map(p => p.dataGB))].sort((a, b) => a - b);
   }, [allPlans]);
@@ -365,7 +399,7 @@ const CountryPage = () => {
 
   const totalPages = Math.ceil(filteredPlans.length / PLANS_PER_PAGE);
 
-  // Reset page when filters change
+  // Reset page on filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedData, selectedDuration]);
@@ -388,7 +422,7 @@ const CountryPage = () => {
               onClick={() => navigate('/')}
               fontWeight="600"
             >
-              Назад
+              {t('countryPage.backButton') || 'Назад'}
             </Button>
 
             <HStack gap={4}>
@@ -409,17 +443,10 @@ const CountryPage = () => {
               </Box>
               <VStack align="flex-start" gap={1}>
                 <Heading size="xl" fontWeight="800" color="gray.900">
-                  eSIM для {countryName}
+                  {t('countryPage.title') || 'eSIM для'} {countryName}
                 </Heading>
                 <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
-                  {loading ? (
-                    <HStack gap={1}>
-                      <Spinner size="xs" />
-                      <Text>Загрузка...</Text>
-                    </HStack>
-                  ) : (
-                    `${filteredPlans.length} ${filteredPlans.length === 1 ? 'план' : 'планов'}`
-                  )}
+                  {loading ? '...' : `${filteredPlans.length} планов`}
                 </Badge>
               </VStack>
             </HStack>
@@ -432,7 +459,7 @@ const CountryPage = () => {
         <Container maxW="8xl">
           <HStack gap={4} flexWrap="wrap">
             <Text fontWeight="600" color="gray.700">
-              Фильтры:
+              {t('countryPage.filterLabel') || 'Фильтры'}:
             </Text>
             
             <Box minW="180px">
@@ -487,7 +514,7 @@ const CountryPage = () => {
 
             {!loading && (
               <Text color="gray.500" fontSize="sm" ml="auto">
-                Показано {paginatedPlans.length} из {filteredPlans.length}
+                {paginatedPlans.length} из {filteredPlans.length}
               </Text>
             )}
           </HStack>
@@ -505,67 +532,55 @@ const CountryPage = () => {
             </Box>
           )}
 
-          {loading ? (
-            <Grid
-              templateColumns={{ 
-                base: '1fr', 
-                md: 'repeat(2, 1fr)', 
-                lg: 'repeat(3, 1fr)',
-                xl: 'repeat(4, 1fr)' 
-              }}
-              gap={4}
-            >
-              {Array.from({ length: 8 }).map((_, i) => (
+          <Grid
+            templateColumns={{ 
+              base: '1fr', 
+              md: 'repeat(2, 1fr)', 
+              lg: 'repeat(3, 1fr)',
+              xl: 'repeat(4, 1fr)' 
+            }}
+            gap={4}
+          >
+            {loading ? (
+              Array.from({ length: 12 }).map((_, i) => (
                 <PlanCardSkeleton key={i} />
-              ))}
-            </Grid>
-          ) : paginatedPlans.length > 0 ? (
-            <>
-              <Grid
-                templateColumns={{ 
-                  base: '1fr', 
-                  md: 'repeat(2, 1fr)', 
-                  lg: 'repeat(3, 1fr)',
-                  xl: 'repeat(4, 1fr)' 
-                }}
-                gap={4}
-              >
-                {paginatedPlans.map((plan) => (
-                  <CountryPlanCard key={plan.id} plan={plan} lang={lang} />
-                ))}
-              </Grid>
+              ))
+            ) : paginatedPlans.length > 0 ? (
+              paginatedPlans.map((plan) => (
+                <CountryPlanCard key={plan.id} plan={plan} lang={lang} />
+              ))
+            ) : (
+              <Box gridColumn="1 / -1" textAlign="center" py={12}>
+                <VStack gap={3}>
+                  <Box w="60px" h="60px" bg="gray.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
+                    <MapPin size={32} color="#9ca3af" />
+                  </Box>
+                  <Heading size="md" color="gray.700">
+                    Планы не найдены
+                  </Heading>
+                  <Button
+                    mt={2}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedData('all');
+                      setSelectedDuration('all');
+                    }}
+                    colorScheme="purple"
+                    variant="outline"
+                  >
+                    Сбросить фильтры
+                  </Button>
+                </VStack>
+              </Box>
+            )}
+          </Grid>
 
-              {totalPages > 1 && (
-                <Pagination 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </>
-          ) : (
-            <Box textAlign="center" py={12}>
-              <VStack gap={3}>
-                <Heading size="md" color="gray.700">
-                  Планы не найдены
-                </Heading>
-                <Text color="gray.500">
-                  Попробуйте изменить фильтры
-                </Text>
-                <Button
-                  mt={2}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedData('all');
-                    setSelectedDuration('all');
-                  }}
-                  colorScheme="purple"
-                  variant="outline"
-                >
-                  Сбросить фильтры
-                </Button>
-              </VStack>
-            </Box>
+          {!loading && totalPages > 1 && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           )}
         </Container>
       </Box>
