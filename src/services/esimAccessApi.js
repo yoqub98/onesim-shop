@@ -3,7 +3,7 @@
 
 import { selectBestPackage } from '../config/pricing.js';
 
-import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
+import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
 
 // Smart API URL detection
 const getApiUrl = () => {
