@@ -1,6 +1,6 @@
 // src/services/esimAccessApi.js
 
-import { selectBestPackage } from '../src/config/pricing.js';
+import { selectBestPackage } from '../config/pricing.js';
 import { getCountryName, DEFAULT_LANGUAGE } from '../src/config/i18n.js';
 import { STATIC_PACKAGE_CODES } from '../src/config/staticPackages.js';
 
