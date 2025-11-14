@@ -21,8 +21,8 @@ import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n
 
 const PLANS_PER_PAGE = 12;
 
-// Plan Card Component
-const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
+// Plan Card Component (optimized - no animations on load)
+const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
 
@@ -35,70 +35,57 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
       overflow="hidden"
       border="2px solid"
       borderColor={isHovered ? 'purple.200' : 'gray.100'}
-      transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-      transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
-      boxShadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
+      transition="all 0.3s ease"
+      transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
+      boxShadow={isHovered ? '0 20px 40px rgba(102, 126, 234, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       minWidth="280px"
-      opacity="0"
-      animation="fadeIn 0.5s ease-out forwards"
-      style={{
-        animationDelay: `${delay}ms`,
-      }}
-      sx={{
-        '@keyframes fadeIn': {
-          from: { opacity: 0, transform: 'translateY(20px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
-        },
-      }}
     >
       <Box
         position="absolute"
         top={0}
         left={0}
         right={0}
-        height="6px"
+        height="4px"
         background="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
         opacity={isHovered ? 1 : 0}
         transition="opacity 0.3s"
       />
 
-      <Box p={8}>
-        <VStack align="stretch" gap={6} height="100%">
+      <Box p={6}>
+        <VStack align="stretch" gap={4} height="100%">
           {/* Speed Badge */}
           <HStack justify="space-between">
             <Badge
               colorScheme="purple"
               fontSize="xs"
-              fontWeight="800"
-              px={3}
-              py={1.5}
+              fontWeight="700"
+              px={2}
+              py={1}
               borderRadius="full"
               textTransform="uppercase"
-              display="inline-flex"
-              alignItems="center"
-              gap={1.5}
             >
-              <Wifi size={12} />
-              {plan.speed}
+              <HStack gap={1}>
+                <Wifi size={10} />
+                <Text>{plan.speed}</Text>
+              </HStack>
             </Badge>
           </HStack>
 
           {/* Data Amount */}
           <Box
             bg="purple.50"
-            p={4}
-            borderRadius="xl"
+            p={3}
+            borderRadius="lg"
             border="1px solid"
             borderColor="purple.100"
           >
             <Text 
-              fontSize="3xl" 
+              fontSize="2xl" 
               fontWeight="800" 
               color="purple.700"
               textAlign="center"
-              letterSpacing="tight"
             >
               {plan.data}
             </Text>
@@ -107,7 +94,6 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
               color="purple.600" 
               textAlign="center"
               fontWeight="600"
-              mt={1}
             >
               {t('plans.card.internet') || 'Интернет'}
             </Text>
@@ -115,15 +101,14 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
 
           {/* Duration */}
           <HStack 
-            gap={3} 
-            color="gray.600"
-            p={3}
+            gap={2} 
+            p={2}
             bg="gray.50"
-            borderRadius="lg"
+            borderRadius="md"
             justify="center"
           >
-            <Calendar size={20} color="#9333ea" />
-            <Text fontSize="lg" fontWeight="700" color="gray.900">
+            <Calendar size={16} color="#9333ea" />
+            <Text fontSize="md" fontWeight="700" color="gray.900">
               {plan.days} {t('plans.card.days') || 'дней'}
             </Text>
           </HStack>
@@ -131,7 +116,7 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
           {/* Price */}
           <Box
             mt="auto"
-            pt={4}
+            pt={3}
             borderTop="2px dashed"
             borderColor="gray.200"
           >
@@ -141,10 +126,9 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   {t('plans.card.price') || 'Цена'}
                 </Text>
                 <Heading
-                  fontSize="3xl"
+                  fontSize="2xl"
                   fontWeight="800"
                   color="gray.800"
-                  letterSpacing="tight"
                 >
                   {plan.price}
                 </Heading>
@@ -164,10 +148,12 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                 transition="all 0.3s"
                 borderRadius="lg"
                 fontWeight="700"
-                px={4}
-                rightIcon={<ArrowRight size={16} />}
+                px={3}
               >
-                {t('plans.card.buy') || 'Купить'}
+                <HStack gap={1}>
+                  <Text>{t('plans.card.buy') || 'Купить'}</Text>
+                  <ArrowRight size={14} />
+                </HStack>
               </Button>
             </HStack>
           </Box>
@@ -177,8 +163,8 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   );
 };
 
-// Simplified Loading Skeleton (just 3 for visual feedback)
-const PlanCardSkeleton = ({ delay = 0 }) => {
+// Minimal Loading Skeleton
+const PlanCardSkeleton = () => {
   return (
     <Box
       borderRadius="2xl"
@@ -188,11 +174,11 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       minWidth="280px"
       bg="white"
     >
-      <Box p={8}>
-        <VStack align="stretch" gap={6}>
+      <Box p={6}>
+        <VStack align="stretch" gap={4}>
           <Box
-            width="60px"
-            height="24px"
+            width="50px"
+            height="20px"
             bg="gray.200"
             borderRadius="full"
             sx={{
@@ -200,19 +186,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 '0%, 100%': { opacity: 1 },
                 '50%': { opacity: 0.5 },
               },
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            }}
-          />
-          <Box
-            height="80px"
-            bg="gray.100"
-            borderRadius="xl"
-            sx={{
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              },
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              animation: 'pulse 2s ease-in-out infinite',
             }}
           />
           <Box
@@ -224,11 +198,23 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 '0%, 100%': { opacity: 1 },
                 '50%': { opacity: 0.5 },
               },
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              animation: 'pulse 2s ease-in-out infinite',
             }}
           />
           <Box
-            height="80px"
+            height="40px"
+            bg="gray.100"
+            borderRadius="md"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s ease-in-out infinite',
+            }}
+          />
+          <Box
+            height="60px"
             bg="gray.100"
             borderRadius="lg"
             sx={{
@@ -236,7 +222,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 '0%, 100%': { opacity: 1 },
                 '50%': { opacity: 0.5 },
               },
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              animation: 'pulse 2s ease-in-out infinite',
             }}
           />
         </VStack>
@@ -245,19 +231,21 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
   );
 };
 
-// Pagination Component
+// Compact Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+  if (totalPages <= 1) return null;
+
   const pages = [];
-  const maxVisiblePages = 5;
+  const maxVisible = 5;
   
-  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+  let end = Math.min(totalPages, start + maxVisible - 1);
   
-  if (endPage - startPage + 1 < maxVisiblePages) {
-    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  if (end - start + 1 < maxVisible) {
+    start = Math.max(1, end - maxVisible + 1);
   }
   
-  for (let i = startPage; i <= endPage; i++) {
+  for (let i = start; i <= end; i++) {
     pages.push(i);
   }
 
@@ -265,52 +253,43 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     <HStack gap={2} justify="center" mt={8}>
       <IconButton
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        variant="ghost"
-        aria-label="Previous page"
         isDisabled={currentPage === 1}
-        _hover={{ bg: 'gray.100' }}
+        variant="ghost"
+        size="sm"
+        aria-label="Previous"
       >
-        <ChevronLeft size={20} />
+        <ChevronLeft size={18} />
       </IconButton>
       
-      {startPage > 1 && (
+      {start > 1 && (
         <>
-          <Button
-            onClick={() => onPageChange(1)}
-            variant="ghost"
-            fontWeight="600"
-          >
+          <Button size="sm" onClick={() => onPageChange(1)} variant="ghost">
             1
           </Button>
-          {startPage > 2 && <Text color="gray.400">...</Text>}
+          {start > 2 && <Text fontSize="sm" color="gray.400">...</Text>}
         </>
       )}
       
       {pages.map((page) => (
         <Button
           key={page}
+          size="sm"
           onClick={() => onPageChange(page)}
           bg={currentPage === page ? 'purple.600' : 'transparent'}
           color={currentPage === page ? 'white' : 'gray.700'}
           _hover={{
             bg: currentPage === page ? 'purple.700' : 'gray.100',
           }}
-          fontWeight="700"
-          minW="40px"
+          minW="32px"
         >
           {page}
         </Button>
       ))}
       
-      {endPage < totalPages && (
+      {end < totalPages && (
         <>
-          {endPage < totalPages - 1 && <Text color="gray.400">...</Text>}
-          <Button
-            onClick={() => onPageChange(totalPages)}
-            variant="ghost"
-            fontWeight="600"
-          >
+          {end < totalPages - 1 && <Text fontSize="sm" color="gray.400">...</Text>}
+          <Button size="sm" onClick={() => onPageChange(totalPages)} variant="ghost">
             {totalPages}
           </Button>
         </>
@@ -318,13 +297,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       
       <IconButton
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        variant="ghost"
-        aria-label="Next page"
         isDisabled={currentPage === totalPages}
-        _hover={{ bg: 'gray.100' }}
+        variant="ghost"
+        size="sm"
+        aria-label="Next"
       >
-        <ChevronRight size={20} />
+        <ChevronRight size={18} />
       </IconButton>
     </HStack>
   );
@@ -341,50 +319,55 @@ const CountryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Filter states
   const [selectedData, setSelectedData] = useState('all');
   const [selectedDuration, setSelectedDuration] = useState('all');
-  
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   
   const countryName = getCountryName(countryCode, lang);
 
-  // Load all plans once
+  // Load plans once
   useEffect(() => {
-    console.log('🔵 CountryPage mounted, countryCode:', countryCode);
+    let isMounted = true;
     
     const loadPlans = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        console.log('📡 Fetching packages for:', countryCode);
+        console.log('📡 Loading packages for:', countryCode);
         const packages = await fetchAllPackagesForCountry(countryCode, lang);
-        console.log('📦 Received packages:', packages.length);
         
-        // Transform with pricing
+        if (!isMounted) return;
+        
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
 
         setAllPlans(transformedPackages);
+        console.log('✅ Loaded', transformedPackages.length, 'packages');
         
       } catch (err) {
-        console.error('❌ Error loading country plans:', err);
+        if (!isMounted) return;
+        console.error('❌ Error:', err);
         setError(t('plans.error') || 'Error loading plans');
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     if (countryCode) {
       loadPlans();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [countryCode, lang, t]);
 
-  // Get unique filter options
+  // Compute filter options
   const dataOptions = useMemo(() => {
     return [...new Set(allPlans.map(p => p.dataGB))].sort((a, b) => a - b);
   }, [allPlans]);
@@ -393,7 +376,7 @@ const CountryPage = () => {
     return [...new Set(allPlans.map(p => p.days))].sort((a, b) => a - b);
   }, [allPlans]);
 
-  // Apply filters and pagination
+  // Apply filters
   const filteredPlans = useMemo(() => {
     let filtered = [...allPlans];
     
@@ -408,102 +391,62 @@ const CountryPage = () => {
     return filtered;
   }, [allPlans, selectedData, selectedDuration]);
 
-  // Paginated plans
+  // Paginate
   const paginatedPlans = useMemo(() => {
-    const startIndex = (currentPage - 1) * PLANS_PER_PAGE;
-    const endIndex = startIndex + PLANS_PER_PAGE;
-    return filteredPlans.slice(startIndex, endIndex);
+    const start = (currentPage - 1) * PLANS_PER_PAGE;
+    return filteredPlans.slice(start, start + PLANS_PER_PAGE);
   }, [filteredPlans, currentPage]);
 
   const totalPages = Math.ceil(filteredPlans.length / PLANS_PER_PAGE);
 
-  // Reset to page 1 when filters change
+  // Reset page on filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedData, selectedDuration]);
 
-  // Scroll to top when page changes
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  console.log('🎨 Rendering:', { 
-    loading, 
-    totalPlans: allPlans.length, 
-    filteredPlans: filteredPlans.length,
-    currentPage,
-    totalPages,
-    showing: paginatedPlans.length 
-  });
-
   return (
     <Box minH="100vh" bg="gray.50">
-      {/* Hero Section with Country Info */}
-      <Box
-        bg="linear-gradient(180deg, #fafafa 0%, #ffffff 100%)"
-        py={16}
-        borderBottom="1px solid"
-        borderColor="gray.200"
-      >
+      {/* Header */}
+      <Box bg="white" py={12} borderBottom="1px solid" borderColor="gray.200">
         <Container maxW="8xl">
-          <VStack align="flex-start" gap={6}>
-            {/* Back Button */}
+          <VStack align="flex-start" gap={4}>
             <Button
-              leftIcon={<ArrowLeft size={20} />}
+              leftIcon={<ArrowLeft size={18} />}
               variant="ghost"
+              size="sm"
               onClick={() => navigate('/')}
-              fontWeight="700"
-              color="gray.700"
-              _hover={{
-                bg: 'gray.100',
-              }}
+              fontWeight="600"
             >
               {t('countryPage.backButton') || 'Назад'}
             </Button>
 
-            {/* Country Header */}
-            <HStack gap={6} flexWrap="nowrap">
+            <HStack gap={4}>
               <Box
-                borderRadius="2xl"
+                borderRadius="xl"
                 overflow="hidden"
-                boxShadow="xl"
-                width="120px"
-                height="90px"
+                boxShadow="lg"
+                width="80px"
+                height="60px"
                 flexShrink={0}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                border="3px solid"
+                border="2px solid"
                 borderColor="gray.200"
               >
                 <Flag 
                   code={countryCode} 
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'cover' 
-                  }} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
               </Box>
-              <VStack align="flex-start" gap={2}>
-                <Heading
-                  fontSize={{ base: '3xl', md: '5xl' }}
-                  fontWeight="800"
-                  color="gray.900"
-                  letterSpacing="tight"
-                >
+              <VStack align="flex-start" gap={1}>
+                <Heading size="xl" fontWeight="800" color="gray.900">
                   {t('countryPage.title') || 'eSIM для'} {countryName}
                 </Heading>
-                <Badge
-                  colorScheme="purple"
-                  fontSize="sm"
-                  fontWeight="700"
-                  px={4}
-                  py={2}
-                  borderRadius="full"
-                >
-                  {loading ? '...' : `${filteredPlans.length} ${filteredPlans.length === 1 ? 'план' : 'планов'}`}
+                <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
+                  {loading ? '...' : `${filteredPlans.length} планов`}
                 </Badge>
               </VStack>
             </HStack>
@@ -511,70 +454,67 @@ const CountryPage = () => {
         </Container>
       </Box>
 
-      {/* Filters Section */}
-      <Box bg="white" py={8} borderBottom="1px solid" borderColor="gray.200">
+      {/* Filters */}
+      <Box bg="white" py={6} borderBottom="1px solid" borderColor="gray.200">
         <Container maxW="8xl">
-          <HStack gap={6} flexWrap="wrap" align="center">
-            <Text fontWeight="700" color="gray.700" fontSize="lg">
+          <HStack gap={4} flexWrap="wrap">
+            <Text fontWeight="600" color="gray.700">
               {t('countryPage.filterLabel') || 'Фильтры'}:
             </Text>
             
-            {/* Data Filter */}
-            <Box minW="200px">
+            <Box minW="180px">
               <select
                 value={selectedData}
                 onChange={(e) => setSelectedData(e.target.value)}
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '2px solid #e2e8f0',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.6 : 1,
                 }}
               >
-                <option value="all">{t('countryPage.allData') || 'Все объёмы данных'}</option>
+                <option value="all">Все данные</option>
                 {dataOptions.map(gb => (
-                  <option key={gb} value={gb.toString()}>
+                  <option key={gb} value={gb}>
                     {gb}GB
                   </option>
                 ))}
               </select>
             </Box>
 
-            {/* Duration Filter */}
-            <Box minW="200px">
+            <Box minW="180px">
               <select
                 value={selectedDuration}
                 onChange={(e) => setSelectedDuration(e.target.value)}
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '2px solid #e2e8f0',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
                   fontSize: '14px',
                   fontWeight: '600',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.6 : 1,
                 }}
               >
-                <option value="all">{t('countryPage.allDuration') || 'Все сроки'}</option>
+                <option value="all">Все сроки</option>
                 {durationOptions.map(days => (
-                  <option key={days} value={days.toString()}>
-                    {days} {t('plans.card.days') || 'дней'}
+                  <option key={days} value={days}>
+                    {days} дней
                   </option>
                 ))}
               </select>
             </Box>
 
-            {/* Results Count */}
             {!loading && (
-              <Text color="gray.600" fontWeight="600" ml="auto">
-                Показано {paginatedPlans.length} из {filteredPlans.length}
+              <Text color="gray.500" fontSize="sm" ml="auto">
+                {paginatedPlans.length} из {filteredPlans.length}
               </Text>
             )}
           </HStack>
@@ -582,17 +522,10 @@ const CountryPage = () => {
       </Box>
 
       {/* Plans Grid */}
-      <Box py={16}>
+      <Box py={12}>
         <Container maxW="8xl">
           {error && (
-            <Box
-              p={6}
-              bg="red.50"
-              borderRadius="xl"
-              border="2px solid"
-              borderColor="red.200"
-              mb={8}
-            >
+            <Box p={4} bg="red.50" borderRadius="lg" border="1px solid" borderColor="red.200" mb={6}>
               <Text color="red.600" textAlign="center" fontWeight="600">
                 {error}
               </Text>
@@ -606,45 +539,28 @@ const CountryPage = () => {
               lg: 'repeat(3, 1fr)',
               xl: 'repeat(4, 1fr)' 
             }}
-            gap={6}
+            gap={4}
           >
             {loading ? (
-              <>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => (
-                  <PlanCardSkeleton key={i} delay={i * 30} />
-                ))}
-              </>
+              Array.from({ length: 12 }).map((_, i) => (
+                <PlanCardSkeleton key={i} />
+              ))
             ) : paginatedPlans.length > 0 ? (
-              paginatedPlans.map((plan, index) => (
-                <CountryPlanCard 
-                  key={plan.id} 
-                  plan={plan} 
-                  delay={index * 50}
-                  lang={lang}
-                />
+              paginatedPlans.map((plan) => (
+                <CountryPlanCard key={plan.id} plan={plan} lang={lang} />
               ))
             ) : (
-              <Box gridColumn="1 / -1" textAlign="center" py={16}>
-                <VStack gap={4}>
-                  <Box
-                    w="80px"
-                    h="80px"
-                    bg="gray.100"
-                    borderRadius="full"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <MapPin size={40} color="#9ca3af" />
+              <Box gridColumn="1 / -1" textAlign="center" py={12}>
+                <VStack gap={3}>
+                  <Box w="60px" h="60px" bg="gray.100" borderRadius="full" display="flex" alignItems="center" justifyContent="center">
+                    <MapPin size={32} color="#9ca3af" />
                   </Box>
-                  <Heading size="lg" color="gray.700">
-                    {t('countryPage.noPlans') || 'Планы не найдены'}
+                  <Heading size="md" color="gray.700">
+                    Планы не найдены
                   </Heading>
-                  <Text fontSize="md" color="gray.500" fontWeight="500">
-                    {t('countryPage.noPlansDescription') || 'Попробуйте изменить фильтры'}
-                  </Text>
                   <Button
-                    mt={4}
+                    mt={2}
+                    size="sm"
                     onClick={() => {
                       setSelectedData('all');
                       setSelectedDuration('all');
@@ -659,7 +575,6 @@ const CountryPage = () => {
             )}
           </Grid>
 
-          {/* Pagination */}
           {!loading && totalPages > 1 && (
             <Pagination 
               currentPage={currentPage}
