@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
-import { fetchPackagesForCountries } from '../../services/esimAccessApi';
+import { fetchPackagesForCountries }  from '../services/esimAccessApi.js'
 import { COUNTRY_MAPPINGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
