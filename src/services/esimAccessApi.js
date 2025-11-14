@@ -1,7 +1,8 @@
 // src/services/esimAccessApi.js
-// Enhanced API service with improved filtering
+// Enhanced API service with improved filtering and i18n support
 
 import { selectBestPackage } from '../config/pricing';
+import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
 
 // Smart API URL detection
 const getApiUrl = () => {
@@ -60,11 +61,11 @@ export const fetchPackagesByCountry = async (locationCode) => {
 /**
  * Transform API package data to our display format
  * @param {Object} apiPackage - Package object from API
- * @param {string} countryName - Display name for the country
  * @param {string} countryCode - ISO country code
+ * @param {string} lang - Language code (defaults to Russian)
  * @returns {Object} Transformed package object
  */
-export const transformPackageData = (apiPackage, countryName, countryCode) => {
+export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LANGUAGE) => {
   // Convert price from API format (divide by 10000 to get USD)
   const priceInUSD = apiPackage.price / 10000;
   
@@ -74,6 +75,9 @@ export const transformPackageData = (apiPackage, countryName, countryCode) => {
   // Determine speed based on package name or default to 5G
   const speed = apiPackage.name.includes('5G') ? '5G' : 
                 apiPackage.name.includes('4G') ? '4G' : '5G';
+
+  // Get translated country name
+  const countryName = getCountryName(countryCode, lang);
 
   return {
     id: apiPackage.packageCode,
@@ -94,10 +98,11 @@ export const transformPackageData = (apiPackage, countryName, countryCode) => {
 /**
  * Fetch and transform packages for multiple countries
  * Returns only ONE package per country based on selection criteria
- * @param {Array} countries - Array of country objects {name, code, displayName}
+ * @param {Array} countries - Array of country objects {code}
+ * @param {string} lang - Language for translations
  * @returns {Promise<Array>} Array of transformed package objects (one per country)
  */
-export const fetchPackagesForCountries = async (countries) => {
+export const fetchPackagesForCountries = async (countries, lang = DEFAULT_LANGUAGE) => {
   try {
     const allPackages = [];
 
@@ -107,7 +112,7 @@ export const fetchPackagesForCountries = async (countries) => {
       if (packages.length > 0) {
         // Transform all packages for this country
         const transformedPackages = packages.map(pkg => 
-          transformPackageData(pkg, country.displayName, country.code)
+          transformPackageData(pkg, country.code, lang)
         );
         
         // Select the BEST single package for this country
@@ -122,6 +127,27 @@ export const fetchPackagesForCountries = async (countries) => {
     return allPackages;
   } catch (error) {
     console.error('Error fetching packages for countries:', error);
+    return [];
+  }
+};
+
+/**
+ * Fetch ALL packages for a specific country (for country detail page)
+ * @param {string} countryCode - ISO country code
+ * @param {string} lang - Language for translations
+ * @returns {Promise<Array>} Array of all packages for the country
+ */
+export const fetchAllPackagesForCountry = async (countryCode, lang = DEFAULT_LANGUAGE) => {
+  try {
+    const packages = await fetchPackagesByCountry(countryCode);
+    
+    if (packages.length > 0) {
+      return packages.map(pkg => transformPackageData(pkg, countryCode, lang));
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching all packages for country:', error);
     return [];
   }
 };

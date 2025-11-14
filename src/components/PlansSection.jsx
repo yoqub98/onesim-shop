@@ -11,17 +11,18 @@ import {
   Badge,
   HStack,
   VStack,
-  Spinner,
   Stack,
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { fetchPackagesForCountries } from '../services/esimAccessApi';
 import { COUNTRY_MAPPINGS, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
-// Enhanced Plan Card Component
-const PlanCard = ({ plan, delay = 0 }) => {
+// Enhanced Plan Card Component with wider design
+const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const t = (key) => getTranslation(lang, key);
 
   return (
     <Card.Root
@@ -41,6 +42,7 @@ const PlanCard = ({ plan, delay = 0 }) => {
       style={{
         animationDelay: `${delay}ms`,
       }}
+      minWidth="280px"
     >
       {/* Gradient overlay on hover */}
       <Box
@@ -58,14 +60,15 @@ const PlanCard = ({ plan, delay = 0 }) => {
         <VStack align="stretch" gap={6} height="100%">
           {/* Header Section */}
           <Box>
-            {/* Country with Flag */}
-            <HStack gap={4} mb={4}>
+            {/* Country with Flag - Single Line */}
+            <HStack gap={3} mb={4} flexWrap="nowrap">
               <Box
                 borderRadius="xl"
                 overflow="hidden"
                 shadow="md"
                 width="56px"
                 height="42px"
+                flexShrink={0}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -83,14 +86,19 @@ const PlanCard = ({ plan, delay = 0 }) => {
                   }} 
                 />
               </Box>
-              <VStack align="flex-start" gap={1}>
-                <HStack>
-                  <MapPin size={16} color="#9333ea" />
-                  <Heading size="xl" fontWeight="800" color="gray.900">
-                    {plan.country}
-                  </Heading>
-                </HStack>
-              </VStack>
+              <HStack gap={2} overflow="hidden" flexGrow={1}>
+                <MapPin size={16} color="#9333ea" flexShrink={0} />
+                <Heading 
+                  size="xl" 
+                  fontWeight="800" 
+                  color="gray.900"
+                  whiteSpace="nowrap"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                >
+                  {plan.country}
+                </Heading>
+              </HStack>
             </HStack>
 
             {/* Speed Badge */}
@@ -135,30 +143,26 @@ const PlanCard = ({ plan, delay = 0 }) => {
               fontWeight="600"
               mt={1}
             >
-              ИНТЕРНЕТ
+              {t('plans.card.internet')}
             </Text>
           </Box>
 
-          {/* Duration */}
+          {/* Duration - Removed "ДЕЙСТВИТЕЛЕН" */}
           <HStack 
             gap={3} 
             color="gray.600"
             p={3}
             bg="gray.50"
             borderRadius="lg"
+            justify="center"
           >
             <Calendar size={20} color="#9333ea" />
-            <VStack align="flex-start" gap={0}>
-              <Text fontSize="lg" fontWeight="700" color="gray.900">
-                {plan.days} дней
-              </Text>
-              <Text fontSize="xs" color="gray.500" fontWeight="600">
-                ДЕЙСТВИТЕЛЕН
-              </Text>
-            </VStack>
+            <Text fontSize="lg" fontWeight="700" color="gray.900">
+              {plan.days} {t('plans.card.days')}
+            </Text>
           </HStack>
 
-          {/* Price */}
+          {/* Price - Dark Gray Color */}
           <Box
             mt="auto"
             pt={4}
@@ -168,19 +172,18 @@ const PlanCard = ({ plan, delay = 0 }) => {
             <HStack justify="space-between" align="center">
               <VStack align="flex-start" gap={0}>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  ЦЕНА
+                  {t('plans.card.price')}
                 </Text>
                 <Heading
                   fontSize="3xl"
                   fontWeight="800"
-                  background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                  backgroundClip="text"
+                  color="gray.800"
                   letterSpacing="tight"
                 >
                   {plan.price}
                 </Heading>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  UZS
+                  {t('plans.card.currency')}
                 </Text>
               </VStack>
 
@@ -199,7 +202,7 @@ const PlanCard = ({ plan, delay = 0 }) => {
                 px={4}
                 rightIcon={<ArrowRight size={16} />}
               >
-                Купить
+                {t('plans.card.buy')}
               </Button>
             </HStack>
           </Box>
@@ -217,6 +220,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       overflow="hidden"
       border="2px solid"
       borderColor="gray.100"
+      minWidth="280px"
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
@@ -231,6 +235,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 width="56px"
                 height="42px"
                 bg="gray.200"
+                flexShrink={0}
                 animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               />
               <Box
@@ -279,6 +284,9 @@ const PlansSection = () => {
   const [plansData, setPlansData] = useState({ ASIA: [], EUROPE: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const lang = DEFAULT_LANGUAGE; // For MVP, hardcode to Russian
+  
+  const t = (key) => getTranslation(lang, key);
 
   useEffect(() => {
     const loadPackages = async () => {
@@ -287,10 +295,10 @@ const PlansSection = () => {
         setError(null);
 
         // Fetch packages for Asia countries (one per country)
-        const asiaPackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA);
+        const asiaPackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA, lang);
         
         // Fetch packages for Europe countries (one per country)
-        const europePackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE);
+        const europePackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE, lang);
 
         // Transform packages with pricing
         const transformedAsiaPackages = asiaPackages.map(pkg => ({
@@ -309,14 +317,14 @@ const PlansSection = () => {
         });
       } catch (err) {
         console.error('Error loading packages:', err);
-        setError('Не удалось загрузить планы. Пожалуйста, попробуйте позже.');
+        setError(t('plans.error'));
       } finally {
         setLoading(false);
       }
     };
 
     loadPackages();
-  }, []);
+  }, [lang]);
 
   return (
     <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
@@ -359,7 +367,7 @@ const PlansSection = () => {
               borderRadius="full"
               textTransform="uppercase"
             >
-              Наши тарифы
+              {t('plans.badge')}
             </Badge>
             <Heading
               as="h2"
@@ -368,13 +376,13 @@ const PlansSection = () => {
               color="gray.900"
               letterSpacing="tight"
             >
-              Выберите идеальный{' '}
+              {t('plans.title')}{' '}
               <Box
                 as="span"
                 background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 backgroundClip="text"
               >
-                план
+                {t('plans.titleHighlight')}
               </Box>
             </Heading>
             <Text
@@ -383,7 +391,7 @@ const PlansSection = () => {
               maxW="2xl"
               fontWeight="500"
             >
-              Гибкие тарифные планы для каждой страны с высокоскоростным интернетом
+              {t('plans.description')}
             </Text>
           </VStack>
 
@@ -417,7 +425,7 @@ const PlansSection = () => {
                 fontSize="lg"
                 shadow={activeTab === 'ASIA' ? 'lg' : 'none'}
               >
-                АЗИЯ
+                {t('plans.tabs.asia')}
               </Button>
               <Button
                 onClick={() => setActiveTab('EUROPE')}
@@ -435,7 +443,7 @@ const PlansSection = () => {
                 fontSize="lg"
                 shadow={activeTab === 'EUROPE' ? 'lg' : 'none'}
               >
-                ЕВРОПА
+                {t('plans.tabs.europe')}
               </Button>
             </Stack>
 
@@ -456,7 +464,7 @@ const PlansSection = () => {
               </Box>
             )}
 
-            {/* Plans Grid */}
+            {/* Plans Grid - Wider cards */}
             <Grid
               templateColumns={{ 
                 base: '1fr', 
@@ -477,7 +485,7 @@ const PlansSection = () => {
               ) : plansData[activeTab].length > 0 ? (
                 // Show actual plans
                 plansData[activeTab].map((plan, index) => (
-                  <PlanCard key={plan.id} plan={plan} delay={index * 100} />
+                  <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={lang} />
                 ))
               ) : (
                 // Show empty state
@@ -495,10 +503,10 @@ const PlansSection = () => {
                       <MapPin size={40} color="#9ca3af" />
                     </Box>
                     <Heading size="lg" color="gray.700">
-                      Планы скоро появятся
+                      {t('plans.empty')}
                     </Heading>
                     <Text fontSize="md" color="gray.500" fontWeight="500">
-                      Мы работаем над добавлением тарифов для этого региона
+                      {t('plans.emptyDescription')}
                     </Text>
                   </VStack>
                 </Box>

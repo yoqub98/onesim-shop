@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -18,11 +19,16 @@ import {
 import { ChevronRight, Menu, X, Globe, Zap, Shield } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
+import PopularDestinations from './components/PopularDestinations';
+import CountryPage from './pages/CountryPage';
+import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
 
 // Navigation Component
 const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const lang = DEFAULT_LANGUAGE;
+  const t = (key) => getTranslation(lang, key);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,25 +55,27 @@ const Navigation = () => {
       <Container maxW="8xl">
         <Flex h="80px" alignItems="center" justifyContent="space-between">
           {/* Logo */}
-          <Heading
-            size="2xl"
-            background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-            backgroundClip="text"
-            fontWeight="800"
-            letterSpacing="tight"
-            cursor="pointer"
-            transition="all 0.3s"
-            _hover={{
-              transform: 'scale(1.05)',
-            }}
-          >
-            OneSIM
-          </Heading>
+          <Link href="/" textDecoration="none">
+            <Heading
+              size="2xl"
+              background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              backgroundClip="text"
+              fontWeight="800"
+              letterSpacing="tight"
+              cursor="pointer"
+              transition="all 0.3s"
+              _hover={{
+                transform: 'scale(1.05)',
+              }}
+            >
+              OneSIM
+            </Heading>
+          </Link>
 
           {/* Desktop Navigation */}
           <HStack gap={10} hideBelow="md">
             <Link 
-              href="#home" 
+              href="/#home" 
               fontWeight="600" 
               color="gray.700" 
               fontSize="md"
@@ -89,10 +97,10 @@ const Navigation = () => {
                 transition: 'width 0.3s ease',
               }}
             >
-              Главная
+              {t('nav.home')}
             </Link>
             <Link 
-              href="#plans" 
+              href="/#plans" 
               fontWeight="600" 
               color="gray.700"
               fontSize="md"
@@ -114,10 +122,10 @@ const Navigation = () => {
                 transition: 'width 0.3s ease',
               }}
             >
-              Планы
+              {t('nav.plans')}
             </Link>
             <Link 
-              href="#contacts" 
+              href="/#contacts" 
               fontWeight="600" 
               color="gray.700"
               fontSize="md"
@@ -139,7 +147,7 @@ const Navigation = () => {
                 transition: 'width 0.3s ease',
               }}
             >
-              Контакты
+              {t('nav.contacts')}
             </Link>
           </HStack>
 
@@ -167,7 +175,7 @@ const Navigation = () => {
           >
             <VStack gap={2} align="stretch">
               <Link
-                href="#home"
+                href="/#home"
                 fontWeight="600"
                 py={3}
                 px={4}
@@ -177,10 +185,10 @@ const Navigation = () => {
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Главная
+                {t('nav.home')}
               </Link>
               <Link
-                href="#plans"
+                href="/#plans"
                 fontWeight="600"
                 py={3}
                 px={4}
@@ -190,10 +198,10 @@ const Navigation = () => {
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Планы
+                {t('nav.plans')}
               </Link>
               <Link
-                href="#contacts"
+                href="/#contacts"
                 fontWeight="600"
                 py={3}
                 px={4}
@@ -203,7 +211,7 @@ const Navigation = () => {
                 }}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Контакты
+                {t('nav.contacts')}
               </Link>
             </VStack>
           </Box>
@@ -215,6 +223,9 @@ const Navigation = () => {
 
 // Hero Section Component
 const HeroSection = () => {
+  const lang = DEFAULT_LANGUAGE;
+  const t = (key) => getTranslation(lang, key);
+
   return (
     <Box
       as="section"
@@ -276,7 +287,7 @@ const HeroSection = () => {
                 gap={2}
               >
                 <Zap size={16} />
-                Мгновенная активация eSIM
+                {t('hero.badge')}
               </Box>
 
               <Heading
@@ -287,7 +298,7 @@ const HeroSection = () => {
                 color="gray.900"
                 letterSpacing="tight"
               >
-                Путешествуйте без границ с{' '}
+                {t('hero.title')}{' '}
                 <Box
                   as="span"
                   background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
@@ -304,8 +315,7 @@ const HeroSection = () => {
                 lineHeight="1.8"
                 fontWeight="500"
               >
-                Глобальное покрытие мобильной связи в более чем 190 странах мира.
-                Оставайтесь на связи везде и всегда с нашими выгодными тарифами.
+                {t('hero.description')}
               </Text>
 
               {/* Features */}
@@ -319,7 +329,7 @@ const HeroSection = () => {
                     <Globe size={20} color="#7c3aed" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">
-                    190+ стран покрытия
+                    {t('hero.features.coverage')}
                   </Text>
                 </HStack>
                 <HStack gap={3}>
@@ -331,7 +341,7 @@ const HeroSection = () => {
                     <Zap size={20} color="#7c3aed" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">
-                    Мгновенная активация за 2 минуты
+                    {t('hero.features.activation')}
                   </Text>
                 </HStack>
                 <HStack gap={3}>
@@ -343,7 +353,7 @@ const HeroSection = () => {
                     <Shield size={20} color="#7c3aed" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">
-                    Безопасное соединение 5G
+                    {t('hero.features.secure')}
                   </Text>
                 </HStack>
               </VStack>
@@ -367,7 +377,7 @@ const HeroSection = () => {
                 transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                 shadow="0 10px 30px rgba(102, 126, 234, 0.3)"
               >
-                Узнать больше
+                {t('hero.cta')}
                 <ChevronRight size={22} style={{ marginLeft: '8px' }} />
               </Button>
             </VStack>
@@ -408,6 +418,9 @@ const HeroSection = () => {
 
 // Footer Component
 const Footer = () => {
+  const lang = DEFAULT_LANGUAGE;
+  const t = (key) => getTranslation(lang, key);
+
   return (
     <Box 
       as="footer" 
@@ -415,6 +428,7 @@ const Footer = () => {
       color="white" 
       py={16}
       mt={20}
+      id="contacts"
     >
       <Container maxW="8xl">
         <Grid
@@ -434,8 +448,7 @@ const Footer = () => {
                 OneSIM
               </Heading>
               <Text color="gray.400" fontSize="sm" lineHeight="1.7">
-                Ваш надежный партнер в мире мобильной связи. 
-                Путешествуйте без границ с нашими eSIM решениями.
+                {t('footer.description')}
               </Text>
             </VStack>
           </GridItem>
@@ -444,16 +457,16 @@ const Footer = () => {
           <GridItem>
             <VStack align="flex-start" gap={3}>
               <Heading size="md" fontWeight="700" mb={2}>
-                Быстрые ссылки
+                {t('footer.quickLinks')}
               </Heading>
-              <Link href="#home" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
-                Главная
+              <Link href="/#home" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
+                {t('nav.home')}
               </Link>
-              <Link href="#plans" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
-                Планы
+              <Link href="/#plans" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
+                {t('nav.plans')}
               </Link>
-              <Link href="#contacts" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
-                Контакты
+              <Link href="/#contacts" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
+                {t('nav.contacts')}
               </Link>
             </VStack>
           </GridItem>
@@ -462,13 +475,13 @@ const Footer = () => {
           <GridItem>
             <VStack align="flex-start" gap={3}>
               <Heading size="md" fontWeight="700" mb={2}>
-                Правовая информация
+                {t('footer.legal')}
               </Heading>
               <Link href="#privacy" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
-                Конфиденциальность
+                {t('footer.privacy')}
               </Link>
               <Link href="#terms" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">
-                Условия использования
+                {t('footer.terms')}
               </Link>
             </VStack>
           </GridItem>
@@ -487,10 +500,10 @@ const Footer = () => {
             gap={4}
           >
             <Text color="gray.400" fontSize="sm" fontWeight="500">
-              © 2025 OneSIM. Все права защищены.
+              © 2025 OneSIM. {t('footer.copyright')}
             </Text>
             <Text color="gray.500" fontSize="xs">
-              Сделано с ❤️ для путешественников
+              {t('footer.madeWith')}
             </Text>
           </Flex>
         </Box>
@@ -499,22 +512,39 @@ const Footer = () => {
   );
 };
 
+// Home Page Component
+const HomePage = () => {
+  return (
+    <>
+      <HeroSection />
+      <PlansSection />
+      <PopularDestinations />
+    </>
+  );
+};
+
 // Main App Component
 function App() {
   return (
-    <Box fontFamily="'Inter Tight', sans-serif">
-      {/* Google Fonts Import */}
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
-        `}
-      </style>
-      
-      <Navigation />
-      <HeroSection />
-      <PlansSection />
-      <Footer />
-    </Box>
+    <Router>
+      <Box fontFamily="'Inter Tight', sans-serif">
+        {/* Google Fonts Import */}
+        <style>
+          {`
+            @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
+          `}
+        </style>
+        
+        <Navigation />
+        
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/country/:countryCode" element={<CountryPage />} />
+        </Routes>
+        
+        <Footer />
+      </Box>
+    </Router>
   );
 }
 

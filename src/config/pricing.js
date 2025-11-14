@@ -1,4 +1,5 @@
 // src/config/pricing.js
+import { getCountryName, DEFAULT_LANGUAGE } from './i18n';
 
 // Pricing configuration with environment variable support
 export const PRICING_CONFIG = {
@@ -14,22 +15,35 @@ export const API_CONFIG = {
 };
 
 // Country mappings for our landing page - UPDATED with new countries
+// Display names will be fetched from i18n based on current language
 export const COUNTRY_MAPPINGS = {
   ASIA: [
-    { code: 'TH', displayName: 'Thailand', name: 'Thailand' },
-    { code: 'AE', displayName: 'UAE', name: 'United Arab Emirates' },
-    { code: 'VN', displayName: 'Vietnam', name: 'Vietnam' },
-    { code: 'MY', displayName: 'Malaysia', name: 'Malaysia' },
-    { code: 'CN', displayName: 'China', name: 'China' },
+    { code: 'TH' },
+    { code: 'AE' },
+    { code: 'VN' },
+    { code: 'MY' },
+    { code: 'CN' },
   ],
   EUROPE: [
-    { code: 'TR', displayName: 'Turkey', name: 'Turkey' },
-    { code: 'GE', displayName: 'Georgia', name: 'Georgia' },
-    { code: 'IT', displayName: 'Italy', name: 'Italy' },
-    { code: 'FR', displayName: 'France', name: 'France' },
-    { code: 'AZ', displayName: 'Azerbaijan', name: 'Azerbaijan' },
+    { code: 'TR' },
+    { code: 'GE' },
+    { code: 'IT' },
+    { code: 'FR' },
+    { code: 'AZ' },
   ],
 };
+
+// Popular destinations for the main page
+export const POPULAR_DESTINATIONS = [
+  { code: 'TR' }, // Turkey
+  { code: 'AE' }, // UAE
+  { code: 'TH' }, // Thailand
+  { code: 'IT' }, // Italy
+  { code: 'FR' }, // France
+  { code: 'GE' }, // Georgia
+  { code: 'VN' }, // Vietnam
+  { code: 'ES' }, // Spain
+];
 
 /**
  * Calculate final price with margin
