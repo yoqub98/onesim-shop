@@ -9,9 +9,7 @@ import {
   Grid,
   HStack,
   VStack,
-  Select,
   Badge,
-  Card,
 } from '@chakra-ui/react';
 import { ArrowLeft, Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -20,13 +18,13 @@ import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
 import { calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
-// Plan Card Component (similar to Plans Section but smaller)
+// Plan Card Component
 const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
 
   return (
-    <Card.Root
+    <Box
       position="relative"
       cursor="pointer"
       bg="white"
@@ -36,7 +34,7 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
       borderColor={isHovered ? 'purple.200' : 'gray.100'}
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
-      shadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
+      boxShadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className="animate__animated animate__fadeInUp"
@@ -56,12 +54,12 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
         transition="opacity 0.3s"
       />
 
-      <Card.Body p={8}>
+      <Box p={8}>
         <VStack align="stretch" gap={6} height="100%">
           {/* Speed Badge */}
           <HStack justify="space-between">
             <Badge
-              colorPalette="purple"
+              colorScheme="purple"
               fontSize="xs"
               fontWeight="800"
               px={3}
@@ -164,15 +162,15 @@ const CountryPlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </HStack>
           </Box>
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
 // Loading Skeleton
 const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
-    <Card.Root
+    <Box
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
@@ -183,36 +181,60 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
         animationDelay: `${delay}ms`,
       }}
     >
-      <Card.Body p={8}>
+      <Box p={8}>
         <VStack align="stretch" gap={6}>
           <Box
             width="60px"
             height="24px"
             bg="gray.200"
             borderRadius="full"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
           />
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="xl"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
           />
           <Box
             height="60px"
             bg="gray.100"
             borderRadius="lg"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
           />
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="lg"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
           />
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
@@ -239,18 +261,24 @@ const CountryPage = () => {
   const countryName = getCountryName(countryCode, lang);
 
   useEffect(() => {
+    console.log('🔵 CountryPage mounted, countryCode:', countryCode);
+    
     const loadPlans = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        console.log('📡 Fetching packages for:', countryCode);
         const packages = await fetchAllPackagesForCountry(countryCode, lang);
+        console.log('📦 Received packages:', packages);
         
         // Transform with pricing
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
+
+        console.log('✅ Transformed packages:', transformedPackages);
 
         setAllPlans(transformedPackages);
         setFilteredPlans(transformedPackages);
@@ -264,8 +292,8 @@ const CountryPage = () => {
         setDurationOptions(uniqueDurations);
         
       } catch (err) {
-        console.error('Error loading country plans:', err);
-        setError(t('plans.error'));
+        console.error('❌ Error loading country plans:', err);
+        setError(t('plans.error') || 'Error loading plans');
       } finally {
         setLoading(false);
       }
@@ -274,7 +302,7 @@ const CountryPage = () => {
     if (countryCode) {
       loadPlans();
     }
-  }, [countryCode, lang]);
+  }, [countryCode, lang, t]);
 
   // Apply filters
   useEffect(() => {
@@ -290,6 +318,8 @@ const CountryPage = () => {
     
     setFilteredPlans(filtered);
   }, [selectedData, selectedDuration, allPlans]);
+
+  console.log('🎨 Rendering CountryPage, loading:', loading, 'plans:', filteredPlans.length);
 
   return (
     <Box minH="100vh" bg="gray.50">
@@ -313,7 +343,7 @@ const CountryPage = () => {
                 bg: 'gray.100',
               }}
             >
-              {t('countryPage.backButton')}
+              {t('countryPage.backButton') || 'Назад'}
             </Button>
 
             {/* Country Header */}
@@ -321,7 +351,7 @@ const CountryPage = () => {
               <Box
                 borderRadius="2xl"
                 overflow="hidden"
-                shadow="xl"
+                boxShadow="xl"
                 width="120px"
                 height="90px"
                 flexShrink={0}
@@ -347,10 +377,10 @@ const CountryPage = () => {
                   color="gray.900"
                   letterSpacing="tight"
                 >
-                  {t('countryPage.title')} {countryName}
+                  {t('countryPage.title') || 'eSIM для'} {countryName}
                 </Heading>
                 <Badge
-                  colorPalette="purple"
+                  colorScheme="purple"
                   fontSize="sm"
                   fontWeight="700"
                   px={4}
@@ -370,51 +400,53 @@ const CountryPage = () => {
         <Container maxW="8xl">
           <HStack gap={6} flexWrap="wrap">
             <Text fontWeight="700" color="gray.700" fontSize="lg">
-              {t('countryPage.filterLabel')}:
+              {t('countryPage.filterLabel') || 'Фильтры'}:
             </Text>
             
             {/* Data Filter */}
             <Box minW="200px">
-              <Select.Root
+              <select
                 value={selectedData}
-                onValueChange={(e) => setSelectedData(e.value[0])}
+                onChange={(e) => setSelectedData(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
               >
-                <Select.Trigger>
-                  <Select.ValueText placeholder={t('countryPage.dataLabel')} />
-                </Select.Trigger>
-                <Select.Content>
-                  <Select.Item value="all">
-                    {t('countryPage.allData')}
-                  </Select.Item>
-                  {dataOptions.map(gb => (
-                    <Select.Item key={gb} value={gb.toString()}>
-                      {gb}GB
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
+                <option value="all">{t('countryPage.allData') || 'Все объёмы данных'}</option>
+                {dataOptions.map(gb => (
+                  <option key={gb} value={gb.toString()}>
+                    {gb}GB
+                  </option>
+                ))}
+              </select>
             </Box>
 
             {/* Duration Filter */}
             <Box minW="200px">
-              <Select.Root
+              <select
                 value={selectedDuration}
-                onValueChange={(e) => setSelectedDuration(e.value[0])}
+                onChange={(e) => setSelectedDuration(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
               >
-                <Select.Trigger>
-                  <Select.ValueText placeholder={t('countryPage.durationLabel')} />
-                </Select.Trigger>
-                <Select.Content>
-                  <Select.Item value="all">
-                    {t('countryPage.allDuration')}
-                  </Select.Item>
-                  {durationOptions.map(days => (
-                    <Select.Item key={days} value={days.toString()}>
-                      {days} {t('plans.card.days')}
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Root>
+                <option value="all">{t('countryPage.allDuration') || 'Все сроки'}</option>
+                {durationOptions.map(days => (
+                  <option key={days} value={days.toString()}>
+                    {days} {t('plans.card.days') || 'дней'}
+                  </option>
+                ))}
+              </select>
             </Box>
 
             {/* Results Count */}
@@ -484,10 +516,10 @@ const CountryPage = () => {
                     <MapPin size={40} color="#9ca3af" />
                   </Box>
                   <Heading size="lg" color="gray.700">
-                    {t('countryPage.noPlans')}
+                    {t('countryPage.noPlans') || 'Планы не найдены'}
                   </Heading>
                   <Text fontSize="md" color="gray.500" fontWeight="500">
-                    {t('countryPage.noPlansDescription')}
+                    {t('countryPage.noPlansDescription') || 'Попробуйте изменить фильтры'}
                   </Text>
                   <Button
                     mt={4}
@@ -495,7 +527,7 @@ const CountryPage = () => {
                       setSelectedData('all');
                       setSelectedDuration('all');
                     }}
-                    colorPalette="purple"
+                    colorScheme="purple"
                     variant="outline"
                   >
                     Сбросить фильтры
