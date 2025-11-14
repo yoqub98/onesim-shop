@@ -12,14 +12,15 @@ import {
   HStack,
   VStack,
   Stack,
+  Spinner,
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
-import { fetchPackagesForCountries } from '../services/esimAccessApi';
+import { fetchPackagesForCountries } from '../../services/esimAccessApi';
 import { COUNTRY_MAPPINGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
-// Enhanced Plan Card Component with wider design
+// Plan Card Component
 const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
@@ -60,7 +61,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
         <VStack align="stretch" gap={6} height="100%">
           {/* Header Section */}
           <Box>
-            {/* Country with Flag - Single Line */}
+            {/* Country with Flag */}
             <HStack gap={3} mb={4} flexWrap="nowrap">
               <Box
                 borderRadius="xl"
@@ -147,7 +148,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </Box>
 
-          {/* Duration - Removed "ДЕЙСТВИТЕЛЕН" */}
+          {/* Duration */}
           <HStack 
             gap={3} 
             color="gray.600"
@@ -162,7 +163,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </HStack>
 
-          {/* Price - Dark Gray Color */}
+          {/* Price */}
           <Box
             mt="auto"
             pt={4}
@@ -183,7 +184,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   {plan.price}
                 </Heading>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  {t('plans.card.currency')}
+                  UZS
                 </Text>
               </VStack>
 
@@ -236,14 +237,26 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 height="42px"
                 bg="gray.200"
                 flexShrink={0}
-                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+                sx={{
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                  },
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }}
               />
               <Box
                 width="140px"
                 height="28px"
                 bg="gray.200"
                 borderRadius="lg"
-                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+                sx={{
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1 },
+                    '50%': { opacity: 0.5 },
+                  },
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }}
               />
             </HStack>
             <Box
@@ -251,26 +264,50 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
               height="24px"
               bg="gray.200"
               borderRadius="full"
-              animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+              sx={{
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.5 },
+                },
+                animation: 'pulse 1.5s ease-in-out infinite',
+              }}
             />
           </Box>
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="xl"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
           />
           <Box
             height="60px"
             bg="gray.100"
             borderRadius="lg"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
           />
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="lg"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
           />
         </VStack>
       </Card.Body>
@@ -284,7 +321,7 @@ const PlansSection = () => {
   const [plansData, setPlansData] = useState({ ASIA: [], EUROPE: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const lang = DEFAULT_LANGUAGE; // For MVP, hardcode to Russian
+  const lang = DEFAULT_LANGUAGE;
   
   const t = (key) => getTranslation(lang, key);
 
@@ -294,11 +331,13 @@ const PlansSection = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch packages for Asia countries (one per country)
-        const asiaPackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA, lang);
-        
-        // Fetch packages for Europe countries (one per country)
-        const europePackages = await fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE, lang);
+        console.log('🚀 Loading packages for main page (optimized)...');
+
+        // Fetch both regions in parallel
+        const [asiaPackages, europePackages] = await Promise.all([
+          fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA, lang),
+          fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE, lang),
+        ]);
 
         // Transform packages with pricing
         const transformedAsiaPackages = asiaPackages.map(pkg => ({
@@ -315,6 +354,8 @@ const PlansSection = () => {
           ASIA: transformedAsiaPackages,
           EUROPE: transformedEuropePackages,
         });
+
+        console.log(`✅ Loaded ${transformedAsiaPackages.length} Asia + ${transformedEuropePackages.length} Europe packages`);
       } catch (err) {
         console.error('Error loading packages:', err);
         setError(t('plans.error'));
@@ -324,7 +365,7 @@ const PlansSection = () => {
     };
 
     loadPackages();
-  }, [lang]);
+  }, [lang, t]);
 
   return (
     <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
@@ -464,7 +505,7 @@ const PlansSection = () => {
               </Box>
             )}
 
-            {/* Plans Grid - Wider cards */}
+            {/* Plans Grid */}
             <Grid
               templateColumns={{ 
                 base: '1fr', 
