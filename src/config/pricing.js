@@ -1,5 +1,5 @@
 // src/config/pricing.js
-import { getCountryName, DEFAULT_LANGUAGE } from './i18n';
+import { getCountryName, DEFAULT_LANGUAGE } from './i18n.js';
 
 // Pricing configuration with environment variable support
 export const PRICING_CONFIG = {
