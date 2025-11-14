@@ -1,7 +1,8 @@
 // src/services/esimAccessApi.js
 // Enhanced API service with improved filtering and i18n support
 
-import { selectBestPackage } from '../config/pricing';
+import { selectBestPackage } from '../config/pricing.js';
+
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
 
 // Smart API URL detection
