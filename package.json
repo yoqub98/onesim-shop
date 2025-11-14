@@ -28,7 +28,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "postinstall": "react-flagpack"
+    
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +50,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
-    "react-flagpack": "^2.0.6"
+    
   }
 }
