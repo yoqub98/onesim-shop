@@ -1,18 +1,31 @@
 // src/services/esimAccessApi.js
+// Automatically detects environment and uses correct API URL
 
 import { API_CONFIG } from '../config/pricing';
 
-// Use proxy server URL (you need to set up proxy server - see CORS_FIX_GUIDE.md)
-const PROXY_URL = process.env.REACT_APP_PROXY_URL || 'http://localhost:5000/api';
+// Smart API URL detection
+const getApiUrl = () => {
+  // Production (Vercel): Use relative path (same domain, no CORS)
+  if (process.env.NODE_ENV === 'production') {
+    return '/api';
+  }
+  
+  // Development: Use environment variable or localhost proxy
+  return process.env.REACT_APP_PROXY_URL || 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
+
+console.log('🔗 API URL:', API_URL); // Debug log
 
 /**
- * Fetch packages for a specific country from esimAccess API via proxy
+ * Fetch packages for a specific country from esimAccess API
  * @param {string} locationCode - ISO country code (e.g., 'TR', 'AE')
  * @returns {Promise<Array>} Array of package objects
  */
 export const fetchPackagesByCountry = async (locationCode) => {
   try {
-    const response = await fetch(`${PROXY_URL}/packages`, {
+    const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +63,7 @@ export const fetchPackagesByCountry = async (locationCode) => {
  */
 export const fetchAllPackages = async () => {
   try {
-    const response = await fetch(`${PROXY_URL}/packages`, {
+    const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
