@@ -1,31 +1,37 @@
 // src/services/esimAccessApi.js
-// Enhanced API service with improved filtering and i18n support
 
 import { selectBestPackage } from '../config/pricing.js';
-
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
 
 // Smart API URL detection
 const getApiUrl = () => {
-  // Production (Vercel): Use relative path (same domain, no CORS)
   if (process.env.NODE_ENV === 'production') {
     return '/api';
   }
-  
-  // Development: Use environment variable or localhost proxy
   return process.env.REACT_APP_PROXY_URL || 'http://localhost:5000/api';
 };
 
 const API_URL = getApiUrl();
 
-console.log('🔗 API URL:', API_URL);
+console.log('🔗 [INIT] API URL:', API_URL);
 
-/**
- * Fetch packages for a specific country from esimAccess API
- * @param {string} locationCode - ISO country code (e.g., 'TR', 'AE')
- * @returns {Promise<Array>} Array of package objects
- */
+
+// ============================================
+// FETCH: Base function with EXTREME DEBUG LOGGING
+// ============================================
 export const fetchPackagesByCountry = async (locationCode) => {
+  console.log(`\n============================`);
+  console.log(`🌍 Fetching packages for country: ${locationCode}`);
+  console.log(`➡️ POST ${API_URL}/packages`);
+  console.log(`📦 Request Body:`, {
+    locationCode,
+    type: '',
+    slug: '',
+    packageCode: '',
+    iccid: '',
+  });
+  console.log(`============================\n`);
+
   try {
     const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
@@ -41,43 +47,94 @@ export const fetchPackagesByCountry = async (locationCode) => {
       }),
     });
 
+    console.log(`📡 Response status: ${response.status}`);
+
+    // Log response headers
+    const headers = {};
+    response.headers.forEach((v, k) => (headers[k] = v));
+    console.log('📑 Response headers:', headers);
+
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
+      console.error('❌ API request failed with status:', response.status);
+      return [];
     }
 
     const data = await response.json();
 
+    console.log('📨 Raw API response JSON:', data);
+
     if (data.success && data.obj && data.obj.packageList) {
+      console.log(
+        `✅ Success: received ${data.obj.packageList.length} packages for ${locationCode}`
+      );
       return data.obj.packageList;
     } else {
-      console.error('API Error:', data.errorMsg);
+      console.error('⚠️ API responded with success=false OR missing packageList');
+      console.error('🔍 API error message:', data.errorMsg);
       return [];
     }
   } catch (error) {
-    console.error('Failed to fetch packages:', error);
+    console.error('💥 Fetch ERROR:', error);
     return [];
   }
 };
 
-/**
- * Transform API package data to our display format
- * @param {Object} apiPackage - Package object from API
- * @param {string} countryCode - ISO country code
- * @param {string} lang - Language code (defaults to Russian)
- * @returns {Object} Transformed package object
- */
-export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LANGUAGE) => {
-  // Convert price from API format (divide by 10000 to get USD)
-  const priceInUSD = apiPackage.price / 10000;
-  
-  // Convert data volume from bytes to GB
-  const dataInGB = Math.round(apiPackage.volume / 1073741824);
-  
-  // Determine speed based on package name or default to 5G
-  const speed = apiPackage.name.includes('5G') ? '5G' : 
-                apiPackage.name.includes('4G') ? '4G' : '5G';
 
-  // Get translated country name
+// ============================================
+// Fetch ALL packages for Country Page (DEBUG)
+// ============================================
+export const fetchAllPackagesForCountry = async (
+  countryCode,
+  lang = DEFAULT_LANGUAGE
+) => {
+  console.log(`\n\n==============================`);
+  console.log(`📘 fetchAllPackagesForCountry() START`);
+  console.log(`Country: ${countryCode}`);
+  console.log(`Language: ${lang}`);
+  console.log(`==============================\n`);
+
+  try {
+    const packages = await fetchPackagesByCountry(countryCode);
+
+    console.log(
+      `📦 Raw package list from fetchPackagesByCountry:`,
+      packages
+    );
+
+    if (!packages || packages.length === 0) {
+      console.warn(`⚠️ No packages found for ${countryCode}`);
+      return [];
+    }
+
+    const output = packages.map((pkg) =>
+      transformPackageData(pkg, countryCode, lang)
+    );
+
+    console.log(
+      `🎯 Transformed packages (${output.length} items):`,
+      output
+    );
+
+    return output;
+  } catch (error) {
+    console.error('💥 ERROR in fetchAllPackagesForCountry:', error);
+    return [];
+  }
+};
+
+
+// ============================================
+// Transform Package Data (optional log)
+// ============================================
+export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LANGUAGE) => {
+  const priceInUSD = apiPackage.price / 10000;
+  const dataInGB = Math.round(apiPackage.volume / 1073741824);
+  const speed = apiPackage.name.includes('5G')
+    ? '5G'
+    : apiPackage.name.includes('4G')
+    ? '4G'
+    : '5G';
+
   const countryName = getCountryName(countryCode, lang);
 
   return {
@@ -96,59 +153,40 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
   };
 };
 
-/**
- * Fetch and transform packages for multiple countries
- * Returns only ONE package per country based on selection criteria
- * @param {Array} countries - Array of country objects {code}
- * @param {string} lang - Language for translations
- * @returns {Promise<Array>} Array of transformed package objects (one per country)
- */
-export const fetchPackagesForCountries = async (countries, lang = DEFAULT_LANGUAGE) => {
+
+export const fetchPackagesForCountries = async (
+  countries,
+  lang = DEFAULT_LANGUAGE
+) => {
   try {
     const allPackages = [];
 
     for (const country of countries) {
+      console.log(`🌎 Fetching best package for: ${country.code}`);
+
       const packages = await fetchPackagesByCountry(country.code);
-      
-      if (packages.length > 0) {
-        // Transform all packages for this country
-        const transformedPackages = packages.map(pkg => 
-          transformPackageData(pkg, country.code, lang)
-        );
-        
-        // Select the BEST single package for this country
-        const bestPackage = selectBestPackage(transformedPackages);
-        
-        if (bestPackage) {
-          allPackages.push(bestPackage);
-        }
+
+      if (!packages || packages.length === 0) {
+        console.log(`⚠️ No packages for ${country.code}`);
+        continue;
+      }
+
+      const transformed = packages.map((p) =>
+        transformPackageData(p, country.code, lang)
+      );
+
+      const best = selectBestPackage(transformed);
+
+      if (best) {
+        console.log(`🎯 Best package for ${country.code}:`, best);
+        allPackages.push(best);
       }
     }
 
+    console.log(`🏁 fetchPackagesForCountries DONE`);
     return allPackages;
-  } catch (error) {
-    console.error('Error fetching packages for countries:', error);
-    return [];
-  }
-};
-
-/**
- * Fetch ALL packages for a specific country (for country detail page)
- * @param {string} countryCode - ISO country code
- * @param {string} lang - Language for translations
- * @returns {Promise<Array>} Array of all packages for the country
- */
-export const fetchAllPackagesForCountry = async (countryCode, lang = DEFAULT_LANGUAGE) => {
-  try {
-    const packages = await fetchPackagesByCountry(countryCode);
-    
-    if (packages.length > 0) {
-      return packages.map(pkg => transformPackageData(pkg, countryCode, lang));
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error fetching all packages for country:', error);
+  } catch (err) {
+    console.error('💥 Error fetching packages for countries:', err);
     return [];
   }
 };
