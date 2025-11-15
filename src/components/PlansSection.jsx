@@ -11,16 +11,14 @@ import {
   Badge,
   HStack,
   VStack,
-  Stack,
-  Spinner,
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
-import { fetchPackagesForCountries }  from '../services/esimAccessApi.js'
-import { COUNTRY_MAPPINGS, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { fetchHandpickedPackages } from '../services/esimAccessApi';
+import { HANDPICKED_PLAN_CODES, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
-// Plan Card Component
+// Enhanced Plan Card Component
 const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
@@ -45,7 +43,6 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
       }}
       minWidth="280px"
     >
-      {/* Gradient overlay on hover */}
       <Box
         position="absolute"
         top={0}
@@ -59,9 +56,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
 
       <Card.Body p={8}>
         <VStack align="stretch" gap={6} height="100%">
-          {/* Header Section */}
           <Box>
-            {/* Country with Flag */}
             <HStack gap={3} mb={4} flexWrap="nowrap">
               <Box
                 borderRadius="xl"
@@ -102,7 +97,6 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
               </HStack>
             </HStack>
 
-            {/* Speed Badge */}
             <Badge
               colorPalette="purple"
               fontSize="xs"
@@ -120,7 +114,6 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Badge>
           </Box>
 
-          {/* Data Amount */}
           <Box
             bg="purple.50"
             p={4}
@@ -148,7 +141,6 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </Box>
 
-          {/* Duration */}
           <HStack 
             gap={3} 
             color="gray.600"
@@ -163,7 +155,6 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </HStack>
 
-          {/* Price */}
           <Box
             mt="auto"
             pt={4}
@@ -184,11 +175,10 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   {plan.price}
                 </Heading>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  UZS
+                  {t('plans.card.currency')}
                 </Text>
               </VStack>
 
-              {/* CTA Button */}
               <Button
                 size="sm"
                 bg={isHovered ? 'purple.600' : 'gray.100'}
@@ -237,26 +227,14 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
                 height="42px"
                 bg="gray.200"
                 flexShrink={0}
-                sx={{
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.5 },
-                  },
-                  animation: 'pulse 1.5s ease-in-out infinite',
-                }}
+                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               />
               <Box
                 width="140px"
                 height="28px"
                 bg="gray.200"
                 borderRadius="lg"
-                sx={{
-                  '@keyframes pulse': {
-                    '0%, 100%': { opacity: 1 },
-                    '50%': { opacity: 0.5 },
-                  },
-                  animation: 'pulse 1.5s ease-in-out infinite',
-                }}
+                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               />
             </HStack>
             <Box
@@ -264,50 +242,26 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
               height="24px"
               bg="gray.200"
               borderRadius="full"
-              sx={{
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%': { opacity: 0.5 },
-                },
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
+              animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
             />
           </Box>
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="xl"
-            sx={{
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              },
-              animation: 'pulse 1.5s ease-in-out infinite',
-            }}
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
             height="60px"
             bg="gray.100"
             borderRadius="lg"
-            sx={{
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              },
-              animation: 'pulse 1.5s ease-in-out infinite',
-            }}
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
             height="80px"
             bg="gray.100"
             borderRadius="lg"
-            sx={{
-              '@keyframes pulse': {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              },
-              animation: 'pulse 1.5s ease-in-out infinite',
-            }}
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
       </Card.Body>
@@ -317,8 +271,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
 
 // Main Plans Section Component
 const PlansSection = () => {
-  const [activeTab, setActiveTab] = useState('ASIA');
-  const [plansData, setPlansData] = useState({ ASIA: [], EUROPE: [] });
+  const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const lang = DEFAULT_LANGUAGE;
@@ -326,50 +279,35 @@ const PlansSection = () => {
   const t = (key) => getTranslation(lang, key);
 
   useEffect(() => {
-    const loadPackages = async () => {
+    const loadHandpickedPackages = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        console.log('🚀 Loading packages for main page (optimized)...');
+        console.log('🎯 Loading handpicked packages...');
+        
+        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_CODES, lang);
 
-        // Fetch both regions in parallel
-        const [asiaPackages, europePackages] = await Promise.all([
-          fetchPackagesForCountries(COUNTRY_MAPPINGS.ASIA, lang),
-          fetchPackagesForCountries(COUNTRY_MAPPINGS.EUROPE, lang),
-        ]);
-
-        // Transform packages with pricing
-        const transformedAsiaPackages = asiaPackages.map(pkg => ({
+        const transformedPackages = packages.map(pkg => ({
           ...pkg,
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
 
-        const transformedEuropePackages = europePackages.map(pkg => ({
-          ...pkg,
-          price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
-        }));
-
-        setPlansData({
-          ASIA: transformedAsiaPackages,
-          EUROPE: transformedEuropePackages,
-        });
-
-        console.log(`✅ Loaded ${transformedAsiaPackages.length} Asia + ${transformedEuropePackages.length} Europe packages`);
+        setPlansData(transformedPackages);
+        console.log(`✅ Loaded ${transformedPackages.length} handpicked plans`);
       } catch (err) {
-        console.error('Error loading packages:', err);
+        console.error('Error loading handpicked packages:', err);
         setError(t('plans.error'));
       } finally {
         setLoading(false);
       }
     };
 
-    loadPackages();
+    loadHandpickedPackages();
   }, [lang, t]);
 
   return (
     <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
-      {/* Background decoration */}
       <Box
         position="absolute"
         top="10%"
@@ -397,7 +335,6 @@ const PlansSection = () => {
 
       <Container maxW="8xl" position="relative">
         <VStack gap={16}>
-          {/* Section Header */}
           <VStack gap={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
               colorPalette="purple"
@@ -436,124 +373,67 @@ const PlansSection = () => {
             </Text>
           </VStack>
 
-          {/* Custom Tabs */}
-          <Box className="animate__animated animate__fadeIn" style={{ animationDelay: '200ms' }}>
-            <Stack
-              direction={{ base: 'column', md: 'row' }}
-              bg="white"
-              p={2}
-              borderRadius="2xl"
-              gap={2}
-              mx="auto"
-              width="fit-content"
-              shadow="lg"
-              border="1px solid"
-              borderColor="gray.200"
+          {error && (
+            <Box
+              p={6}
+              bg="red.50"
+              borderRadius="xl"
+              border="2px solid"
+              borderColor="red.200"
+              className="animate__animated animate__shakeX"
             >
-              <Button
-                onClick={() => setActiveTab('ASIA')}
-                bg={activeTab === 'ASIA' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'}
-                color={activeTab === 'ASIA' ? 'white' : 'gray.700'}
-                borderRadius="xl"
-                _hover={{
-                  bg: activeTab === 'ASIA' ? 'linear-gradient(135deg, #5568d3 0%, #6941a3 100%)' : 'gray.50',
-                  transform: 'scale(1.02)',
-                }}
-                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                fontWeight="800"
-                px={12}
-                py={7}
-                fontSize="lg"
-                shadow={activeTab === 'ASIA' ? 'lg' : 'none'}
-              >
-                {t('plans.tabs.asia')}
-              </Button>
-              <Button
-                onClick={() => setActiveTab('EUROPE')}
-                bg={activeTab === 'EUROPE' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent'}
-                color={activeTab === 'EUROPE' ? 'white' : 'gray.700'}
-                borderRadius="xl"
-                _hover={{
-                  bg: activeTab === 'EUROPE' ? 'linear-gradient(135deg, #5568d3 0%, #6941a3 100%)' : 'gray.50',
-                  transform: 'scale(1.02)',
-                }}
-                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                fontWeight="800"
-                px={12}
-                py={7}
-                fontSize="lg"
-                shadow={activeTab === 'EUROPE' ? 'lg' : 'none'}
-              >
-                {t('plans.tabs.europe')}
-              </Button>
-            </Stack>
+              <Text color="red.600" textAlign="center" fontWeight="600">
+                {error}
+              </Text>
+            </Box>
+          )}
 
-            {/* Error Message */}
-            {error && (
-              <Box
-                mt={8}
-                p={6}
-                bg="red.50"
-                borderRadius="xl"
-                border="2px solid"
-                borderColor="red.200"
-                className="animate__animated animate__shakeX"
-              >
-                <Text color="red.600" textAlign="center" fontWeight="600">
-                  {error}
-                </Text>
+          <Grid
+            templateColumns={{ 
+              base: '1fr', 
+              md: 'repeat(2, 1fr)', 
+              lg: 'repeat(3, 1fr)',
+              xl: 'repeat(5, 1fr)' 
+            }}
+            gap={6}
+            mt={12}
+            className="animate__animated animate__fadeIn"
+            style={{ animationDelay: '200ms' }}
+          >
+            {loading ? (
+              <>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <PlanCardSkeleton key={i} delay={i * 100} />
+                ))}
+              </>
+            ) : plansData.length > 0 ? (
+              plansData.map((plan, index) => (
+                <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={lang} />
+              ))
+            ) : (
+              <Box gridColumn="1 / -1" textAlign="center" py={16}>
+                <VStack gap={4}>
+                  <Box
+                    w="80px"
+                    h="80px"
+                    bg="gray.100"
+                    borderRadius="full"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <MapPin size={40} color="#9ca3af" />
+                  </Box>
+                  <Heading size="lg" color="gray.700">
+                    {t('plans.empty')}
+                  </Heading>
+                  <Text fontSize="md" color="gray.500" fontWeight="500">
+                    {t('plans.emptyDescription')}
+                  </Text>
+                </VStack>
               </Box>
             )}
-
-            {/* Plans Grid */}
-            <Grid
-              templateColumns={{ 
-                base: '1fr', 
-                md: 'repeat(2, 1fr)', 
-                lg: 'repeat(3, 1fr)',
-                xl: 'repeat(5, 1fr)' 
-              }}
-              gap={6}
-              mt={12}
-            >
-              {loading ? (
-                // Show loading skeletons
-                <>
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <PlanCardSkeleton key={i} delay={i * 100} />
-                  ))}
-                </>
-              ) : plansData[activeTab].length > 0 ? (
-                // Show actual plans
-                plansData[activeTab].map((plan, index) => (
-                  <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={lang} />
-                ))
-              ) : (
-                // Show empty state
-                <Box gridColumn="1 / -1" textAlign="center" py={16}>
-                  <VStack gap={4}>
-                    <Box
-                      w="80px"
-                      h="80px"
-                      bg="gray.100"
-                      borderRadius="full"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <MapPin size={40} color="#9ca3af" />
-                    </Box>
-                    <Heading size="lg" color="gray.700">
-                      {t('plans.empty')}
-                    </Heading>
-                    <Text fontSize="md" color="gray.500" fontWeight="500">
-                      {t('plans.emptyDescription')}
-                    </Text>
-                  </VStack>
-                </Box>
-              )}
-            </Grid>
-          </Box>
+          </Grid>
         </VStack>
       </Container>
     </Box>
