@@ -120,14 +120,11 @@ export const COUNTRY_TRANSLATIONS = {
 // UI translations
 export const TRANSLATIONS = {
   ru: {
-    // Navigation
     nav: {
       home: 'Главная',
       plans: 'Планы',
       contacts: 'Контакты',
     },
-    
-    // Hero Section
     hero: {
       badge: 'Мгновенная активация eSIM',
       title: 'Путешествуйте без границ с',
@@ -139,8 +136,31 @@ export const TRANSLATIONS = {
       },
       cta: 'Узнать больше',
     },
-    
-    // Plans Section
+    benefits: {
+      title: 'Почему выбирают',
+      titleHighlight: 'eSIM?',
+      description: 'Современное решение для мобильной связи без физических SIM-карт',
+      instant: {
+        title: 'Мгновенная активация',
+        description: 'Получите доступ к интернету сразу после приземления. Никаких очередей и ожидания.',
+      },
+      savings: {
+        title: 'Экономия денег',
+        description: 'Избегайте дорогого роуминга. Тарифы eSIM в 5-10 раз дешевле традиционного роуминга.',
+      },
+      noPhysical: {
+        title: 'Без физической карты',
+        description: 'Не нужно менять SIM-карты. Всё управляется цифровым способом прямо на вашем устройстве.',
+      },
+      multiCountry: {
+        title: 'Несколько стран',
+        description: 'Один eSIM профиль работает в нескольких странах. Путешествуйте без ограничений.',
+      },
+      dataControl: {
+        title: 'Контроль трафика',
+        description: 'Точно знайте, сколько данных используете. Никаких скрытых платежей и сюрпризов.',
+      },
+    },
     plans: {
       badge: 'Наши тарифы',
       title: 'Выберите идеальный',
@@ -162,8 +182,6 @@ export const TRANSLATIONS = {
       emptyDescription: 'Мы работаем над добавлением тарифов для этого региона',
       error: 'Не удалось загрузить планы. Пожалуйста, попробуйте позже.',
     },
-    
-    // Popular Destinations
     destinations: {
       badge: 'Популярные направления',
       title: 'Куда вы',
@@ -171,8 +189,29 @@ export const TRANSLATIONS = {
       description: 'Выберите страну и найдите идеальный тарифный план для вашего путешествия',
       explore: 'Смотреть планы',
     },
-    
-    // Country Page
+    faq: {
+      title: 'Часто задаваемые',
+      titleHighlight: 'вопросы',
+      description: 'Всё, что вам нужно знать о eSIM',
+      questions: {
+        whatIsEsim: {
+          question: 'Что такое eSIM?',
+          answer: 'eSIM - это встроенная SIM-карта, которая уже установлена в вашем устройстве. Вместо физической карты, вы получаете цифровой профиль, который можно активировать мгновенно через QR-код или приложение.',
+        },
+        howToActivate: {
+          question: 'Как активировать eSIM?',
+          answer: 'После покупки вы получите QR-код на email. Просто отсканируйте его камерой телефона в настройках сотовой связи, и eSIM автоматически активируется. Весь процесс занимает не более 2 минут.',
+        },
+        deviceCompatibility: {
+          question: 'Какие устройства поддерживают eSIM?',
+          answer: 'Большинство современных смартфонов поддерживают eSIM: iPhone XS и новее, Samsung Galaxy S20 и новее, Google Pixel 3 и новее, а также многие модели Huawei, Oppo и другие. Проверьте совместимость вашего устройства перед покупкой.',
+        },
+        canKeepNumber: {
+          question: 'Могу ли я сохранить свой номер?',
+          answer: 'Да, вы можете использовать eSIM вместе с вашей обычной SIM-картой. Ваш основной номер останется активным для звонков и SMS, а eSIM будет использоваться для мобильного интернета.',
+        },
+      },
+    },
     countryPage: {
       title: 'eSIM планы в',
       backButton: 'Назад к планам',
@@ -184,8 +223,6 @@ export const TRANSLATIONS = {
       noPlans: 'Планы не найдены',
       noPlansDescription: 'Попробуйте изменить фильтры или вернитесь позже',
     },
-    
-    // Footer
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
       quickLinks: 'Быстрые ссылки',
@@ -196,16 +233,12 @@ export const TRANSLATIONS = {
       madeWith: 'Сделано с ❤️ для путешественников',
     },
   },
-  
   uz: {
-    // Navigation
     nav: {
       home: 'Bosh sahifa',
       plans: 'Rejalar',
       contacts: 'Aloqa',
     },
-    
-    // Hero Section
     hero: {
       badge: 'eSIM oniy faollashtirish',
       title: 'Chegaralarsiz sayohat qiling',
@@ -217,8 +250,31 @@ export const TRANSLATIONS = {
       },
       cta: 'Batafsil',
     },
-    
-    // Plans Section
+    benefits: {
+      title: 'Nima uchun',
+      titleHighlight: 'eSIM?',
+      description: 'Jismoniy SIM-kartasiz mobil aloqa uchun zamonaviy yechim',
+      instant: {
+        title: 'Oniy faollashtirish',
+        description: 'Qo\'nganingizdan so\'ng darhol internetga kiring. Navbatsiz va kutishsiz.',
+      },
+      savings: {
+        title: 'Pul tejash',
+        description: 'Qimmat roumingdan qoching. eSIM tariflari oddiy roumingdan 5-10 marta arzonroq.',
+      },
+      noPhysical: {
+        title: 'Jismoniy kartasiz',
+        description: 'SIM-kartani almashtirish shart emas. Hamma narsa qurilmangizda raqamli boshqariladi.',
+      },
+      multiCountry: {
+        title: 'Bir nechta mamlakat',
+        description: 'Bitta eSIM profili bir nechta mamlakatda ishlaydi. Chegaralarsiz sayohat qiling.',
+      },
+      dataControl: {
+        title: 'Trafik nazorati',
+        description: 'Qancha ma\'lumot ishlatayotganingizni aniq bilib turing. Yashirin to\'lovlar yo\'q.',
+      },
+    },
     plans: {
       badge: 'Bizning tariflar',
       title: 'Mukammal',
@@ -240,8 +296,6 @@ export const TRANSLATIONS = {
       emptyDescription: 'Biz bu mintaqa uchun tariflarni qoʻshish ustida ishlayapmiz',
       error: 'Rejalarni yuklab boʻlmadi. Iltimos keyinroq urinib koʻring.',
     },
-    
-    // Popular Destinations
     destinations: {
       badge: 'Mashhur yoʻnalishlar',
       title: 'Qayerga',
@@ -249,8 +303,29 @@ export const TRANSLATIONS = {
       description: 'Mamlakatni tanlang va sayohatingiz uchun ideal tarifni toping',
       explore: 'Rejalarni koʻrish',
     },
-    
-    // Country Page
+    faq: {
+      title: 'Tez-tez so\'raladigan',
+      titleHighlight: 'savollar',
+      description: 'eSIM haqida bilishingiz kerak bo\'lgan hamma narsa',
+      questions: {
+        whatIsEsim: {
+          question: 'eSIM nima?',
+          answer: 'eSIM - bu qurilmangizga o\'rnatilgan o\'rnatilgan SIM-karta. Jismoniy karta o\'rniga, siz QR-kod yoki ilova orqali oniy faollashtirishingiz mumkin bo\'lgan raqamli profilni olasiz.',
+        },
+        howToActivate: {
+          question: 'eSIMni qanday faollashtirish mumkin?',
+          answer: 'Xarid qilganingizdan so\'ng, sizga emailga QR-kod yuboriladi. Uni telefon sozlamalarida kamera bilan skanerlang va eSIM avtomatik faollashadi. Butun jarayon 2 daqiqadan ko\'p vaqt olmaydi.',
+        },
+        deviceCompatibility: {
+          question: 'Qaysi qurilmalar eSIMni qo\'llab-quvvatlaydi?',
+          answer: 'Ko\'pchilik zamonaviy smartfonlar eSIMni qo\'llab-quvvatlaydi: iPhone XS va yangiroqlari, Samsung Galaxy S20 va yangiroqlari, Google Pixel 3 va yangiroqlari, shuningdek Huawei, Oppo va boshqalarning ko\'p modellari. Xarid qilishdan oldin qurilmangiz muvofiqligini tekshiring.',
+        },
+        canKeepNumber: {
+          question: 'Raqamimni saqlab qolsam bo\'ladimi?',
+          answer: 'Ha, siz eSIMni oddiy SIM-karta bilan birga ishlatishingiz mumkin. Asosiy raqamingiz qo\'ng\'iroqlar va SMS uchun faol bo\'lib qoladi, eSIM esa mobil internet uchun ishlatiladi.',
+        },
+      },
+    },
     countryPage: {
       title: 'dagi eSIM rejalar',
       backButton: 'Rejalarga qaytish',
@@ -262,8 +337,6 @@ export const TRANSLATIONS = {
       noPlans: 'Rejalar topilmadi',
       noPlansDescription: 'Filtrlarni oʻzgartiring yoki keyinroq qaytib keling',
     },
-    
-    // Footer
     footer: {
       description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlari bilan chegaralarsiz sayohat qiling.',
       quickLinks: 'Tezkor havolalar',
@@ -274,16 +347,12 @@ export const TRANSLATIONS = {
       madeWith: '❤️ bilan sayohatchilar uchun yaratildi',
     },
   },
-  
   en: {
-    // Navigation
     nav: {
       home: 'Home',
       plans: 'Plans',
       contacts: 'Contacts',
     },
-    
-    // Hero Section
     hero: {
       badge: 'Instant eSIM Activation',
       title: 'Travel Without Borders with',
@@ -295,8 +364,31 @@ export const TRANSLATIONS = {
       },
       cta: 'Learn More',
     },
-    
-    // Plans Section
+    benefits: {
+      title: 'Why choose',
+      titleHighlight: 'eSIM?',
+      description: 'Modern solution for mobile connectivity without physical SIM cards',
+      instant: {
+        title: 'Instant Activation',
+        description: 'Get internet access right after landing. No queues, no waiting.',
+      },
+      savings: {
+        title: 'Save Money',
+        description: 'Avoid expensive roaming. eSIM plans are 5-10 times cheaper than traditional roaming.',
+      },
+      noPhysical: {
+        title: 'No Physical Card',
+        description: 'No need to swap SIM cards. Everything is managed digitally on your device.',
+      },
+      multiCountry: {
+        title: 'Multiple Countries',
+        description: 'One eSIM profile works in multiple countries. Travel without limits.',
+      },
+      dataControl: {
+        title: 'Data Control',
+        description: 'Know exactly how much data you use. No hidden fees or surprises.',
+      },
+    },
     plans: {
       badge: 'Our Plans',
       title: 'Choose the Perfect',
@@ -318,8 +410,6 @@ export const TRANSLATIONS = {
       emptyDescription: 'We are working on adding plans for this region',
       error: 'Failed to load plans. Please try again later.',
     },
-    
-    // Popular Destinations
     destinations: {
       badge: 'Popular Destinations',
       title: 'Where are you',
@@ -327,8 +417,29 @@ export const TRANSLATIONS = {
       description: 'Choose a country and find the perfect plan for your trip',
       explore: 'Explore Plans',
     },
-    
-    // Country Page
+    faq: {
+      title: 'Frequently Asked',
+      titleHighlight: 'Questions',
+      description: 'Everything you need to know about eSIM',
+      questions: {
+        whatIsEsim: {
+          question: 'What is eSIM?',
+          answer: 'eSIM is an embedded SIM card that is already built into your device. Instead of a physical card, you get a digital profile that can be activated instantly via QR code or app.',
+        },
+        howToActivate: {
+          question: 'How to activate eSIM?',
+          answer: 'After purchase, you will receive a QR code via email. Simply scan it with your phone camera in cellular settings, and the eSIM will activate automatically. The entire process takes no more than 2 minutes.',
+        },
+        deviceCompatibility: {
+          question: 'Which devices support eSIM?',
+          answer: 'Most modern smartphones support eSIM: iPhone XS and newer, Samsung Galaxy S20 and newer, Google Pixel 3 and newer, as well as many Huawei, Oppo and other models. Check your device compatibility before purchase.',
+        },
+        canKeepNumber: {
+          question: 'Can I keep my number?',
+          answer: 'Yes, you can use eSIM alongside your regular SIM card. Your main number will remain active for calls and SMS, while the eSIM will be used for mobile internet.',
+        },
+      },
+    },
     countryPage: {
       title: 'eSIM Plans in',
       backButton: 'Back to Plans',
@@ -340,8 +451,6 @@ export const TRANSLATIONS = {
       noPlans: 'No Plans Found',
       noPlansDescription: 'Try changing filters or come back later',
     },
-    
-    // Footer
     footer: {
       description: 'Your reliable partner in the world of mobile communications. Travel without borders with our eSIM solutions.',
       quickLinks: 'Quick Links',
@@ -354,12 +463,6 @@ export const TRANSLATIONS = {
   },
 };
 
-/**
- * Get translation for a key
- * @param {string} lang - Language code (ru, uz, en)
- * @param {string} key - Translation key (e.g., 'hero.title')
- * @returns {string} Translated text
- */
 export const getTranslation = (lang, key) => {
   const keys = key.split('.');
   let value = TRANSLATIONS[lang] || TRANSLATIONS[DEFAULT_LANGUAGE];
@@ -372,12 +475,6 @@ export const getTranslation = (lang, key) => {
   return value;
 };
 
-/**
- * Get country name translation
- * @param {string} countryCode - ISO country code (e.g., 'TR')
- * @param {string} lang - Language code (ru, uz, en)
- * @returns {string} Translated country name
- */
 export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
   const country = COUNTRY_TRANSLATIONS[countryCode];
   if (!country) return countryCode;
