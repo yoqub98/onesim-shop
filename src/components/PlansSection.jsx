@@ -15,7 +15,7 @@ import {
 import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { HANDPICKED_PLAN_CODES, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
 // Enhanced Plan Card Component
@@ -284,10 +284,12 @@ const PlansSection = () => {
         setLoading(true);
         setError(null);
 
-        console.log('🎯 Loading handpicked packages...');
+        console.log('🎯 Loading handpicked packages by slug...');
         
-        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_CODES, lang);
+        // Fetch packages using slugs
+        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, lang);
 
+        // Transform packages with pricing
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),

@@ -15,14 +15,15 @@ export const API_CONFIG = {
 };
 
 // ============================================
-// HANDPICKED PLAN CODES - For homepage "Best Plans" section
+// HANDPICKED PLAN SLUGS - For homepage "Best Plans" section
+// These slugs fetch specific packages via the API
 // ============================================
-export const HANDPICKED_PLAN_CODES = {
-  TR: 'CKH738',      // Turkey
-  AE: 'P0LWCN1S2',   // UAE
-  TH: 'JC080',       // Thailand
-  VN: 'JC088',       // Vietnam
-  FR: 'CKH1005',     // France
+export const HANDPICKED_PLAN_SLUGS = {
+  TR: 'TR_20_30',   // Turkey - 20GB, 30 days
+  AE: 'AE_20_30',   // UAE - 20GB, 30 days
+  TH: 'TH_20_30',   // Thailand - 20GB, 30 days
+  VN: 'VN_20_30',   // Vietnam - 20GB, 30 days
+  FR: 'FR_20_30',   // France - 20GB, 30 days
 };
 
 // ============================================

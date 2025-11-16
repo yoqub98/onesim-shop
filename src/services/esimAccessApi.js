@@ -20,37 +20,105 @@ console.log('🔗 [INIT] API URL:', API_URL);
 const packageCache = new Map();
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
-const getCacheKey = (countryCode) => `packages_${countryCode}`;
+const getCacheKey = (key) => `package_${key}`;
 
-const getCachedPackages = (countryCode) => {
-  const key = getCacheKey(countryCode);
-  const cached = packageCache.get(key);
+const getCachedPackage = (key) => {
+  const cacheKey = getCacheKey(key);
+  const cached = packageCache.get(cacheKey);
   
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    console.log(`✅ Using cached data for ${countryCode}`);
+    console.log(`✅ Using cached data for ${key}`);
     return cached.data;
   }
   
   return null;
 };
 
-const setCachedPackages = (countryCode, data) => {
-  const key = getCacheKey(countryCode);
-  packageCache.set(key, {
+const setCachedPackage = (key, data) => {
+  const cacheKey = getCacheKey(key);
+  packageCache.set(cacheKey, {
     data,
     timestamp: Date.now()
   });
 };
 
 // ============================================
-// FETCH: Base function to fetch all packages for a country
+// FETCH: Package by slug (for handpicked plans)
+// ============================================
+export const fetchPackageBySlug = async (slug, countryCode) => {
+  // Check cache first
+  const cached = getCachedPackage(slug);
+  if (cached) return cached;
+
+  console.log(`🎯 Fetching package by slug: ${slug}`);
+
+  try {
+    const response = await fetch(`${API_URL}/packages?slug=${slug}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
+      console.log(`✅ Found package with slug ${slug}`);
+      const pkg = data.obj.packageList[0];
+      
+      // Cache it
+      setCachedPackage(slug, pkg);
+      
+      return pkg;
+    } else {
+      console.warn(`⚠️ Package with slug ${slug} not found`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`❌ Error fetching package ${slug}:`, error.message);
+    return null;
+  }
+};
+
+// ============================================
+// FETCH: Multiple packages by slugs (for handpicked plans)
+// ============================================
+export const fetchHandpickedPackages = async (planSlugsMap, lang = DEFAULT_LANGUAGE) => {
+  console.log(`🎯 Fetching handpicked packages...`);
+  
+  const results = [];
+
+  for (const [countryCode, slug] of Object.entries(planSlugsMap)) {
+    try {
+      const pkg = await fetchPackageBySlug(slug, countryCode);
+      
+      if (pkg) {
+        const transformed = transformPackageData(pkg, countryCode, lang);
+        results.push(transformed);
+      }
+    } catch (error) {
+      console.error(`Error fetching ${countryCode} (${slug}):`, error);
+      continue;
+    }
+  }
+
+  console.log(`✅ Fetched ${results.length} handpicked packages`);
+  return results;
+};
+
+// ============================================
+// FETCH: All packages for a country (for Country Page)
 // ============================================
 export const fetchPackagesByCountry = async (locationCode) => {
   // Check cache first
-  const cached = getCachedPackages(locationCode);
+  const cached = getCachedPackage(`country_${locationCode}`);
   if (cached) return cached;
 
-  console.log(`🌍 Fetching packages for ${locationCode}`);
+  console.log(`🌍 Fetching all packages for ${locationCode}`);
 
   try {
     const response = await fetch(`${API_URL}/packages`, {
@@ -77,7 +145,7 @@ export const fetchPackagesByCountry = async (locationCode) => {
       console.log(`✅ Received ${data.obj.packageList.length} packages for ${locationCode}`);
       
       // Cache the raw data
-      setCachedPackages(locationCode, data.obj.packageList);
+      setCachedPackage(`country_${locationCode}`, data.obj.packageList);
       
       return data.obj.packageList;
     } else {
@@ -87,72 +155,6 @@ export const fetchPackagesByCountry = async (locationCode) => {
     console.error(`❌ Error fetching ${locationCode}:`, error.message);
     throw error;
   }
-};
-
-// ============================================
-// NEW: Fetch specific package by packageCode
-// ============================================
-export const fetchPackageByCode = async (packageCode, countryCode) => {
-  console.log(`🎯 Fetching specific package: ${packageCode} for ${countryCode}`);
-
-  try {
-    const response = await fetch(`${API_URL}/packages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        locationCode: countryCode,
-        type: '',
-        slug: '',
-        packageCode: packageCode,
-        iccid: '',
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
-      console.log(`✅ Found package ${packageCode}`);
-      return data.obj.packageList[0]; // Return the first (and should be only) package
-    } else {
-      console.warn(`⚠️ Package ${packageCode} not found`);
-      return null;
-    }
-  } catch (error) {
-    console.error(`❌ Error fetching package ${packageCode}:`, error.message);
-    return null;
-  }
-};
-
-// ============================================
-// NEW: Fetch multiple specific packages by their codes
-// ============================================
-export const fetchHandpickedPackages = async (planCodesMap, lang = DEFAULT_LANGUAGE) => {
-  console.log(`🎯 Fetching handpicked packages...`);
-  
-  const results = [];
-
-  for (const [countryCode, packageCode] of Object.entries(planCodesMap)) {
-    try {
-      const pkg = await fetchPackageByCode(packageCode, countryCode);
-      
-      if (pkg) {
-        const transformed = transformPackageData(pkg, countryCode, lang);
-        results.push(transformed);
-      }
-    } catch (error) {
-      console.error(`Error fetching ${countryCode} (${packageCode}):`, error);
-      continue;
-    }
-  }
-
-  console.log(`✅ Fetched ${results.length} handpicked packages`);
-  return results;
 };
 
 // ============================================
