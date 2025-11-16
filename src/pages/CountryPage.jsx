@@ -13,7 +13,7 @@ import {
   IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
@@ -28,6 +28,14 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
 
+  // Debug logging
+  console.log('Plan data:', {
+    id: plan.id,
+    data: plan.data,
+    operatorList: plan.operatorList,
+    hasOperators: plan.operatorList && plan.operatorList.length > 0
+  });
+
   return (
     <Box
       position="relative"
@@ -39,7 +47,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
       borderColor={isHovered ? 'purple.200' : 'gray.100'}
       transition="all 0.3s ease"
       transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
-      boxShadow={isHovered ? '0 20px 40px rgba(102, 126, 234, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.05)'}
+      boxShadow={isHovered ? '0 20px 40px rgba(100, 100, 100, 0.25)' : '0 4px 12px rgba(100, 100, 100, 0.15)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -71,6 +79,9 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
                 <Text>{plan.speed}</Text>
               </HStack>
             </Badge>
+            <Box color="purple.600">
+              <CreditCard size={20} />
+            </Box>
           </HStack>
 
           <Box
@@ -146,20 +157,22 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             borderColor="gray.200"
           >
             <HStack justify="space-between" align="center">
-              <VStack align="flex-start" gap={0}>
+              <VStack align="flex-start" gap={0.5}>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
                   {t('plans.card.price') || 'Цена'}
                 </Text>
-                <Heading
-                  fontSize="2xl"
-                  fontWeight="800"
-                  color="gray.800"
-                >
-                  {plan.price}
-                </Heading>
-                <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  UZS
-                </Text>
+                <HStack gap={1.5} align="baseline">
+                  <Heading
+                    fontSize="2xl"
+                    fontWeight="800"
+                    color="gray.800"
+                  >
+                    {plan.price}
+                  </Heading>
+                  <Text fontSize="md" color="gray.600" fontWeight="700">
+                    UZS
+                  </Text>
+                </HStack>
               </VStack>
 
               <Button
@@ -434,7 +447,7 @@ const CountryPage = () => {
             left={0}
             right={0}
             bottom={0}
-            bg="blackAlpha.600"
+            bg="blackAlpha.700"
             zIndex={1}
           />
         )}
@@ -458,11 +471,29 @@ const CountryPage = () => {
             </Button>
 
             {/* Main Content */}
-            <HStack align="flex-end" gap={8} w="100%" flexWrap={{ base: 'wrap', md: 'nowrap' }}>
-              {/* Left Side - Text Content */}
-              <VStack align="flex-start" gap={4} flex={1} maxW="600px">
+            <VStack align="flex-start" gap={6} w="100%">
+              {/* Flag Above Title */}
+              <Box
+                borderRadius="xl"
+                overflow="hidden"
+                boxShadow="0 8px 25px rgba(0,0,0,0.4)"
+                width={{ base: '80px', md: '96px' }}
+                height={{ base: '60px', md: '72px' }}
+                flexShrink={0}
+                border="3px solid"
+                borderColor="white"
+                bg="white"
+              >
+                <Flag
+                  code={countryCode}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
+
+              {/* Text Content */}
+              <VStack align="flex-start" gap={5} flex={1} maxW="700px">
                 <Heading
-                  size="2xl"
+                  fontSize={{ base: '4xl', md: '5xl' }}
                   fontWeight="900"
                   color={headerBgImage ? 'white' : 'gray.800'}
                   lineHeight="1.2"
@@ -472,7 +503,7 @@ const CountryPage = () => {
                 </Heading>
 
                 <Text
-                  fontSize="lg"
+                  fontSize={{ base: 'xl', md: '2xl' }}
                   color={headerBgImage ? 'whiteAlpha.900' : 'gray.600'}
                   fontWeight="500"
                   lineHeight="1.6"
@@ -503,32 +534,19 @@ const CountryPage = () => {
                   )}
                 </Badge>
               </VStack>
-
-              {/* Right Side - Flag */}
-              <Box
-                borderRadius="2xl"
-                overflow="hidden"
-                boxShadow="0 10px 40px rgba(0,0,0,0.3)"
-                width={{ base: '120px', md: '140px' }}
-                height={{ base: '90px', md: '105px' }}
-                flexShrink={0}
-                border="4px solid"
-                borderColor="white"
-                bg="white"
-                position="relative"
-              >
-                <Flag
-                  code={countryCode}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </Box>
-            </HStack>
+            </VStack>
           </VStack>
         </Container>
       </Box>
 
       {/* Filters */}
-      <Box bg="white" py={6} borderBottom="1px solid" borderColor="gray.200">
+      <Box
+        bg="white"
+        py={6}
+        borderBottom="1px solid"
+        borderColor="gray.200"
+        boxShadow="0 6px 20px rgba(100, 100, 100, 0.12)"
+      >
         <Container maxW="8xl">
           <HStack gap={4} flexWrap="wrap">
             <Text fontWeight="600" color="gray.700">

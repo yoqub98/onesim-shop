@@ -267,22 +267,6 @@ const HeroSection = () => {
         >
           <GridItem className="animate__animated animate__fadeInLeft">
             <VStack align="flex-start" gap={8}>
-              <Box
-                bg="purple.50"
-                color="purple.700"
-                px={5}
-                py={2}
-                borderRadius="full"
-                fontSize="sm"
-                fontWeight="700"
-                display="inline-flex"
-                alignItems="center"
-                gap={2}
-              >
-                <Zap size={16} />
-                {t('hero.badge')}
-              </Box>
-
               <Heading
                 as="h1"
                 fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }}
