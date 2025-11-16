@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Card,
   Container,
   Heading,
   Text,
@@ -32,7 +31,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
   };
 
   return (
-    <Card.Root
+    <Box
       ref={cardRef}
       position="relative"
       cursor="pointer"
@@ -66,7 +65,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
         transition="opacity 0.3s"
       />
 
-      <Card.Body p={8}>
+      <Box p={8}>
         <VStack align="stretch" gap={6} justify="space-between" h="100%">
           {/* Flag and Country Name */}
           <HStack gap={4} flexWrap="nowrap">
@@ -130,15 +129,15 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
             </Button>
           </Box>
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
 // Loading Skeleton Component
 const DestinationCardSkeleton = ({ delay = 0 }) => {
   return (
-    <Card.Root
+    <Box
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
@@ -149,7 +148,7 @@ const DestinationCardSkeleton = ({ delay = 0 }) => {
         animationDelay: `${delay}ms`,
       }}
     >
-      <Card.Body p={8}>
+      <Box p={8}>
         <HStack gap={4}>
           <Box
             borderRadius="xl"
