@@ -15,12 +15,11 @@ import {
   VStack,
   IconButton,
   Link,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
   Avatar,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody,
 } from '@chakra-ui/react';
 import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, Wifi, CreditCard, Clock, Smartphone, LogIn, User, LogOut } from 'lucide-react';
 import 'animate.css';
@@ -165,45 +164,64 @@ const Navigation = () => {
 
             {/* Auth Section */}
             {user ? (
-              <Menu>
-                <MenuButton>
-                  <HStack
-                    gap={3}
-                    px={3}
-                    py={2}
-                    borderRadius="lg"
-                    transition="all 0.2s"
-                    _hover={{ bg: 'gray.50' }}
-                    cursor="pointer"
-                  >
-                    <Avatar
-                      size="sm"
-                      name={fullName}
-                      bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                      color="white"
-                    />
-                    <Text fontWeight="600" color="gray.700" fontSize="sm">
-                      {fullName}
-                    </Text>
-                  </HStack>
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<User size={18} />} onClick={() => window.location.href = '/cabinet'}>
-                    {t('nav.myAccount')}
-                  </MenuItem>
-                  <MenuDivider />
-                  <MenuItem
-                    icon={<LogOut size={18} />}
-                    onClick={async () => {
-                      await signOut();
-                      window.location.href = '/';
-                    }}
-                    color="red.600"
-                  >
-                    {t('nav.logout')}
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+              <Popover placement="bottom-end">
+                <PopoverTrigger>
+                  <Box>
+                    <HStack
+                      gap={3}
+                      px={3}
+                      py={2}
+                      borderRadius="lg"
+                      transition="all 0.2s"
+                      _hover={{ bg: 'gray.50' }}
+                      cursor="pointer"
+                    >
+                      <Avatar
+                        size="sm"
+                        name={fullName}
+                        bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                        color="white"
+                      />
+                      <Text fontWeight="600" color="gray.700" fontSize="sm">
+                        {fullName}
+                      </Text>
+                    </HStack>
+                  </Box>
+                </PopoverTrigger>
+                <PopoverContent w="200px" boxShadow="lg" borderRadius="xl" border="1px solid" borderColor="gray.200">
+                  <PopoverBody p={2}>
+                    <VStack gap={1} align="stretch">
+                      <Button
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        leftIcon={<User size={18} />}
+                        onClick={() => window.location.href = '/cabinet'}
+                        fontWeight="600"
+                        size="md"
+                        _hover={{ bg: 'purple.50', color: 'purple.600' }}
+                      >
+                        {t('nav.myAccount')}
+                      </Button>
+                      <Box h="1px" bg="gray.200" my={1} />
+                      <Button
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        leftIcon={<LogOut size={18} />}
+                        onClick={async () => {
+                          await signOut();
+                          window.location.href = '/';
+                        }}
+                        fontWeight="600"
+                        size="md"
+                        color="red.600"
+                        _hover={{ bg: 'red.50' }}
+                      >
+                        {t('nav.logout')}
+                      </Button>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
             ) : (
               <Button
                 leftIcon={<LogIn size={18} />}
