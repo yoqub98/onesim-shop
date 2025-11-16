@@ -1,5 +1,5 @@
 // src/components/PlansSection.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Card,
@@ -11,20 +11,24 @@ import {
   Badge,
   HStack,
   VStack,
+  IconButton,
 } from '@chakra-ui/react';
-import { Calendar, Wifi, MapPin, ArrowRight } from 'lucide-react';
+import { Calendar, Wifi, MapPin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 // Enhanced Plan Card Component
 const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [cardRef, isVisible] = useScrollAnimation(0.1);
   const t = (key) => getTranslation(lang, key);
 
   return (
     <Card.Root
+      ref={cardRef}
       position="relative"
       cursor="pointer"
       bg="white"
@@ -37,11 +41,13 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
       shadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="animate__animated animate__fadeInUp"
+      opacity={isVisible ? 1 : 0}
       style={{
-        animationDelay: `${delay}ms`,
+        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+        transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="280px"
+      minWidth="320px"
+      maxWidth="320px"
     >
       <Box
         position="absolute"
@@ -166,17 +172,19 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
                   {t('plans.card.price')}
                 </Text>
-                <Heading
-                  fontSize="3xl"
-                  fontWeight="800"
-                  color="gray.800"
-                  letterSpacing="tight"
-                >
-                  {plan.price}
-                </Heading>
-                <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  {t('plans.card.currency')}
-                </Text>
+                <HStack gap={1.5} align="baseline">
+                  <Heading
+                    fontSize="3xl"
+                    fontWeight="800"
+                    color="gray.800"
+                    letterSpacing="tight"
+                  >
+                    {plan.price}
+                  </Heading>
+                  <Text fontSize="md" color="gray.600" fontWeight="700">
+                    {t('plans.card.currency')}
+                  </Text>
+                </HStack>
               </VStack>
 
               <Button
@@ -211,7 +219,8 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       overflow="hidden"
       border="2px solid"
       borderColor="gray.100"
-      minWidth="280px"
+      minWidth="320px"
+      maxWidth="320px"
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
@@ -274,6 +283,41 @@ const PlansSection = () => {
   const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const scrollContainerRef = useRef(null);
+
+  const checkScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 350; // Card width + gap
+      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
+      scrollContainerRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      checkScroll();
+      container.addEventListener('scroll', checkScroll);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        container.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
+    }
+  }, [plansData]);
 
   useEffect(() => {
     const loadHandpickedPackages = async () => {
@@ -403,52 +447,111 @@ const PlansSection = () => {
             </Box>
           )}
 
-          <Grid
-            templateColumns={{ 
-              base: '1fr', 
-              md: 'repeat(2, 1fr)', 
-              lg: 'repeat(3, 1fr)',
-              xl: 'repeat(5, 1fr)' 
-            }}
-            gap={6}
-            mt={12}
-            className="animate__animated animate__fadeIn"
-            style={{ animationDelay: '200ms' }}
-          >
-            {loading ? (
-              <>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <PlanCardSkeleton key={i} delay={i * 100} />
-                ))}
-              </>
-            ) : plansData.length > 0 ? (
-              plansData.map((plan, index) => (
-                <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={DEFAULT_LANGUAGE} />
-              ))
-            ) : (
-              <Box gridColumn="1 / -1" textAlign="center" py={16}>
-                <VStack gap={4}>
-                  <Box
-                    w="80px"
-                    h="80px"
-                    bg="gray.100"
-                    borderRadius="full"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <MapPin size={40} color="#9ca3af" />
-                  </Box>
-                  <Heading size="lg" color="gray.700">
-                    {t('plans.empty')}
-                  </Heading>
-                  <Text fontSize="md" color="gray.500" fontWeight="500">
-                    {t('plans.emptyDescription')}
-                  </Text>
-                </VStack>
-              </Box>
+          <Box position="relative" mt={12}>
+            {/* Left Arrow */}
+            {showLeftArrow && (
+              <IconButton
+                position="absolute"
+                left="-20px"
+                top="50%"
+                transform="translateY(-50%)"
+                zIndex={10}
+                onClick={() => scroll('left')}
+                bg="white"
+                shadow="lg"
+                borderRadius="full"
+                size="lg"
+                _hover={{
+                  bg: 'purple.50',
+                  transform: 'translateY(-50%) scale(1.1)',
+                }}
+                transition="all 0.3s"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={24} color="#7c3aed" />
+              </IconButton>
             )}
-          </Grid>
+
+            {/* Right Arrow */}
+            {showRightArrow && (
+              <IconButton
+                position="absolute"
+                right="-20px"
+                top="50%"
+                transform="translateY(-50%)"
+                zIndex={10}
+                onClick={() => scroll('right')}
+                bg="white"
+                shadow="lg"
+                borderRadius="full"
+                size="lg"
+                _hover={{
+                  bg: 'purple.50',
+                  transform: 'translateY(-50%) scale(1.1)',
+                }}
+                transition="all 0.3s"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={24} color="#7c3aed" />
+              </IconButton>
+            )}
+
+            {/* Scrollable Container */}
+            <Box
+              ref={scrollContainerRef}
+              overflowX="auto"
+              overflowY="hidden"
+              css={{
+                '&::-webkit-scrollbar': {
+                  display: 'none',
+                },
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+              pb={4}
+            >
+              <HStack
+                gap={6}
+                align="stretch"
+                className="animate__animated animate__fadeIn"
+                style={{ animationDelay: '200ms' }}
+              >
+                {loading ? (
+                  <>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <PlanCardSkeleton key={i} delay={i * 100} />
+                    ))}
+                  </>
+                ) : plansData.length > 0 ? (
+                  plansData.map((plan, index) => (
+                    <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={DEFAULT_LANGUAGE} />
+                  ))
+                ) : (
+                  <Box w="100%" textAlign="center" py={16}>
+                    <VStack gap={4}>
+                      <Box
+                        w="80px"
+                        h="80px"
+                        bg="gray.100"
+                        borderRadius="full"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <MapPin size={40} color="#9ca3af" />
+                      </Box>
+                      <Heading size="lg" color="gray.700">
+                        {t('plans.empty')}
+                      </Heading>
+                      <Text fontSize="md" color="gray.500" fontWeight="500">
+                        {t('plans.emptyDescription')}
+                      </Text>
+                    </VStack>
+                  </Box>
+                )}
+              </HStack>
+            </Box>
+          </Box>
         </VStack>
       </Container>
     </Box>

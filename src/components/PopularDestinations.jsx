@@ -17,10 +17,12 @@ import Flag from 'react-world-flags';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
 import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 // Destination Card Component
 const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [cardRef, isVisible] = useScrollAnimation(0.1);
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
   const countryName = getCountryName(countryCode, lang);
@@ -31,6 +33,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
 
   return (
     <Card.Root
+      ref={cardRef}
       position="relative"
       cursor="pointer"
       bg="white"
@@ -44,9 +47,10 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleExplore}
-      className="animate__animated animate__fadeInUp"
+      opacity={isVisible ? 1 : 0}
       style={{
-        animationDelay: `${delay}ms`,
+        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+        transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
       minH="180px"
     >

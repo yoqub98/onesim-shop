@@ -456,7 +456,6 @@ const CountryPage = () => {
           <VStack align="flex-start" justify="space-between" minH="400px" py={8} gap={6}>
             {/* Back Navigation */}
             <Button
-              leftIcon={<ArrowLeft size={20} />}
               variant="ghost"
               size="md"
               onClick={() => navigate('/')}
@@ -467,7 +466,10 @@ const CountryPage = () => {
               }}
               transition="all 0.3s"
             >
-              Назад
+              <HStack gap={2}>
+                <ArrowLeft size={20} />
+                <Text>Назад</Text>
+              </HStack>
             </Button>
 
             {/* Main Content */}
@@ -493,7 +495,7 @@ const CountryPage = () => {
               {/* Text Content */}
               <VStack align="flex-start" gap={5} flex={1} maxW="700px">
                 <Heading
-                  fontSize={{ base: '4xl', md: '5xl' }}
+                  fontSize={{ base: '5xl', md: '6xl' }}
                   fontWeight="900"
                   color={headerBgImage ? 'white' : 'gray.800'}
                   lineHeight="1.2"
@@ -503,7 +505,7 @@ const CountryPage = () => {
                 </Heading>
 
                 <Text
-                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontSize={{ base: 'md', md: 'lg' }}
                   color={headerBgImage ? 'whiteAlpha.900' : 'gray.600'}
                   fontWeight="500"
                   lineHeight="1.6"

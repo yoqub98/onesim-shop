@@ -46,9 +46,9 @@ const Navigation = () => {
       bg={scrolled ? 'rgba(255, 255, 255, 0.95)' : 'white'}
       backdropFilter={scrolled ? 'blur(10px)' : 'none'}
       borderBottom="1px solid"
-      borderColor={scrolled ? 'gray.200' : 'transparent'}
+      borderColor="transparent"
       zIndex="1000"
-      shadow={scrolled ? 'lg' : 'none'}
+      shadow={scrolled ? 'sm' : 'none'}
       transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       className="animate__animated animate__fadeInDown"
     >
@@ -227,7 +227,7 @@ const HeroSection = () => {
       as="section"
       id="home"
       background="linear-gradient(180deg, #fafafa 0%, #ffffff 100%)"
-      py={{ base: 20, md: 28 }}
+      py={{ base: 12, md: 20 }}
       minH="calc(100vh - 80px)"
       display="flex"
       alignItems="center"
@@ -437,7 +437,7 @@ const BenefitsSection = () => {
   return (
     <Box
       as="section"
-      py={24}
+      py={12}
       bg="white"
       position="relative"
       overflow="hidden"
