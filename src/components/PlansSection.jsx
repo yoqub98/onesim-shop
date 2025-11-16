@@ -286,14 +286,28 @@ const PlansSection = () => {
         // Fetch packages using slugs
         const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, DEFAULT_LANGUAGE);
 
+        console.log('💰 PRICING CALCULATION:');
+        
         // Transform packages with pricing
-        const transformedPackages = packages.map(pkg => ({
-          ...pkg,
-          price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
-        }));
+        const transformedPackages = packages.map(pkg => {
+          const finalPriceUZS = calculateFinalPrice(pkg.priceUSD);
+          const formattedPrice = formatPrice(finalPriceUZS);
+          
+          console.log(`💵 ${pkg.country}:`, {
+            priceUSD: pkg.priceUSD,
+            finalPriceUZS: finalPriceUZS,
+            formattedPrice: formattedPrice,
+          });
+          
+          return {
+            ...pkg,
+            price: formattedPrice,
+          };
+        });
 
         setPlansData(transformedPackages);
         console.log(`✅ Loaded ${transformedPackages.length} handpicked plans`);
+        console.log('📦 FINAL PLANS DATA:', transformedPackages);
       } catch (err) {
         console.error('Error loading handpicked packages:', err);
         setError(getTranslation(DEFAULT_LANGUAGE, 'plans.error'));
@@ -303,7 +317,7 @@ const PlansSection = () => {
     };
 
     loadHandpickedPackages();
-  }, []); // ✅ FIXED: Empty dependency array - only runs once on mount
+  }, []);
 
   const t = (key) => getTranslation(DEFAULT_LANGUAGE, key);
 

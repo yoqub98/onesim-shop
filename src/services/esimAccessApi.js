@@ -44,17 +44,15 @@ const setCachedPackage = (key, data) => {
 
 // ============================================
 // FETCH: Package by slug (for handpicked plans)
-// IMPORTANT: Use POST method with slug as query parameter
 // ============================================
 export const fetchPackageBySlug = async (slug, countryCode) => {
   // Check cache first
   const cached = getCachedPackage(slug);
   if (cached) return cached;
 
-  console.log(`🎯 Fetching package by slug: ${slug}`);
+  console.log(`🎯 Fetching package by slug: ${slug} for country: ${countryCode}`);
 
   try {
-    // POST request with slug as query parameter (just like in Postman)
     const response = await fetch(`${API_URL}/packages?slug=${slug}`, {
       method: 'POST',
       headers: {
@@ -75,13 +73,34 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
 
     const data = await response.json();
 
+    console.log(`📦 RAW API RESPONSE for slug ${slug}:`, {
+      success: data.success,
+      packageCount: data.obj?.packageList?.length || 0,
+      fullResponse: data
+    });
+
     if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
-      console.log(`✅ Found package with slug ${slug}`);
       const pkg = data.obj.packageList[0];
+      
+      // DETAILED LOGGING OF THE PACKAGE
+      console.log(`📋 PACKAGE DETAILS for ${slug}:`, {
+        packageCode: pkg.packageCode,
+        slug: pkg.slug,
+        name: pkg.name,
+        price: pkg.price,
+        priceInUSD: pkg.price / 10000,
+        volume: pkg.volume,
+        volumeInGB: Math.round(pkg.volume / 1073741824),
+        duration: pkg.duration,
+        durationUnit: pkg.durationUnit,
+        locationCode: pkg.locationCode,
+        speed: pkg.speed,
+      });
       
       // Cache it
       setCachedPackage(slug, pkg);
       
+      console.log(`✅ Found package with slug ${slug}`);
       return pkg;
     } else {
       console.warn(`⚠️ Package with slug ${slug} not found`);
@@ -98,6 +117,7 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
 // ============================================
 export const fetchHandpickedPackages = async (planSlugsMap, lang = DEFAULT_LANGUAGE) => {
   console.log(`🎯 Fetching handpicked packages...`);
+  console.log(`📝 Slugs to fetch:`, planSlugsMap);
   
   const results = [];
 
@@ -107,6 +127,16 @@ export const fetchHandpickedPackages = async (planSlugsMap, lang = DEFAULT_LANGU
       
       if (pkg) {
         const transformed = transformPackageData(pkg, countryCode, lang);
+        
+        console.log(`🔄 TRANSFORMED PACKAGE for ${countryCode}:`, {
+          country: transformed.country,
+          data: transformed.data,
+          dataGB: transformed.dataGB,
+          days: transformed.days,
+          priceUSD: transformed.priceUSD,
+          speed: transformed.speed,
+        });
+        
         results.push(transformed);
       }
     } catch (error) {
@@ -116,6 +146,8 @@ export const fetchHandpickedPackages = async (planSlugsMap, lang = DEFAULT_LANGU
   }
 
   console.log(`✅ Fetched ${results.length} handpicked packages`);
+  console.log(`📊 FINAL RESULTS:`, results);
+  
   return results;
 };
 
