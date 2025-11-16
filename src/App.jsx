@@ -15,20 +15,35 @@ import {
   VStack,
   IconButton,
   Link,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  Avatar,
 } from '@chakra-ui/react';
-import { ChevronRight, Menu, X, Globe, Zap, Shield, Wifi, CreditCard, Clock, Smartphone } from 'lucide-react';
+import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, Wifi, CreditCard, Clock, Smartphone, LogIn, User, LogOut } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import CountryPage from './pages/CountryPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import SignupPage from './pages/SignupPage.jsx';
+import PersonalCabinetPage from './pages/PersonalCabinetPage.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Navigation Component
 const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, userProfile, signOut } = useAuth();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
+
+  const fullName = userProfile
+    ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim()
+    : user?.email?.split('@')[0];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,14 +86,14 @@ const Navigation = () => {
             </Heading>
           </Link>
 
-          <HStack gap={10} hideBelow="md">
-            <Link 
-              href="/#home" 
-              fontWeight="600" 
-              color="gray.700" 
+          <HStack gap={6} hideBelow="md">
+            <Link
+              href="/#home"
+              fontWeight="600"
+              color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
                 color: 'purple.600',
                 _after: {
                   width: '100%',
@@ -97,13 +112,13 @@ const Navigation = () => {
             >
               {t('nav.home')}
             </Link>
-            <Link 
-              href="/#plans" 
-              fontWeight="600" 
+            <Link
+              href="/#plans"
+              fontWeight="600"
               color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
                 color: 'purple.600',
                 _after: {
                   width: '100%',
@@ -122,13 +137,13 @@ const Navigation = () => {
             >
               {t('nav.plans')}
             </Link>
-            <Link 
-              href="/#contacts" 
-              fontWeight="600" 
+            <Link
+              href="/#contacts"
+              fontWeight="600"
               color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
                 color: 'purple.600',
                 _after: {
                   width: '100%',
@@ -147,6 +162,65 @@ const Navigation = () => {
             >
               {t('nav.contacts')}
             </Link>
+
+            {/* Auth Section */}
+            {user ? (
+              <Menu>
+                <MenuButton>
+                  <HStack
+                    gap={3}
+                    px={3}
+                    py={2}
+                    borderRadius="lg"
+                    transition="all 0.2s"
+                    _hover={{ bg: 'gray.50' }}
+                    cursor="pointer"
+                  >
+                    <Avatar
+                      size="sm"
+                      name={fullName}
+                      bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                      color="white"
+                    />
+                    <Text fontWeight="600" color="gray.700" fontSize="sm">
+                      {fullName}
+                    </Text>
+                  </HStack>
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<User size={18} />} onClick={() => window.location.href = '/cabinet'}>
+                    {t('nav.myAccount')}
+                  </MenuItem>
+                  <MenuDivider />
+                  <MenuItem
+                    icon={<LogOut size={18} />}
+                    onClick={async () => {
+                      await signOut();
+                      window.location.href = '/';
+                    }}
+                    color="red.600"
+                  >
+                    {t('nav.logout')}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Button
+                leftIcon={<LogIn size={18} />}
+                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                color="white"
+                size="md"
+                fontWeight="700"
+                onClick={() => window.location.href = '/login'}
+                _hover={{
+                  transform: 'translateY(-2px)',
+                  shadow: '0 6px 12px rgba(102, 126, 234, 0.3)',
+                }}
+                transition="all 0.3s"
+              >
+                {t('nav.login')}
+              </Button>
+            )}
           </HStack>
 
           <IconButton
@@ -159,7 +233,7 @@ const Navigation = () => {
               bg: 'gray.100',
             }}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
           </IconButton>
         </Flex>
 
@@ -810,19 +884,24 @@ const HomePage = () => {
 function App() {
   return (
     <Router>
-      <Box fontFamily="'Inter Tight', sans-serif">
-        <style>
-          {`
-            @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
-          `}
-        </style>
-        <Navigation />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/country/:countryCode" element={<CountryPage />} />
-        </Routes>
-        <Footer />
-      </Box>
+      <AuthProvider>
+        <Box fontFamily="'Inter Tight', sans-serif">
+          <style>
+            {`
+              @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');
+            `}
+          </style>
+          <Navigation />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/country/:countryCode" element={<CountryPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/cabinet" element={<PersonalCabinetPage />} />
+          </Routes>
+          <Footer />
+        </Box>
+      </AuthProvider>
     </Router>
   );
 }

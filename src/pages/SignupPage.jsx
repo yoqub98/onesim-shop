@@ -1,0 +1,485 @@
+// src/pages/SignupPage.jsx
+import React, { useState } from 'react';
+import {
+  Box,
+  Container,
+  Heading,
+  Text,
+  Button,
+  Input,
+  FormControl,
+  FormLabel,
+  VStack,
+  HStack,
+  Link,
+  InputGroup,
+  InputLeftElement,
+  useToast,
+  FormErrorMessage,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  PinInput,
+  PinInputField,
+  Grid,
+} from '@chakra-ui/react';
+import { Mail, Lock, User, Phone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+
+const SignupPage = () => {
+  const navigate = useNavigate();
+  const { signUp, verifyOtp, resendOtp } = useAuth();
+  const toast = useToast();
+  const lang = DEFAULT_LANGUAGE;
+  const t = (key) => getTranslation(lang, key);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [otpModalOpen, setOtpModalOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const validatePhone = (phone) => {
+    // Uzbekistan phone numbers are 9 digits after +998
+    return /^\d{9}$/.test(phone);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = t('auth.errors.firstNameRequired');
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = t('auth.errors.lastNameRequired');
+    }
+
+    if (!formData.email) {
+      newErrors.email = t('auth.errors.emailRequired');
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = t('auth.errors.emailInvalid');
+    }
+
+    if (!formData.phone) {
+      newErrors.phone = t('auth.errors.phoneRequired');
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = t('auth.errors.phoneInvalid');
+    }
+
+    if (!formData.password) {
+      newErrors.password = t('auth.errors.passwordRequired');
+    } else if (formData.password.length < 6) {
+      newErrors.password = t('auth.errors.passwordMinLength');
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = t('auth.errors.passwordsNotMatch');
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+    const { data, error } = await signUp(formData.email, formData.password, {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      phone: `+998${formData.phone}`,
+    });
+    setLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Ошибка регистрации',
+        description: error.message || t('auth.errors.signupFailed'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top',
+      });
+      return;
+    }
+
+    toast({
+      title: t('auth.success.otpSent'),
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+      position: 'top',
+    });
+
+    setOtpModalOpen(true);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpValue.length !== 6) return;
+
+    setVerifying(true);
+    const { data, error } = await verifyOtp(formData.email, otpValue);
+    setVerifying(false);
+
+    if (error) {
+      toast({
+        title: 'Ошибка проверки',
+        description: t('auth.errors.otpInvalid'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top',
+      });
+      setOtpValue('');
+      return;
+    }
+
+    toast({
+      title: t('auth.success.signupComplete'),
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+      position: 'top',
+    });
+
+    setOtpModalOpen(false);
+    navigate('/login');
+  };
+
+  const handleResendOtp = async () => {
+    setResending(true);
+    const { error } = await resendOtp(formData.email);
+    setResending(false);
+
+    if (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось отправить код повторно',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+      return;
+    }
+
+    toast({
+      title: t('auth.success.otpSent'),
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+      position: 'top',
+    });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  return (
+    <>
+      <Box minH="calc(100vh - 80px)" bg="gray.50" py={12}>
+        <Container maxW="lg">
+          <VStack gap={8}>
+            <VStack gap={2} textAlign="center">
+              <Heading fontSize="4xl" fontWeight="800" color="gray.900">
+                {t('auth.signup.title')}
+              </Heading>
+              <Text fontSize="md" color="gray.600">
+                {t('auth.signup.subtitle')}
+              </Text>
+            </VStack>
+
+            <Box
+              bg="white"
+              p={8}
+              borderRadius="2xl"
+              boxShadow="0 4px 12px rgba(100, 100, 100, 0.15)"
+              w="100%"
+            >
+              <form onSubmit={handleSubmit}>
+                <VStack gap={5}>
+                  <Grid templateColumns="repeat(2, 1fr)" gap={4} w="100%">
+                    <FormControl isInvalid={errors.firstName}>
+                      <FormLabel fontWeight="600" color="gray.700">
+                        {t('auth.signup.firstName')}
+                      </FormLabel>
+                      <InputGroup>
+                        <InputLeftElement pointerEvents="none">
+                          <User size={18} color="#9CA3AF" />
+                        </InputLeftElement>
+                        <Input
+                          name="firstName"
+                          type="text"
+                          placeholder={t('auth.signup.firstNamePlaceholder')}
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          size="lg"
+                          borderRadius="lg"
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>{errors.firstName}</FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={errors.lastName}>
+                      <FormLabel fontWeight="600" color="gray.700">
+                        {t('auth.signup.lastName')}
+                      </FormLabel>
+                      <InputGroup>
+                        <InputLeftElement pointerEvents="none">
+                          <User size={18} color="#9CA3AF" />
+                        </InputLeftElement>
+                        <Input
+                          name="lastName"
+                          type="text"
+                          placeholder={t('auth.signup.lastNamePlaceholder')}
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          size="lg"
+                          borderRadius="lg"
+                        />
+                      </InputGroup>
+                      <FormErrorMessage>{errors.lastName}</FormErrorMessage>
+                    </FormControl>
+                  </Grid>
+
+                  <FormControl isInvalid={errors.email}>
+                    <FormLabel fontWeight="600" color="gray.700">
+                      {t('auth.signup.email')}
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none">
+                        <Mail size={18} color="#9CA3AF" />
+                      </InputLeftElement>
+                      <Input
+                        name="email"
+                        type="email"
+                        placeholder={t('auth.signup.emailPlaceholder')}
+                        value={formData.email}
+                        onChange={handleChange}
+                        size="lg"
+                        borderRadius="lg"
+                      />
+                    </InputGroup>
+                    <FormErrorMessage>{errors.email}</FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={errors.phone}>
+                    <FormLabel fontWeight="600" color="gray.700">
+                      {t('auth.signup.phone')}
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none" width="4.5rem">
+                        <HStack gap={1}>
+                          <Phone size={18} color="#9CA3AF" />
+                          <Text fontSize="md" color="gray.500" fontWeight="600">
+                            +998
+                          </Text>
+                        </HStack>
+                      </InputLeftElement>
+                      <Input
+                        name="phone"
+                        type="tel"
+                        placeholder={t('auth.signup.phonePlaceholder')}
+                        value={formData.phone}
+                        onChange={handleChange}
+                        size="lg"
+                        borderRadius="lg"
+                        paddingLeft="4.5rem"
+                        maxLength={9}
+                      />
+                    </InputGroup>
+                    <FormErrorMessage>{errors.phone}</FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={errors.password}>
+                    <FormLabel fontWeight="600" color="gray.700">
+                      {t('auth.signup.password')}
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none">
+                        <Lock size={18} color="#9CA3AF" />
+                      </InputLeftElement>
+                      <Input
+                        name="password"
+                        type="password"
+                        placeholder={t('auth.signup.passwordPlaceholder')}
+                        value={formData.password}
+                        onChange={handleChange}
+                        size="lg"
+                        borderRadius="lg"
+                      />
+                    </InputGroup>
+                    <FormErrorMessage>{errors.password}</FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={errors.confirmPassword}>
+                    <FormLabel fontWeight="600" color="gray.700">
+                      {t('auth.signup.confirmPassword')}
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none">
+                        <Lock size={18} color="#9CA3AF" />
+                      </InputLeftElement>
+                      <Input
+                        name="confirmPassword"
+                        type="password"
+                        placeholder={t('auth.signup.confirmPasswordPlaceholder')}
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        size="lg"
+                        borderRadius="lg"
+                      />
+                    </InputGroup>
+                    <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
+                  </FormControl>
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    w="100%"
+                    bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                    color="white"
+                    fontWeight="700"
+                    borderRadius="lg"
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
+                    }}
+                    transition="all 0.3s"
+                    isLoading={loading}
+                    loadingText={t('auth.signup.signingUp')}
+                  >
+                    {t('auth.signup.signUpButton')}
+                  </Button>
+
+                  <HStack gap={1} fontSize="sm">
+                    <Text color="gray.600">{t('auth.signup.haveAccount')}</Text>
+                    <Link
+                      color="purple.600"
+                      fontWeight="700"
+                      onClick={() => navigate('/login')}
+                      _hover={{ textDecoration: 'underline' }}
+                    >
+                      {t('auth.signup.loginLink')}
+                    </Link>
+                  </HStack>
+                </VStack>
+              </form>
+            </Box>
+          </VStack>
+        </Container>
+      </Box>
+
+      {/* OTP Verification Modal */}
+      <Modal
+        isOpen={otpModalOpen}
+        onClose={() => setOtpModalOpen(false)}
+        isCentered
+        closeOnOverlayClick={false}
+      >
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
+        <ModalContent borderRadius="2xl" p={4}>
+          <ModalHeader>
+            <VStack gap={2} align="center">
+              <Heading fontSize="2xl" fontWeight="800" color="gray.900">
+                {t('auth.signup.otpModal.title')}
+              </Heading>
+              <Text fontSize="sm" fontWeight="500" color="gray.600" textAlign="center">
+                {t('auth.signup.otpModal.description')}
+              </Text>
+              <Text fontSize="md" fontWeight="700" color="purple.600">
+                {formData.email}
+              </Text>
+            </VStack>
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody pb={6}>
+            <VStack gap={6}>
+              <VStack gap={3} w="100%">
+                <Text fontSize="sm" fontWeight="600" color="gray.700">
+                  {t('auth.signup.otpModal.enterCode')}
+                </Text>
+                <HStack justify="center">
+                  <PinInput
+                    size="lg"
+                    value={otpValue}
+                    onChange={setOtpValue}
+                    onComplete={handleVerifyOtp}
+                    otp
+                  >
+                    <PinInputField borderRadius="lg" />
+                    <PinInputField borderRadius="lg" />
+                    <PinInputField borderRadius="lg" />
+                    <PinInputField borderRadius="lg" />
+                    <PinInputField borderRadius="lg" />
+                    <PinInputField borderRadius="lg" />
+                  </PinInput>
+                </HStack>
+              </VStack>
+
+              <Button
+                w="100%"
+                size="lg"
+                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                color="white"
+                fontWeight="700"
+                borderRadius="lg"
+                onClick={handleVerifyOtp}
+                isLoading={verifying}
+                loadingText={t('auth.signup.otpModal.verifying')}
+                isDisabled={otpValue.length !== 6}
+                _hover={{
+                  transform: 'translateY(-2px)',
+                  shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
+                }}
+                transition="all 0.3s"
+              >
+                Подтвердить
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                colorScheme="purple"
+                onClick={handleResendOtp}
+                isLoading={resending}
+                loadingText={t('auth.signup.otpModal.resending')}
+              >
+                {t('auth.signup.otpModal.resend')}
+              </Button>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+};
+
+export default SignupPage;
