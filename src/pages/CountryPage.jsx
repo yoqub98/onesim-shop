@@ -66,7 +66,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between">
             <Badge
-              colorScheme="purple"
+              colorPalette="purple"
               fontSize="xs"
               fontWeight="700"
               px={2}
@@ -141,7 +141,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
                       {operator.operatorName}
                     </Text>
                     {operator.networkType && (
-                      <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
+                      <Badge colorPalette="blue" fontSize="xs" px={1.5} py={0.5}>
                         {operator.networkType}
                       </Badge>
                     )}
@@ -516,7 +516,7 @@ const CountryPage = () => {
                 </Text>
 
                 <Badge
-                  colorScheme={headerBgImage ? 'whiteAlpha' : 'purple'}
+                  colorPalette={headerBgImage ? 'whiteAlpha' : 'purple'}
                   fontSize="md"
                   px={4}
                   py={2}
@@ -679,7 +679,7 @@ const CountryPage = () => {
                     setSelectedData('all');
                     setSelectedDuration('all');
                   }}
-                  colorScheme="purple"
+                  colorPalette="purple"
                   variant="outline"
                 >
                   Сбросить фильтры

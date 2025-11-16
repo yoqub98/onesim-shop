@@ -9,7 +9,6 @@ import {
   Input,
   VStack,
   HStack,
-  Checkbox,
   Link,
   InputGroup,
 } from '@chakra-ui/react';
@@ -19,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
 import { Field } from '../components/ui/field';
+import { Checkbox } from '../components/ui/checkbox';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -164,9 +164,9 @@ const LoginPage = () => {
                 <HStack justify="space-between" w="100%">
                   <Checkbox
                     name="rememberMe"
-                    isChecked={formData.rememberMe}
-                    onChange={handleChange}
-                    colorScheme="purple"
+                    checked={formData.rememberMe}
+                    onCheckedChange={(e) => handleChange({ target: { name: 'rememberMe', type: 'checkbox', checked: e.checked } })}
+                    colorPalette="purple"
                   >
                     <Text fontSize="sm" color="gray.600">
                       {t('auth.login.rememberMe')}
@@ -203,7 +203,7 @@ const LoginPage = () => {
                     shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
                   }}
                   transition="all 0.3s"
-                  isLoading={loading}
+                  loading={loading}
                   loadingText={t('auth.login.loggingIn')}
                 >
                   {t('auth.login.loginButton')}

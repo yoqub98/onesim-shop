@@ -9,7 +9,7 @@ import {
   VStack,
   HStack,
   Avatar,
-  Divider,
+  Separator,
 } from '@chakra-ui/react';
 import { LogOut, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -75,7 +75,7 @@ const PersonalCabinetPage = () => {
               </VStack>
               <Button
                 leftIcon={<LogOut size={20} />}
-                colorScheme="red"
+                colorPalette="red"
                 variant="outline"
                 size="md"
                 onClick={handleLogout}
@@ -89,7 +89,7 @@ const PersonalCabinetPage = () => {
             </HStack>
           </Box>
 
-          <Divider />
+          <Separator />
 
           {/* Orders Section */}
           <Box

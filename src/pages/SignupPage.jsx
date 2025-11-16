@@ -361,7 +361,7 @@ const SignupPage = () => {
                       shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
                     }}
                     transition="all 0.3s"
-                    isLoading={loading}
+                    loading={loading}
                     loadingText={t('auth.signup.signingUp')}
                   >
                     {t('auth.signup.signUpButton')}
@@ -454,7 +454,7 @@ const SignupPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                colorScheme="purple"
+                colorPalette="purple"
                 onClick={handleResendOtp}
                 loading={resending}
                 loadingText={t('auth.signup.otpModal.resending')}
