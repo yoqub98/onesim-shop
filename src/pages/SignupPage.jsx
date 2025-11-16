@@ -7,14 +7,10 @@ import {
   Text,
   Button,
   Input,
-  FormControl,
-  FormLabel,
   VStack,
   HStack,
   Link,
   InputGroup,
-  InputLeftElement,
-  FormErrorMessage,
   Grid,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
@@ -32,6 +28,7 @@ import {
   DialogBackdrop,
 } from '../components/ui/dialog';
 import { PinInput } from '../components/ui/pin-input';
+import { Field } from '../components/ui/field';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -214,14 +211,14 @@ const SignupPage = () => {
               <form onSubmit={handleSubmit}>
                 <VStack gap={5}>
                   <Grid templateColumns="repeat(2, 1fr)" gap={4} w="100%">
-                    <FormControl isInvalid={errors.firstName}>
-                      <FormLabel fontWeight="600" color="gray.700">
+                    <Field.Root invalid={!!errors.firstName}>
+                      <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.firstName')}
-                      </FormLabel>
+                      </Field.Label>
                       <InputGroup>
-                        <InputLeftElement pointerEvents="none">
+                        <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                           <User size={18} color="#9CA3AF" />
-                        </InputLeftElement>
+                        </Box>
                         <Input
                           name="firstName"
                           type="text"
@@ -230,19 +227,20 @@ const SignupPage = () => {
                           onChange={handleChange}
                           size="lg"
                           borderRadius="lg"
+                          pl="10"
                         />
                       </InputGroup>
-                      <FormErrorMessage>{errors.firstName}</FormErrorMessage>
-                    </FormControl>
+                      <Field.ErrorText>{errors.firstName}</Field.ErrorText>
+                    </Field.Root>
 
-                    <FormControl isInvalid={errors.lastName}>
-                      <FormLabel fontWeight="600" color="gray.700">
+                    <Field.Root invalid={!!errors.lastName}>
+                      <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.lastName')}
-                      </FormLabel>
+                      </Field.Label>
                       <InputGroup>
-                        <InputLeftElement pointerEvents="none">
+                        <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                           <User size={18} color="#9CA3AF" />
-                        </InputLeftElement>
+                        </Box>
                         <Input
                           name="lastName"
                           type="text"
@@ -251,20 +249,21 @@ const SignupPage = () => {
                           onChange={handleChange}
                           size="lg"
                           borderRadius="lg"
+                          pl="10"
                         />
                       </InputGroup>
-                      <FormErrorMessage>{errors.lastName}</FormErrorMessage>
-                    </FormControl>
+                      <Field.ErrorText>{errors.lastName}</Field.ErrorText>
+                    </Field.Root>
                   </Grid>
 
-                  <FormControl isInvalid={errors.email}>
-                    <FormLabel fontWeight="600" color="gray.700">
+                  <Field.Root invalid={!!errors.email}>
+                    <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.email')}
-                    </FormLabel>
+                    </Field.Label>
                     <InputGroup>
-                      <InputLeftElement pointerEvents="none">
+                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Mail size={18} color="#9CA3AF" />
-                      </InputLeftElement>
+                      </Box>
                       <Input
                         name="email"
                         type="email"
@@ -273,24 +272,23 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
+                        pl="10"
                       />
                     </InputGroup>
-                    <FormErrorMessage>{errors.email}</FormErrorMessage>
-                  </FormControl>
+                    <Field.ErrorText>{errors.email}</Field.ErrorText>
+                  </Field.Root>
 
-                  <FormControl isInvalid={errors.phone}>
-                    <FormLabel fontWeight="600" color="gray.700">
+                  <Field.Root invalid={!!errors.phone}>
+                    <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.phone')}
-                    </FormLabel>
-                    <InputGroup>
-                      <InputLeftElement pointerEvents="none" width="4.5rem">
-                        <HStack gap={1}>
-                          <Phone size={18} color="#9CA3AF" />
-                          <Text fontSize="md" color="gray.500" fontWeight="600">
-                            +998
-                          </Text>
-                        </HStack>
-                      </InputLeftElement>
+                    </Field.Label>
+                    <InputGroup position="relative">
+                      <HStack position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1" gap={1}>
+                        <Phone size={18} color="#9CA3AF" />
+                        <Text fontSize="md" color="gray.500" fontWeight="600">
+                          +998
+                        </Text>
+                      </HStack>
                       <Input
                         name="phone"
                         type="tel"
@@ -299,21 +297,21 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
-                        paddingLeft="4.5rem"
+                        pl="20"
                         maxLength={9}
                       />
                     </InputGroup>
-                    <FormErrorMessage>{errors.phone}</FormErrorMessage>
-                  </FormControl>
+                    <Field.ErrorText>{errors.phone}</Field.ErrorText>
+                  </Field.Root>
 
-                  <FormControl isInvalid={errors.password}>
-                    <FormLabel fontWeight="600" color="gray.700">
+                  <Field.Root invalid={!!errors.password}>
+                    <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.password')}
-                    </FormLabel>
+                    </Field.Label>
                     <InputGroup>
-                      <InputLeftElement pointerEvents="none">
+                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Lock size={18} color="#9CA3AF" />
-                      </InputLeftElement>
+                      </Box>
                       <Input
                         name="password"
                         type="password"
@@ -322,19 +320,20 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
+                        pl="10"
                       />
                     </InputGroup>
-                    <FormErrorMessage>{errors.password}</FormErrorMessage>
-                  </FormControl>
+                    <Field.ErrorText>{errors.password}</Field.ErrorText>
+                  </Field.Root>
 
-                  <FormControl isInvalid={errors.confirmPassword}>
-                    <FormLabel fontWeight="600" color="gray.700">
+                  <Field.Root invalid={!!errors.confirmPassword}>
+                    <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.confirmPassword')}
-                    </FormLabel>
+                    </Field.Label>
                     <InputGroup>
-                      <InputLeftElement pointerEvents="none">
+                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Lock size={18} color="#9CA3AF" />
-                      </InputLeftElement>
+                      </Box>
                       <Input
                         name="confirmPassword"
                         type="password"
@@ -343,10 +342,11 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
+                        pl="10"
                       />
                     </InputGroup>
-                    <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
-                  </FormControl>
+                    <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
+                  </Field.Root>
 
                   <Button
                     type="submit"

@@ -7,21 +7,18 @@ import {
   Text,
   Button,
   Input,
-  FormControl,
-  FormLabel,
   VStack,
   HStack,
   Checkbox,
   Link,
   InputGroup,
-  InputLeftElement,
-  FormErrorMessage,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
+import { Field } from '../components/ui/field';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -120,14 +117,14 @@ const LoginPage = () => {
           >
             <form onSubmit={handleSubmit}>
               <VStack gap={5}>
-                <FormControl isInvalid={errors.email}>
-                  <FormLabel fontWeight="600" color="gray.700">
+                <Field.Root invalid={!!errors.email}>
+                  <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.email')}
-                  </FormLabel>
+                  </Field.Label>
                   <InputGroup>
-                    <InputLeftElement pointerEvents="none">
+                    <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                       <Mail size={18} color="#9CA3AF" />
-                    </InputLeftElement>
+                    </Box>
                     <Input
                       name="email"
                       type="email"
@@ -136,19 +133,20 @@ const LoginPage = () => {
                       onChange={handleChange}
                       size="lg"
                       borderRadius="lg"
+                      pl="10"
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.email}</FormErrorMessage>
-                </FormControl>
+                  <Field.ErrorText>{errors.email}</Field.ErrorText>
+                </Field.Root>
 
-                <FormControl isInvalid={errors.password}>
-                  <FormLabel fontWeight="600" color="gray.700">
+                <Field.Root invalid={!!errors.password}>
+                  <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.password')}
-                  </FormLabel>
+                  </Field.Label>
                   <InputGroup>
-                    <InputLeftElement pointerEvents="none">
+                    <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                       <Lock size={18} color="#9CA3AF" />
-                    </InputLeftElement>
+                    </Box>
                     <Input
                       name="password"
                       type="password"
@@ -157,10 +155,11 @@ const LoginPage = () => {
                       onChange={handleChange}
                       size="lg"
                       borderRadius="lg"
+                      pl="10"
                     />
                   </InputGroup>
-                  <FormErrorMessage>{errors.password}</FormErrorMessage>
-                </FormControl>
+                  <Field.ErrorText>{errors.password}</Field.ErrorText>
+                </Field.Root>
 
                 <HStack justify="space-between" w="100%">
                   <Checkbox
