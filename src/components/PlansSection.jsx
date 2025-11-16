@@ -274,9 +274,6 @@ const PlansSection = () => {
   const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const lang = DEFAULT_LANGUAGE;
-  
-  const t = (key) => getTranslation(lang, key);
 
   useEffect(() => {
     const loadHandpickedPackages = async () => {
@@ -287,7 +284,7 @@ const PlansSection = () => {
         console.log('🎯 Loading handpicked packages by slug...');
         
         // Fetch packages using slugs
-        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, lang);
+        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, DEFAULT_LANGUAGE);
 
         // Transform packages with pricing
         const transformedPackages = packages.map(pkg => ({
@@ -299,14 +296,16 @@ const PlansSection = () => {
         console.log(`✅ Loaded ${transformedPackages.length} handpicked plans`);
       } catch (err) {
         console.error('Error loading handpicked packages:', err);
-        setError(t('plans.error'));
+        setError(getTranslation(DEFAULT_LANGUAGE, 'plans.error'));
       } finally {
         setLoading(false);
       }
     };
 
     loadHandpickedPackages();
-  }, [lang, t]);
+  }, []); // ✅ FIXED: Empty dependency array - only runs once on mount
+
+  const t = (key) => getTranslation(DEFAULT_LANGUAGE, key);
 
   return (
     <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
@@ -410,7 +409,7 @@ const PlansSection = () => {
               </>
             ) : plansData.length > 0 ? (
               plansData.map((plan, index) => (
-                <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={lang} />
+                <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={DEFAULT_LANGUAGE} />
               ))
             ) : (
               <Box gridColumn="1 / -1" textAlign="center" py={16}>
