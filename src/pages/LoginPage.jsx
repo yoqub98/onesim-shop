@@ -10,7 +10,6 @@ import {
   VStack,
   HStack,
   Link,
-  InputGroup,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -121,7 +120,7 @@ const LoginPage = () => {
                   <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.email')}
                   </Field.Label>
-                  <InputGroup>
+                  <Box position="relative">
                     <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                       <Mail size={18} color="#9CA3AF" />
                     </Box>
@@ -135,7 +134,7 @@ const LoginPage = () => {
                       borderRadius="lg"
                       pl="10"
                     />
-                  </InputGroup>
+                  </Box>
                   <Field.ErrorText>{errors.email}</Field.ErrorText>
                 </Field.Root>
 
@@ -143,7 +142,7 @@ const LoginPage = () => {
                   <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.password')}
                   </Field.Label>
-                  <InputGroup>
+                  <Box position="relative">
                     <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                       <Lock size={18} color="#9CA3AF" />
                     </Box>
@@ -157,7 +156,7 @@ const LoginPage = () => {
                       borderRadius="lg"
                       pl="10"
                     />
-                  </InputGroup>
+                  </Box>
                   <Field.ErrorText>{errors.password}</Field.ErrorText>
                 </Field.Root>
 
