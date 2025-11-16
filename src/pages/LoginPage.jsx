@@ -15,18 +15,17 @@ import {
   Link,
   InputGroup,
   InputLeftElement,
-  useToast,
   FormErrorMessage,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { toaster } from '../components/ui/toaster';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const toast = useToast();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
 
@@ -65,23 +64,19 @@ const LoginPage = () => {
     setLoading(false);
 
     if (error) {
-      toast({
+      toaster.create({
         title: 'Ошибка входа',
         description: t('auth.errors.loginFailed'),
-        status: 'error',
+        type: 'error',
         duration: 5000,
-        isClosable: true,
-        position: 'top',
       });
       return;
     }
 
-    toast({
+    toaster.create({
       title: t('auth.success.loginComplete'),
-      status: 'success',
+      type: 'success',
       duration: 3000,
-      isClosable: true,
-      position: 'top',
     });
 
     navigate('/');
@@ -184,12 +179,11 @@ const LoginPage = () => {
                     fontWeight="600"
                     _hover={{ textDecoration: 'underline' }}
                     onClick={() => {
-                      toast({
+                      toaster.create({
                         title: 'Скоро появится',
                         description: 'Функция восстановления пароля будет добавлена в ближайшее время',
-                        status: 'info',
+                        type: 'info',
                         duration: 3000,
-                        isClosable: true,
                       });
                     }}
                   >

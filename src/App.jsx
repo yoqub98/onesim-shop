@@ -31,6 +31,7 @@ import SignupPage from './pages/SignupPage.jsx';
 import PersonalCabinetPage from './pages/PersonalCabinetPage.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Toaster } from './components/ui/toaster';
 
 // Navigation Component
 const Navigation = () => {
@@ -918,6 +919,7 @@ function App() {
             <Route path="/cabinet" element={<PersonalCabinetPage />} />
           </Routes>
           <Footer />
+          <Toaster />
         </Box>
       </AuthProvider>
     </Router>

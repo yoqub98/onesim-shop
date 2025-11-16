@@ -14,27 +14,28 @@ import {
   Link,
   InputGroup,
   InputLeftElement,
-  useToast,
   FormErrorMessage,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  PinInput,
-  PinInputField,
   Grid,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { toaster } from '../components/ui/toaster';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogBackdrop,
+} from '../components/ui/dialog';
+import { PinInput } from '../components/ui/pin-input';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signUp, verifyOtp, resendOtp } = useAuth();
-  const toast = useToast();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
 
@@ -109,23 +110,19 @@ const SignupPage = () => {
     setLoading(false);
 
     if (error) {
-      toast({
+      toaster.create({
         title: 'Ошибка регистрации',
         description: error.message || t('auth.errors.signupFailed'),
-        status: 'error',
+        type: 'error',
         duration: 5000,
-        isClosable: true,
-        position: 'top',
       });
       return;
     }
 
-    toast({
+    toaster.create({
       title: t('auth.success.otpSent'),
-      status: 'success',
+      type: 'success',
       duration: 3000,
-      isClosable: true,
-      position: 'top',
     });
 
     setOtpModalOpen(true);
@@ -139,24 +136,20 @@ const SignupPage = () => {
     setVerifying(false);
 
     if (error) {
-      toast({
+      toaster.create({
         title: 'Ошибка проверки',
         description: t('auth.errors.otpInvalid'),
-        status: 'error',
+        type: 'error',
         duration: 5000,
-        isClosable: true,
-        position: 'top',
       });
       setOtpValue('');
       return;
     }
 
-    toast({
+    toaster.create({
       title: t('auth.success.signupComplete'),
-      status: 'success',
+      type: 'success',
       duration: 3000,
-      isClosable: true,
-      position: 'top',
     });
 
     setOtpModalOpen(false);
@@ -169,23 +162,19 @@ const SignupPage = () => {
     setResending(false);
 
     if (error) {
-      toast({
+      toaster.create({
         title: 'Ошибка',
         description: 'Не удалось отправить код повторно',
-        status: 'error',
+        type: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
       });
       return;
     }
 
-    toast({
+    toaster.create({
       title: t('auth.success.otpSent'),
-      status: 'success',
+      type: 'success',
       duration: 3000,
-      isClosable: true,
-      position: 'top',
     });
   };
 
@@ -396,20 +385,21 @@ const SignupPage = () => {
         </Container>
       </Box>
 
-      {/* OTP Verification Modal */}
-      <Modal
-        isOpen={otpModalOpen}
-        onClose={() => setOtpModalOpen(false)}
-        isCentered
-        closeOnOverlayClick={false}
+      {/* OTP Verification Dialog */}
+      <DialogRoot
+        open={otpModalOpen}
+        onOpenChange={(e) => setOtpModalOpen(e.open)}
+        closeOnInteractOutside={false}
+        placement="center"
+        size="md"
       >
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
-        <ModalContent borderRadius="2xl" p={4}>
-          <ModalHeader>
+        <DialogBackdrop bg="blackAlpha.600" backdropFilter="blur(10px)" />
+        <DialogContent borderRadius="2xl" p={4}>
+          <DialogHeader>
             <VStack gap={2} align="center">
-              <Heading fontSize="2xl" fontWeight="800" color="gray.900">
+              <DialogTitle fontSize="2xl" fontWeight="800" color="gray.900">
                 {t('auth.signup.otpModal.title')}
-              </Heading>
+              </DialogTitle>
               <Text fontSize="sm" fontWeight="500" color="gray.600" textAlign="center">
                 {t('auth.signup.otpModal.description')}
               </Text>
@@ -417,10 +407,10 @@ const SignupPage = () => {
                 {formData.email}
               </Text>
             </VStack>
-          </ModalHeader>
-          <ModalCloseButton />
+          </DialogHeader>
+          <DialogCloseTrigger />
 
-          <ModalBody pb={6}>
+          <DialogBody pb={6}>
             <VStack gap={6}>
               <VStack gap={3} w="100%">
                 <Text fontSize="sm" fontWeight="600" color="gray.700">
@@ -429,18 +419,15 @@ const SignupPage = () => {
                 <HStack justify="center">
                   <PinInput
                     size="lg"
-                    value={otpValue}
-                    onChange={setOtpValue}
-                    onComplete={handleVerifyOtp}
+                    value={otpValue.split('')}
+                    onValueChange={(e) => {
+                      setOtpValue(e.value.join(''));
+                      if (e.value.join('').length === 6) {
+                        handleVerifyOtp();
+                      }
+                    }}
                     otp
-                  >
-                    <PinInputField borderRadius="lg" />
-                    <PinInputField borderRadius="lg" />
-                    <PinInputField borderRadius="lg" />
-                    <PinInputField borderRadius="lg" />
-                    <PinInputField borderRadius="lg" />
-                    <PinInputField borderRadius="lg" />
-                  </PinInput>
+                  />
                 </HStack>
               </VStack>
 
@@ -452,9 +439,9 @@ const SignupPage = () => {
                 fontWeight="700"
                 borderRadius="lg"
                 onClick={handleVerifyOtp}
-                isLoading={verifying}
+                loading={verifying}
                 loadingText={t('auth.signup.otpModal.verifying')}
-                isDisabled={otpValue.length !== 6}
+                disabled={otpValue.length !== 6}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
@@ -469,15 +456,15 @@ const SignupPage = () => {
                 size="sm"
                 colorScheme="purple"
                 onClick={handleResendOtp}
-                isLoading={resending}
+                loading={resending}
                 loadingText={t('auth.signup.otpModal.resending')}
               >
                 {t('auth.signup.otpModal.resend')}
               </Button>
             </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </DialogBody>
+        </DialogContent>
+      </DialogRoot>
     </>
   );
 };
