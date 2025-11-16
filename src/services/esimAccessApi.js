@@ -1,4 +1,4 @@
-// src/services/esimAccessApi.js
+=// src/services/esimAccessApi.js
 
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
 
@@ -44,6 +44,7 @@ const setCachedPackage = (key, data) => {
 
 // ============================================
 // FETCH: Package by slug (for handpicked plans)
+// FIXED: Put slug in request BODY, not URL!
 // ============================================
 export const fetchPackageBySlug = async (slug, countryCode) => {
   // Check cache first
@@ -53,7 +54,8 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
   console.log(`🎯 Fetching package by slug: ${slug} for country: ${countryCode}`);
 
   try {
-    const response = await fetch(`${API_URL}/packages?slug=${slug}`, {
+    // ✅ FIXED: slug goes in the BODY, not the URL
+    const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +63,7 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
       body: JSON.stringify({
         locationCode: '',
         type: '',
-        slug: '',
+        slug: slug,  // ✅ Slug in body!
         packageCode: '',
         iccid: '',
       }),
@@ -76,7 +78,6 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
     console.log(`📦 RAW API RESPONSE for slug ${slug}:`, {
       success: data.success,
       packageCount: data.obj?.packageList?.length || 0,
-      fullResponse: data
     });
 
     if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
