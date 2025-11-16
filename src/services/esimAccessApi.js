@@ -44,6 +44,7 @@ const setCachedPackage = (key, data) => {
 
 // ============================================
 // FETCH: Package by slug (for handpicked plans)
+// IMPORTANT: Use POST method with slug as query parameter
 // ============================================
 export const fetchPackageBySlug = async (slug, countryCode) => {
   // Check cache first
@@ -53,11 +54,19 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
   console.log(`🎯 Fetching package by slug: ${slug}`);
 
   try {
+    // POST request with slug as query parameter (just like in Postman)
     const response = await fetch(`${API_URL}/packages?slug=${slug}`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        locationCode: '',
+        type: '',
+        slug: '',
+        packageCode: '',
+        iccid: '',
+      }),
     });
 
     if (!response.ok) {
