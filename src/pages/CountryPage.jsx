@@ -80,17 +80,17 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             border="1px solid"
             borderColor="purple.100"
           >
-            <Text 
-              fontSize="2xl" 
-              fontWeight="800" 
+            <Text
+              fontSize="2xl"
+              fontWeight="800"
               color="purple.700"
               textAlign="center"
             >
               {plan.data}
             </Text>
-            <Text 
-              fontSize="xs" 
-              color="purple.600" 
+            <Text
+              fontSize="xs"
+              color="purple.600"
               textAlign="center"
               fontWeight="600"
             >
@@ -98,8 +98,8 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </Box>
 
-          <HStack 
-            gap={2} 
+          <HStack
+            gap={2}
             p={2}
             bg="gray.50"
             borderRadius="md"
@@ -110,6 +110,35 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
               {plan.days} {t('plans.card.days') || 'дней'}
             </Text>
           </HStack>
+
+          {/* Operator/Telecom Provider */}
+          {plan.operatorList && plan.operatorList.length > 0 && (
+            <Box
+              p={2}
+              bg="blue.50"
+              borderRadius="md"
+              border="1px solid"
+              borderColor="blue.100"
+            >
+              <Text fontSize="xs" color="blue.600" fontWeight="600" textAlign="center" mb={1}>
+                Провайдер
+              </Text>
+              <VStack gap={1} align="stretch">
+                {plan.operatorList.map((operator, idx) => (
+                  <HStack key={idx} justify="center" gap={1}>
+                    <Text fontSize="sm" fontWeight="700" color="blue.800">
+                      {operator.operatorName}
+                    </Text>
+                    {operator.networkType && (
+                      <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
+                        {operator.networkType}
+                      </Badge>
+                    )}
+                  </HStack>
+                ))}
+              </VStack>
+            </Box>
+          )}
 
           <Box
             pt={3}
@@ -171,7 +200,7 @@ const PlanCardSkeleton = () => {
     >
       <Box p={6}>
         <VStack align="stretch" gap={4}>
-          {[20, 60, 40, 60].map((height, i) => (
+          {[20, 60, 40, 50, 60].map((height, i) => (
             <Box
               key={i}
               height={`${height}px`}
@@ -375,53 +404,124 @@ const CountryPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Background image logic
+  const getHeaderBackground = () => {
+    if (countryCode?.toLowerCase() === 'tr') {
+      return 'https://ik.imagekit.io/php1jcf0t/OneSim/1278.jpg';
+    }
+    return null; // Use gray background for other countries
+  };
+
+  const headerBgImage = getHeaderBackground();
+
   return (
-    <Box minH="100vh" bg="gray.50">
-      {/* Header */}
-      <Box bg="white" py={12} borderBottom="1px solid" borderColor="gray.200">
-        <Container maxW="8xl">
-          <VStack align="flex-start" gap={4}>
+    <Box minH="100vh" bg="white">
+      {/* Hero Header with Background Image */}
+      <Box
+        position="relative"
+        minH="400px"
+        overflow="hidden"
+        backgroundImage={headerBgImage ? `url(${headerBgImage})` : 'none'}
+        backgroundSize="cover"
+        backgroundPosition="center"
+        backgroundColor={headerBgImage ? 'gray.900' : 'gray.200'}
+      >
+        {/* Dark Overlay */}
+        {headerBgImage && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            bg="blackAlpha.600"
+            zIndex={1}
+          />
+        )}
+
+        <Container maxW="8xl" position="relative" zIndex={2} h="100%">
+          <VStack align="flex-start" justify="space-between" minH="400px" py={8} gap={6}>
+            {/* Back Navigation */}
             <Button
-              leftIcon={<ArrowLeft size={18} />}
+              leftIcon={<ArrowLeft size={20} />}
               variant="ghost"
-              size="sm"
+              size="md"
               onClick={() => navigate('/')}
-              fontWeight="600"
+              fontWeight="700"
+              color={headerBgImage ? 'white' : 'gray.800'}
+              _hover={{
+                bg: headerBgImage ? 'whiteAlpha.200' : 'gray.300',
+              }}
+              transition="all 0.3s"
             >
               Назад
             </Button>
 
-            <HStack gap={4}>
-              <Box
-                borderRadius="xl"
-                overflow="hidden"
-                boxShadow="lg"
-                width="80px"
-                height="60px"
-                flexShrink={0}
-                border="2px solid"
-                borderColor="gray.200"
-              >
-                <Flag 
-                  code={countryCode} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              </Box>
-              <VStack align="flex-start" gap={1}>
-                <Heading size="xl" fontWeight="800" color="gray.900">
+            {/* Main Content */}
+            <HStack align="flex-end" gap={8} w="100%" flexWrap={{ base: 'wrap', md: 'nowrap' }}>
+              {/* Left Side - Text Content */}
+              <VStack align="flex-start" gap={4} flex={1} maxW="600px">
+                <Heading
+                  size="2xl"
+                  fontWeight="900"
+                  color={headerBgImage ? 'white' : 'gray.800'}
+                  lineHeight="1.2"
+                  textShadow={headerBgImage ? '0 2px 10px rgba(0,0,0,0.3)' : 'none'}
+                >
                   eSIM для {countryName}
                 </Heading>
-                <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
+
+                <Text
+                  fontSize="lg"
+                  color={headerBgImage ? 'whiteAlpha.900' : 'gray.600'}
+                  fontWeight="500"
+                  lineHeight="1.6"
+                  textShadow={headerBgImage ? '0 1px 5px rgba(0,0,0,0.3)' : 'none'}
+                >
+                  Выберите идеальный план мобильного интернета для вашей поездки.
+                  Быстрая активация, надежная связь и доступные цены.
+                </Text>
+
+                <Badge
+                  colorScheme={headerBgImage ? 'whiteAlpha' : 'purple'}
+                  fontSize="md"
+                  px={4}
+                  py={2}
+                  borderRadius="full"
+                  bg={headerBgImage ? 'whiteAlpha.300' : 'purple.100'}
+                  color={headerBgImage ? 'white' : 'purple.800'}
+                  fontWeight="700"
+                  backdropFilter={headerBgImage ? 'blur(10px)' : 'none'}
+                >
                   {loading ? (
-                    <HStack gap={1}>
-                      <Spinner size="xs" />
+                    <HStack gap={2}>
+                      <Spinner size="sm" />
                       <Text>Загрузка...</Text>
                     </HStack>
                   ) : (
-                    `${filteredPlans.length} ${filteredPlans.length === 1 ? 'план' : 'планов'}`
+                    `${filteredPlans.length} ${filteredPlans.length === 1 ? 'план' : 'планов'} доступно`
                   )}
                 </Badge>
               </VStack>
+
+              {/* Right Side - Flag */}
+              <Box
+                borderRadius="2xl"
+                overflow="hidden"
+                boxShadow="0 10px 40px rgba(0,0,0,0.3)"
+                width={{ base: '120px', md: '140px' }}
+                height={{ base: '90px', md: '105px' }}
+                flexShrink={0}
+                border="4px solid"
+                borderColor="white"
+                bg="white"
+                position="relative"
+              >
+                <Flag
+                  code={countryCode}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
             </HStack>
           </VStack>
         </Container>
@@ -495,7 +595,7 @@ const CountryPage = () => {
       </Box>
 
       {/* Plans Grid */}
-      <Box py={12}>
+      <Box py={12} bg="white">
         <Container maxW="8xl">
           {error && (
             <Box p={4} bg="red.50" borderRadius="lg" border="1px solid" borderColor="red.200" mb={6}>

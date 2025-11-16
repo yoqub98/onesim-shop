@@ -226,6 +226,7 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
     originalPrice: apiPackage.price,
     description: apiPackage.description,
     name: apiPackage.name,
+    operatorList: apiPackage.operatorList || [],
   };
 };
 
