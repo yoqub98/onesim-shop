@@ -1,4 +1,4 @@
-=// src/services/esimAccessApi.js
+// src/services/esimAccessApi.js
 
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
 
