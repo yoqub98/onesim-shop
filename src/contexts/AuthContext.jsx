@@ -69,7 +69,6 @@ export const AuthProvider = ({ children }) => {
         options: {
           data: metadata,
           emailRedirectTo: `${window.location.origin}/login`,
-          channel: 'email',
         },
       });
 
