@@ -11,7 +11,6 @@ import {
   HStack,
   Link,
   InputGroup,
-  InputElement,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -122,10 +121,9 @@ const LoginPage = () => {
                   <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.email')}
                   </Field.Label>
-                  <InputGroup>
-                    <InputElement pointerEvents="none">
-                      <Mail size={18} color="#9CA3AF" />
-                    </InputElement>
+                  <InputGroup
+                    startElement={<Mail size={18} color="#9CA3AF" />}
+                  >
                     <Input
                       name="email"
                       type="email"
@@ -134,7 +132,6 @@ const LoginPage = () => {
                       onChange={handleChange}
                       size="lg"
                       borderRadius="lg"
-                      pl="10"
                     />
                   </InputGroup>
                   <Field.ErrorText>{errors.email}</Field.ErrorText>
@@ -144,10 +141,9 @@ const LoginPage = () => {
                   <Field.Label fontWeight="600" color="gray.700">
                     {t('auth.login.password')}
                   </Field.Label>
-                  <InputGroup>
-                    <InputElement pointerEvents="none">
-                      <Lock size={18} color="#9CA3AF" />
-                    </InputElement>
+                  <InputGroup
+                    startElement={<Lock size={18} color="#9CA3AF" />}
+                  >
                     <Input
                       name="password"
                       type="password"
@@ -156,7 +152,6 @@ const LoginPage = () => {
                       onChange={handleChange}
                       size="lg"
                       borderRadius="lg"
-                      pl="10"
                     />
                   </InputGroup>
                   <Field.ErrorText>{errors.password}</Field.ErrorText>
