@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../config/supabase';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext({});
 
@@ -14,55 +14,107 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
+    console.log('🔐 AuthProvider initializing...');
+    
+    const initializeAuth = async () => {
+      try {
+        console.log('🔍 Checking for existing session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ Session check error:', error);
+          setUser(null);
+          setUserProfile(null);
+        } else if (session?.user) {
+          console.log('✅ Found active session:', session.user.email);
+          setUser(session.user);
+          await fetchUserProfile(session.user.id);
+        } else {
+          console.log('ℹ️ No active session');
+          setUser(null);
+          setUserProfile(null);
+        }
+      } catch (err) {
+        console.error('💥 Unexpected error in auth initialization:', err);
+        setUser(null);
         setUserProfile(null);
+      } finally {
+        setLoading(false);
+        setSessionChecked(true);
+        console.log('✅ Auth initialization complete');
       }
-      setLoading(false);
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        console.log('✅ User signed in');
+        setUser(session.user);
+        await fetchUserProfile(session.user.id);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('👋 User signed out');
+        setUser(null);
+        setUserProfile(null);
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('🔄 Token refreshed');
+        if (session?.user) {
+          setUser(session.user);
+        }
+      } else if (event === 'USER_UPDATED' && session?.user) {
+        console.log('🔄 User updated');
+        setUser(session.user);
+        await fetchUserProfile(session.user.id);
+      }
+      
+      if (sessionChecked) {
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      console.log('🧹 Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
+  }, [sessionChecked]);
 
   const fetchUserProfile = async (userId) => {
     try {
+      console.log('👤 Fetching user profile for:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Profile fetch error:', error);
+        if (error.code !== 'PGRST116') {
+          console.error('Profile error details:', error);
+        }
+        return null;
+      }
+
+      console.log('✅ Profile fetched:', data);
       setUserProfile(data);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+      return data;
+    } catch (err) {
+      console.error('💥 Unexpected profile fetch error:', err);
+      return null;
     }
   };
 
-  const signUp = async (email, password, metadata) => {
+  const signUp = async (email, password, metadata = {}) => {
     try {
+      console.log('📝 Signing up user:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -72,83 +124,130 @@ export const AuthProvider = ({ children }) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Signup error:', error);
+        return { data: null, error };
+      }
+
+      console.log('✅ Signup successful:', data);
       return { data, error: null };
-    } catch (error) {
-      console.error('Sign up error:', error);
-      return { data: null, error };
-    }
-  };
-
-  const signIn = async (email, password) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      return { data, error: null };
-    } catch (error) {
-      console.error('Sign in error:', error);
-      return { data: null, error };
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      setUserProfile(null);
-      return { error: null };
-    } catch (error) {
-      console.error('Sign out error:', error);
-      return { error };
+    } catch (err) {
+      console.error('💥 Unexpected signup error:', err);
+      return { data: null, error: err };
     }
   };
 
   const verifyOtp = async (email, token) => {
     try {
+      console.log('🔐 Verifying OTP for:', email);
+      
       const { data, error } = await supabase.auth.verifyOtp({
         email,
         token,
         type: 'signup',
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ OTP verification error:', error);
+        return { data: null, error };
+      }
+
+      console.log('✅ OTP verified successfully');
       return { data, error: null };
-    } catch (error) {
-      console.error('OTP verification error:', error);
-      return { data: null, error };
+    } catch (err) {
+      console.error('💥 Unexpected OTP verification error:', err);
+      return { data: null, error: err };
     }
   };
 
   const resendOtp = async (email) => {
     try {
+      console.log('🔄 Resending OTP to:', email);
+      
       const { data, error } = await supabase.auth.resend({
         type: 'signup',
         email,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Resend OTP error:', error);
+        return { data: null, error };
+      }
+
+      console.log('✅ OTP resent successfully');
       return { data, error: null };
-    } catch (error) {
-      console.error('Resend OTP error:', error);
-      return { data: null, error };
+    } catch (err) {
+      console.error('💥 Unexpected resend error:', err);
+      return { data: null, error: err };
+    }
+  };
+
+  const signIn = async (email, password) => {
+    try {
+      console.log('🔐 Signing in user:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('❌ Sign in error:', error);
+        return { data: null, error };
+      }
+
+      console.log('✅ Sign in successful');
+      setUser(data.user);
+      
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
+
+      return { data, error: null };
+    } catch (err) {
+      console.error('💥 Unexpected sign in error:', err);
+      return { data: null, error: err };
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      console.log('🚪 Signing out...');
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('❌ Sign out error:', error);
+      }
+
+      console.log('✅ Sign out successful');
+      setUser(null);
+      setUserProfile(null);
+      
+      return { error: null };
+    } catch (err) {
+      console.error('💥 Unexpected sign out error:', err);
+      setUser(null);
+      setUserProfile(null);
+      return { error: err };
     }
   };
 
   const value = {
     user,
-    session,
     userProfile,
     loading,
     signUp,
-    signIn,
-    signOut,
     verifyOtp,
     resendOtp,
+    signIn,
+    signOut,
+    refreshProfile: () => user ? fetchUserProfile(user.id) : null,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

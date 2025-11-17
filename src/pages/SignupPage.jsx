@@ -47,12 +47,11 @@ const SignupPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [otpModalOpen, setOtpModalOpen] = useState(false);
-  const [otpValue, setOtpValue] = useState('');
+  const [otpValue, setOtpValue] = useState(['', '', '', '', '', '', '', '']);
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
 
   const validatePhone = (phone) => {
-    // Uzbekistan phone numbers are 9 digits after +998
     return /^\d{9}$/.test(phone);
   };
 
@@ -98,81 +97,141 @@ const SignupPage = () => {
 
     if (!validateForm()) return;
 
+    console.log('📝 Starting signup process...');
     setLoading(true);
-    const { data, error } = await signUp(formData.email, formData.password, {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      phone: `+998${formData.phone}`,
-    });
-    setLoading(false);
 
-    if (error) {
+    try {
+      const { data, error } = await signUp(formData.email, formData.password, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: `+998${formData.phone}`,
+      });
+
+      console.log('📧 Signup response:', { data, error });
+
+      if (error) {
+        console.error('❌ Signup error:', error);
+        toaster.create({
+          title: 'Ошибка регистрации',
+          description: error.message || t('auth.errors.signupFailed'),
+          type: 'error',
+          duration: 5000,
+        });
+        return;
+      }
+
+      console.log('✅ Signup successful, opening OTP modal');
       toaster.create({
-        title: 'Ошибка регистрации',
-        description: error.message || t('auth.errors.signupFailed'),
+        title: t('auth.success.otpSent'),
+        description: 'Проверьте вашу почту',
+        type: 'success',
+        duration: 3000,
+      });
+
+      setOtpModalOpen(true);
+    } catch (err) {
+      console.error('💥 Unexpected signup error:', err);
+      toaster.create({
+        title: 'Ошибка',
+        description: 'Произошла непредвиденная ошибка',
         type: 'error',
         duration: 5000,
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    toaster.create({
-      title: t('auth.success.otpSent'),
-      type: 'success',
-      duration: 3000,
-    });
-
-    setOtpModalOpen(true);
   };
 
   const handleVerifyOtp = async () => {
-    if (otpValue.length !== 6) return;
+    const otpCode = otpValue.join('');
+    
+    if (otpCode.length !== 8) {
+      console.warn('⚠️ OTP incomplete:', otpCode.length, 'digits');
+      return;
+    }
 
+    console.log('🔐 Verifying OTP...');
     setVerifying(true);
-    const { data, error } = await verifyOtp(formData.email, otpValue);
-    setVerifying(false);
 
-    if (error) {
+    try {
+      const { data, error } = await verifyOtp(formData.email, otpCode);
+      
+      console.log('🔍 OTP verification response:', { data, error });
+
+      if (error) {
+        console.error('❌ OTP verification failed:', error);
+        toaster.create({
+          title: 'Ошибка проверки',
+          description: error.message || t('auth.errors.otpInvalid'),
+          type: 'error',
+          duration: 5000,
+        });
+        setOtpValue(['', '', '', '', '', '', '', '']);
+        return;
+      }
+
+      console.log('✅ OTP verified successfully');
       toaster.create({
-        title: 'Ошибка проверки',
-        description: t('auth.errors.otpInvalid'),
+        title: t('auth.success.signupComplete'),
+        description: 'Теперь вы можете войти в систему',
+        type: 'success',
+        duration: 3000,
+      });
+
+      setOtpModalOpen(false);
+      setTimeout(() => navigate('/login'), 1000);
+    } catch (err) {
+      console.error('💥 Unexpected OTP verification error:', err);
+      toaster.create({
+        title: 'Ошибка',
+        description: 'Произошла непредвиденная ошибка',
         type: 'error',
         duration: 5000,
       });
-      setOtpValue('');
-      return;
+      setOtpValue(['', '', '', '', '', '', '', '']);
+    } finally {
+      setVerifying(false);
     }
-
-    toaster.create({
-      title: t('auth.success.signupComplete'),
-      type: 'success',
-      duration: 3000,
-    });
-
-    setOtpModalOpen(false);
-    navigate('/login');
   };
 
   const handleResendOtp = async () => {
+    console.log('🔄 Resending OTP...');
     setResending(true);
-    const { error } = await resendOtp(formData.email);
-    setResending(false);
 
-    if (error) {
+    try {
+      const { error } = await resendOtp(formData.email);
+      
+      if (error) {
+        console.error('❌ Resend OTP failed:', error);
+        toaster.create({
+          title: 'Ошибка',
+          description: 'Не удалось отправить код повторно',
+          type: 'error',
+          duration: 3000,
+        });
+        return;
+      }
+
+      console.log('✅ OTP resent successfully');
+      toaster.create({
+        title: t('auth.success.otpSent'),
+        description: 'Новый код отправлен на почту',
+        type: 'success',
+        duration: 3000,
+      });
+      
+      setOtpValue(['', '', '', '', '', '', '', '']);
+    } catch (err) {
+      console.error('💥 Unexpected resend error:', err);
       toaster.create({
         title: 'Ошибка',
-        description: 'Не удалось отправить код повторно',
+        description: 'Произошла непредвиденная ошибка',
         type: 'error',
         duration: 3000,
       });
-      return;
+    } finally {
+      setResending(false);
     }
-
-    toaster.create({
-      title: t('auth.success.otpSent'),
-      type: 'success',
-      duration: 3000,
-    });
   };
 
   const handleChange = (e) => {
@@ -368,7 +427,7 @@ const SignupPage = () => {
         </Container>
       </Box>
 
-      {/* OTP Verification Dialog */}
+      {/* OTP Verification Dialog - 8 DIGITS */}
       <DialogRoot
         open={otpModalOpen}
         onOpenChange={(e) => setOtpModalOpen(e.open)}
@@ -384,7 +443,7 @@ const SignupPage = () => {
                 {t('auth.signup.otpModal.title')}
               </DialogTitle>
               <Text fontSize="sm" fontWeight="500" color="gray.600" textAlign="center">
-                {t('auth.signup.otpModal.description')}
+                Введите 8-значный код, отправленный на
               </Text>
               <Text fontSize="md" fontWeight="700" color="purple.600">
                 {formData.email}
@@ -397,21 +456,28 @@ const SignupPage = () => {
             <VStack gap={6}>
               <VStack gap={3} w="100%">
                 <Text fontSize="sm" fontWeight="600" color="gray.700">
-                  {t('auth.signup.otpModal.enterCode')}
+                  Код подтверждения (8 цифр)
                 </Text>
-                <HStack justify="center">
+                <HStack justify="center" gap={2}>
                   <PinInput
                     size="lg"
-                    value={otpValue.split('')}
-                    onValueChange={(e) => {
-                      setOtpValue(e.value.join(''));
-                      if (e.value.join('').length === 6) {
-                        handleVerifyOtp();
+                    value={otpValue}
+                    onValueChange={(details) => {
+                      console.log('🔢 OTP input change:', details);
+                      setOtpValue(details.value);
+                      
+                      // Auto-submit when all 8 digits entered
+                      if (details.value.join('').length === 8) {
+                        console.log('🎯 8 digits entered, auto-verifying');
+                        setTimeout(() => handleVerifyOtp(), 300);
                       }
                     }}
                     otp
                   />
                 </HStack>
+                <Text fontSize="xs" color="gray.500" textAlign="center">
+                  Код из {otpValue.join('').length}/8 символов
+                </Text>
               </VStack>
 
               <Button
@@ -423,8 +489,8 @@ const SignupPage = () => {
                 borderRadius="lg"
                 onClick={handleVerifyOtp}
                 loading={verifying}
-                loadingText={t('auth.signup.otpModal.verifying')}
-                disabled={otpValue.length !== 6}
+                loadingText="Проверка..."
+                disabled={otpValue.join('').length !== 8}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
@@ -440,9 +506,9 @@ const SignupPage = () => {
                 colorPalette="purple"
                 onClick={handleResendOtp}
                 loading={resending}
-                loadingText={t('auth.signup.otpModal.resending')}
+                loadingText="Отправка..."
               >
-                {t('auth.signup.otpModal.resend')}
+                Отправить код повторно
               </Button>
             </VStack>
           </DialogBody>

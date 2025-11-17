@@ -22,7 +22,7 @@ import { Checkbox } from '../components/ui/checkbox';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
 
@@ -33,6 +33,14 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (user) {
+      console.log('👤 User already logged in, redirecting to home');
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,29 +62,76 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
-    setLoading(true);
-    const { data, error } = await signIn(formData.email, formData.password);
-    setLoading(false);
-
-    if (error) {
-      toaster.create({
-        title: 'Ошибка входа',
-        description: t('auth.errors.loginFailed'),
-        type: 'error',
-        duration: 5000,
-      });
+    if (!validateForm()) {
+      console.warn('⚠️ Form validation failed');
       return;
     }
 
-    toaster.create({
-      title: t('auth.success.loginComplete'),
-      type: 'success',
-      duration: 3000,
-    });
+    console.log('🔐 Starting login process...');
+    console.log('📧 Email:', formData.email);
+    setLoading(true);
 
-    navigate('/');
+    try {
+      const { data, error } = await signIn(formData.email, formData.password);
+
+      console.log('📨 Login response:', { data, error });
+
+      if (error) {
+        console.error('❌ Login error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+        });
+
+        let errorMessage = t('auth.errors.loginFailed');
+        
+        if (error.message?.includes('Invalid login credentials')) {
+          errorMessage = 'Неверный email или пароль';
+        } else if (error.message?.includes('Email not confirmed')) {
+          errorMessage = 'Email не подтвержден. Проверьте почту для подтверждения.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        toaster.create({
+          title: 'Ошибка входа',
+          description: errorMessage,
+          type: 'error',
+          duration: 5000,
+        });
+        return;
+      }
+
+      console.log('✅ Login successful!');
+      console.log('User data:', data);
+
+      toaster.create({
+        title: t('auth.success.loginComplete'),
+        description: 'Добро пожаловать!',
+        type: 'success',
+        duration: 3000,
+      });
+
+      // Small delay before redirect to ensure state updates
+      setTimeout(() => {
+        console.log('➡️ Redirecting to home page...');
+        navigate('/');
+      }, 500);
+
+    } catch (err) {
+      console.error('💥 Unexpected login error:', err);
+      console.error('Error stack:', err.stack);
+      
+      toaster.create({
+        title: 'Ошибка',
+        description: 'Произошла непредвиденная ошибка при входе',
+        type: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
