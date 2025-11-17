@@ -20,3 +20,10 @@ export const Field = React.forwardRef(function Field(props, ref) {
     </ChakraField.Root>
   )
 })
+
+// Export the sub-components for direct usage
+Field.Root = ChakraField.Root
+Field.Label = ChakraField.Label
+Field.ErrorText = ChakraField.ErrorText
+Field.HelperText = ChakraField.HelperText
+Field.RequiredIndicator = ChakraField.RequiredIndicator

@@ -10,6 +10,7 @@ import {
   VStack,
   HStack,
   Link,
+  InputGroup,
   Grid,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
@@ -214,7 +215,7 @@ const SignupPage = () => {
                       <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.firstName')}
                       </Field.Label>
-                      <Box position="relative">
+                      <InputGroup>
                         <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                           <User size={18} color="#9CA3AF" />
                         </Box>
@@ -228,7 +229,7 @@ const SignupPage = () => {
                           borderRadius="lg"
                           pl="10"
                         />
-                      </Box>
+                      </InputGroup>
                       <Field.ErrorText>{errors.firstName}</Field.ErrorText>
                     </Field.Root>
 
@@ -236,7 +237,7 @@ const SignupPage = () => {
                       <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.lastName')}
                       </Field.Label>
-                      <Box position="relative">
+                      <InputGroup>
                         <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                           <User size={18} color="#9CA3AF" />
                         </Box>
@@ -250,7 +251,7 @@ const SignupPage = () => {
                           borderRadius="lg"
                           pl="10"
                         />
-                      </Box>
+                      </InputGroup>
                       <Field.ErrorText>{errors.lastName}</Field.ErrorText>
                     </Field.Root>
                   </Grid>
@@ -259,7 +260,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.email')}
                     </Field.Label>
-                    <Box position="relative">
+                    <InputGroup>
                       <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Mail size={18} color="#9CA3AF" />
                       </Box>
@@ -273,7 +274,7 @@ const SignupPage = () => {
                         borderRadius="lg"
                         pl="10"
                       />
-                    </Box>
+                    </InputGroup>
                     <Field.ErrorText>{errors.email}</Field.ErrorText>
                   </Field.Root>
 
@@ -281,7 +282,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.phone')}
                     </Field.Label>
-                    <Box position="relative">
+                    <InputGroup position="relative">
                       <HStack position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1" gap={1}>
                         <Phone size={18} color="#9CA3AF" />
                         <Text fontSize="md" color="gray.500" fontWeight="600">
@@ -299,7 +300,7 @@ const SignupPage = () => {
                         pl="20"
                         maxLength={9}
                       />
-                    </Box>
+                    </InputGroup>
                     <Field.ErrorText>{errors.phone}</Field.ErrorText>
                   </Field.Root>
 
@@ -307,7 +308,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.password')}
                     </Field.Label>
-                    <Box position="relative">
+                    <InputGroup>
                       <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Lock size={18} color="#9CA3AF" />
                       </Box>
@@ -321,7 +322,7 @@ const SignupPage = () => {
                         borderRadius="lg"
                         pl="10"
                       />
-                    </Box>
+                    </InputGroup>
                     <Field.ErrorText>{errors.password}</Field.ErrorText>
                   </Field.Root>
 
@@ -329,7 +330,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.confirmPassword')}
                     </Field.Label>
-                    <Box position="relative">
+                    <InputGroup>
                       <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
                         <Lock size={18} color="#9CA3AF" />
                       </Box>
@@ -343,7 +344,7 @@ const SignupPage = () => {
                         borderRadius="lg"
                         pl="10"
                       />
-                    </Box>
+                    </InputGroup>
                     <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
                   </Field.Root>
 

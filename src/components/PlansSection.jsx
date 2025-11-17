@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
+  Card,
   Container,
   Heading,
   Text,
@@ -26,7 +27,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const t = (key) => getTranslation(lang, key);
 
   return (
-    <Box
+    <Card.Root
       ref={cardRef}
       position="relative"
       cursor="pointer"
@@ -59,7 +60,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
         transition="opacity 0.3s"
       />
 
-      <Box p={8}>
+      <Card.Body p={8}>
         <VStack align="stretch" gap={6} height="100%">
           <Box>
             <HStack gap={3} mb={4} flexWrap="nowrap">
@@ -205,15 +206,15 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </HStack>
           </Box>
         </VStack>
-      </Box>
-    </Box>
+      </Card.Body>
+    </Card.Root>
   );
 };
 
 // Loading Skeleton Component
 const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
-    <Box
+    <Card.Root
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
@@ -225,7 +226,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
         animationDelay: `${delay}ms`,
       }}
     >
-      <Box p={8}>
+      <Card.Body p={8}>
         <VStack align="stretch" gap={6}>
           <Box>
             <HStack gap={4} mb={4}>
@@ -272,8 +273,8 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
-      </Box>
-    </Box>
+      </Card.Body>
+    </Card.Root>
   );
 };
 
