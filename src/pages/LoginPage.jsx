@@ -162,16 +162,17 @@ const LoginPage = () => {
                 </Field.Root>
 
                 <HStack justify="space-between" w="100%">
-                  <Checkbox
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onCheckedChange={(e) => handleChange({ target: { name: 'rememberMe', type: 'checkbox', checked: e.checked } })}
-                    colorPalette="purple"
-                  >
+                  <HStack gap={2}>
+                    <Checkbox
+                      name="rememberMe"
+                      checked={formData.rememberMe}
+                      onCheckedChange={(e) => handleChange({ target: { name: 'rememberMe', type: 'checkbox', checked: e.checked } })}
+                      colorPalette="purple"
+                    />
                     <Text fontSize="sm" color="gray.600">
                       {t('auth.login.rememberMe')}
                     </Text>
-                  </Checkbox>
+                  </HStack>
                   <Link
                     fontSize="sm"
                     color="purple.600"
