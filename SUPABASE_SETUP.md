@@ -23,13 +23,17 @@ This guide will walk you through setting up Supabase for authentication in the O
      ```
    - For Vercel deployment, add these as environment variables in your Vercel project settings
 
-## Step 2: Enable Email Authentication
+## Step 2: Enable Email Authentication with OTP
 
 1. In your Supabase dashboard, go to **Authentication** → **Providers**
 2. Find **Email** provider and ensure it's enabled
-3. **IMPORTANT:** Enable **Confirm email** option
-   - This will require users to verify their email via OTP before login
+3. **IMPORTANT:** Configure email verification settings:
+   - Enable **Confirm email** option
+   - Set **Email Confirmation Method** to **OTP** (not Magic Link)
+   - This will send a 6-digit OTP code to users instead of a magic link
 4. Save the changes
+
+**Note:** By default, Supabase may send magic links. Ensure you explicitly select "OTP" as the confirmation method so users receive a verification code instead.
 
 ## Step 3: Configure Email Templates (Optional but Recommended)
 
