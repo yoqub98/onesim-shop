@@ -163,6 +163,8 @@ const PersonalCabinetPage = () => {
       </Container>
     </Box>
   );
+
+  
 };
 
 export default PersonalCabinetPage;
