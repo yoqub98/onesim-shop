@@ -11,7 +11,6 @@ import {
   HStack,
   Link,
   InputGroup,
-  InputElement,
   Grid,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
@@ -216,10 +215,7 @@ const SignupPage = () => {
                       <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.firstName')}
                       </Field.Label>
-                      <InputGroup>
-                        <InputElement pointerEvents="none">
-                          <User size={18} color="#9CA3AF" />
-                        </InputElement>
+                      <InputGroup startElement={<User size={18} color="#9CA3AF" />}>
                         <Input
                           name="firstName"
                           type="text"
@@ -228,7 +224,6 @@ const SignupPage = () => {
                           onChange={handleChange}
                           size="lg"
                           borderRadius="lg"
-                          pl="10"
                         />
                       </InputGroup>
                       <Field.ErrorText>{errors.firstName}</Field.ErrorText>
@@ -238,10 +233,7 @@ const SignupPage = () => {
                       <Field.Label fontWeight="600" color="gray.700">
                         {t('auth.signup.lastName')}
                       </Field.Label>
-                      <InputGroup>
-                        <InputElement pointerEvents="none">
-                          <User size={18} color="#9CA3AF" />
-                        </InputElement>
+                      <InputGroup startElement={<User size={18} color="#9CA3AF" />}>
                         <Input
                           name="lastName"
                           type="text"
@@ -250,7 +242,6 @@ const SignupPage = () => {
                           onChange={handleChange}
                           size="lg"
                           borderRadius="lg"
-                          pl="10"
                         />
                       </InputGroup>
                       <Field.ErrorText>{errors.lastName}</Field.ErrorText>
@@ -261,10 +252,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.email')}
                     </Field.Label>
-                    <InputGroup>
-                      <InputElement pointerEvents="none">
-                        <Mail size={18} color="#9CA3AF" />
-                      </InputElement>
+                    <InputGroup startElement={<Mail size={18} color="#9CA3AF" />}>
                       <Input
                         name="email"
                         type="email"
@@ -273,7 +261,6 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
-                        pl="10"
                       />
                     </InputGroup>
                     <Field.ErrorText>{errors.email}</Field.ErrorText>
@@ -283,15 +270,16 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.phone')}
                     </Field.Label>
-                    <InputGroup>
-                      <InputElement pointerEvents="none">
+                    <InputGroup
+                      startElement={
                         <HStack gap={1}>
                           <Phone size={18} color="#9CA3AF" />
                           <Text fontSize="md" color="gray.500" fontWeight="600">
                             +998
                           </Text>
                         </HStack>
-                      </InputElement>
+                      }
+                    >
                       <Input
                         name="phone"
                         type="tel"
@@ -300,7 +288,7 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
-                        pl="20"
+                        ps="5.5rem"
                         maxLength={9}
                       />
                     </InputGroup>
@@ -311,10 +299,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.password')}
                     </Field.Label>
-                    <InputGroup>
-                      <InputElement pointerEvents="none">
-                        <Lock size={18} color="#9CA3AF" />
-                      </InputElement>
+                    <InputGroup startElement={<Lock size={18} color="#9CA3AF" />}>
                       <Input
                         name="password"
                         type="password"
@@ -323,7 +308,6 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
-                        pl="10"
                       />
                     </InputGroup>
                     <Field.ErrorText>{errors.password}</Field.ErrorText>
@@ -333,10 +317,7 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.confirmPassword')}
                     </Field.Label>
-                    <InputGroup>
-                      <InputElement pointerEvents="none">
-                        <Lock size={18} color="#9CA3AF" />
-                      </InputElement>
+                    <InputGroup startElement={<Lock size={18} color="#9CA3AF" />}>
                       <Input
                         name="confirmPassword"
                         type="password"
@@ -345,7 +326,6 @@ const SignupPage = () => {
                         onChange={handleChange}
                         size="lg"
                         borderRadius="lg"
-                        pl="10"
                       />
                     </InputGroup>
                     <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
