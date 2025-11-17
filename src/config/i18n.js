@@ -317,7 +317,7 @@ export const TRANSLATIONS = {
     hero: {
       badge: 'eSIM oniy faollashtirish',
       title: 'Chegaralarsiz sayohat qiling',
-      description: 'Dunyoning 190 dan ortiq mamlakatida mobil aloqa. Har doim va har yerda qulay tariflar bilan aloqada bo'ling.',
+      description: "Dunyoning 190 dan ortiq mamlakatida mobil aloqa. Har doim va har yerda qulay tariflar bilan aloqada bo'ling.",
       features: {
         coverage: '190+ mamlakat qamrovi',
         activation: '2 daqiqada oniy faollashtirish',
@@ -331,7 +331,7 @@ export const TRANSLATIONS = {
       description: 'Jismoniy SIM-kartasiz mobil aloqa uchun zamonaviy yechim',
       instant: {
         title: 'Oniy faollashtirish',
-        description: 'Qo\'nganingizdan so\'ng darhol internetga kiring. Navbatsiz va kutishsiz.',
+        description: "Qo'nganingizdan so'ng darhol internetga kiring. Navbatsiz va kutishsiz.",
       },
       savings: {
         title: 'Pul tejash',
@@ -347,7 +347,7 @@ export const TRANSLATIONS = {
       },
       dataControl: {
         title: 'Trafik nazorati',
-        description: 'Qancha ma\'lumot ishlatayotganingizni aniq bilib turing. Yashirin to\'lovlar yo\'q.',
+        description: "Qancha ma'lumot ishlatayotganingizni aniq bilib turing. Yashirin to'lovlar yo'q.",
       },
     },
     plans: {
@@ -367,37 +367,37 @@ export const TRANSLATIONS = {
         currency: 'SUM',
         buy: 'Sotib olish',
       },
-      empty: 'Bu mintaqa uchun rejalar tez orada paydo bo\'ladi',
-      emptyDescription: 'Biz bu mintaqa uchun tariflarni qo\'shish ustida ishlayapmiz',
-      error: 'Rejalarni yuklab bo\'lmadi. Iltimos keyinroq urinib ko\'ring.',
+      empty: "Bu mintaqa uchun rejalar tez orada paydo bo'ladi",
+      emptyDescription: "Biz bu mintaqa uchun tariflarni qo'shish ustida ishlayapmiz",
+      error: "Rejalarni yuklab bo'lmadi. Iltimos keyinroq urinib ko'ring.",
     },
     destinations: {
-      badge: 'Mashhur yo\'nalishlar',
+      badge: "Mashhur yo'nalishlar",
       title: 'Qayerga',
       titleHighlight: 'ketyapsiz?',
       description: 'Mamlakatni tanlang va sayohatingiz uchun ideal tarifni toping',
-      explore: 'Rejalarni ko\'rish',
+      explore: "Rejalarni ko'rish",
     },
     faq: {
-      title: 'Tez-tez so\'raladigan',
+      title: "Tez-tez so'raladigan",
       titleHighlight: 'savollar',
-      description: 'eSIM haqida bilishingiz kerak bo\'lgan hamma narsa',
+      description: "eSIM haqida bilishingiz kerak bo'lgan hamma narsa",
       questions: {
         whatIsEsim: {
           question: 'eSIM nima?',
-          answer: 'eSIM - bu qurilmangizga o\'rnatilgan o\'rnatilgan SIM-karta. Jismoniy karta o\'rniga, siz QR-kod yoki ilova orqali oniy faollashtirishingiz mumkin bo\'lgan raqamli profilni olasiz.',
+          answer: "eSIM - bu qurilmangizga o'rnatilgan o'rnatilgan SIM-karta. Jismoniy karta o'rniga, siz QR-kod yoki ilova orqali oniy faollashtirishingiz mumkin bo'lgan raqamli profilni olasiz.",
         },
         howToActivate: {
           question: 'eSIMni qanday faollashtirish mumkin?',
-          answer: 'Xarid qilganingizdan so\'ng, sizga emailga QR-kod yuboriladi. Uni telefon sozlamalarida kamera bilan skanerlang va eSIM avtomatik faollashadi. Butun jarayon 2 daqiqadan ko\'p vaqt olmaydi.',
+          answer: "Xarid qilganingizdan so'ng, sizga emailga QR-kod yuboriladi. Uni telefon sozlamalarida kamera bilan skanerlang va eSIM avtomatik faollashadi. Butun jarayon 2 daqiqadan ko'p vaqt olmaydi.",
         },
         deviceCompatibility: {
-          question: 'Qaysi qurilmalar eSIMni qo\'llab-quvvatlaydi?',
-          answer: 'Ko\'pchilik zamonaviy smartfonlar eSIMni qo\'llab-quvvatlaydi: iPhone XS va yangiroqlari, Samsung Galaxy S20 va yangiroqlari, Google Pixel 3 va yangiroqlari, shuningdek Huawei, Oppo va boshqalarning ko\'p modellari. Xarid qilishdan oldin qurilmangiz muvofiqligini tekshiring.',
+          question: "Qaysi qurilmalar eSIMni qo'llab-quvvatlaydi?",
+          answer: "Ko'pchilik zamonaviy smartfonlar eSIMni qo'llab-quvvatlaydi: iPhone XS va yangiroqlari, Samsung Galaxy S20 va yangiroqlari, Google Pixel 3 va yangiroqlari, shuningdek Huawei, Oppo va boshqalarning ko'p modellari. Xarid qilishdan oldin qurilmangiz muvofiqligini tekshiring.",
         },
         canKeepNumber: {
-          question: 'Raqamimni saqlab qolsam bo\'ladimi?',
-          answer: 'Ha, siz eSIMni oddiy SIM-karta bilan birga ishlatishingiz mumkin. Asosiy raqamingiz qo\'ng\'iroqlar va SMS uchun faol bo\'lib qoladi, eSIM esa mobil internet uchun ishlatiladi.',
+          question: "Raqamimni saqlab qolsam bo'ladimi?",
+          answer: "Ha, siz eSIMni oddiy SIM-karta bilan birga ishlatishingiz mumkin. Asosiy raqamingiz qo'ng'iroqlar va SMS uchun faol bo'lib qoladi, eSIM esa mobil internet uchun ishlatiladi.",
         },
       },
     },
@@ -405,17 +405,17 @@ export const TRANSLATIONS = {
       title: 'dagi eSIM rejalar',
       backButton: 'Rejalarga qaytish',
       filterLabel: 'Filtrlar',
-      dataLabel: 'Ma\'lumotlar hajmi',
+      dataLabel: "Ma'lumotlar hajmi",
       durationLabel: 'Muddat',
       allData: 'Barcha hajmlar',
       allDuration: 'Barcha muddatlar',
       noPlans: 'Rejalar topilmadi',
-      noPlansDescription: 'Filtrlarni o\'zgartiring yoki keyinroq qaytib keling',
+      noPlansDescription: "Filtrlarni o'zgartiring yoki keyinroq qaytib keling",
     },
     footer: {
       description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlari bilan chegaralarsiz sayohat qiling.',
       quickLinks: 'Tezkor havolalar',
-      legal: 'Huquqiy ma\'lumot',
+      legal: "Huquqiy ma'lumot",
       privacy: 'Maxfiylik',
       terms: 'Foydalanish shartlari',
       copyright: 'Barcha huquqlar himoyalangan.',
