@@ -11,6 +11,7 @@ import {
   HStack,
   Link,
   InputGroup,
+  InputElement,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -122,9 +123,9 @@ const LoginPage = () => {
                     {t('auth.login.email')}
                   </Field.Label>
                   <InputGroup>
-                    <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                    <InputElement pointerEvents="none">
                       <Mail size={18} color="#9CA3AF" />
-                    </Box>
+                    </InputElement>
                     <Input
                       name="email"
                       type="email"
@@ -144,9 +145,9 @@ const LoginPage = () => {
                     {t('auth.login.password')}
                   </Field.Label>
                   <InputGroup>
-                    <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                    <InputElement pointerEvents="none">
                       <Lock size={18} color="#9CA3AF" />
-                    </Box>
+                    </InputElement>
                     <Input
                       name="password"
                       type="password"

@@ -11,6 +11,7 @@ import {
   HStack,
   Link,
   InputGroup,
+  InputElement,
   Grid,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
@@ -216,9 +217,9 @@ const SignupPage = () => {
                         {t('auth.signup.firstName')}
                       </Field.Label>
                       <InputGroup>
-                        <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                        <InputElement pointerEvents="none">
                           <User size={18} color="#9CA3AF" />
-                        </Box>
+                        </InputElement>
                         <Input
                           name="firstName"
                           type="text"
@@ -238,9 +239,9 @@ const SignupPage = () => {
                         {t('auth.signup.lastName')}
                       </Field.Label>
                       <InputGroup>
-                        <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                        <InputElement pointerEvents="none">
                           <User size={18} color="#9CA3AF" />
-                        </Box>
+                        </InputElement>
                         <Input
                           name="lastName"
                           type="text"
@@ -261,9 +262,9 @@ const SignupPage = () => {
                       {t('auth.signup.email')}
                     </Field.Label>
                     <InputGroup>
-                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                      <InputElement pointerEvents="none">
                         <Mail size={18} color="#9CA3AF" />
-                      </Box>
+                      </InputElement>
                       <Input
                         name="email"
                         type="email"
@@ -282,13 +283,15 @@ const SignupPage = () => {
                     <Field.Label fontWeight="600" color="gray.700">
                       {t('auth.signup.phone')}
                     </Field.Label>
-                    <InputGroup position="relative">
-                      <HStack position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1" gap={1}>
-                        <Phone size={18} color="#9CA3AF" />
-                        <Text fontSize="md" color="gray.500" fontWeight="600">
-                          +998
-                        </Text>
-                      </HStack>
+                    <InputGroup>
+                      <InputElement pointerEvents="none">
+                        <HStack gap={1}>
+                          <Phone size={18} color="#9CA3AF" />
+                          <Text fontSize="md" color="gray.500" fontWeight="600">
+                            +998
+                          </Text>
+                        </HStack>
+                      </InputElement>
                       <Input
                         name="phone"
                         type="tel"
@@ -309,9 +312,9 @@ const SignupPage = () => {
                       {t('auth.signup.password')}
                     </Field.Label>
                     <InputGroup>
-                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                      <InputElement pointerEvents="none">
                         <Lock size={18} color="#9CA3AF" />
-                      </Box>
+                      </InputElement>
                       <Input
                         name="password"
                         type="password"
@@ -331,9 +334,9 @@ const SignupPage = () => {
                       {t('auth.signup.confirmPassword')}
                     </Field.Label>
                     <InputGroup>
-                      <Box position="absolute" left="3" top="50%" transform="translateY(-50%)" zIndex="1">
+                      <InputElement pointerEvents="none">
                         <Lock size={18} color="#9CA3AF" />
-                      </Box>
+                      </InputElement>
                       <Input
                         name="confirmPassword"
                         type="password"
