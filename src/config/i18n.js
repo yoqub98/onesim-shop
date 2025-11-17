@@ -110,9 +110,9 @@ export const COUNTRY_TRANSLATIONS = {
   FJ: { ru: 'Фиджи', uz: 'Fiji', en: 'Fiji' },
   
   // Central Asia
-  UZ: { ru: 'Узбекистан', uz: 'Oʻzbekiston', en: 'Uzbekistan' },
-  KZ: { ru: 'Казахстан', uz: 'Qozogʻiston', en: 'Kazakhstan' },
-  KG: { ru: 'Кыргызстан', uz: 'Qirgʻiziston', en: 'Kyrgyzstan' },
+  UZ: { ru: 'Узбекистан', uz: "O'zbekiston", en: 'Uzbekistan' },
+  KZ: { ru: 'Казахстан', uz: "Qozog'iston", en: 'Kazakhstan' },
+  KG: { ru: 'Кыргызстан', uz: "Qirg'iziston", en: 'Kyrgyzstan' },
   TJ: { ru: 'Таджикистан', uz: 'Tojikiston', en: 'Tajikistan' },
   TM: { ru: 'Туркменистан', uz: 'Turkmaniston', en: 'Turkmenistan' },
 };
@@ -317,7 +317,7 @@ export const TRANSLATIONS = {
     hero: {
       badge: 'eSIM oniy faollashtirish',
       title: 'Chegaralarsiz sayohat qiling',
-      description: 'Dunyoning 190 dan ortiq mamlakatida mobil aloqa. Har doim va har yerda qulay tariflar bilan aloqada boʻling.',
+      description: 'Dunyoning 190 dan ortiq mamlakatida mobil aloqa. Har doim va har yerda qulay tariflar bilan aloqada bo'ling.',
       features: {
         coverage: '190+ mamlakat qamrovi',
         activation: '2 daqiqada oniy faollashtirish',
@@ -367,16 +367,16 @@ export const TRANSLATIONS = {
         currency: 'SUM',
         buy: 'Sotib olish',
       },
-      empty: 'Bu mintaqa uchun rejalar tez orada paydo boʻladi',
-      emptyDescription: 'Biz bu mintaqa uchun tariflarni qoʻshish ustida ishlayapmiz',
-      error: 'Rejalarni yuklab boʻlmadi. Iltimos keyinroq urinib koʻring.',
+      empty: 'Bu mintaqa uchun rejalar tez orada paydo bo\'ladi',
+      emptyDescription: 'Biz bu mintaqa uchun tariflarni qo\'shish ustida ishlayapmiz',
+      error: 'Rejalarni yuklab bo\'lmadi. Iltimos keyinroq urinib ko\'ring.',
     },
     destinations: {
-      badge: 'Mashhur yoʻnalishlar',
+      badge: 'Mashhur yo\'nalishlar',
       title: 'Qayerga',
       titleHighlight: 'ketyapsiz?',
       description: 'Mamlakatni tanlang va sayohatingiz uchun ideal tarifni toping',
-      explore: 'Rejalarni koʻrish',
+      explore: 'Rejalarni ko\'rish',
     },
     faq: {
       title: 'Tez-tez so\'raladigan',
@@ -405,17 +405,17 @@ export const TRANSLATIONS = {
       title: 'dagi eSIM rejalar',
       backButton: 'Rejalarga qaytish',
       filterLabel: 'Filtrlar',
-      dataLabel: 'Maʼlumotlar hajmi',
+      dataLabel: 'Ma\'lumotlar hajmi',
       durationLabel: 'Muddat',
       allData: 'Barcha hajmlar',
       allDuration: 'Barcha muddatlar',
       noPlans: 'Rejalar topilmadi',
-      noPlansDescription: 'Filtrlarni oʻzgartiring yoki keyinroq qaytib keling',
+      noPlansDescription: 'Filtrlarni o\'zgartiring yoki keyinroq qaytib keling',
     },
     footer: {
       description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlari bilan chegaralarsiz sayohat qiling.',
       quickLinks: 'Tezkor havolalar',
-      legal: 'Huquqiy maʼlumot',
+      legal: 'Huquqiy ma\'lumot',
       privacy: 'Maxfiylik',
       terms: 'Foydalanish shartlari',
       copyright: 'Barcha huquqlar himoyalangan.',
@@ -538,20 +538,61 @@ export const TRANSLATIONS = {
   },
 };
 
+// Fixed getTranslation function with proper error handling
 export const getTranslation = (lang, key) => {
-  const keys = key.split('.');
-  let value = TRANSLATIONS[lang] || TRANSLATIONS[DEFAULT_LANGUAGE];
-  
-  for (const k of keys) {
-    value = value[k];
-    if (!value) return key;
+  try {
+    // Validate inputs
+    if (!lang || !key) {
+      console.warn('getTranslation: Missing lang or key parameter');
+      return key || '';
+    }
+
+    // Get the language translations, fallback to default if not found
+    const langTranslations = TRANSLATIONS[lang] || TRANSLATIONS[DEFAULT_LANGUAGE];
+    
+    if (!langTranslations) {
+      console.warn(`getTranslation: No translations found for language "${lang}"`);
+      return key;
+    }
+
+    // Split the key and traverse the object
+    const keys = key.split('.');
+    let value = langTranslations;
+    
+    for (const k of keys) {
+      // Check if the current value is an object and has the key
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        // Key not found, return the original key
+        console.warn(`getTranslation: Translation key "${key}" not found for language "${lang}"`);
+        return key;
+      }
+    }
+    
+    // Make sure we return a string
+    if (typeof value === 'string') {
+      return value;
+    } else {
+      console.warn(`getTranslation: Translation for "${key}" is not a string:`, value);
+      return key;
+    }
+  } catch (error) {
+    console.error('getTranslation error:', error);
+    return key || '';
   }
-  
-  return value;
 };
 
 export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
-  const country = COUNTRY_TRANSLATIONS[countryCode];
-  if (!country) return countryCode;
-  return country[lang] || country[DEFAULT_LANGUAGE];
+  try {
+    const country = COUNTRY_TRANSLATIONS[countryCode];
+    if (!country) {
+      console.warn(`getCountryName: Country code "${countryCode}" not found`);
+      return countryCode;
+    }
+    return country[lang] || country[DEFAULT_LANGUAGE] || countryCode;
+  } catch (error) {
+    console.error('getCountryName error:', error);
+    return countryCode;
+  }
 };

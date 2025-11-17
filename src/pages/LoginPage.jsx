@@ -24,7 +24,16 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { signIn, user } = useAuth();
   const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  
+  // Create a stable translation function
+  const t = React.useCallback((key) => {
+    try {
+      return getTranslation(lang, key) || key;
+    } catch (err) {
+      console.error('Translation error:', err);
+      return key;
+    }
+  }, [lang]);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -46,13 +55,13 @@ const LoginPage = () => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = t('auth.errors.emailRequired');
+      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('auth.errors.emailInvalid');
+      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
     }
 
     if (!formData.password) {
-      newErrors.password = t('auth.errors.passwordRequired');
+      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
     }
 
     setErrors(newErrors);
@@ -84,7 +93,7 @@ const LoginPage = () => {
           name: error.name,
         });
 
-        let errorMessage = t('auth.errors.loginFailed');
+        let errorMessage = 'Не удалось войти в систему';
         
         if (error.message?.includes('Invalid login credentials')) {
           errorMessage = 'Неверный email или пароль';
@@ -107,7 +116,7 @@ const LoginPage = () => {
       console.log('User data:', data);
 
       toaster.create({
-        title: t('auth.success.loginComplete'),
+        title: t('auth.success.loginComplete') || 'Вход выполнен успешно',
         description: 'Добро пожаловать!',
         type: 'success',
         duration: 3000,
@@ -156,10 +165,10 @@ const LoginPage = () => {
               fontWeight="800"
               color="gray.900"
             >
-              {t('auth.login.title')}
+              {t('auth.login.title') || 'Вход в систему'}
             </Heading>
             <Text fontSize="md" color="gray.600">
-              {t('auth.login.subtitle')}
+              {t('auth.login.subtitle') || 'Войдите в свой аккаунт'}
             </Text>
           </VStack>
 
@@ -174,7 +183,7 @@ const LoginPage = () => {
               <VStack gap={5}>
                 <Field.Root invalid={!!errors.email}>
                   <Field.Label fontWeight="600" color="gray.700">
-                    {t('auth.login.email')}
+                    {t('auth.login.email') || 'Email'}
                   </Field.Label>
                   <InputGroup
                     startElement={<Mail size={18} color="#9CA3AF" />}
@@ -182,7 +191,7 @@ const LoginPage = () => {
                     <Input
                       name="email"
                       type="email"
-                      placeholder={t('auth.login.emailPlaceholder')}
+                      placeholder={t('auth.login.emailPlaceholder') || 'Введите ваш email'}
                       value={formData.email}
                       onChange={handleChange}
                       size="lg"
@@ -194,7 +203,7 @@ const LoginPage = () => {
 
                 <Field.Root invalid={!!errors.password}>
                   <Field.Label fontWeight="600" color="gray.700">
-                    {t('auth.login.password')}
+                    {t('auth.login.password') || 'Пароль'}
                   </Field.Label>
                   <InputGroup
                     startElement={<Lock size={18} color="#9CA3AF" />}
@@ -202,7 +211,7 @@ const LoginPage = () => {
                     <Input
                       name="password"
                       type="password"
-                      placeholder={t('auth.login.passwordPlaceholder')}
+                      placeholder={t('auth.login.passwordPlaceholder') || 'Введите пароль'}
                       value={formData.password}
                       onChange={handleChange}
                       size="lg"
@@ -221,7 +230,7 @@ const LoginPage = () => {
                       colorPalette="purple"
                     />
                     <Text fontSize="sm" color="gray.600">
-                      {t('auth.login.rememberMe')}
+                      {t('auth.login.rememberMe') || 'Запомнить меня'}
                     </Text>
                   </HStack>
                   <Link
@@ -238,7 +247,7 @@ const LoginPage = () => {
                       });
                     }}
                   >
-                    {t('auth.login.forgotPassword')}
+                    {t('auth.login.forgotPassword') || 'Забыли пароль?'}
                   </Link>
                 </HStack>
 
@@ -256,20 +265,20 @@ const LoginPage = () => {
                   }}
                   transition="all 0.3s"
                   loading={loading}
-                  loadingText={t('auth.login.loggingIn')}
+                  loadingText={t('auth.login.loggingIn') || 'Вход...'}
                 >
-                  {t('auth.login.loginButton')}
+                  {t('auth.login.loginButton') || 'Войти'}
                 </Button>
 
                 <HStack gap={1} fontSize="sm">
-                  <Text color="gray.600">{t('auth.login.noAccount')}</Text>
+                  <Text color="gray.600">{t('auth.login.noAccount') || 'Нет аккаунта?'}</Text>
                   <Link
                     color="purple.600"
                     fontWeight="700"
                     onClick={() => navigate('/signup')}
                     _hover={{ textDecoration: 'underline' }}
                   >
-                    {t('auth.login.signUpLink')}
+                    {t('auth.login.signUpLink') || 'Зарегистрироваться'}
                   </Link>
                 </HStack>
               </VStack>
