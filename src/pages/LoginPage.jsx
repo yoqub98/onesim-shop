@@ -31,24 +31,44 @@ const LoginPage = () => {
     console.log('🔧 lang:', lang);
     console.log('🔧 DEFAULT_LANGUAGE:', DEFAULT_LANGUAGE);
     console.log('🔧 getTranslation type:', typeof getTranslation);
+    console.log('🔧 getTranslation function:', getTranslation);
   }, [lang]);
 
-  // Create a stable translation function
-  const t = React.useCallback((key) => {
+  // Create a simple, stable translation function - NOT using useCallback
+  // This ensures t is always defined and available
+  const t = (key) => {
     try {
+      console.log(`🔤 Translating key: ${key}`);
+      console.log('🔤 Current lang:', lang);
+      console.log('🔤 getTranslation available:', typeof getTranslation);
+
+      if (typeof getTranslation !== 'function') {
+        console.error('❌ getTranslation is not a function!');
+        return key;
+      }
+
       const result = getTranslation(lang, key);
-      console.log(`🔤 Translation [${key}]:`, result);
+      console.log(`🔤 Translation result for [${key}]:`, result);
       return result || key;
     } catch (err) {
       console.error('❌ Translation error for key:', key, err);
+      console.error('❌ Error stack:', err.stack);
       return key;
     }
-  }, [lang]);
+  };
 
-  // Debug: Log when t changes
+  // Debug: Log t function
   React.useEffect(() => {
-    console.log('🔧 Translation function (t) updated, type:', typeof t);
-  }, [t]);
+    console.log('🔧 Translation function (t) type:', typeof t);
+    console.log('🔧 Translation function (t):', t);
+    console.log('🔧 Testing t function with test key...');
+    try {
+      const testResult = t('auth.login.title');
+      console.log('🔧 Test translation result:', testResult);
+    } catch (err) {
+      console.error('🔧 Test translation failed:', err);
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -67,36 +87,32 @@ const LoginPage = () => {
   }, [user, navigate]);
 
   const validateForm = React.useCallback(() => {
+    console.log('🔍 validateForm called');
+    console.log('🔍 t type:', typeof t);
+    console.log('🔍 formData:', formData);
+
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailRequired') : null) || 'Email обязателен';
+      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailInvalid') : null) || 'Неверный формат email';
+      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
     }
 
     if (!formData.password) {
-      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordRequired') : null) || 'Пароль обязателен';
+      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
     }
 
+    console.log('✅ Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData.email, formData.password, t]);
+  }, [formData.email, formData.password]);
 
   const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
 
-    // Defensive check for t function
-    if (typeof t !== 'function') {
-      console.error('❌ Translation function (t) is not available');
-      toaster.create({
-        title: 'Ошибка',
-        description: 'Произошла ошибка инициализации',
-        type: 'error',
-        duration: 5000,
-      });
-      return;
-    }
+    console.log('📝 handleSubmit called');
+    console.log('🔍 t type in handleSubmit:', typeof t);
 
     if (!validateForm()) {
       console.warn('⚠️ Form validation failed');
@@ -143,7 +159,7 @@ const LoginPage = () => {
       console.log('User data:', data);
 
       toaster.create({
-        title: (typeof t === 'function' ? t('auth.success.loginComplete') : null) || 'Вход выполнен успешно',
+        title: t('auth.success.loginComplete') || 'Вход выполнен успешно',
         description: 'Добро пожаловать!',
         type: 'success',
         duration: 3000,
@@ -158,6 +174,8 @@ const LoginPage = () => {
     } catch (err) {
       console.error('💥 Unexpected login error:', err);
       console.error('Error stack:', err.stack);
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
 
       toaster.create({
         title: 'Ошибка',
@@ -168,7 +186,7 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [validateForm, formData.email, formData.password, signIn, navigate, t]);
+  }, [validateForm, formData.email, formData.password, signIn, navigate]);
 
   const handleChange = React.useCallback((e) => {
     const { name, value, type, checked } = e.target;

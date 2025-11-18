@@ -41,24 +41,44 @@ const SignupPage = () => {
     console.log('🔧 lang:', lang);
     console.log('🔧 DEFAULT_LANGUAGE:', DEFAULT_LANGUAGE);
     console.log('🔧 getTranslation type:', typeof getTranslation);
+    console.log('🔧 getTranslation function:', getTranslation);
   }, [lang]);
 
-  // Create a stable translation function
-  const t = React.useCallback((key) => {
+  // Create a simple, stable translation function - NOT using useCallback
+  // This ensures t is always defined and available
+  const t = (key) => {
     try {
+      console.log(`🔤 Translating key: ${key}`);
+      console.log('🔤 Current lang:', lang);
+      console.log('🔤 getTranslation available:', typeof getTranslation);
+
+      if (typeof getTranslation !== 'function') {
+        console.error('❌ getTranslation is not a function!');
+        return key;
+      }
+
       const result = getTranslation(lang, key);
-      console.log(`🔤 Translation [${key}]:`, result);
+      console.log(`🔤 Translation result for [${key}]:`, result);
       return result || key;
     } catch (err) {
       console.error('❌ Translation error for key:', key, err);
+      console.error('❌ Error stack:', err.stack);
       return key;
     }
-  }, [lang]);
+  };
 
-  // Debug: Log when t changes
+  // Debug: Log t function
   React.useEffect(() => {
-    console.log('🔧 Translation function (t) updated, type:', typeof t);
-  }, [t]);
+    console.log('🔧 Translation function (t) type:', typeof t);
+    console.log('🔧 Translation function (t):', t);
+    console.log('🔧 Testing t function with test key...');
+    try {
+      const testResult = t('auth.signup.title');
+      console.log('🔧 Test translation result:', testResult);
+    } catch (err) {
+      console.error('🔧 Test translation failed:', err);
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -80,74 +100,52 @@ const SignupPage = () => {
   }, []);
 
   const validateForm = React.useCallback(() => {
-    console.log('🔍 validateForm called, t type:', typeof t);
-    console.log('🔍 t function:', t);
-
-    // Defensive check for t function
-    if (typeof t !== 'function') {
-      console.error('❌ Translation function (t) is not available in validateForm');
-      console.error('t value:', t);
-      console.error('lang value:', lang);
-      return false;
-    }
+    console.log('🔍 validateForm called');
+    console.log('🔍 t type:', typeof t);
+    console.log('🔍 formData:', formData);
 
     const newErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = (typeof t === 'function' ? t('auth.errors.firstNameRequired') : null) || 'Имя обязательно';
+      newErrors.firstName = t('auth.errors.firstNameRequired') || 'Имя обязательно';
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = (typeof t === 'function' ? t('auth.errors.lastNameRequired') : null) || 'Фамилия обязательна';
+      newErrors.lastName = t('auth.errors.lastNameRequired') || 'Фамилия обязательна';
     }
 
     if (!formData.email) {
-      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailRequired') : null) || 'Email обязателен';
+      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailInvalid') : null) || 'Неверный формат email';
+      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
     }
 
     if (!formData.phone) {
-      newErrors.phone = (typeof t === 'function' ? t('auth.errors.phoneRequired') : null) || 'Номер телефона обязателен';
+      newErrors.phone = t('auth.errors.phoneRequired') || 'Номер телефона обязателен';
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = (typeof t === 'function' ? t('auth.errors.phoneInvalid') : null) || 'Неверный номер телефона';
+      newErrors.phone = t('auth.errors.phoneInvalid') || 'Неверный номер телефона';
     }
 
     if (!formData.password) {
-      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordRequired') : null) || 'Пароль обязателен';
+      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
     } else if (formData.password.length < 6) {
-      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordMinLength') : null) || 'Пароль должен быть не менее 6 символов';
+      newErrors.password = t('auth.errors.passwordMinLength') || 'Пароль должен быть не менее 6 символов';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = (typeof t === 'function' ? t('auth.errors.passwordsNotMatch') : null) || 'Пароли не совпадают';
+      newErrors.confirmPassword = t('auth.errors.passwordsNotMatch') || 'Пароли не совпадают';
     }
 
     console.log('✅ Validation complete, errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, t, lang, validatePhone]);
+  }, [formData, validatePhone]);
 
   const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
 
     console.log('📝 handleSubmit called');
     console.log('🔍 t type in handleSubmit:', typeof t);
-    console.log('🔍 t function in handleSubmit:', t);
-
-    // Defensive check for t function
-    if (typeof t !== 'function') {
-      console.error('❌ Translation function (t) is not available in handleSubmit');
-      console.error('t value:', t);
-      console.error('lang value:', lang);
-      toaster.create({
-        title: 'Ошибка',
-        description: 'Произошла ошибка инициализации перевода',
-        type: 'error',
-        duration: 5000,
-      });
-      return;
-    }
 
     if (!validateForm()) {
       console.warn('⚠️ Form validation failed in signup');
@@ -170,7 +168,7 @@ const SignupPage = () => {
         console.error('❌ Signup error:', error);
         toaster.create({
           title: 'Ошибка регистрации',
-          description: error.message || (typeof t === 'function' ? t('auth.errors.signupFailed') : null) || 'Ошибка регистрации. Попробуйте снова.',
+          description: error.message || t('auth.errors.signupFailed') || 'Ошибка регистрации. Попробуйте снова.',
           type: 'error',
           duration: 5000,
         });
@@ -179,7 +177,7 @@ const SignupPage = () => {
 
       console.log('✅ Signup successful, opening OTP modal');
       toaster.create({
-        title: (typeof t === 'function' ? t('auth.success.otpSent') : null) || 'Код подтверждения отправлен на email',
+        title: t('auth.success.otpSent') || 'Код подтверждения отправлен на email',
         description: 'Проверьте вашу почту',
         type: 'success',
         duration: 3000,
@@ -189,11 +187,8 @@ const SignupPage = () => {
     } catch (err) {
       console.error('💥 Unexpected signup error:', err);
       console.error('Error stack:', err.stack);
-      console.error('Error details:', {
-        message: err.message,
-        name: err.name,
-        type: typeof err,
-      });
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -203,7 +198,7 @@ const SignupPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [validateForm, formData, signUp, t, lang]);
+  }, [validateForm, formData, signUp]);
 
   const handleVerifyOtp = React.useCallback(async () => {
     const otpCode = otpValue.join('');
@@ -226,7 +221,7 @@ const SignupPage = () => {
         console.error('❌ OTP verification failed:', error);
         toaster.create({
           title: 'Ошибка проверки',
-          description: error.message || (typeof t === 'function' ? t('auth.errors.otpInvalid') : null) || 'Неверный код подтверждения',
+          description: error.message || t('auth.errors.otpInvalid') || 'Неверный код подтверждения',
           type: 'error',
           duration: 5000,
         });
@@ -236,7 +231,7 @@ const SignupPage = () => {
 
       console.log('✅ OTP verified successfully');
       toaster.create({
-        title: (typeof t === 'function' ? t('auth.success.signupComplete') : null) || 'Регистрация успешна! Теперь войдите в систему.',
+        title: t('auth.success.signupComplete') || 'Регистрация успешна! Теперь войдите в систему.',
         description: 'Теперь вы можете войти в систему',
         type: 'success',
         duration: 3000,
@@ -257,7 +252,7 @@ const SignupPage = () => {
     } finally {
       setVerifying(false);
     }
-  }, [otpValue, verifyOtp, formData.email, navigate, t]);
+  }, [otpValue, verifyOtp, formData.email, navigate]);
 
   const handleResendOtp = React.useCallback(async () => {
     console.log('🔄 Resending OTP...');
@@ -280,7 +275,7 @@ const SignupPage = () => {
 
       console.log('✅ OTP resent successfully');
       toaster.create({
-        title: (typeof t === 'function' ? t('auth.success.otpSent') : null) || 'Код подтверждения отправлен на email',
+        title: t('auth.success.otpSent') || 'Код подтверждения отправлен на email',
         description: 'Новый код отправлен на почту',
         type: 'success',
         duration: 3000,
@@ -299,7 +294,7 @@ const SignupPage = () => {
     } finally {
       setResending(false);
     }
-  }, [resendOtp, formData.email, t]);
+  }, [resendOtp, formData.email]);
 
   const handleChange = React.useCallback((e) => {
     const { name, value } = e.target;
