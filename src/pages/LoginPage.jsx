@@ -86,27 +86,24 @@ const LoginPage = () => {
     }
   }, [user, navigate]);
 
-  const validateForm = React.useCallback(() => {
-    console.log('🔍 validateForm called');
-    console.log('🔍 t type:', typeof t);
-    console.log('🔍 formData:', formData);
+const validateForm = () => {
+  console.log('🔍 validateForm called');
+  const newErrors = {};
 
-    const newErrors = {};
+  if (!formData.email) {
+    newErrors.email = getTranslation(lang, 'auth.errors.emailRequired') || 'Email обязателен';
+  } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    newErrors.email = getTranslation(lang, 'auth.errors.emailInvalid') || 'Неверный формат email';
+  }
 
-    if (!formData.email) {
-      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
-    }
+  if (!formData.password) {
+    newErrors.password = getTranslation(lang, 'auth.errors.passwordRequired') || 'Пароль обязателен';
+  }
 
-    if (!formData.password) {
-      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
-    }
-
-    console.log('✅ Validation errors:', newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData.email, formData.password]);
+  console.log('✅ Validation errors:', newErrors);
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();

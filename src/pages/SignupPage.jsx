@@ -99,47 +99,44 @@ const SignupPage = () => {
     return /^\d{9}$/.test(phone);
   }, []);
 
-  const validateForm = React.useCallback(() => {
-    console.log('🔍 validateForm called');
-    console.log('🔍 t type:', typeof t);
-    console.log('🔍 formData:', formData);
+const validateForm = () => {
+  console.log('🔍 validateForm called');
+  const newErrors = {};
 
-    const newErrors = {};
+  if (!formData.firstName.trim()) {
+    newErrors.firstName = getTranslation(lang, 'auth.errors.firstNameRequired') || 'Имя обязательно';
+  }
 
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = t('auth.errors.firstNameRequired') || 'Имя обязательно';
-    }
+  if (!formData.lastName.trim()) {
+    newErrors.lastName = getTranslation(lang, 'auth.errors.lastNameRequired') || 'Фамилия обязательна';
+  }
 
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = t('auth.errors.lastNameRequired') || 'Фамилия обязательна';
-    }
+  if (!formData.email) {
+    newErrors.email = getTranslation(lang, 'auth.errors.emailRequired') || 'Email обязателен';
+  } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    newErrors.email = getTranslation(lang, 'auth.errors.emailInvalid') || 'Неверный формат email';
+  }
 
-    if (!formData.email) {
-      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
-    }
+  if (!formData.phone) {
+    newErrors.phone = getTranslation(lang, 'auth.errors.phoneRequired') || 'Номер телефона обязателен';
+  } else if (!validatePhone(formData.phone)) {
+    newErrors.phone = getTranslation(lang, 'auth.errors.phoneInvalid') || 'Неверный номер телефона';
+  }
 
-    if (!formData.phone) {
-      newErrors.phone = t('auth.errors.phoneRequired') || 'Номер телефона обязателен';
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = t('auth.errors.phoneInvalid') || 'Неверный номер телефона';
-    }
+  if (!formData.password) {
+    newErrors.password = getTranslation(lang, 'auth.errors.passwordRequired') || 'Пароль обязателен';
+  } else if (formData.password.length < 6) {
+    newErrors.password = getTranslation(lang, 'auth.errors.passwordMinLength') || 'Пароль должен быть не менее 6 символов';
+  }
 
-    if (!formData.password) {
-      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
-    } else if (formData.password.length < 6) {
-      newErrors.password = t('auth.errors.passwordMinLength') || 'Пароль должен быть не менее 6 символов';
-    }
+  if (formData.password !== formData.confirmPassword) {
+    newErrors.confirmPassword = getTranslation(lang, 'auth.errors.passwordsNotMatch') || 'Пароли не совпадают';
+  }
 
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('auth.errors.passwordsNotMatch') || 'Пароли не совпадают';
-    }
-
-    console.log('✅ Validation complete, errors:', newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, validatePhone]);
+  console.log('✅ Validation complete, errors:', newErrors);
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
