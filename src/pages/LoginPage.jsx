@@ -24,16 +24,31 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { signIn, user } = useAuth();
   const lang = DEFAULT_LANGUAGE;
-  
+
+  // Debug: Log initialization
+  React.useEffect(() => {
+    console.log('🔧 LoginPage initialized');
+    console.log('🔧 lang:', lang);
+    console.log('🔧 DEFAULT_LANGUAGE:', DEFAULT_LANGUAGE);
+    console.log('🔧 getTranslation type:', typeof getTranslation);
+  }, [lang]);
+
   // Create a stable translation function
   const t = React.useCallback((key) => {
     try {
-      return getTranslation(lang, key) || key;
+      const result = getTranslation(lang, key);
+      console.log(`🔤 Translation [${key}]:`, result);
+      return result || key;
     } catch (err) {
-      console.error('Translation error:', err);
+      console.error('❌ Translation error for key:', key, err);
       return key;
     }
   }, [lang]);
+
+  // Debug: Log when t changes
+  React.useEffect(() => {
+    console.log('🔧 Translation function (t) updated, type:', typeof t);
+  }, [t]);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -51,25 +66,37 @@ const LoginPage = () => {
     }
   }, [user, navigate]);
 
-  const validateForm = () => {
+  const validateForm = React.useCallback(() => {
     const newErrors = {};
 
     if (!formData.email) {
-      newErrors.email = t('auth.errors.emailRequired') || 'Email обязателен';
+      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailRequired') : null) || 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('auth.errors.emailInvalid') || 'Неверный формат email';
+      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailInvalid') : null) || 'Неверный формат email';
     }
 
     if (!formData.password) {
-      newErrors.password = t('auth.errors.passwordRequired') || 'Пароль обязателен';
+      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordRequired') : null) || 'Пароль обязателен';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData.email, formData.password, t]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
+
+    // Defensive check for t function
+    if (typeof t !== 'function') {
+      console.error('❌ Translation function (t) is not available');
+      toaster.create({
+        title: 'Ошибка',
+        description: 'Произошла ошибка инициализации',
+        type: 'error',
+        duration: 5000,
+      });
+      return;
+    }
 
     if (!validateForm()) {
       console.warn('⚠️ Form validation failed');
@@ -94,7 +121,7 @@ const LoginPage = () => {
         });
 
         let errorMessage = 'Не удалось войти в систему';
-        
+
         if (error.message?.includes('Invalid login credentials')) {
           errorMessage = 'Неверный email или пароль';
         } else if (error.message?.includes('Email not confirmed')) {
@@ -116,7 +143,7 @@ const LoginPage = () => {
       console.log('User data:', data);
 
       toaster.create({
-        title: t('auth.success.loginComplete') || 'Вход выполнен успешно',
+        title: (typeof t === 'function' ? t('auth.success.loginComplete') : null) || 'Вход выполнен успешно',
         description: 'Добро пожаловать!',
         type: 'success',
         duration: 3000,
@@ -131,7 +158,7 @@ const LoginPage = () => {
     } catch (err) {
       console.error('💥 Unexpected login error:', err);
       console.error('Error stack:', err.stack);
-      
+
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка при входе',
@@ -141,19 +168,25 @@ const LoginPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [validateForm, formData.email, formData.password, signIn, navigate, t]);
 
-  const handleChange = (e) => {
+  const handleChange = React.useCallback((e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
+    // Clear error for this field if it exists
+    setErrors((prev) => {
+      if (prev[name]) {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={12}>

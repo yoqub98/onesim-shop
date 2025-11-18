@@ -34,7 +34,31 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const { signUp, verifyOtp, resendOtp } = useAuth();
   const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+
+  // Debug: Log initialization
+  React.useEffect(() => {
+    console.log('🔧 SignupPage initialized');
+    console.log('🔧 lang:', lang);
+    console.log('🔧 DEFAULT_LANGUAGE:', DEFAULT_LANGUAGE);
+    console.log('🔧 getTranslation type:', typeof getTranslation);
+  }, [lang]);
+
+  // Create a stable translation function
+  const t = React.useCallback((key) => {
+    try {
+      const result = getTranslation(lang, key);
+      console.log(`🔤 Translation [${key}]:`, result);
+      return result || key;
+    } catch (err) {
+      console.error('❌ Translation error for key:', key, err);
+      return key;
+    }
+  }, [lang]);
+
+  // Debug: Log when t changes
+  React.useEffect(() => {
+    console.log('🔧 Translation function (t) updated, type:', typeof t);
+  }, [t]);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -51,51 +75,84 @@ const SignupPage = () => {
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
 
-  const validatePhone = (phone) => {
+  const validatePhone = React.useCallback((phone) => {
     return /^\d{9}$/.test(phone);
-  };
+  }, []);
 
-  const validateForm = () => {
+  const validateForm = React.useCallback(() => {
+    console.log('🔍 validateForm called, t type:', typeof t);
+    console.log('🔍 t function:', t);
+
+    // Defensive check for t function
+    if (typeof t !== 'function') {
+      console.error('❌ Translation function (t) is not available in validateForm');
+      console.error('t value:', t);
+      console.error('lang value:', lang);
+      return false;
+    }
+
     const newErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = t('auth.errors.firstNameRequired');
+      newErrors.firstName = (typeof t === 'function' ? t('auth.errors.firstNameRequired') : null) || 'Имя обязательно';
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = t('auth.errors.lastNameRequired');
+      newErrors.lastName = (typeof t === 'function' ? t('auth.errors.lastNameRequired') : null) || 'Фамилия обязательна';
     }
 
     if (!formData.email) {
-      newErrors.email = t('auth.errors.emailRequired');
+      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailRequired') : null) || 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t('auth.errors.emailInvalid');
+      newErrors.email = (typeof t === 'function' ? t('auth.errors.emailInvalid') : null) || 'Неверный формат email';
     }
 
     if (!formData.phone) {
-      newErrors.phone = t('auth.errors.phoneRequired');
+      newErrors.phone = (typeof t === 'function' ? t('auth.errors.phoneRequired') : null) || 'Номер телефона обязателен';
     } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = t('auth.errors.phoneInvalid');
+      newErrors.phone = (typeof t === 'function' ? t('auth.errors.phoneInvalid') : null) || 'Неверный номер телефона';
     }
 
     if (!formData.password) {
-      newErrors.password = t('auth.errors.passwordRequired');
+      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordRequired') : null) || 'Пароль обязателен';
     } else if (formData.password.length < 6) {
-      newErrors.password = t('auth.errors.passwordMinLength');
+      newErrors.password = (typeof t === 'function' ? t('auth.errors.passwordMinLength') : null) || 'Пароль должен быть не менее 6 символов';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('auth.errors.passwordsNotMatch');
+      newErrors.confirmPassword = (typeof t === 'function' ? t('auth.errors.passwordsNotMatch') : null) || 'Пароли не совпадают';
     }
 
+    console.log('✅ Validation complete, errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t, lang, validatePhone]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    console.log('📝 handleSubmit called');
+    console.log('🔍 t type in handleSubmit:', typeof t);
+    console.log('🔍 t function in handleSubmit:', t);
+
+    // Defensive check for t function
+    if (typeof t !== 'function') {
+      console.error('❌ Translation function (t) is not available in handleSubmit');
+      console.error('t value:', t);
+      console.error('lang value:', lang);
+      toaster.create({
+        title: 'Ошибка',
+        description: 'Произошла ошибка инициализации перевода',
+        type: 'error',
+        duration: 5000,
+      });
+      return;
+    }
+
+    if (!validateForm()) {
+      console.warn('⚠️ Form validation failed in signup');
+      return;
+    }
 
     console.log('📝 Starting signup process...');
     setLoading(true);
@@ -113,7 +170,7 @@ const SignupPage = () => {
         console.error('❌ Signup error:', error);
         toaster.create({
           title: 'Ошибка регистрации',
-          description: error.message || t('auth.errors.signupFailed'),
+          description: error.message || (typeof t === 'function' ? t('auth.errors.signupFailed') : null) || 'Ошибка регистрации. Попробуйте снова.',
           type: 'error',
           duration: 5000,
         });
@@ -122,7 +179,7 @@ const SignupPage = () => {
 
       console.log('✅ Signup successful, opening OTP modal');
       toaster.create({
-        title: t('auth.success.otpSent'),
+        title: (typeof t === 'function' ? t('auth.success.otpSent') : null) || 'Код подтверждения отправлен на email',
         description: 'Проверьте вашу почту',
         type: 'success',
         duration: 3000,
@@ -131,6 +188,12 @@ const SignupPage = () => {
       setOtpModalOpen(true);
     } catch (err) {
       console.error('💥 Unexpected signup error:', err);
+      console.error('Error stack:', err.stack);
+      console.error('Error details:', {
+        message: err.message,
+        name: err.name,
+        type: typeof err,
+      });
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -140,29 +203,30 @@ const SignupPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [validateForm, formData, signUp, t, lang]);
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = React.useCallback(async () => {
     const otpCode = otpValue.join('');
-    
+
     if (otpCode.length !== 8) {
       console.warn('⚠️ OTP incomplete:', otpCode.length, 'digits');
       return;
     }
 
     console.log('🔐 Verifying OTP...');
+    console.log('🔍 t type in handleVerifyOtp:', typeof t);
     setVerifying(true);
 
     try {
       const { data, error } = await verifyOtp(formData.email, otpCode);
-      
+
       console.log('🔍 OTP verification response:', { data, error });
 
       if (error) {
         console.error('❌ OTP verification failed:', error);
         toaster.create({
           title: 'Ошибка проверки',
-          description: error.message || t('auth.errors.otpInvalid'),
+          description: error.message || (typeof t === 'function' ? t('auth.errors.otpInvalid') : null) || 'Неверный код подтверждения',
           type: 'error',
           duration: 5000,
         });
@@ -172,7 +236,7 @@ const SignupPage = () => {
 
       console.log('✅ OTP verified successfully');
       toaster.create({
-        title: t('auth.success.signupComplete'),
+        title: (typeof t === 'function' ? t('auth.success.signupComplete') : null) || 'Регистрация успешна! Теперь войдите в систему.',
         description: 'Теперь вы можете войти в систему',
         type: 'success',
         duration: 3000,
@@ -182,6 +246,7 @@ const SignupPage = () => {
       setTimeout(() => navigate('/login'), 1000);
     } catch (err) {
       console.error('💥 Unexpected OTP verification error:', err);
+      console.error('Error stack:', err.stack);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -192,15 +257,16 @@ const SignupPage = () => {
     } finally {
       setVerifying(false);
     }
-  };
+  }, [otpValue, verifyOtp, formData.email, navigate, t]);
 
-  const handleResendOtp = async () => {
+  const handleResendOtp = React.useCallback(async () => {
     console.log('🔄 Resending OTP...');
+    console.log('🔍 t type in handleResendOtp:', typeof t);
     setResending(true);
 
     try {
       const { error } = await resendOtp(formData.email);
-      
+
       if (error) {
         console.error('❌ Resend OTP failed:', error);
         toaster.create({
@@ -214,15 +280,16 @@ const SignupPage = () => {
 
       console.log('✅ OTP resent successfully');
       toaster.create({
-        title: t('auth.success.otpSent'),
+        title: (typeof t === 'function' ? t('auth.success.otpSent') : null) || 'Код подтверждения отправлен на email',
         description: 'Новый код отправлен на почту',
         type: 'success',
         duration: 3000,
       });
-      
+
       setOtpValue(['', '', '', '', '', '', '', '']);
     } catch (err) {
       console.error('💥 Unexpected resend error:', err);
+      console.error('Error stack:', err.stack);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -232,19 +299,25 @@ const SignupPage = () => {
     } finally {
       setResending(false);
     }
-  };
+  }, [resendOtp, formData.email, t]);
 
-  const handleChange = (e) => {
+  const handleChange = React.useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
 
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
+    // Clear error for this field if it exists
+    setErrors((prev) => {
+      if (prev[name]) {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
   return (
     <>
