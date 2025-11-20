@@ -16,23 +16,17 @@ import {
   IconButton,
   Link,
 } from '@chakra-ui/react';
-import { ChevronRight, Menu, X, Globe, Zap, Shield, User, LogOut } from 'lucide-react';
+import { ChevronRight, Menu, X, Globe, Zap, Shield } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import CountryPage from './pages/CountryPage.jsx';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import PersonalCabinetPage from './pages/PersonalCabinetPage';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
-import { useAuth } from './contexts/AuthContext';
 
 // Navigation Component
 const Navigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
 
@@ -43,24 +37,6 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleLogout = async () => {
-    console.log('🚪 Logging out...');
-    await signOut();
-    setMobileMenuOpen(false);
-    console.log('✅ Logout complete, redirecting to home');
-    navigate('/');
-  };
-
-  const handleProfileClick = () => {
-    setMobileMenuOpen(false);
-    navigate('/cabinet');
-  };
-
-  const handleLoginClick = () => {
-    setMobileMenuOpen(false);
-    navigate('/login');
-  };
 
   return (
     <Box
@@ -163,44 +139,6 @@ const Navigation = () => {
             >
               {t('nav.contacts')}
             </Link>
-
-            {user ? (
-              <HStack gap={3}>
-                <Button
-                  leftIcon={<User size={18} />}
-                  variant="outline"
-                  colorPalette="purple"
-                  size="sm"
-                  onClick={handleProfileClick}
-                >
-                  Кабинет
-                </Button>
-                <IconButton
-                  variant="ghost"
-                  colorPalette="red"
-                  size="sm"
-                  onClick={handleLogout}
-                  aria-label="Logout"
-                >
-                  <LogOut size={18} />
-                </IconButton>
-              </HStack>
-            ) : (
-              <Button
-                size="sm"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                color="white"
-                fontWeight="700"
-                onClick={handleLoginClick}
-                _hover={{
-                  transform: 'translateY(-2px)',
-                  shadow: '0 10px 20px rgba(102, 126, 234, 0.3)',
-                }}
-                transition="all 0.3s"
-              >
-                Войти
-              </Button>
-            )}
           </HStack>
 
           <IconButton
@@ -227,21 +165,6 @@ const Navigation = () => {
               <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.contacts')}
               </Link>
-
-              {user ? (
-                <>
-                  <Button leftIcon={<User size={18} />} colorPalette="purple" variant="outline" onClick={handleProfileClick} w="100%" justifyContent="flex-start">
-                    Кабинет
-                  </Button>
-                  <Button leftIcon={<LogOut size={18} />} colorPalette="red" variant="outline" onClick={handleLogout} w="100%" justifyContent="flex-start">
-                    Выйти
-                  </Button>
-                </>
-              ) : (
-                <Button bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" color="white" fontWeight="700" onClick={handleLoginClick} w="100%">
-                  Войти
-                </Button>
-              )}
             </VStack>
           </Box>
         )}
@@ -427,41 +350,8 @@ const HomePage = () => {
   );
 };
 
-// Main App Component with proper auth handling
+// Main App Component
 function AppContent() {
-  const location = useLocation();
-  const { loading, user } = useAuth();
-
-  useEffect(() => {
-    console.log('🔄 Auth state:', { loading, user: !!user, path: location.pathname });
-  }, [loading, user, location]);
-
-  if (loading) {
-    console.log('⏳ App loading...');
-    return (
-      <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
-        <VStack gap={4}>
-          <Box
-            w="50px"
-            h="50px"
-            borderRadius="full"
-            border="4px solid"
-            borderColor="purple.200"
-            borderTopColor="purple.600"
-            animation="spin 1s linear infinite"
-            sx={{
-              '@keyframes spin': {
-                '0%': { transform: 'rotate(0deg)' },
-                '100%': { transform: 'rotate(360deg)' },
-              },
-            }}
-          />
-          <Text color="gray.600" fontWeight="600">Загрузка...</Text>
-        </VStack>
-      </Box>
-    );
-  }
-
   return (
     <Box fontFamily="'Inter Tight', sans-serif">
       <style>
@@ -472,9 +362,6 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/cabinet" element={<PersonalCabinetPage />} />
       </Routes>
       <Footer />
     </Box>
