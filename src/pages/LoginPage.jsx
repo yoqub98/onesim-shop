@@ -25,7 +25,7 @@ const LoginPage = () => {
   const { signIn, user } = useAuth();
   const lang = DEFAULT_LANGUAGE;
 
-  const t = (key) => {
+  const t = React.useCallback((key) => {
     try {
       if (typeof getTranslation !== 'function') {
         return key;
@@ -35,7 +35,7 @@ const LoginPage = () => {
     } catch (err) {
       return key;
     }
-  };
+  }, [lang]);
 
   const [formData, setFormData] = useState({
     email: '',

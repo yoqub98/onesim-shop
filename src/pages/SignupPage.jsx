@@ -35,7 +35,7 @@ const SignupPage = () => {
   const { signUp, verifyOtp, resendOtp } = useAuth();
   const lang = DEFAULT_LANGUAGE;
 
-  const t = (key) => {
+  const t = React.useCallback((key) => {
     try {
       if (typeof getTranslation !== 'function') {
         return key;
@@ -45,7 +45,7 @@ const SignupPage = () => {
     } catch (err) {
       return key;
     }
-  };
+  }, [lang]);
 
   const [formData, setFormData] = useState({
     firstName: '',
