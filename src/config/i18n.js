@@ -1,120 +1,118 @@
 // src/config/i18n.js
 // Internationalization configuration for OneSIM
 
-// Available languages
+// ONLY RUSSIAN LANGUAGE FOR NOW
 export const LANGUAGES = {
   RU: 'ru',
-  UZ: 'uz',
-  EN: 'en',
 };
 
 // Default language
 export const DEFAULT_LANGUAGE = LANGUAGES.RU;
 
-// Country translations dictionary (100 countries)
+// Country translations dictionary (Russian only)
 export const COUNTRY_TRANSLATIONS = {
   // Asia
-  TH: { ru: 'Таиланд', uz: 'Tailand', en: 'Thailand' },
-  AE: { ru: 'ОАЭ', uz: 'BAA', en: 'UAE' },
-  VN: { ru: 'Вьетнам', uz: 'Vyetnam', en: 'Vietnam' },
-  MY: { ru: 'Малайзия', uz: 'Malayziya', en: 'Malaysia' },
-  CN: { ru: 'Китай', uz: 'Xitoy', en: 'China' },
-  JP: { ru: 'Япония', uz: 'Yaponiya', en: 'Japan' },
-  KR: { ru: 'Южная Корея', uz: 'Janubiy Koreya', en: 'South Korea' },
-  SG: { ru: 'Сингапур', uz: 'Singapur', en: 'Singapore' },
-  ID: { ru: 'Индонезия', uz: 'Indoneziya', en: 'Indonesia' },
-  PH: { ru: 'Филиппины', uz: 'Filippin', en: 'Philippines' },
-  IN: { ru: 'Индия', uz: 'Hindiston', en: 'India' },
-  HK: { ru: 'Гонконг', uz: 'Gonkong', en: 'Hong Kong' },
-  TW: { ru: 'Тайвань', uz: 'Tayvan', en: 'Taiwan' },
-  KH: { ru: 'Камбоджа', uz: 'Kambodja', en: 'Cambodia' },
-  LA: { ru: 'Лаос', uz: 'Laos', en: 'Laos' },
-  MM: { ru: 'Мьянма', uz: 'Myanma', en: 'Myanmar' },
-  MO: { ru: 'Макао', uz: 'Makao', en: 'Macau' },
-  MN: { ru: 'Монголия', uz: 'Mongoliya', en: 'Mongolia' },
-  NP: { ru: 'Непал', uz: 'Nepal', en: 'Nepal' },
-  LK: { ru: 'Шри-Ланка', uz: 'Shri-Lanka', en: 'Sri Lanka' },
-  
+  TH: 'Таиланд',
+  AE: 'ОАЭ',
+  VN: 'Вьетнам',
+  MY: 'Малайзия',
+  CN: 'Китай',
+  JP: 'Япония',
+  KR: 'Южная Корея',
+  SG: 'Сингапур',
+  ID: 'Индонезия',
+  PH: 'Филиппины',
+  IN: 'Индия',
+  HK: 'Гонконг',
+  TW: 'Тайвань',
+  KH: 'Камбоджа',
+  LA: 'Лаос',
+  MM: 'Мьянма',
+  MO: 'Макао',
+  MN: 'Монголия',
+  NP: 'Непал',
+  LK: 'Шри-Ланка',
+
   // Europe
-  TR: { ru: 'Турция', uz: 'Turkiya', en: 'Turkey' },
-  GE: { ru: 'Грузия', uz: 'Gruziya', en: 'Georgia' },
-  IT: { ru: 'Италия', uz: 'Italiya', en: 'Italy' },
-  FR: { ru: 'Франция', uz: 'Fransiya', en: 'France' },
-  AZ: { ru: 'Азербайджан', uz: 'Ozarbayjon', en: 'Azerbaijan' },
-  ES: { ru: 'Испания', uz: 'Ispaniya', en: 'Spain' },
-  DE: { ru: 'Германия', uz: 'Germaniya', en: 'Germany' },
-  GB: { ru: 'Великобритания', uz: 'Buyuk Britaniya', en: 'United Kingdom' },
-  PT: { ru: 'Португалия', uz: 'Portugaliya', en: 'Portugal' },
-  GR: { ru: 'Греция', uz: 'Gretsiya', en: 'Greece' },
-  NL: { ru: 'Нидерланды', uz: 'Niderlandiya', en: 'Netherlands' },
-  BE: { ru: 'Бельгия', uz: 'Belgiya', en: 'Belgium' },
-  AT: { ru: 'Австрия', uz: 'Avstriya', en: 'Austria' },
-  CH: { ru: 'Швейцария', uz: 'Shveytsariya', en: 'Switzerland' },
-  SE: { ru: 'Швеция', uz: 'Shvetsiya', en: 'Sweden' },
-  NO: { ru: 'Норвегия', uz: 'Norvegiya', en: 'Norway' },
-  DK: { ru: 'Дания', uz: 'Daniya', en: 'Denmark' },
-  FI: { ru: 'Финляндия', uz: 'Finlandiya', en: 'Finland' },
-  PL: { ru: 'Польша', uz: 'Polsha', en: 'Poland' },
-  CZ: { ru: 'Чехия', uz: 'Chexiya', en: 'Czech Republic' },
-  HU: { ru: 'Венгрия', uz: 'Vengriya', en: 'Hungary' },
-  RO: { ru: 'Румыния', uz: 'Ruminiya', en: 'Romania' },
-  BG: { ru: 'Болгария', uz: 'Bolgariya', en: 'Bulgaria' },
-  HR: { ru: 'Хорватия', uz: 'Xorvatiya', en: 'Croatia' },
-  RS: { ru: 'Сербия', uz: 'Serbiya', en: 'Serbia' },
-  UA: { ru: 'Украина', uz: 'Ukraina', en: 'Ukraine' },
-  BY: { ru: 'Беларусь', uz: 'Belarus', en: 'Belarus' },
-  MD: { ru: 'Молдова', uz: 'Moldova', en: 'Moldova' },
-  AM: { ru: 'Армения', uz: 'Armaniston', en: 'Armenia' },
-  IE: { ru: 'Ирландия', uz: 'Irlandiya', en: 'Ireland' },
-  IS: { ru: 'Исландия', uz: 'Islandiya', en: 'Iceland' },
-  LU: { ru: 'Люксембург', uz: 'Lyuksemburg', en: 'Luxembourg' },
-  MT: { ru: 'Мальта', uz: 'Malta', en: 'Malta' },
-  CY: { ru: 'Кипр', uz: 'Kipr', en: 'Cyprus' },
-  
+  TR: 'Турция',
+  GE: 'Грузия',
+  IT: 'Италия',
+  FR: 'Франция',
+  AZ: 'Азербайджан',
+  ES: 'Испания',
+  DE: 'Германия',
+  GB: 'Великобритания',
+  PT: 'Португалия',
+  GR: 'Греция',
+  NL: 'Нидерланды',
+  BE: 'Бельгия',
+  AT: 'Австрия',
+  CH: 'Швейцария',
+  SE: 'Швеция',
+  NO: 'Норвегия',
+  DK: 'Дания',
+  FI: 'Финляндия',
+  PL: 'Польша',
+  CZ: 'Чехия',
+  HU: 'Венгрия',
+  RO: 'Румыния',
+  BG: 'Болгария',
+  HR: 'Хорватия',
+  RS: 'Сербия',
+  UA: 'Украина',
+  BY: 'Беларусь',
+  MD: 'Молдова',
+  AM: 'Армения',
+  IE: 'Ирландия',
+  IS: 'Исландия',
+  LU: 'Люксембург',
+  MT: 'Мальта',
+  CY: 'Кипр',
+
   // Americas
-  US: { ru: 'США', uz: 'AQSH', en: 'United States' },
-  CA: { ru: 'Канада', uz: 'Kanada', en: 'Canada' },
-  MX: { ru: 'Мексика', uz: 'Meksika', en: 'Mexico' },
-  BR: { ru: 'Бразилия', uz: 'Braziliya', en: 'Brazil' },
-  AR: { ru: 'Аргентина', uz: 'Argentina', en: 'Argentina' },
-  CL: { ru: 'Чили', uz: 'Chili', en: 'Chile' },
-  CO: { ru: 'Колумбия', uz: 'Kolumbiya', en: 'Colombia' },
-  PE: { ru: 'Перу', uz: 'Peru', en: 'Peru' },
-  VE: { ru: 'Венесуэла', uz: 'Venesuela', en: 'Venezuela' },
-  EC: { ru: 'Эквадор', uz: 'Ekvador', en: 'Ecuador' },
-  UY: { ru: 'Уругвай', uz: 'Urugvay', en: 'Uruguay' },
-  PY: { ru: 'Парагвай', uz: 'Paragvay', en: 'Paraguay' },
-  BO: { ru: 'Боливия', uz: 'Boliviya', en: 'Bolivia' },
-  CR: { ru: 'Коста-Рика', uz: 'Kosta-Rika', en: 'Costa Rica' },
-  PA: { ru: 'Панама', uz: 'Panama', en: 'Panama' },
-  
+  US: 'США',
+  CA: 'Канада',
+  MX: 'Мексика',
+  BR: 'Бразилия',
+  AR: 'Аргентина',
+  CL: 'Чили',
+  CO: 'Колумбия',
+  PE: 'Перу',
+  VE: 'Венесуэла',
+  EC: 'Эквадор',
+  UY: 'Уругвай',
+  PY: 'Парагвай',
+  BO: 'Боливия',
+  CR: 'Коста-Рика',
+  PA: 'Панама',
+
   // Middle East & Africa
-  SA: { ru: 'Саудовская Аравия', uz: 'Saudiya Arabistoni', en: 'Saudi Arabia' },
-  QA: { ru: 'Катар', uz: 'Qatar', en: 'Qatar' },
-  KW: { ru: 'Кувейт', uz: 'Quvayt', en: 'Kuwait' },
-  BH: { ru: 'Бахрейн', uz: 'Bahrayn', en: 'Bahrain' },
-  OM: { ru: 'Оман', uz: 'Ummon', en: 'Oman' },
-  JO: { ru: 'Иордания', uz: 'Iordaniya', en: 'Jordan' },
-  IL: { ru: 'Израиль', uz: 'Isroil', en: 'Israel' },
-  EG: { ru: 'Египет', uz: 'Misr', en: 'Egypt' },
-  ZA: { ru: 'ЮАР', uz: 'JAR', en: 'South Africa' },
-  MA: { ru: 'Марокко', uz: 'Marokash', en: 'Morocco' },
-  TN: { ru: 'Тунис', uz: 'Tunis', en: 'Tunisia' },
-  KE: { ru: 'Кения', uz: 'Keniya', en: 'Kenya' },
-  NG: { ru: 'Нигерия', uz: 'Nigeriya', en: 'Nigeria' },
-  GH: { ru: 'Гана', uz: 'Gana', en: 'Ghana' },
-  
+  SA: 'Саудовская Аравия',
+  QA: 'Катар',
+  KW: 'Кувейт',
+  BH: 'Бахрейн',
+  OM: 'Оман',
+  JO: 'Иордания',
+  IL: 'Израиль',
+  EG: 'Египет',
+  ZA: 'ЮАР',
+  MA: 'Марокко',
+  TN: 'Тунис',
+  KE: 'Кения',
+  NG: 'Нигерия',
+  GH: 'Гана',
+
   // Oceania
-  AU: { ru: 'Австралия', uz: 'Avstraliya', en: 'Australia' },
-  NZ: { ru: 'Новая Зеландия', uz: 'Yangi Zelandiya', en: 'New Zealand' },
-  FJ: { ru: 'Фиджи', uz: 'Fiji', en: 'Fiji' },
-  
+  AU: 'Австралия',
+  NZ: 'Новая Зеландия',
+  FJ: 'Фиджи',
+
   // Central Asia
-  UZ: { ru: 'Узбекистан', uz: "O'zbekiston", en: 'Uzbekistan' },
-  KZ: { ru: 'Казахстан', uz: "Qozog'iston", en: 'Kazakhstan' },
-  KG: { ru: 'Кыргызстан', uz: "Qirg'iziston", en: 'Kyrgyzstan' },
-  TJ: { ru: 'Таджикистан', uz: 'Tojikiston', en: 'Tajikistan' },
-  TM: { ru: 'Туркменистан', uz: 'Turkmaniston', en: 'Turkmenistan' },
+  UZ: 'Узбекистан',
+  KZ: 'Казахстан',
+  KG: 'Кыргызстан',
+  TJ: 'Таджикистан',
+  TM: 'Туркменистан',
 };
 
 // UI translations
@@ -308,234 +306,6 @@ export const TRANSLATIONS = {
       madeWith: 'Сделано с ❤️ для путешественников',
     },
   },
-  uz: {
-    nav: {
-      home: 'Bosh sahifa',
-      plans: 'Rejalar',
-      contacts: 'Aloqa',
-    },
-    hero: {
-      badge: 'eSIM oniy faollashtirish',
-      title: 'Chegaralarsiz sayohat qiling',
-      description: "Dunyoning 190 dan ortiq mamlakatida mobil aloqa. Har doim va har yerda qulay tariflar bilan aloqada bo'ling.",
-      features: {
-        coverage: '190+ mamlakat qamrovi',
-        activation: '2 daqiqada oniy faollashtirish',
-        secure: 'Xavfsiz 5G aloqa',
-      },
-      cta: 'Batafsil',
-    },
-    benefits: {
-      title: 'Nima uchun',
-      titleHighlight: 'eSIM?',
-      description: 'Jismoniy SIM-kartasiz mobil aloqa uchun zamonaviy yechim',
-      instant: {
-        title: 'Oniy faollashtirish',
-        description: "Qo'nganingizdan so'ng darhol internetga kiring. Navbatsiz va kutishsiz.",
-      },
-      savings: {
-        title: 'Pul tejash',
-        description: 'Qimmat roumingdan qoching. eSIM tariflari oddiy roumingdan 5-10 marta arzonroq.',
-      },
-      noPhysical: {
-        title: 'Jismoniy kartasiz',
-        description: 'SIM-kartani almashtirish shart emas. Hamma narsa qurilmangizda raqamli boshqariladi.',
-      },
-      multiCountry: {
-        title: 'Bir nechta mamlakat',
-        description: 'Bitta eSIM profili bir nechta mamlakatda ishlaydi. Chegaralarsiz sayohat qiling.',
-      },
-      dataControl: {
-        title: 'Trafik nazorati',
-        description: "Qancha ma'lumot ishlatayotganingizni aniq bilib turing. Yashirin to'lovlar yo'q.",
-      },
-    },
-    plans: {
-      badge: 'Bizning tariflar',
-      title: 'Mukammal',
-      titleHighlight: 'rejani',
-      description: 'Har bir mamlakat uchun yuqori tezlikdagi internet bilan moslashuvchan tariflar',
-      tabs: {
-        asia: 'OSIYO',
-        europe: 'YEVROPA',
-      },
-      card: {
-        internet: 'INTERNET',
-        days: 'kun',
-        valid: 'AMAL QILADI',
-        price: 'NARX',
-        currency: 'SUM',
-        buy: 'Sotib olish',
-      },
-      empty: "Bu mintaqa uchun rejalar tez orada paydo bo'ladi",
-      emptyDescription: "Biz bu mintaqa uchun tariflarni qo'shish ustida ishlayapmiz",
-      error: "Rejalarni yuklab bo'lmadi. Iltimos keyinroq urinib ko'ring.",
-    },
-    destinations: {
-      badge: "Mashhur yo'nalishlar",
-      title: 'Qayerga',
-      titleHighlight: 'ketyapsiz?',
-      description: 'Mamlakatni tanlang va sayohatingiz uchun ideal tarifni toping',
-      explore: "Rejalarni ko'rish",
-    },
-    faq: {
-      title: "Tez-tez so'raladigan",
-      titleHighlight: 'savollar',
-      description: "eSIM haqida bilishingiz kerak bo'lgan hamma narsa",
-      questions: {
-        whatIsEsim: {
-          question: 'eSIM nima?',
-          answer: "eSIM - bu qurilmangizga o'rnatilgan o'rnatilgan SIM-karta. Jismoniy karta o'rniga, siz QR-kod yoki ilova orqali oniy faollashtirishingiz mumkin bo'lgan raqamli profilni olasiz.",
-        },
-        howToActivate: {
-          question: 'eSIMni qanday faollashtirish mumkin?',
-          answer: "Xarid qilganingizdan so'ng, sizga emailga QR-kod yuboriladi. Uni telefon sozlamalarida kamera bilan skanerlang va eSIM avtomatik faollashadi. Butun jarayon 2 daqiqadan ko'p vaqt olmaydi.",
-        },
-        deviceCompatibility: {
-          question: "Qaysi qurilmalar eSIMni qo'llab-quvvatlaydi?",
-          answer: "Ko'pchilik zamonaviy smartfonlar eSIMni qo'llab-quvvatlaydi: iPhone XS va yangiroqlari, Samsung Galaxy S20 va yangiroqlari, Google Pixel 3 va yangiroqlari, shuningdek Huawei, Oppo va boshqalarning ko'p modellari. Xarid qilishdan oldin qurilmangiz muvofiqligini tekshiring.",
-        },
-        canKeepNumber: {
-          question: "Raqamimni saqlab qolsam bo'ladimi?",
-          answer: "Ha, siz eSIMni oddiy SIM-karta bilan birga ishlatishingiz mumkin. Asosiy raqamingiz qo'ng'iroqlar va SMS uchun faol bo'lib qoladi, eSIM esa mobil internet uchun ishlatiladi.",
-        },
-      },
-    },
-    countryPage: {
-      title: 'dagi eSIM rejalar',
-      backButton: 'Rejalarga qaytish',
-      filterLabel: 'Filtrlar',
-      dataLabel: "Ma'lumotlar hajmi",
-      durationLabel: 'Muddat',
-      allData: 'Barcha hajmlar',
-      allDuration: 'Barcha muddatlar',
-      noPlans: 'Rejalar topilmadi',
-      noPlansDescription: "Filtrlarni o'zgartiring yoki keyinroq qaytib keling",
-    },
-    footer: {
-      description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlari bilan chegaralarsiz sayohat qiling.',
-      quickLinks: 'Tezkor havolalar',
-      legal: "Huquqiy ma'lumot",
-      privacy: 'Maxfiylik',
-      terms: 'Foydalanish shartlari',
-      copyright: 'Barcha huquqlar himoyalangan.',
-      madeWith: '❤️ bilan sayohatchilar uchun yaratildi',
-    },
-  },
-  en: {
-    nav: {
-      home: 'Home',
-      plans: 'Plans',
-      contacts: 'Contacts',
-    },
-    hero: {
-      badge: 'Instant eSIM Activation',
-      title: 'Travel Without Borders with',
-      description: 'Global mobile coverage in more than 190 countries worldwide. Stay connected everywhere and always with our affordable plans.',
-      features: {
-        coverage: '190+ countries coverage',
-        activation: 'Instant activation in 2 minutes',
-        secure: 'Secure 5G connection',
-      },
-      cta: 'Learn More',
-    },
-    benefits: {
-      title: 'Why choose',
-      titleHighlight: 'eSIM?',
-      description: 'Modern solution for mobile connectivity without physical SIM cards',
-      instant: {
-        title: 'Instant Activation',
-        description: 'Get internet access right after landing. No queues, no waiting.',
-      },
-      savings: {
-        title: 'Save Money',
-        description: 'Avoid expensive roaming. eSIM plans are 5-10 times cheaper than traditional roaming.',
-      },
-      noPhysical: {
-        title: 'No Physical Card',
-        description: 'No need to swap SIM cards. Everything is managed digitally on your device.',
-      },
-      multiCountry: {
-        title: 'Multiple Countries',
-        description: 'One eSIM profile works in multiple countries. Travel without limits.',
-      },
-      dataControl: {
-        title: 'Data Control',
-        description: 'Know exactly how much data you use. No hidden fees or surprises.',
-      },
-    },
-    plans: {
-      badge: 'Our Plans',
-      title: 'Choose the Perfect',
-      titleHighlight: 'Plan',
-      description: 'Flexible plans for every country with high-speed internet',
-      tabs: {
-        asia: 'ASIA',
-        europe: 'EUROPE',
-      },
-      card: {
-        internet: 'INTERNET',
-        days: 'days',
-        valid: 'VALID',
-        price: 'PRICE',
-        currency: 'UZS',
-        buy: 'Buy',
-      },
-      empty: 'Plans for this region coming soon',
-      emptyDescription: 'We are working on adding plans for this region',
-      error: 'Failed to load plans. Please try again later.',
-    },
-    destinations: {
-      badge: 'Popular Destinations',
-      title: 'Where are you',
-      titleHighlight: 'heading?',
-      description: 'Choose a country and find the perfect plan for your trip',
-      explore: 'Explore Plans',
-    },
-    faq: {
-      title: 'Frequently Asked',
-      titleHighlight: 'Questions',
-      description: 'Everything you need to know about eSIM',
-      questions: {
-        whatIsEsim: {
-          question: 'What is eSIM?',
-          answer: 'eSIM is an embedded SIM card that is already built into your device. Instead of a physical card, you get a digital profile that can be activated instantly via QR code or app.',
-        },
-        howToActivate: {
-          question: 'How to activate eSIM?',
-          answer: 'After purchase, you will receive a QR code via email. Simply scan it with your phone camera in cellular settings, and the eSIM will activate automatically. The entire process takes no more than 2 minutes.',
-        },
-        deviceCompatibility: {
-          question: 'Which devices support eSIM?',
-          answer: 'Most modern smartphones support eSIM: iPhone XS and newer, Samsung Galaxy S20 and newer, Google Pixel 3 and newer, as well as many Huawei, Oppo and other models. Check your device compatibility before purchase.',
-        },
-        canKeepNumber: {
-          question: 'Can I keep my number?',
-          answer: 'Yes, you can use eSIM alongside your regular SIM card. Your main number will remain active for calls and SMS, while the eSIM will be used for mobile internet.',
-        },
-      },
-    },
-    countryPage: {
-      title: 'eSIM Plans in',
-      backButton: 'Back to Plans',
-      filterLabel: 'Filters',
-      dataLabel: 'Data Amount',
-      durationLabel: 'Duration',
-      allData: 'All Data',
-      allDuration: 'All Durations',
-      noPlans: 'No Plans Found',
-      noPlansDescription: 'Try changing filters or come back later',
-    },
-    footer: {
-      description: 'Your reliable partner in the world of mobile communications. Travel without borders with our eSIM solutions.',
-      quickLinks: 'Quick Links',
-      legal: 'Legal Information',
-      privacy: 'Privacy',
-      terms: 'Terms of Use',
-      copyright: 'All rights reserved.',
-      madeWith: 'Made with ❤️ for travelers',
-    },
-  },
 };
 
 // Fixed getTranslation function with proper error handling
@@ -583,14 +353,13 @@ export const getTranslation = (lang, key) => {
   }
 };
 
-export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
+export const getCountryName = (countryCode) => {
   try {
     const country = COUNTRY_TRANSLATIONS[countryCode];
     if (!country) {
-      console.warn(`getCountryName: Country code "${countryCode}" not found`);
       return countryCode;
     }
-    return country[lang] || country[DEFAULT_LANGUAGE] || countryCode;
+    return country;
   } catch (error) {
     console.error('getCountryName error:', error);
     return countryCode;

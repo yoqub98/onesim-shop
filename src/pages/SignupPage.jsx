@@ -35,50 +35,17 @@ const SignupPage = () => {
   const { signUp, verifyOtp, resendOtp } = useAuth();
   const lang = DEFAULT_LANGUAGE;
 
-  // Debug: Log initialization
-  React.useEffect(() => {
-    console.log('🔧 SignupPage initialized');
-    console.log('🔧 lang:', lang);
-    console.log('🔧 DEFAULT_LANGUAGE:', DEFAULT_LANGUAGE);
-    console.log('🔧 getTranslation type:', typeof getTranslation);
-    console.log('🔧 getTranslation function:', getTranslation);
-  }, [lang]);
-
-  // Create a simple, stable translation function - NOT using useCallback
-  // This ensures t is always defined and available
   const t = (key) => {
     try {
-      console.log(`🔤 Translating key: ${key}`);
-      console.log('🔤 Current lang:', lang);
-      console.log('🔤 getTranslation available:', typeof getTranslation);
-
       if (typeof getTranslation !== 'function') {
-        console.error('❌ getTranslation is not a function!');
         return key;
       }
-
       const result = getTranslation(lang, key);
-      console.log(`🔤 Translation result for [${key}]:`, result);
       return result || key;
     } catch (err) {
-      console.error('❌ Translation error for key:', key, err);
-      console.error('❌ Error stack:', err.stack);
       return key;
     }
   };
-
-  // Debug: Log t function
-  React.useEffect(() => {
-    console.log('🔧 Translation function (t) type:', typeof t);
-    console.log('🔧 Translation function (t):', t);
-    console.log('🔧 Testing t function with test key...');
-    try {
-      const testResult = t('auth.signup.title');
-      console.log('🔧 Test translation result:', testResult);
-    } catch (err) {
-      console.error('🔧 Test translation failed:', err);
-    }
-  }, []);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -100,7 +67,6 @@ const SignupPage = () => {
   }, []);
 
 const validateForm = () => {
-  console.log('🔍 validateForm called');
   const newErrors = {};
 
   if (!formData.firstName.trim()) {
@@ -133,7 +99,6 @@ const validateForm = () => {
     newErrors.confirmPassword = getTranslation(lang, 'auth.errors.passwordsNotMatch') || 'Пароли не совпадают';
   }
 
-  console.log('✅ Validation complete, errors:', newErrors);
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
 };
@@ -141,28 +106,20 @@ const validateForm = () => {
   const handleSubmit = React.useCallback(async (e) => {
     e.preventDefault();
 
-    console.log('📝 handleSubmit called');
-    console.log('🔍 t type in handleSubmit:', typeof t);
-
     if (!validateForm()) {
-      console.warn('⚠️ Form validation failed in signup');
       return;
     }
 
-    console.log('📝 Starting signup process...');
     setLoading(true);
 
     try {
-      const { data, error } = await signUp(formData.email, formData.password, {
+      const { error } = await signUp(formData.email, formData.password, {
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone: `+998${formData.phone}`,
       });
 
-      console.log('📧 Signup response:', { data, error });
-
       if (error) {
-        console.error('❌ Signup error:', error);
         toaster.create({
           title: 'Ошибка регистрации',
           description: error.message || t('auth.errors.signupFailed') || 'Ошибка регистрации. Попробуйте снова.',
@@ -172,7 +129,6 @@ const validateForm = () => {
         return;
       }
 
-      console.log('✅ Signup successful, opening OTP modal');
       toaster.create({
         title: t('auth.success.otpSent') || 'Код подтверждения отправлен на email',
         description: 'Проверьте вашу почту',
@@ -182,10 +138,7 @@ const validateForm = () => {
 
       setOtpModalOpen(true);
     } catch (err) {
-      console.error('💥 Unexpected signup error:', err);
-      console.error('Error stack:', err.stack);
-      console.error('Error name:', err.name);
-      console.error('Error message:', err.message);
+      console.error('Unexpected signup error:', err);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -201,21 +154,15 @@ const validateForm = () => {
     const otpCode = otpValue.join('');
 
     if (otpCode.length !== 8) {
-      console.warn('⚠️ OTP incomplete:', otpCode.length, 'digits');
       return;
     }
 
-    console.log('🔐 Verifying OTP...');
-    console.log('🔍 t type in handleVerifyOtp:', typeof t);
     setVerifying(true);
 
     try {
-      const { data, error } = await verifyOtp(formData.email, otpCode);
-
-      console.log('🔍 OTP verification response:', { data, error });
+      const { error } = await verifyOtp(formData.email, otpCode);
 
       if (error) {
-        console.error('❌ OTP verification failed:', error);
         toaster.create({
           title: 'Ошибка проверки',
           description: error.message || t('auth.errors.otpInvalid') || 'Неверный код подтверждения',
@@ -226,7 +173,6 @@ const validateForm = () => {
         return;
       }
 
-      console.log('✅ OTP verified successfully');
       toaster.create({
         title: t('auth.success.signupComplete') || 'Регистрация успешна! Теперь войдите в систему.',
         description: 'Теперь вы можете войти в систему',
@@ -237,8 +183,7 @@ const validateForm = () => {
       setOtpModalOpen(false);
       setTimeout(() => navigate('/login'), 1000);
     } catch (err) {
-      console.error('💥 Unexpected OTP verification error:', err);
-      console.error('Error stack:', err.stack);
+      console.error('Unexpected OTP verification error:', err);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -252,15 +197,12 @@ const validateForm = () => {
   }, [otpValue, verifyOtp, formData.email, navigate]);
 
   const handleResendOtp = React.useCallback(async () => {
-    console.log('🔄 Resending OTP...');
-    console.log('🔍 t type in handleResendOtp:', typeof t);
     setResending(true);
 
     try {
       const { error } = await resendOtp(formData.email);
 
       if (error) {
-        console.error('❌ Resend OTP failed:', error);
         toaster.create({
           title: 'Ошибка',
           description: 'Не удалось отправить код повторно',
@@ -270,7 +212,6 @@ const validateForm = () => {
         return;
       }
 
-      console.log('✅ OTP resent successfully');
       toaster.create({
         title: t('auth.success.otpSent') || 'Код подтверждения отправлен на email',
         description: 'Новый код отправлен на почту',
@@ -280,8 +221,7 @@ const validateForm = () => {
 
       setOtpValue(['', '', '', '', '', '', '', '']);
     } catch (err) {
-      console.error('💥 Unexpected resend error:', err);
-      console.error('Error stack:', err.stack);
+      console.error('Unexpected resend error:', err);
       toaster.create({
         title: 'Ошибка',
         description: 'Произошла непредвиденная ошибка',
@@ -528,12 +468,9 @@ const validateForm = () => {
                     size="lg"
                     value={otpValue}
                     onValueChange={(details) => {
-                      console.log('🔢 OTP input change:', details);
                       setOtpValue(details.value);
-                      
-                      // Auto-submit when all 8 digits entered
+
                       if (details.value.join('').length === 8) {
-                        console.log('🎯 8 digits entered, auto-verifying');
                         setTimeout(() => handleVerifyOtp(), 300);
                       }
                     }}
