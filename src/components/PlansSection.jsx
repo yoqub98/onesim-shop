@@ -2,12 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Card,
   Container,
   Heading,
   Text,
   Button,
-  Grid,
   Badge,
   HStack,
   VStack,
@@ -27,7 +25,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const t = (key) => getTranslation(lang, key);
 
   return (
-    <Card.Root
+    <Box
       ref={cardRef}
       position="relative"
       cursor="pointer"
@@ -60,10 +58,10 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
         transition="opacity 0.3s"
       />
 
-      <Card.Body p={8}>
-        <VStack align="stretch" gap={6} height="100%">
+      <Box p={8}>
+        <VStack align="stretch" spacing={6} height="100%">
           <Box>
-            <HStack gap={3} mb={4} flexWrap="nowrap">
+            <HStack spacing={3} mb={4} flexWrap="nowrap">
               <Box
                 borderRadius="xl"
                 overflow="hidden"
@@ -88,7 +86,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   }} 
                 />
               </Box>
-              <HStack gap={2} overflow="hidden" flexGrow={1}>
+              <HStack spacing={2} overflow="hidden" flexGrow={1}>
                 <MapPin size={16} color="#9333ea" flexShrink={0} />
                 <Heading 
                   size="xl" 
@@ -104,7 +102,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </HStack>
 
             <Badge
-              colorPalette="purple"
+              colorScheme="purple"
               fontSize="xs"
               fontWeight="800"
               px={3}
@@ -147,8 +145,8 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </Text>
           </Box>
 
-          <HStack 
-            gap={3} 
+          <HStack
+            spacing={3}
             color="gray.600"
             p={3}
             bg="gray.50"
@@ -168,11 +166,11 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             borderColor="gray.200"
           >
             <HStack justify="space-between" align="center">
-              <VStack align="flex-start" gap={0}>
+              <VStack align="flex-start" spacing={0}>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
                   {t('plans.card.price')}
                 </Text>
-                <HStack gap={1.5} align="baseline">
+                <HStack spacing={1.5} align="baseline">
                   <Heading
                     fontSize="3xl"
                     fontWeight="800"
@@ -206,15 +204,15 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             </HStack>
           </Box>
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
 // Loading Skeleton Component
 const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
-    <Card.Root
+    <Box
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
@@ -226,10 +224,10 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
         animationDelay: `${delay}ms`,
       }}
     >
-      <Card.Body p={8}>
-        <VStack align="stretch" gap={6}>
+      <Box p={8}>
+        <VStack align="stretch" spacing={6}>
           <Box>
-            <HStack gap={4} mb={4}>
+            <HStack spacing={4} mb={4}>
               <Box
                 borderRadius="xl"
                 width="56px"
@@ -273,8 +271,8 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
@@ -393,10 +391,10 @@ const PlansSection = () => {
       />
 
       <Container maxW="8xl" position="relative">
-        <VStack gap={16}>
-          <VStack gap={4} textAlign="center" className="animate__animated animate__fadeIn">
+        <VStack spacing={16}>
+          <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
-              colorPalette="purple"
+              colorScheme="purple"
               fontSize="sm"
               fontWeight="800"
               px={5}
@@ -511,7 +509,7 @@ const PlansSection = () => {
               pb={4}
             >
               <HStack
-                gap={6}
+                spacing={6}
                 align="stretch"
                 className="animate__animated animate__fadeIn"
                 style={{ animationDelay: '200ms' }}
@@ -528,7 +526,7 @@ const PlansSection = () => {
                   ))
                 ) : (
                   <Box w="100%" textAlign="center" py={16}>
-                    <VStack gap={4}>
+                    <VStack spacing={4}>
                       <Box
                         w="80px"
                         h="80px"

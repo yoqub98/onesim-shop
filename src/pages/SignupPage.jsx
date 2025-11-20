@@ -11,9 +11,11 @@ import {
   VStack,
   HStack,
   Link,
-  Field,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
 } from '@chakra-ui/react';
-import { Mail, Lock, User, Phone } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
@@ -140,8 +142,8 @@ const SignupPage = () => {
   return (
     <Box minH="100vh" bg="gray.50" py={20}>
       <Container maxW="md">
-        <VStack gap={8}>
-          <VStack gap={2}>
+        <VStack spacing={8}>
+          <VStack spacing={2}>
             <Heading
               size="2xl"
               background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
@@ -164,10 +166,10 @@ const SignupPage = () => {
             borderRadius="2xl"
             shadow="lg"
           >
-            <VStack gap={4}>
-              <Field.Root invalid={!!errors.firstName}>
-                <Field.Label>{t('auth.fields.firstName')}</Field.Label>
-                <HStack>
+            <VStack spacing={4}>
+              <FormControl isInvalid={!!errors.firstName}>
+                <FormLabel>{t('auth.fields.firstName')}</FormLabel>
+                <HStack spacing={0}>
                   <Box color="gray.500" px={3}>
                     <User size={18} />
                   </Box>
@@ -177,12 +179,12 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.firstName')}
                   />
                 </HStack>
-                {errors.firstName && <Field.ErrorText>{errors.firstName}</Field.ErrorText>}
-              </Field.Root>
+                {errors.firstName && <FormErrorMessage>{errors.firstName}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.lastName}>
-                <Field.Label>{t('auth.fields.lastName')}</Field.Label>
-                <HStack>
+              <FormControl isInvalid={!!errors.lastName}>
+                <FormLabel>{t('auth.fields.lastName')}</FormLabel>
+                <HStack spacing={0}>
                   <Box color="gray.500" px={3}>
                     <User size={18} />
                   </Box>
@@ -192,12 +194,12 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.lastName')}
                   />
                 </HStack>
-                {errors.lastName && <Field.ErrorText>{errors.lastName}</Field.ErrorText>}
-              </Field.Root>
+                {errors.lastName && <FormErrorMessage>{errors.lastName}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.phone}>
-                <Field.Label>{t('auth.fields.phone')}</Field.Label>
-                <HStack>
+              <FormControl isInvalid={!!errors.phone}>
+                <FormLabel>{t('auth.fields.phone')}</FormLabel>
+                <HStack spacing={0}>
                   <Box bg="gray.100" px={3} py={2} borderRadius="md">
                     <Text fontWeight="600">+998</Text>
                   </Box>
@@ -208,12 +210,12 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.phone')}
                   />
                 </HStack>
-                {errors.phone && <Field.ErrorText>{errors.phone}</Field.ErrorText>}
-              </Field.Root>
+                {errors.phone && <FormErrorMessage>{errors.phone}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.email}>
-                <Field.Label>{t('auth.fields.email')}</Field.Label>
-                <HStack>
+              <FormControl isInvalid={!!errors.email}>
+                <FormLabel>{t('auth.fields.email')}</FormLabel>
+                <HStack spacing={0}>
                   <Box color="gray.500" px={3}>
                     <Mail size={18} />
                   </Box>
@@ -224,12 +226,12 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.email')}
                   />
                 </HStack>
-                {errors.email && <Field.ErrorText>{errors.email}</Field.ErrorText>}
-              </Field.Root>
+                {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.password}>
-                <Field.Label>{t('auth.fields.password')}</Field.Label>
-                <HStack>
+              <FormControl isInvalid={!!errors.password}>
+                <FormLabel>{t('auth.fields.password')}</FormLabel>
+                <HStack spacing={0}>
                   <Box color="gray.500" px={3}>
                     <Lock size={18} />
                   </Box>
@@ -240,12 +242,12 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.password')}
                   />
                 </HStack>
-                {errors.password && <Field.ErrorText>{errors.password}</Field.ErrorText>}
-              </Field.Root>
+                {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.confirmPassword}>
-                <Field.Label>{t('auth.fields.confirmPassword')}</Field.Label>
-                <HStack>
+              <FormControl isInvalid={!!errors.confirmPassword}>
+                <FormLabel>{t('auth.fields.confirmPassword')}</FormLabel>
+                <HStack spacing={0}>
                   <Box color="gray.500" px={3}>
                     <Lock size={18} />
                   </Box>
@@ -256,8 +258,8 @@ const SignupPage = () => {
                     placeholder={t('auth.placeholders.confirmPassword')}
                   />
                 </HStack>
-                {errors.confirmPassword && <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>}
-              </Field.Root>
+                {errors.confirmPassword && <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>}
+              </FormControl>
 
               <Button
                 type="submit"
@@ -266,7 +268,7 @@ const SignupPage = () => {
                 bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 color="white"
                 fontWeight="700"
-                loading={loading}
+                isLoading={loading}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: 'lg',
@@ -278,8 +280,8 @@ const SignupPage = () => {
 
               <Text fontSize="sm" color="gray.600">
                 {t('auth.signup.haveAccount')}{' '}
-                <Link asChild color="purple.600" fontWeight="600">
-                  <RouterLink to="/login">{t('auth.signup.loginLink')}</RouterLink>
+                <Link as={RouterLink} to="/login" color="purple.600" fontWeight="600">
+                  {t('auth.signup.loginLink')}
                 </Link>
               </Text>
             </VStack>
@@ -304,7 +306,7 @@ const SignupPage = () => {
         >
           <Box bg="white" p={6} borderRadius="xl" maxW="md" w="full" mx={4}>
             <Heading size="lg" mb={4}>{t('auth.verification.title')}</Heading>
-            <VStack gap={4}>
+            <VStack spacing={4}>
               <Text fontSize="sm" color="gray.600" textAlign="center">
                 {t('auth.verification.description')}
               </Text>
@@ -323,8 +325,8 @@ const SignupPage = () => {
                 bg="purple.600"
                 color="white"
                 onClick={handleVerifyPin}
-                loading={verifyLoading}
-                disabled={pin.length !== 8}
+                isLoading={verifyLoading}
+                isDisabled={pin.length !== 8}
               >
                 {t('auth.verification.button')}
               </Button>

@@ -9,7 +9,7 @@ import {
   VStack,
   HStack,
   Avatar,
-  Separator,
+  Divider,
 } from '@chakra-ui/react';
 import { LogOut, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -51,7 +51,7 @@ const PersonalCabinetPage = () => {
     console.log('⏳ Cabinet loading...');
     return (
       <Box minH="calc(100vh - 80px)" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
-        <VStack gap={4}>
+        <VStack spacing={4}>
           <Box
             w="50px"
             h="50px"
@@ -84,16 +84,16 @@ const PersonalCabinetPage = () => {
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={12}>
       <Container maxW="6xl">
-        <VStack gap={8} align="stretch">
+        <VStack spacing={8} align="stretch">
           <Box bg="white" p={8} borderRadius="2xl" boxShadow="0 4px 12px rgba(100, 100, 100, 0.15)">
-            <HStack gap={6} flexWrap="wrap">
+            <HStack spacing={6} flexWrap="wrap">
               <Avatar
                 size="2xl"
                 name={fullName}
                 bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 color="white"
               />
-              <VStack align="flex-start" gap={2} flex={1}>
+              <VStack align="flex-start" spacing={2} flex={1}>
                 <Heading fontSize="3xl" fontWeight="800" color="gray.900">
                   {t('cabinet.welcome')}, {fullName}!
                 </Heading>
@@ -104,7 +104,7 @@ const PersonalCabinetPage = () => {
               </VStack>
               <Button
                 leftIcon={<LogOut size={20} />}
-                colorPalette="red"
+                colorScheme="red"
                 variant="outline"
                 size="md"
                 onClick={handleLogout}
@@ -116,11 +116,11 @@ const PersonalCabinetPage = () => {
             </HStack>
           </Box>
 
-          <Separator />
+          <Divider />
 
           <Box bg="white" p={8} borderRadius="2xl" boxShadow="0 4px 12px rgba(100, 100, 100, 0.15)" minH="400px">
-            <VStack gap={6} align="stretch">
-              <HStack gap={3}>
+            <VStack spacing={6} align="stretch">
+              <HStack spacing={3}>
                 <Package size={28} color="#667eea" />
                 <Heading fontSize="2xl" fontWeight="800" color="gray.900">
                   {t('cabinet.ordersTitle')}
@@ -128,11 +128,11 @@ const PersonalCabinetPage = () => {
               </HStack>
 
               <Box p={12} bg="gray.50" borderRadius="xl" border="2px dashed" borderColor="gray.300" textAlign="center">
-                <VStack gap={4}>
+                <VStack spacing={4}>
                   <Box p={4} bg="purple.100" borderRadius="full" display="inline-flex">
                     <Package size={40} color="#7c3aed" />
                   </Box>
-                  <VStack gap={2}>
+                  <VStack spacing={2}>
                     <Heading fontSize="xl" fontWeight="700" color="gray.700">
                       {t('cabinet.noOrders')}
                     </Heading>

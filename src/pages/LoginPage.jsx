@@ -11,7 +11,9 @@ import {
   VStack,
   HStack,
   Link,
-  Field,
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -71,8 +73,8 @@ const LoginPage = () => {
   return (
     <Box minH="100vh" bg="gray.50" py={20}>
       <Container maxW="md">
-        <VStack gap={8}>
-          <VStack gap={2}>
+        <VStack spacing={8}>
+          <VStack spacing={2}>
             <Heading
               size="2xl"
               background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
@@ -95,9 +97,9 @@ const LoginPage = () => {
             borderRadius="2xl"
             shadow="lg"
           >
-            <VStack gap={4}>
-              <Field.Root invalid={!!errors.email}>
-                <Field.Label>{t('auth.fields.email')}</Field.Label>
+            <VStack spacing={4}>
+              <FormControl isInvalid={!!errors.email}>
+                <FormLabel>{t('auth.fields.email')}</FormLabel>
                 <HStack>
                   <Box color="gray.500" px={3}>
                     <Mail size={18} />
@@ -109,11 +111,11 @@ const LoginPage = () => {
                     placeholder={t('auth.placeholders.email')}
                   />
                 </HStack>
-                {errors.email && <Field.ErrorText>{errors.email}</Field.ErrorText>}
-              </Field.Root>
+                {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
+              </FormControl>
 
-              <Field.Root invalid={!!errors.password}>
-                <Field.Label>{t('auth.fields.password')}</Field.Label>
+              <FormControl isInvalid={!!errors.password}>
+                <FormLabel>{t('auth.fields.password')}</FormLabel>
                 <HStack>
                   <Box color="gray.500" px={3}>
                     <Lock size={18} />
@@ -125,8 +127,8 @@ const LoginPage = () => {
                     placeholder={t('auth.placeholders.password')}
                   />
                 </HStack>
-                {errors.password && <Field.ErrorText>{errors.password}</Field.ErrorText>}
-              </Field.Root>
+                {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
+              </FormControl>
 
               <Button
                 type="submit"
@@ -135,7 +137,7 @@ const LoginPage = () => {
                 bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 color="white"
                 fontWeight="700"
-                loading={loading}
+                isLoading={loading}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: 'lg',
@@ -147,8 +149,8 @@ const LoginPage = () => {
 
               <Text fontSize="sm" color="gray.600">
                 {t('auth.login.noAccount')}{' '}
-                <Link asChild color="purple.600" fontWeight="600">
-                  <RouterLink to="/signup">{t('auth.login.signupLink')}</RouterLink>
+                <Link as={RouterLink} to="/signup" color="purple.600" fontWeight="600">
+                  {t('auth.login.signupLink')}
                 </Link>
               </Text>
             </VStack>

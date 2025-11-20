@@ -16,9 +16,11 @@ import {
   IconButton,
   Link,
   Avatar,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
-import { Menu, MenuList, MenuItem } from '@chakra-ui/menu';
-import { MenuButton } from '@chakra-ui/menu';
 import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
@@ -86,14 +88,14 @@ const Navigation = () => {
             </Heading>
           </Link>
 
-          <HStack gap={10} hideBelow="md">
-            <Link 
-              href="/#home" 
-              fontWeight="600" 
-              color="gray.700" 
+          <HStack spacing={10} display={{ base: 'none', md: 'flex' }}>
+            <Link
+              href="/#home"
+              fontWeight="600"
+              color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
                 color: 'purple.600',
                 _after: { width: '100%' }
               }}
@@ -159,7 +161,7 @@ const Navigation = () => {
           </HStack>
 
           {/* User Dropdown or Login Button */}
-          <HStack gap={4} hideBelow="md">
+          <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
             {user && profile ? (
               <Menu>
                 <MenuButton
@@ -170,7 +172,7 @@ const Navigation = () => {
                   _hover={{ bg: 'gray.50' }}
                   _active={{ bg: 'gray.100' }}
                 >
-                  <HStack gap={2}>
+                  <HStack spacing={2}>
                     <Avatar
                       size="sm"
                       name={`${profile.first_name} ${profile.last_name}`}
@@ -211,7 +213,7 @@ const Navigation = () => {
           </HStack>
 
           <IconButton
-            hideFrom="md"
+            display={{ base: 'flex', md: 'none' }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             variant="ghost"
             aria-label="Toggle menu"
@@ -223,8 +225,8 @@ const Navigation = () => {
         </Flex>
 
         {mobileMenuOpen && (
-          <Box hideFrom="md" pb={4} className="animate__animated animate__fadeInDown animate__faster">
-            <VStack gap={2} align="stretch">
+          <Box display={{ base: 'block', md: 'none' }} pb={4} className="animate__animated animate__fadeInDown animate__faster">
+            <VStack spacing={2} align="stretch">
               <Link href="/#home" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.home')}
               </Link>
@@ -279,7 +281,7 @@ const HeroSection = () => {
       <Container maxW="8xl" position="relative">
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
           <GridItem className="animate__animated animate__fadeInLeft">
-            <VStack align="flex-start" gap={8}>
+            <VStack align="flex-start" spacing={8}>
               <Box bg="purple.50" color="purple.700" px={5} py={2} borderRadius="full" fontSize="sm" fontWeight="700" display="inline-flex" alignItems="center" gap={2}>
                 <Zap size={16} />
                 {t('hero.badge')}
@@ -296,20 +298,20 @@ const HeroSection = () => {
                 {t('hero.description')}
               </Text>
 
-              <VStack align="flex-start" gap={4} mt={2}>
-                <HStack gap={3}>
+              <VStack align="flex-start" spacing={4} mt={2}>
+                <HStack spacing={3}>
                   <Box bg="purple.100" p={2} borderRadius="lg">
                     <Globe size={20} color="#7c3aed" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.coverage')}</Text>
                 </HStack>
-                <HStack gap={3}>
+                <HStack spacing={3}>
                   <Box bg="purple.100" p={2} borderRadius="lg">
                     <Zap size={20} color="#7c3aed" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.activation')}</Text>
                 </HStack>
-                <HStack gap={3}>
+                <HStack spacing={3}>
                   <Box bg="purple.100" p={2} borderRadius="lg">
                     <Shield size={20} color="#7c3aed" />
                   </Box>
@@ -379,7 +381,7 @@ const Footer = () => {
       <Container maxW="8xl">
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={12} mb={12}>
           <GridItem>
-            <VStack align="flex-start" gap={4}>
+            <VStack align="flex-start" spacing={4}>
               <Heading size="xl" background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" backgroundClip="text" fontWeight="800">
                 OneSIM
               </Heading>
@@ -390,7 +392,7 @@ const Footer = () => {
           </GridItem>
 
           <GridItem>
-            <VStack align="flex-start" gap={3}>
+            <VStack align="flex-start" spacing={3}>
               <Heading size="md" fontWeight="700" mb={2}>{t('footer.quickLinks')}</Heading>
               <Link href="/#home" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.home')}</Link>
               <Link href="/#plans" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.plans')}</Link>
@@ -399,7 +401,7 @@ const Footer = () => {
           </GridItem>
 
           <GridItem>
-            <VStack align="flex-start" gap={3}>
+            <VStack align="flex-start" spacing={3}>
               <Heading size="md" fontWeight="700" mb={2}>{t('footer.legal')}</Heading>
               <Link href="#privacy" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('footer.privacy')}</Link>
               <Link href="#terms" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('footer.terms')}</Link>

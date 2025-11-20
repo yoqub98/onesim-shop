@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Card,
   Container,
   Heading,
   Text,
@@ -32,7 +31,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
   };
 
   return (
-    <Card.Root
+    <Box
       ref={cardRef}
       position="relative"
       cursor="pointer"
@@ -66,10 +65,10 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
         transition="opacity 0.3s"
       />
 
-      <Card.Body p={8}>
-        <VStack align="stretch" gap={6} justify="space-between" h="100%">
+      <Box p={8}>
+        <VStack align="stretch" spacing={6} justify="space-between" h="100%">
           {/* Flag and Country Name */}
-          <HStack gap={4} flexWrap="nowrap">
+          <HStack spacing={4} flexWrap="nowrap">
             <Box
               borderRadius="xl"
               overflow="hidden"
@@ -130,15 +129,15 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
             </Button>
           </Box>
         </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 };
 
 // Loading Skeleton Component
 const DestinationCardSkeleton = ({ delay = 0 }) => {
   return (
-    <Card.Root
+    <Box
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
@@ -149,8 +148,8 @@ const DestinationCardSkeleton = ({ delay = 0 }) => {
         animationDelay: `${delay}ms`,
       }}
     >
-      <Card.Body p={8}>
-        <HStack gap={4}>
+      <Box p={8}>
+        <HStack spacing={4}>
           <Box
             borderRadius="xl"
             width="64px"
@@ -167,8 +166,8 @@ const DestinationCardSkeleton = ({ delay = 0 }) => {
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </HStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
 
   );
 };
@@ -195,11 +194,11 @@ const PopularDestinations = () => {
       />
 
       <Container maxW="8xl" position="relative">
-        <VStack gap={16}>
+        <VStack spacing={16}>
           {/* Section Header */}
-          <VStack gap={4} textAlign="center" className="animate__animated animate__fadeIn">
+          <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
-              colorPalette="purple"
+              colorScheme="purple"
               fontSize="sm"
               fontWeight="800"
               px={5}

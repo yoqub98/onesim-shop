@@ -63,10 +63,10 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
       />
 
       <Box p={6}>
-        <VStack align="stretch" gap={4}>
+        <VStack align="stretch" spacing={4}>
           <HStack justify="space-between">
             <Badge
-              colorPalette="purple"
+              colorScheme="purple"
               fontSize="xs"
               fontWeight="700"
               px={2}
@@ -74,7 +74,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
               borderRadius="full"
               textTransform="uppercase"
             >
-              <HStack gap={1}>
+              <HStack spacing={1}>
                 <Wifi size={10} />
                 <Text>{plan.speed}</Text>
               </HStack>
@@ -110,7 +110,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
           </Box>
 
           <HStack
-            gap={2}
+            spacing={2}
             p={2}
             bg="gray.50"
             borderRadius="md"
@@ -134,14 +134,14 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
               <Text fontSize="xs" color="blue.600" fontWeight="600" textAlign="center" mb={1}>
                 Провайдер
               </Text>
-              <VStack gap={1} align="stretch">
+              <VStack spacing={1} align="stretch">
                 {plan.operatorList.map((operator, idx) => (
-                  <HStack key={idx} justify="center" gap={1}>
+                  <HStack key={idx} justify="center" spacing={1}>
                     <Text fontSize="sm" fontWeight="700" color="blue.800">
                       {operator.operatorName}
                     </Text>
                     {operator.networkType && (
-                      <Badge colorPalette="blue" fontSize="xs" px={1.5} py={0.5}>
+                      <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
                         {operator.networkType}
                       </Badge>
                     )}
@@ -157,11 +157,11 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
             borderColor="gray.200"
           >
             <HStack justify="space-between" align="center">
-              <VStack align="flex-start" gap={0.5}>
+              <VStack align="flex-start" spacing={0.5}>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
                   {t('plans.card.price') || 'Цена'}
                 </Text>
-                <HStack gap={1.5} align="baseline">
+                <HStack spacing={1.5} align="baseline">
                   <Heading
                     fontSize="2xl"
                     fontWeight="800"
@@ -188,7 +188,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
                 fontWeight="700"
                 px={3}
               >
-                <HStack gap={1}>
+                <HStack spacing={1}>
                   <Text>{t('plans.card.buy') || 'Купить'}</Text>
                   <ArrowRight size={14} />
                 </HStack>
@@ -212,7 +212,7 @@ const PlanCardSkeleton = () => {
       bg="white"
     >
       <Box p={6}>
-        <VStack align="stretch" gap={4}>
+        <VStack align="stretch" spacing={4}>
           {[20, 60, 40, 50, 60].map((height, i) => (
             <Box
               key={i}
@@ -253,10 +253,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   }
 
   return (
-    <HStack gap={2} justify="center" mt={8}>
+    <HStack spacing={2} justify="center" mt={8}>
       <IconButton
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        isDisabled={currentPage === 1}
         variant="ghost"
         size="sm"
         aria-label="Previous"
@@ -297,10 +297,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           </Button>
         </>
       )}
-      
+
       <IconButton
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        isDisabled={currentPage === totalPages}
         variant="ghost"
         size="sm"
         aria-label="Next"
@@ -453,7 +453,7 @@ const CountryPage = () => {
         )}
 
         <Container maxW="8xl" position="relative" zIndex={2} h="100%">
-          <VStack align="flex-start" justify="space-between" minH="400px" py={8} gap={6}>
+          <VStack align="flex-start" justify="space-between" minH="400px" py={8} spacing={6}>
             {/* Back Navigation */}
             <Button
               variant="ghost"
@@ -466,14 +466,14 @@ const CountryPage = () => {
               }}
               transition="all 0.3s"
             >
-              <HStack gap={2}>
+              <HStack spacing={2}>
                 <ArrowLeft size={20} />
                 <Text>Назад</Text>
               </HStack>
             </Button>
 
             {/* Main Content */}
-            <VStack align="flex-start" gap={6} w="100%">
+            <VStack align="flex-start" spacing={6} w="100%">
               {/* Flag Above Title */}
               <Box
                 borderRadius="xl"
@@ -493,7 +493,7 @@ const CountryPage = () => {
               </Box>
 
               {/* Text Content */}
-              <VStack align="flex-start" gap={5} flex={1} maxW="700px">
+              <VStack align="flex-start" spacing={5} flex={1} maxW="700px">
                 <Heading
                   fontSize={{ base: '5xl', md: '6xl' }}
                   fontWeight="900"
@@ -516,7 +516,7 @@ const CountryPage = () => {
                 </Text>
 
                 <Badge
-                  colorPalette={headerBgImage ? 'whiteAlpha' : 'purple'}
+                  colorScheme={headerBgImage ? 'whiteAlpha' : 'purple'}
                   fontSize="md"
                   px={4}
                   py={2}
@@ -527,7 +527,7 @@ const CountryPage = () => {
                   backdropFilter={headerBgImage ? 'blur(10px)' : 'none'}
                 >
                   {loading ? (
-                    <HStack gap={2}>
+                    <HStack spacing={2}>
                       <Spinner size="sm" />
                       <Text>Загрузка...</Text>
                     </HStack>
@@ -550,7 +550,7 @@ const CountryPage = () => {
         boxShadow="0 6px 20px rgba(100, 100, 100, 0.12)"
       >
         <Container maxW="8xl">
-          <HStack gap={4} flexWrap="wrap">
+          <HStack spacing={4} flexWrap="wrap">
             <Text fontWeight="600" color="gray.700">
               Фильтры:
             </Text>
@@ -559,7 +559,6 @@ const CountryPage = () => {
               <select
                 value={selectedData}
                 onChange={(e) => setSelectedData(e.target.value)}
-                disabled={loading}
                 style={{
                   width: '100%',
                   padding: '8px 12px',
@@ -584,7 +583,6 @@ const CountryPage = () => {
               <select
                 value={selectedDuration}
                 onChange={(e) => setSelectedDuration(e.target.value)}
-                disabled={loading}
                 style={{
                   width: '100%',
                   padding: '8px 12px',
@@ -665,7 +663,7 @@ const CountryPage = () => {
             </>
           ) : (
             <Box textAlign="center" py={12}>
-              <VStack gap={3}>
+              <VStack spacing={3}>
                 <Heading size="md" color="gray.700">
                   Планы не найдены
                 </Heading>
@@ -679,7 +677,7 @@ const CountryPage = () => {
                     setSelectedData('all');
                     setSelectedDuration('all');
                   }}
-                  colorPalette="purple"
+                  colorScheme="purple"
                   variant="outline"
                 >
                   Сбросить фильтры

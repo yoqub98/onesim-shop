@@ -12,12 +12,12 @@ const MyPage = () => {
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={20}>
       <Container maxW="4xl">
-        <VStack gap={6} align="flex-start">
+        <VStack spacing={6} align="flex-start">
           <Heading size="xl">{t('myPage.title')}</Heading>
           
           {profile && (
             <Box bg="white" p={6} borderRadius="xl" w="full" shadow="md">
-              <VStack align="flex-start" gap={3}>
+              <VStack align="flex-start" spacing={3}>
                 <Text fontSize="lg">
                   <strong>{t('myPage.name')}:</strong> {profile.first_name} {profile.last_name}
                 </Text>
