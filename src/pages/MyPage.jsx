@@ -1,7 +1,7 @@
 // src/pages/MyPage.jsx
 import React from 'react';
 import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
 const MyPage = () => {

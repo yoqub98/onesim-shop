@@ -26,7 +26,7 @@ import {
   InputLeftAddon,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 
 const SignupPage = () => {

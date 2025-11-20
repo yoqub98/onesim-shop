@@ -1,7 +1,7 @@
 // src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { Box, Spinner, Center } from '@chakra-ui/react';
 
 const ProtectedRoute = ({ children }) => {

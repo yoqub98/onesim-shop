@@ -30,7 +30,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
 
 // Navigation Component
