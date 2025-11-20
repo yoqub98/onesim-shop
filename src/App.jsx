@@ -16,11 +16,9 @@ import {
   IconButton,
   Link,
   Avatar,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
 } from '@chakra-ui/react';
+import { Menu, MenuList, MenuItem } from '@chakra-ui/menu';
+import { MenuButton } from '@chakra-ui/menu';
 import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';

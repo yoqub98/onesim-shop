@@ -9,32 +9,23 @@ import {
   Button,
   Input,
   VStack,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Link,
   HStack,
-  PinInput,
-  PinInputField,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  useToast,
-  InputGroup,
-  InputLeftAddon,
+  Link,
+  Field,
 } from '@chakra-ui/react';
 import { Mail, Lock, User, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { toaster } from '../components/ui/toaster';
+// Note: Dialog and PinInput may need to be added as snippets
+// Run: npx @chakra-ui/cli snippet add dialog
+// Run: npx @chakra-ui/cli snippet add pin-input
 
 const SignupPage = () => {
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
   const navigate = useNavigate();
   const { signUp, verifyOtp } = useAuth();
-  const toast = useToast();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -92,19 +83,19 @@ const SignupPage = () => {
     try {
       await signUp(email, password, firstName, lastName, `+998${phone}`);
       
-      toast({
+      toaster.create({
         title: t('auth.signup.verificationSent'),
         description: t('auth.signup.checkEmail'),
-        status: 'success',
+        type: 'success',
         duration: 5000,
       });
 
       setShowPinModal(true);
     } catch (error) {
-      toast({
+      toaster.create({
         title: t('auth.errors.signupFailed'),
         description: error.message,
-        status: 'error',
+        type: 'error',
         duration: 5000,
       });
     } finally {
@@ -114,9 +105,9 @@ const SignupPage = () => {
 
   const handleVerifyPin = async () => {
     if (pin.length !== 8) {
-      toast({
+      toaster.create({
         title: t('auth.errors.invalidPin'),
-        status: 'error',
+        type: 'error',
         duration: 3000,
       });
       return;
@@ -126,19 +117,19 @@ const SignupPage = () => {
     try {
       await verifyOtp(email, pin);
       
-      toast({
+      toaster.create({
         title: t('auth.signup.success'),
-        status: 'success',
+        type: 'success',
         duration: 3000,
       });
 
       setShowPinModal(false);
       navigate('/');
     } catch (error) {
-      toast({
+      toaster.create({
         title: t('auth.errors.verificationFailed'),
         description: error.message,
-        status: 'error',
+        type: 'error',
         duration: 5000,
       });
     } finally {
@@ -174,97 +165,99 @@ const SignupPage = () => {
             shadow="lg"
           >
             <VStack gap={4}>
-              <FormControl isInvalid={errors.firstName}>
-                <FormLabel>{t('auth.fields.firstName')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.firstName}>
+                <Field.Label>{t('auth.fields.firstName')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <User size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder={t('auth.placeholders.firstName')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.firstName}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.firstName && <Field.ErrorText>{errors.firstName}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.lastName}>
-                <FormLabel>{t('auth.fields.lastName')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.lastName}>
+                <Field.Label>{t('auth.fields.lastName')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <User size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder={t('auth.placeholders.lastName')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.lastName}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.lastName && <Field.ErrorText>{errors.lastName}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.phone}>
-                <FormLabel>{t('auth.fields.phone')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>+998</InputLeftAddon>
+              <Field.Root invalid={!!errors.phone}>
+                <Field.Label>{t('auth.fields.phone')}</Field.Label>
+                <HStack>
+                  <Box bg="gray.100" px={3} py={2} borderRadius="md">
+                    <Text fontWeight="600">+998</Text>
+                  </Box>
                   <Input
                     type="tel"
                     value={formatPhoneDisplay(phone)}
                     onChange={handlePhoneChange}
                     placeholder={t('auth.placeholders.phone')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.phone}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.phone && <Field.ErrorText>{errors.phone}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.email}>
-                <FormLabel>{t('auth.fields.email')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.email}>
+                <Field.Label>{t('auth.fields.email')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <Mail size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('auth.placeholders.email')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.email}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.email && <Field.ErrorText>{errors.email}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.password}>
-                <FormLabel>{t('auth.fields.password')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.password}>
+                <Field.Label>{t('auth.fields.password')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <Lock size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('auth.placeholders.password')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.password}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.password && <Field.ErrorText>{errors.password}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.confirmPassword}>
-                <FormLabel>{t('auth.fields.confirmPassword')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.confirmPassword}>
+                <Field.Label>{t('auth.fields.confirmPassword')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <Lock size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t('auth.placeholders.confirmPassword')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.confirmPassword && <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>}
+              </Field.Root>
 
               <Button
                 type="submit"
@@ -273,7 +266,7 @@ const SignupPage = () => {
                 bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 color="white"
                 fontWeight="700"
-                isLoading={loading}
+                loading={loading}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: 'lg',
@@ -285,8 +278,8 @@ const SignupPage = () => {
 
               <Text fontSize="sm" color="gray.600">
                 {t('auth.signup.haveAccount')}{' '}
-                <Link as={RouterLink} to="/login" color="purple.600" fontWeight="600">
-                  {t('auth.signup.loginLink')}
+                <Link asChild color="purple.600" fontWeight="600">
+                  <RouterLink to="/login">{t('auth.signup.loginLink')}</RouterLink>
                 </Link>
               </Text>
             </VStack>
@@ -294,50 +287,51 @@ const SignupPage = () => {
         </VStack>
       </Container>
 
-      <Modal isOpen={showPinModal} onClose={() => {}} closeOnOverlayClick={false}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>{t('auth.verification.title')}</ModalHeader>
-          <ModalBody pb={6}>
+      {/* Note: Replace this with Dialog component from snippets */}
+      {/* The Modal API has changed completely in v3 */}
+      {showPinModal && (
+        <Box
+          position="fixed"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="blackAlpha.600"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          zIndex="modal"
+        >
+          <Box bg="white" p={6} borderRadius="xl" maxW="md" w="full" mx={4}>
+            <Heading size="lg" mb={4}>{t('auth.verification.title')}</Heading>
             <VStack gap={4}>
               <Text fontSize="sm" color="gray.600" textAlign="center">
                 {t('auth.verification.description')}
               </Text>
               
-              <HStack justify="center">
-                <PinInput
-                  value={pin}
-                  onChange={setPin}
-                  otp
-                  size="lg"
-                  manageFocus
-                  autoFocus
-                >
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                  <PinInputField />
-                </PinInput>
-              </HStack>
+              <Input
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="Enter 8-digit code"
+                maxLength={8}
+                textAlign="center"
+                fontSize="lg"
+              />
 
               <Button
                 w="full"
                 bg="purple.600"
                 color="white"
                 onClick={handleVerifyPin}
-                isLoading={verifyLoading}
-                isDisabled={pin.length !== 8}
+                loading={verifyLoading}
+                disabled={pin.length !== 8}
               >
                 {t('auth.verification.button')}
               </Button>
             </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 };

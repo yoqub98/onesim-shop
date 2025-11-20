@@ -9,24 +9,20 @@ import {
   Button,
   Input,
   VStack,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
+  HStack,
   Link,
-  InputGroup,
-  InputLeftAddon,
-  useToast,
+  Field,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { toaster } from '../components/ui/toaster';
 
 const LoginPage = () => {
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const toast = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,18 +49,18 @@ const LoginPage = () => {
     try {
       await signIn(email, password);
       
-      toast({
+      toaster.create({
         title: t('auth.login.success'),
-        status: 'success',
+        type: 'success',
         duration: 3000,
       });
 
       navigate('/');
     } catch (error) {
-      toast({
+      toaster.create({
         title: t('auth.errors.loginFailed'),
         description: error.message,
-        status: 'error',
+        type: 'error',
         duration: 5000,
       });
     } finally {
@@ -100,37 +96,37 @@ const LoginPage = () => {
             shadow="lg"
           >
             <VStack gap={4}>
-              <FormControl isInvalid={errors.email}>
-                <FormLabel>{t('auth.fields.email')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.email}>
+                <Field.Label>{t('auth.fields.email')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <Mail size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('auth.placeholders.email')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.email}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.email && <Field.ErrorText>{errors.email}</Field.ErrorText>}
+              </Field.Root>
 
-              <FormControl isInvalid={errors.password}>
-                <FormLabel>{t('auth.fields.password')}</FormLabel>
-                <InputGroup>
-                  <InputLeftAddon>
+              <Field.Root invalid={!!errors.password}>
+                <Field.Label>{t('auth.fields.password')}</Field.Label>
+                <HStack>
+                  <Box color="gray.500" px={3}>
                     <Lock size={18} />
-                  </InputLeftAddon>
+                  </Box>
                   <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t('auth.placeholders.password')}
                   />
-                </InputGroup>
-                <FormErrorMessage>{errors.password}</FormErrorMessage>
-              </FormControl>
+                </HStack>
+                {errors.password && <Field.ErrorText>{errors.password}</Field.ErrorText>}
+              </Field.Root>
 
               <Button
                 type="submit"
@@ -139,7 +135,7 @@ const LoginPage = () => {
                 bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                 color="white"
                 fontWeight="700"
-                isLoading={loading}
+                loading={loading}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: 'lg',
@@ -151,8 +147,8 @@ const LoginPage = () => {
 
               <Text fontSize="sm" color="gray.600">
                 {t('auth.login.noAccount')}{' '}
-                <Link as={RouterLink} to="/signup" color="purple.600" fontWeight="600">
-                  {t('auth.login.signupLink')}
+                <Link asChild color="purple.600" fontWeight="600">
+                  <RouterLink to="/signup">{t('auth.login.signupLink')}</RouterLink>
                 </Link>
               </Text>
             </VStack>
