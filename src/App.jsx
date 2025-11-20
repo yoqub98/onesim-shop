@@ -1,6 +1,6 @@
-// src/App.jsx
+// src/App.jsx (FULL FILE - copy entire thing)
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -15,20 +15,31 @@ import {
   VStack,
   IconButton,
   Link,
+  Avatar,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
-import { ChevronRight, Menu, X, Globe, Zap, Shield } from 'lucide-react';
+import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import CountryPage from './pages/CountryPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import SignupPage from './pages/SignupPage';
+import MyPage from './pages/MyPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
 
 // Navigation Component
 const Navigation = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
+  const { user, profile, signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +48,14 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   return (
     <Box
@@ -141,6 +160,58 @@ const Navigation = () => {
             </Link>
           </HStack>
 
+          {/* User Dropdown or Login Button */}
+          <HStack gap={4} hideBelow="md">
+            {user && profile ? (
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="ghost"
+                  px={3}
+                  py={2}
+                  _hover={{ bg: 'gray.50' }}
+                  _active={{ bg: 'gray.100' }}
+                >
+                  <HStack gap={2}>
+                    <Avatar
+                      size="sm"
+                      name={`${profile.first_name} ${profile.last_name}`}
+                      bg="purple.500"
+                      color="white"
+                    />
+                    <Text fontWeight="600" color="gray.700">
+                      {profile.first_name} {profile.last_name}
+                    </Text>
+                    <ChevronDown size={18} />
+                  </HStack>
+                </MenuButton>
+                <MenuList>
+                  <MenuItem icon={<User size={18} />} as="a" href="/mypage">
+                    {t('nav.myPage')}
+                  </MenuItem>
+                  <MenuItem icon={<LogOut size={18} />} onClick={handleLogout} color="red.600">
+                    {t('nav.logout')}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Button
+                as="a"
+                href="/login"
+                size="md"
+                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                color="white"
+                fontWeight="700"
+                _hover={{
+                  transform: 'translateY(-2px)',
+                  shadow: 'lg',
+                }}
+              >
+                {t('nav.login')}
+              </Button>
+            )}
+          </HStack>
+
           <IconButton
             hideFrom="md"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -149,7 +220,7 @@ const Navigation = () => {
             color="gray.700"
             _hover={{ bg: 'gray.100' }}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
           </IconButton>
         </Flex>
 
@@ -165,6 +236,20 @@ const Navigation = () => {
               <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.contacts')}
               </Link>
+              {user && profile ? (
+                <>
+                  <Link href="/mypage" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.myPage')}
+                  </Link>
+                  <Button onClick={handleLogout} variant="ghost" justifyContent="flex-start" fontWeight="600" color="red.600">
+                    {t('nav.logout')}
+                  </Button>
+                </>
+              ) : (
+                <Link href="/login" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                  {t('nav.login')}
+                </Link>
+              )}
             </VStack>
           </Box>
         )}
@@ -362,6 +447,16 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route
+          path="/mypage"
+          element={
+            <ProtectedRoute>
+              <MyPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       <Footer />
     </Box>
@@ -371,7 +466,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }
