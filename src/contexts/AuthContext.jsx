@@ -58,6 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, firstName, lastName, phone) => {
+    // Database trigger will automatically create the profile
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -71,20 +72,6 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (error) throw error;
-
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: data.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-        });
-
-      if (profileError) throw profileError;
-    }
-
     return data;
   };
 
