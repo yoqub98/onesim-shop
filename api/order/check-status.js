@@ -11,9 +11,16 @@ const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 // Send eSIM email notification via Resend
 async function sendEsimEmail(order, esim) {
-  console.log('📧 [EMAIL] Starting email send process...');
+  console.log('📧 [EMAIL] ========== EMAIL SEND STARTING ==========');
   console.log('📧 [EMAIL] Order:', { id: order.id, user_id: order.user_id, order_no: order.order_no });
   console.log('📧 [EMAIL] eSIM:', { iccid: esim.iccid, qrCodeUrl: esim.qrCodeUrl ? 'present' : 'missing' });
+
+  // Validate RESEND_API_KEY
+  if (!process.env.RESEND_API_KEY) {
+    console.error('📧 [EMAIL] ❌ CRITICAL: RESEND_API_KEY is not set in environment variables!');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
+  }
+  console.log('📧 [EMAIL] ✅ RESEND_API_KEY is configured (length:', process.env.RESEND_API_KEY.length, ')');
 
   try {
     // Get user email from Supabase auth
@@ -21,15 +28,16 @@ async function sendEsimEmail(order, esim) {
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(order.user_id);
 
     if (userError) {
-      console.error('📧 [EMAIL] Error fetching user:', userError);
+      console.error('📧 [EMAIL] ❌ Error fetching user:', userError);
       return { success: false, error: userError.message };
     }
 
+    console.log('📧 [EMAIL] User data retrieved:', { hasUser: !!userData?.user, hasEmail: !!userData?.user?.email });
     const userEmail = userData?.user?.email;
-    console.log('📧 [EMAIL] User email:', userEmail || 'NOT FOUND');
+    console.log('📧 [EMAIL] User email:', userEmail || '❌ NOT FOUND');
 
     if (!userEmail) {
-      console.error('📧 [EMAIL] No email found for user:', order.user_id);
+      console.error('📧 [EMAIL] ❌ No email found for user:', order.user_id);
       return { success: false, error: 'No email found' };
     }
 
@@ -85,32 +93,41 @@ async function sendEsimEmail(order, esim) {
     `;
 
     // Send email via Resend
-    console.log('📧 [EMAIL] Sending via Resend to:', userEmail);
+    console.log('📧 [EMAIL] ========== CALLING RESEND API ==========');
+    console.log('📧 [EMAIL] Target email:', userEmail);
+    console.log('📧 [EMAIL] Resend URL: https://api.resend.com/emails');
+
+    const resendPayload = {
+      from: 'OneSIM <onboarding@resend.dev>',
+      to: [userEmail],
+      subject: 'Ваш eSIM готов к активации - OneSIM',
+      html: emailHtml,
+    };
+    console.log('📧 [EMAIL] Payload:', JSON.stringify({ ...resendPayload, html: '[HTML_CONTENT]' }));
+
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: 'OneSIM <onboarding@resend.dev>',
-        to: [userEmail],
-        subject: 'Ваш eSIM готов к активации - OneSIM',
-        html: emailHtml,
-      }),
+      body: JSON.stringify(resendPayload),
     });
 
+    console.log('📧 [EMAIL] Resend HTTP Status:', resendResponse.status, resendResponse.statusText);
     const resendData = await resendResponse.json();
-    console.log('📧 [EMAIL] Resend response:', JSON.stringify(resendData));
+    console.log('📧 [EMAIL] Resend response body:', JSON.stringify(resendData, null, 2));
 
     if (!resendResponse.ok) {
-      console.error('📧 [EMAIL] Resend error:', resendData);
+      console.error('📧 [EMAIL] ❌ Resend API returned error status:', resendResponse.status);
+      console.error('📧 [EMAIL] ❌ Error details:', JSON.stringify(resendData, null, 2));
       return { success: false, error: resendData.message || 'Failed to send email' };
     }
 
-    console.log('✅ [EMAIL] Email sent successfully! ID:', resendData.id);
+    console.log('📧 [EMAIL] ✅✅✅ Email sent successfully! Resend ID:', resendData.id);
 
     // Update email_sent status in database
+    console.log('📧 [EMAIL] Updating database: setting email_sent = true...');
     const { error: updateError } = await supabase
       .from('orders')
       .update({
@@ -120,15 +137,17 @@ async function sendEsimEmail(order, esim) {
       .eq('id', order.id);
 
     if (updateError) {
-      console.error('📧 [EMAIL] Error updating email_sent status:', updateError);
+      console.error('📧 [EMAIL] ❌ Error updating email_sent status:', updateError);
     } else {
-      console.log('📧 [EMAIL] Database updated: email_sent = true');
+      console.log('📧 [EMAIL] ✅ Database updated: email_sent = true');
     }
 
+    console.log('📧 [EMAIL] ========== EMAIL SEND COMPLETED SUCCESSFULLY ==========');
     return { success: true, email: userEmail, resendId: resendData.id };
   } catch (error) {
-    console.error('📧 [EMAIL] Exception:', error.message);
-    console.error('📧 [EMAIL] Stack:', error.stack);
+    console.error('📧 [EMAIL] ❌❌❌ EXCEPTION CAUGHT:', error.message);
+    console.error('📧 [EMAIL] Error name:', error.name);
+    console.error('📧 [EMAIL] Stack trace:', error.stack);
     return { success: false, error: error.message };
   }
 }
@@ -150,6 +169,8 @@ export default async function handler(req, res) {
   try {
     const { orderId } = req.body;
     console.log('🔍 [CHECK-STATUS] Request received for orderId:', orderId);
+    console.log('🔍 [CHECK-STATUS] Environment check - RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
+    console.log('🔍 [CHECK-STATUS] Environment check - RESEND_API_KEY length:', process.env.RESEND_API_KEY?.length || 0);
 
     if (!orderId) {
       console.error('❌ [CHECK-STATUS] Missing orderId');
@@ -168,12 +189,22 @@ export default async function handler(req, res) {
       console.error('❌ [CHECK-STATUS] Order not found:', fetchError);
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
-    console.log('📂 [CHECK-STATUS] Order found:', { orderNo: order.order_no, status: order.order_status });
+    console.log('📂 [CHECK-STATUS] Order found:', {
+      orderNo: order.order_no,
+      status: order.order_status,
+      emailSent: order.email_sent,
+      iccid: order.iccid
+    });
 
-    // If already allocated, return current data
-    if (order.order_status === 'ALLOCATED') {
-      console.log('✅ [CHECK-STATUS] Already allocated, returning cached data');
-      return res.json({ success: true, data: order, message: 'Already allocated' });
+    // If already allocated and email sent, return current data
+    if (order.order_status === 'ALLOCATED' && order.email_sent) {
+      console.log('✅ [CHECK-STATUS] Already allocated and email sent, returning cached data');
+      return res.json({ success: true, data: order, message: 'Already allocated and email sent' });
+    }
+
+    // If already allocated but email NOT sent, we'll query again and try to send email
+    if (order.order_status === 'ALLOCATED' && !order.email_sent) {
+      console.log('⚠️ [CHECK-STATUS] Order is allocated but email was not sent. Will attempt to send email now.');
     }
 
     // Query eSIMAccess for profile data
@@ -218,16 +249,26 @@ export default async function handler(req, res) {
       console.log('✅ [CHECK-STATUS] Order updated successfully');
 
       // Send email notification
-      console.log('📧 [CHECK-STATUS] Triggering email send...');
+      console.log('📧 [CHECK-STATUS] ========== TRIGGERING EMAIL SEND ==========');
+      console.log('📧 [CHECK-STATUS] About to call sendEsimEmail with:', {
+        orderId: updatedOrder.id,
+        orderNo: updatedOrder.order_no,
+        userId: updatedOrder.user_id,
+        esimIccid: esim.iccid
+      });
+
       const emailResult = await sendEsimEmail(updatedOrder, esim);
-      console.log('📧 [CHECK-STATUS] Email result:', emailResult);
+
+      console.log('📧 [CHECK-STATUS] ========== EMAIL RESULT RECEIVED ==========');
+      console.log('📧 [CHECK-STATUS] Email result:', JSON.stringify(emailResult, null, 2));
 
       return res.json({
         success: true,
         data: updatedOrder,
         message: 'eSIM allocated successfully',
         emailSent: emailResult.success,
-        emailTo: emailResult.email
+        emailTo: emailResult.email,
+        emailError: emailResult.error || null
       });
     }
 
