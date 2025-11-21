@@ -1,5 +1,5 @@
 // src/pages/PackagePage.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -14,7 +14,17 @@ import {
   Divider,
   List,
   ListItem,
-  ListIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  useDisclosure,
+  Spinner,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import {
   ArrowLeft,
@@ -31,16 +41,44 @@ import {
   QrCode,
   Download,
   Smartphone,
+  LogIn,
+  AlertCircle,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useAuth } from '../contexts/AuthContext';
+import { createOrder } from '../services/orderService';
 
 const PackagePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const lang = DEFAULT_LANGUAGE;
   const t = (key) => getTranslation(lang, key);
+
+  const [isOrdering, setIsOrdering] = useState(false);
+  const [orderError, setOrderError] = useState(null);
+  const [orderSuccess, setOrderSuccess] = useState(null);
+
+  // Modal controls
+  const {
+    isOpen: isLoginModalOpen,
+    onOpen: onLoginModalOpen,
+    onClose: onLoginModalClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isSuccessModalOpen,
+    onOpen: onSuccessModalOpen,
+    onClose: onSuccessModalClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isErrorModalOpen,
+    onOpen: onErrorModalOpen,
+    onClose: onErrorModalClose
+  } = useDisclosure();
 
   const plan = location.state?.plan;
   const countryCode = location.state?.countryCode;
@@ -72,6 +110,51 @@ const PackagePage = () => {
     { icon: Download, text: 'Установите профиль eSIM' },
     { icon: Smartphone, text: 'Активируйте и начните использовать' },
   ];
+
+  // Handle purchase button click
+  const handlePurchaseClick = async () => {
+    // Check if user is logged in
+    if (!user) {
+      onLoginModalOpen();
+      return;
+    }
+
+    // User is logged in, proceed with order
+    setIsOrdering(true);
+    setOrderError(null);
+
+    try {
+      // Extract price from formatted string (e.g., "150 000" -> 150000)
+      const priceUzs = parseFloat(plan.price.replace(/\s/g, '')) || 0;
+
+      const orderData = {
+        userId: user.id,
+        userEmail: user.email,
+        packageCode: plan.packageCode || plan.id,
+        packageName: plan.name || `${plan.data} - ${plan.days} дней`,
+        countryCode: countryCode,
+        dataAmount: plan.data,
+        validityDays: plan.days,
+        priceUzs: priceUzs,
+        priceUsd: plan.priceUSD || 0,
+      };
+
+      const result = await createOrder(orderData);
+
+      setOrderSuccess({
+        orderNo: result.data.orderNo,
+        email: user.email,
+      });
+      onSuccessModalOpen();
+
+    } catch (error) {
+      console.error('Order failed:', error);
+      setOrderError(error.message || 'Не удалось создать заказ. Попробуйте позже.');
+      onErrorModalOpen();
+    } finally {
+      setIsOrdering(false);
+    }
+  };
 
   return (
     <Box minH="100vh" bg="gray.50">
@@ -313,16 +396,26 @@ const PackagePage = () => {
                     transform: 'translateY(-2px)',
                     shadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
                   }}
-                  transition="all 0.3s"
-                  onClick={() => {
-                    // Purchase logic will be implemented later
-                    console.log('Purchase clicked for plan:', plan.id);
+                  _disabled={{
+                    opacity: 0.7,
+                    cursor: 'not-allowed',
+                    transform: 'none',
                   }}
+                  transition="all 0.3s"
+                  onClick={handlePurchaseClick}
+                  isDisabled={isOrdering}
                 >
-                  <HStack spacing={2}>
-                    <ShoppingCart size={20} />
-                    <Text>Купить</Text>
-                  </HStack>
+                  {isOrdering ? (
+                    <HStack spacing={2}>
+                      <Spinner size="sm" />
+                      <Text>Оформление...</Text>
+                    </HStack>
+                  ) : (
+                    <HStack spacing={2}>
+                      <ShoppingCart size={20} />
+                      <Text>Купить</Text>
+                    </HStack>
+                  )}
                 </Button>
 
                 <HStack justify="center" spacing={4} pt={2}>
@@ -336,6 +429,126 @@ const PackagePage = () => {
           </GridItem>
         </Grid>
       </Container>
+
+      {/* Login Required Modal */}
+      <Modal isOpen={isLoginModalOpen} onClose={onLoginModalClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent mx={4} borderRadius="2xl">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="purple.100" p={2} borderRadius="lg">
+                <LogIn size={24} color="#7c3aed" />
+              </Box>
+              <Text>Требуется авторизация</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Text color="gray.600">
+              Для оформления заказа на eSIM необходимо войти в аккаунт или зарегистрироваться.
+            </Text>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button variant="outline" onClick={onLoginModalClose}>
+              Отмена
+            </Button>
+            <Button
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => navigate('/login')}
+            >
+              Войти
+            </Button>
+            <Button
+              variant="outline"
+              colorScheme="purple"
+              onClick={() => navigate('/signup')}
+            >
+              Регистрация
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Order Success Modal */}
+      <Modal isOpen={isSuccessModalOpen} onClose={onSuccessModalClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent mx={4} borderRadius="2xl">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="green.100" p={2} borderRadius="lg">
+                <CheckCircle size={24} color="#16a34a" />
+              </Box>
+              <Text>Заказ оформлен!</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack align="stretch" spacing={4}>
+              <Text color="gray.600">
+                Ваш eSIM успешно заказан и будет отправлен на вашу электронную почту:
+              </Text>
+              <Box bg="purple.50" p={4} borderRadius="xl" textAlign="center">
+                <Text fontWeight="700" color="purple.700">
+                  {orderSuccess?.email}
+                </Text>
+              </Box>
+              <Alert status="info" borderRadius="lg">
+                <AlertIcon />
+                <Text fontSize="sm">
+                  Обработка заказа может занять несколько минут. Вы также можете отслеживать статус в личном кабинете.
+                </Text>
+              </Alert>
+            </VStack>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button variant="outline" onClick={onSuccessModalClose}>
+              Закрыть
+            </Button>
+            <Button
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={() => navigate('/mypage')}
+            >
+              Перейти в профиль
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Order Error Modal */}
+      <Modal isOpen={isErrorModalOpen} onClose={onErrorModalClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent mx={4} borderRadius="2xl">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="red.100" p={2} borderRadius="lg">
+                <AlertCircle size={24} color="#dc2626" />
+              </Box>
+              <Text>Ошибка заказа</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Alert status="error" borderRadius="lg">
+              <AlertIcon />
+              <Text>{orderError}</Text>
+            </Alert>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={onErrorModalClose}
+            >
+              Понятно
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
