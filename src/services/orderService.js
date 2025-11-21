@@ -103,6 +103,35 @@ export const queryEsimProfile = async (orderNo) => {
 };
 
 /**
+ * Cancel an eSIM order and get refund
+ * @param {string} orderId - Order ID (UUID)
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} Cancellation result
+ */
+export const cancelOrder = async (orderId, userId) => {
+  try {
+    const response = await fetch(`${API_URL}/order/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ orderId, userId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to cancel order');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Cancel order failed:', error);
+    throw error;
+  }
+};
+
+/**
  * Check and update order status by polling eSIMAccess
  * @param {string} orderId - Order ID (UUID)
  * @returns {Promise<Object>} Updated order data

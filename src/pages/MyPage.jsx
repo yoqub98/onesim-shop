@@ -41,11 +41,13 @@ import {
   RefreshCw,
   Copy,
   CheckCircle,
+  XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
-import { getUserOrders, getOrderStatusText, getOrderStatusColor, checkOrderStatus } from '../services/orderService';
+import { getUserOrders, getOrderStatusText, getOrderStatusColor, checkOrderStatus, cancelOrder } from '../services/orderService';
 
 const MyPage = () => {
   const lang = DEFAULT_LANGUAGE;
@@ -57,8 +59,12 @@ const MyPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [copied, setCopied] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(null); // orderId being checked
+  const [cancellingOrder, setCancellingOrder] = useState(null); // orderId being cancelled
+  const [orderToCancel, setOrderToCancel] = useState(null); // order for confirmation modal
 
   const { isOpen: isQrModalOpen, onOpen: onQrModalOpen, onClose: onQrModalClose } = useDisclosure();
+  const { isOpen: isCancelModalOpen, onOpen: onCancelModalOpen, onClose: onCancelModalClose } = useDisclosure();
+  const { isOpen: isCancelSuccessOpen, onOpen: onCancelSuccessOpen, onClose: onCancelSuccessClose } = useDisclosure();
 
   // Fetch user orders
   const fetchOrders = async () => {
@@ -86,6 +92,37 @@ const MyPage = () => {
   const handleViewQr = (order) => {
     setSelectedOrder(order);
     onQrModalOpen();
+  };
+
+  // Open cancel confirmation modal
+  const handleCancelClick = (order) => {
+    setOrderToCancel(order);
+    onCancelModalOpen();
+  };
+
+  // Confirm and execute cancellation
+  const handleConfirmCancel = async () => {
+    if (!orderToCancel || !user?.id) return;
+
+    setCancellingOrder(orderToCancel.id);
+    onCancelModalClose();
+
+    try {
+      const result = await cancelOrder(orderToCancel.id, user.id);
+      if (result.success) {
+        // Update the order in local state
+        setOrders(prev => prev.map(o =>
+          o.id === orderToCancel.id ? { ...o, order_status: 'CANCELLED' } : o
+        ));
+        onCancelSuccessOpen();
+      }
+    } catch (err) {
+      console.error('Failed to cancel order:', err);
+      setError(err.message || 'Не удалось отменить заказ');
+    } finally {
+      setCancellingOrder(null);
+      setOrderToCancel(null);
+    }
   };
 
   // Check order status (polling)
@@ -235,17 +272,34 @@ const MyPage = () => {
           </HStack>
 
           {/* Actions */}
-          {order.order_status === 'ALLOCATED' && (order.qr_code_url || order.activation_code) && (
-            <Button
-              size="md"
-              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              color="white"
-              _hover={{ opacity: 0.9 }}
-              onClick={() => handleViewQr(order)}
-              leftIcon={<QrCode size={18} />}
-            >
-              Показать QR-код
-            </Button>
+          {order.order_status === 'ALLOCATED' && (
+            <VStack spacing={2} width="full">
+              {(order.qr_code_url || order.activation_code) && (
+                <Button
+                  size="md"
+                  width="full"
+                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  color="white"
+                  _hover={{ opacity: 0.9 }}
+                  onClick={() => handleViewQr(order)}
+                  leftIcon={<QrCode size={18} />}
+                >
+                  Показать QR-код
+                </Button>
+              )}
+              <Button
+                size="sm"
+                width="full"
+                variant="outline"
+                colorScheme="red"
+                leftIcon={<XCircle size={16} />}
+                onClick={() => handleCancelClick(order)}
+                isLoading={cancellingOrder === order.id}
+                loadingText="Отмена..."
+              >
+                Отменить eSIM
+              </Button>
+            </VStack>
           )}
 
           {order.order_status === 'PENDING' && (
@@ -546,6 +600,100 @@ const MyPage = () => {
               onClick={onQrModalClose}
             >
               Закрыть
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Cancel Confirmation Modal */}
+      <Modal isOpen={isCancelModalOpen} onClose={onCancelModalClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent mx={4} borderRadius="2xl">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="red.100" p={2} borderRadius="lg">
+                <AlertTriangle size={24} color="#dc2626" />
+              </Box>
+              <Text>Отменить eSIM?</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4} align="stretch">
+              <Text color="gray.600">
+                Вы уверены, что хотите отменить этот eSIM? Это действие нельзя отменить.
+              </Text>
+              {orderToCancel && (
+                <Box bg="gray.50" p={4} borderRadius="lg">
+                  <VStack align="stretch" spacing={2}>
+                    <HStack justify="space-between">
+                      <Text fontSize="sm" color="gray.500">Пакет:</Text>
+                      <Text fontSize="sm" fontWeight="600">{orderToCancel.package_name}</Text>
+                    </HStack>
+                    <HStack justify="space-between">
+                      <Text fontSize="sm" color="gray.500">Заказ:</Text>
+                      <Text fontSize="sm" fontWeight="600">#{orderToCancel.order_no}</Text>
+                    </HStack>
+                  </VStack>
+                </Box>
+              )}
+              <Alert status="warning" borderRadius="lg">
+                <AlertIcon />
+                <Text fontSize="sm">
+                  eSIM можно отменить только если он ещё не был установлен на устройство.
+                </Text>
+              </Alert>
+            </VStack>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button variant="outline" onClick={onCancelModalClose}>
+              Отмена
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={handleConfirmCancel}
+              leftIcon={<XCircle size={18} />}
+            >
+              Да, отменить
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Cancel Success Modal */}
+      <Modal isOpen={isCancelSuccessOpen} onClose={onCancelSuccessClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent mx={4} borderRadius="2xl">
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="green.100" p={2} borderRadius="lg">
+                <CheckCircle size={24} color="#16a34a" />
+              </Box>
+              <Text>eSIM отменён</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4} align="stretch">
+              <Text color="gray.600">
+                eSIM успешно отменён. Стоимость возвращена на баланс.
+              </Text>
+              <Alert status="success" borderRadius="lg">
+                <AlertIcon />
+                <Text fontSize="sm">
+                  Средства будут зачислены на баланс в течение нескольких минут.
+                </Text>
+              </Alert>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              color="white"
+              _hover={{ opacity: 0.9 }}
+              onClick={onCancelSuccessClose}
+            >
+              Понятно
             </Button>
           </ModalFooter>
         </ModalContent>
