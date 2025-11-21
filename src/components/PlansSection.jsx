@@ -12,6 +12,7 @@ import {
   IconButton,
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
@@ -22,7 +23,12 @@ import { useScrollAnimation } from '../hooks/useScrollAnimation';
 const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
+  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
+
+  const handleBuyClick = () => {
+    navigate(`/package/${plan.id}`, { state: { plan, countryCode: plan.countryCode } });
+  };
 
   return (
     <Box
@@ -198,6 +204,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                 fontWeight="700"
                 px={4}
                 rightIcon={<ArrowRight size={16} />}
+                onClick={handleBuyClick}
               >
                 {t('plans.card.buy')}
               </Button>
