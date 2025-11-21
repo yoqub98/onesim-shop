@@ -45,7 +45,7 @@ import {
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
-import { getUserOrders, getOrderStatusText, getOrderStatusColor } from '../services/orderService';
+import { getUserOrders, getOrderStatusText, getOrderStatusColor, checkOrderStatus } from '../services/orderService';
 
 const MyPage = () => {
   const lang = DEFAULT_LANGUAGE;
@@ -56,6 +56,7 @@ const MyPage = () => {
   const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(null); // orderId being checked
 
   const { isOpen: isQrModalOpen, onOpen: onQrModalOpen, onClose: onQrModalClose } = useDisclosure();
 
@@ -85,6 +86,24 @@ const MyPage = () => {
   const handleViewQr = (order) => {
     setSelectedOrder(order);
     onQrModalOpen();
+  };
+
+  // Check order status (polling)
+  const handleCheckStatus = async (orderId) => {
+    setCheckingStatus(orderId);
+    try {
+      const result = await checkOrderStatus(orderId);
+      if (result.data) {
+        // Update the order in local state
+        setOrders(prev => prev.map(o =>
+          o.id === orderId ? result.data : o
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to check status:', err);
+    } finally {
+      setCheckingStatus(null);
+    }
   };
 
   // Copy activation code to clipboard
@@ -230,10 +249,24 @@ const MyPage = () => {
           )}
 
           {order.order_status === 'PENDING' && (
-            <Alert status="info" borderRadius="lg" fontSize="sm">
-              <AlertIcon />
-              Ваш eSIM обрабатывается. Это может занять несколько минут.
-            </Alert>
+            <VStack spacing={3}>
+              <Alert status="info" borderRadius="lg" fontSize="sm">
+                <AlertIcon />
+                Ваш eSIM обрабатывается. Это может занять несколько минут.
+              </Alert>
+              <Button
+                size="sm"
+                variant="outline"
+                colorScheme="purple"
+                width="full"
+                leftIcon={<RefreshCw size={16} />}
+                onClick={() => handleCheckStatus(order.id)}
+                isLoading={checkingStatus === order.id}
+                loadingText="Проверка..."
+              >
+                Проверить статус
+              </Button>
+            </VStack>
           )}
 
           {order.order_status === 'FAILED' && (

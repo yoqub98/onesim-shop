@@ -103,6 +103,34 @@ export const queryEsimProfile = async (orderNo) => {
 };
 
 /**
+ * Check and update order status by polling eSIMAccess
+ * @param {string} orderId - Order ID (UUID)
+ * @returns {Promise<Object>} Updated order data
+ */
+export const checkOrderStatus = async (orderId) => {
+  try {
+    const response = await fetch(`${API_URL}/order/check-status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ orderId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to check order status');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Check status failed:', error);
+    throw error;
+  }
+};
+
+/**
  * Get order status display text (Russian)
  * @param {string} status - Order status
  * @returns {string} Translated status text
