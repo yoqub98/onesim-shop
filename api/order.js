@@ -1,5 +1,5 @@
 // api/order.js - Vercel serverless function for creating eSIM orders
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
@@ -13,7 +13,7 @@ const generateTransactionId = () => {
   return `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 };
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');

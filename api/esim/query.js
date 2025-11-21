@@ -2,7 +2,7 @@
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
 const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');

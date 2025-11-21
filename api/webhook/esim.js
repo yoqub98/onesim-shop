@@ -1,5 +1,5 @@
 // api/webhook/esim.js - Vercel serverless function for eSIMAccess webhooks
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
@@ -41,7 +41,7 @@ async function sendEsimEmail(order, esim) {
   }
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
