@@ -229,13 +229,22 @@ export default async function handler(req, res) {
 
       // Query eSIMAccess API to get full eSIM profile data
       console.log('📡 [WEBHOOK] Querying eSIMAccess for full eSIM profile...');
+      const queryPayload = {
+        orderNo,
+        pager: {
+          pageNo: 1,
+          pageSize: 10
+        }
+      };
+      console.log('📡 [WEBHOOK] Query payload:', JSON.stringify(queryPayload));
+
       const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
         method: 'POST',
         headers: {
           'RT-AccessCode': ESIMACCESS_API_KEY,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ orderNo }),
+        body: JSON.stringify(queryPayload),
       });
 
       const queryData = await queryResponse.json();

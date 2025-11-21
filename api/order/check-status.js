@@ -209,13 +209,22 @@ export default async function handler(req, res) {
 
     // Query eSIMAccess for profile data
     console.log('📡 [CHECK-STATUS] Querying eSIMAccess for orderNo:', order.order_no);
+    const queryPayload = {
+      orderNo: order.order_no,
+      pager: {
+        pageNo: 1,
+        pageSize: 10
+      }
+    };
+    console.log('📡 [CHECK-STATUS] Query payload:', JSON.stringify(queryPayload));
+
     const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
       headers: {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderNo: order.order_no }),
+      body: JSON.stringify(queryPayload),
     });
 
     const queryData = await queryResponse.json();

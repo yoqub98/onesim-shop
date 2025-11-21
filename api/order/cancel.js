@@ -65,13 +65,22 @@ export default async function handler(req, res) {
 
     // First, query eSIMAccess to get the esimTranNo and current status
     console.log('📡 [CANCEL] Querying eSIMAccess for current eSIM status...');
+    const queryPayload = {
+      orderNo: order.order_no,
+      pager: {
+        pageNo: 1,
+        pageSize: 10
+      }
+    };
+    console.log('📡 [CANCEL] Query payload:', JSON.stringify(queryPayload));
+
     const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
       headers: {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderNo: order.order_no }),
+      body: JSON.stringify(queryPayload),
     });
 
     const queryData = await queryResponse.json();
