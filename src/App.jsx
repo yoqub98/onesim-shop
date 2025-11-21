@@ -26,6 +26,7 @@ import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import CountryPage from './pages/CountryPage.jsx';
+import PackagePage from './pages/PackagePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
@@ -447,6 +448,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
+        <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route

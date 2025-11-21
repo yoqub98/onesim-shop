@@ -24,9 +24,14 @@ const PLANS_PER_PAGE = 12;
 const DEFAULT_DURATION_FILTER = 30; // Default to 30 days
 
 // Plan Card Component
-const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
+const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
+
+  const handleBuyClick = () => {
+    navigate(`/package/${plan.id}`, { state: { plan, countryCode } });
+  };
 
   // Debug logging
   console.log('Plan data:', {
@@ -187,6 +192,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE }) => {
                 borderRadius="lg"
                 fontWeight="700"
                 px={3}
+                onClick={handleBuyClick}
               >
                 <HStack spacing={1}>
                   <Text>{t('plans.card.buy') || 'Купить'}</Text>
@@ -649,7 +655,7 @@ const CountryPage = () => {
                 gap={4}
               >
                 {paginatedPlans.map((plan) => (
-                  <CountryPlanCard key={plan.id} plan={plan} lang={lang} />
+                  <CountryPlanCard key={plan.id} plan={plan} lang={lang} countryCode={countryCode} />
                 ))}
               </Grid>
 
