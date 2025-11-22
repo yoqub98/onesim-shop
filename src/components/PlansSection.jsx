@@ -1,5 +1,5 @@
 // src/components/PlansSection.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Container,
@@ -293,7 +293,9 @@ const PlansSection = () => {
   const [error, setError] = useState(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const scrollContainerRef = useRef(null);
+  const autoScrollIntervalRef = useRef(null);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -303,16 +305,46 @@ const PlansSection = () => {
     }
   };
 
-  const scroll = (direction) => {
+  const scroll = (direction, isAutoScroll = false) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 364; // Card width (340px) + gap (24px)
+      // For manual clicks: scroll 2 cards (728px), for auto-scroll: scroll 1px
+      const scrollAmount = isAutoScroll ? 1 : 728; // 2 cards (364px * 2)
       const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
-        behavior: 'smooth'
+        behavior: isAutoScroll ? 'auto' : 'smooth'
       });
     }
   };
+
+  // Auto-scroll functionality
+  useEffect(() => {
+    if (!loading && plansData.length > 0 && !isHovered) {
+      // Start auto-scrolling to the right slowly
+      autoScrollIntervalRef.current = setInterval(() => {
+        if (scrollContainerRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+
+          // If reached the end, scroll back to start
+          if (scrollLeft >= scrollWidth - clientWidth - 10) {
+            scrollContainerRef.current.scrollTo({
+              left: 0,
+              behavior: 'smooth'
+            });
+          } else {
+            // Scroll slowly to the right
+            scroll('right', true);
+          }
+        }
+      }, 30); // Scroll every 30ms for smooth animation
+
+      return () => {
+        if (autoScrollIntervalRef.current) {
+          clearInterval(autoScrollIntervalRef.current);
+        }
+      };
+    }
+  }, [loading, plansData, isHovered]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -400,7 +432,7 @@ const PlansSection = () => {
         pointerEvents="none"
       />
 
-      <Container maxW="8xl" position="relative" overflow="hidden">
+      <Container maxW="8xl" position="relative">
         <VStack spacing={16}>
           <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
@@ -513,6 +545,8 @@ const PlansSection = () => {
                 msOverflowStyle: 'none',
               }}
               pb={4}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
               <HStack
                 spacing={6}

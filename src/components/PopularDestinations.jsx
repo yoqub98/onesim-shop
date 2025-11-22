@@ -182,11 +182,11 @@ const PopularDestinations = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
-  // Filter destinations based on search query
+  // Filter destinations based on search query - first letter must match
   const filteredDestinations = POPULAR_DESTINATIONS.filter(destination => {
     if (!searchQuery) return true;
     const countryName = getCountryName(destination.code, lang).toLowerCase();
-    return countryName.includes(searchQuery.toLowerCase());
+    return countryName.startsWith(searchQuery.toLowerCase());
   });
 
   return (
