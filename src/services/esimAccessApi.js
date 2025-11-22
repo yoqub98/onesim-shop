@@ -205,17 +205,37 @@ export const fetchPackagesByCountry = async (locationCode) => {
 export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LANGUAGE) => {
   const priceInUSD = apiPackage.price / 10000;
   const dataInGB = Math.round(apiPackage.volume / 1073741824);
-  const speed = apiPackage.name.includes('5G')
+  const speed = apiPackage.speed || (apiPackage.name.includes('5G')
     ? '5G'
     : apiPackage.name.includes('4G')
     ? '4G'
-    : '5G';
+    : '4G/5G');
 
   const countryName = getCountryName(countryCode, lang);
 
+  // Extract operators for the specific country from locationNetworkList
+  let operators = [];
+  if (apiPackage.locationNetworkList && Array.isArray(apiPackage.locationNetworkList)) {
+    // Find the location entry that matches our countryCode
+    const locationEntry = apiPackage.locationNetworkList.find(
+      loc => loc.locationCode === countryCode
+    );
+
+    if (locationEntry && locationEntry.operatorList) {
+      operators = locationEntry.operatorList.map(op => ({
+        operatorName: op.operatorName,
+        networkType: op.networkType
+      }));
+    }
+  }
+
+  // Create unique ID using packageCode + slug to avoid duplicates
+  const uniqueId = `${apiPackage.packageCode}_${apiPackage.slug || ''}`;
+
   return {
-    id: apiPackage.packageCode,
+    id: uniqueId,
     packageCode: apiPackage.packageCode,
+    slug: apiPackage.slug,
     country: countryName,
     countryCode: countryCode,
     data: `${dataInGB}GB`,
@@ -226,7 +246,7 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
     originalPrice: apiPackage.price,
     description: apiPackage.description,
     name: apiPackage.name,
-    operatorList: apiPackage.operatorList || [],
+    operatorList: operators,
   };
 };
 
@@ -244,11 +264,25 @@ export const fetchAllPackagesForCountry = async (
       return [];
     }
 
-    const output = packages.map((pkg) =>
+    // Transform all packages
+    const transformed = packages.map((pkg) =>
       transformPackageData(pkg, countryCode, lang)
     );
 
-    return output;
+    // Deduplicate by packageCode (keep the first occurrence)
+    const seen = new Set();
+    const deduplicated = transformed.filter(pkg => {
+      if (seen.has(pkg.packageCode)) {
+        console.log(`🗑️ Removing duplicate: ${pkg.packageCode} (${pkg.data}, ${pkg.days} days)`);
+        return false;
+      }
+      seen.add(pkg.packageCode);
+      return true;
+    });
+
+    console.log(`📊 Total packages: ${packages.length}, After deduplication: ${deduplicated.length}`);
+
+    return deduplicated;
   } catch (error) {
     console.error('💥 ERROR in fetchAllPackagesForCountry:', error);
     throw error;
