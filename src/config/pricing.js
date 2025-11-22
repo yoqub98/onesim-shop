@@ -38,6 +38,7 @@ export const POPULAR_DESTINATIONS = [
   { code: 'GE' }, // Georgia
   { code: 'VN' }, // Vietnam
   { code: 'ES' }, // Spain
+  { code: 'KR' }, // South Korea
 ];
 
 /**
