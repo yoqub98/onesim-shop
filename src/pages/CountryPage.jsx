@@ -426,6 +426,7 @@ const CountryPage = () => {
       'vn': 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=1600&q=80', // Vietnam - Ho Chi Minh
       'es': 'https://images.unsplash.com/photo-1558642084-fd07fae5282e?w=1600&q=80', // Spain - Barcelona
       'kr': 'https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=1600&q=80', // South Korea - Seoul
+      'uz': 'https://images.unsplash.com/photo-1597074866923-dc0589150ad7?w=1600&q=80', // Uzbekistan - Samarkand
     };
 
     return countryImages[countryCode?.toLowerCase()] || null; // Use gray background if no image
