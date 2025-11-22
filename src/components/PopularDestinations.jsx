@@ -10,8 +10,11 @@ import {
   Badge,
   HStack,
   VStack,
+  Input,
+  InputGroup,
+  InputLeftElement,
 } from '@chakra-ui/react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
@@ -176,6 +179,15 @@ const DestinationCardSkeleton = ({ delay = 0 }) => {
 const PopularDestinations = () => {
   const lang = DEFAULT_LANGUAGE; // For MVP, hardcode to Russian
   const t = (key) => getTranslation(lang, key);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+
+  // Filter destinations based on search query
+  const filteredDestinations = POPULAR_DESTINATIONS.filter(destination => {
+    if (!searchQuery) return true;
+    const countryName = getCountryName(destination.code, lang).toLowerCase();
+    return countryName.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <Box as="section" py={24} bg="white" position="relative">
@@ -196,7 +208,7 @@ const PopularDestinations = () => {
       <Container maxW="8xl" position="relative">
         <VStack spacing={16}>
           {/* Section Header */}
-          <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
+          <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn" width="100%">
             <Badge
               colorScheme="purple"
               fontSize="sm"
@@ -232,28 +244,82 @@ const PopularDestinations = () => {
             >
               {t('destinations.description')}
             </Text>
+
+            {/* Animated Search */}
+            <Box width="100%" display="flex" justifyContent="flex-start" mt={6}>
+              {!isSearchExpanded ? (
+                <Button
+                  leftIcon={<Search size={18} />}
+                  onClick={() => setIsSearchExpanded(true)}
+                  variant="outline"
+                  colorScheme="purple"
+                  borderWidth="2px"
+                  fontWeight="700"
+                  size="md"
+                  className="animate__animated animate__fadeIn"
+                >
+                  Поиск
+                </Button>
+              ) : (
+                <InputGroup
+                  maxW="400px"
+                  className="animate__animated animate__fadeIn animate__faster"
+                >
+                  <InputLeftElement pointerEvents="none">
+                    <Search size={18} color="#9333ea" />
+                  </InputLeftElement>
+                  <Input
+                    placeholder="Введите название страны..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onBlur={() => {
+                      if (!searchQuery) {
+                        setIsSearchExpanded(false);
+                      }
+                    }}
+                    autoFocus
+                    borderWidth="2px"
+                    borderColor="purple.200"
+                    _focus={{
+                      borderColor: 'purple.500',
+                      boxShadow: '0 0 0 1px #9333ea',
+                    }}
+                    fontWeight="600"
+                    size="md"
+                  />
+                </InputGroup>
+              )}
+            </Box>
           </VStack>
 
           {/* Destinations Grid */}
           <Grid
-            templateColumns={{ 
-              base: '1fr', 
-              md: 'repeat(2, 1fr)', 
-              lg: 'repeat(4, 1fr)' 
+            templateColumns={{
+              base: '1fr',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(4, 1fr)'
             }}
             gap={6}
             w="100%"
             className="animate__animated animate__fadeIn"
             style={{ animationDelay: '200ms' }}
           >
-            {POPULAR_DESTINATIONS.map((destination, index) => (
-              <DestinationCard 
-                key={destination.code} 
-                countryCode={destination.code}
-                delay={index * 100}
-                lang={lang}
-              />
-            ))}
+            {filteredDestinations.length > 0 ? (
+              filteredDestinations.map((destination, index) => (
+                <DestinationCard
+                  key={destination.code}
+                  countryCode={destination.code}
+                  delay={index * 100}
+                  lang={lang}
+                />
+              ))
+            ) : (
+              <Box gridColumn="1 / -1" textAlign="center" py={12}>
+                <Text fontSize="xl" color="gray.500" fontWeight="600">
+                  Страна не найдена
+                </Text>
+              </Box>
+            )}
           </Grid>
         </VStack>
       </Container>

@@ -161,8 +161,8 @@ const Navigation = () => {
             </Link>
           </HStack>
 
-          {/* User Dropdown or Login Button */}
-          <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
+          {/* User Dropdown or Login/Signup Buttons */}
+          <HStack spacing={3} display={{ base: 'none', md: 'flex' }}>
             {user && profile ? (
               <Menu>
                 <MenuButton
@@ -196,20 +196,36 @@ const Navigation = () => {
                 </MenuList>
               </Menu>
             ) : (
-              <Button
-                as="a"
-                href="/login"
-                size="md"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                color="white"
-                fontWeight="700"
-                _hover={{
-                  transform: 'translateY(-2px)',
-                  shadow: 'lg',
-                }}
-              >
-                {t('nav.login')}
-              </Button>
+              <>
+                <Button
+                  as="a"
+                  href="/signup"
+                  size="md"
+                  variant="outline"
+                  colorScheme="purple"
+                  fontWeight="700"
+                  borderWidth="2px"
+                  _hover={{
+                    bg: 'purple.50',
+                  }}
+                >
+                  Регистрация
+                </Button>
+                <Button
+                  as="a"
+                  href="/login"
+                  size="md"
+                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  color="white"
+                  fontWeight="700"
+                  _hover={{
+                    transform: 'translateY(-2px)',
+                    shadow: 'lg',
+                  }}
+                >
+                  {t('nav.login')}
+                </Button>
+              </>
             )}
           </HStack>
 
@@ -247,9 +263,14 @@ const Navigation = () => {
                   </Button>
                 </>
               ) : (
-                <Link href="/login" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
-                  {t('nav.login')}
-                </Link>
+                <>
+                  <Link href="/signup" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                    Регистрация
+                  </Link>
+                  <Link href="/login" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                    {t('nav.login')}
+                  </Link>
+                </>
               )}
             </VStack>
           </Box>
@@ -269,7 +290,8 @@ const HeroSection = () => {
       as="section"
       id="home"
       background="linear-gradient(180deg, #fafafa 0%, #ffffff 100%)"
-      py={{ base: 20, md: 28 }}
+      pt={0}
+      pb={{ base: 20, md: 28 }}
       minH="calc(100vh - 80px)"
       display="flex"
       alignItems="center"

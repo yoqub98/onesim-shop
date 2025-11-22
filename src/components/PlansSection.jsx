@@ -187,7 +187,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   >
                     {plan.price}
                   </Heading>
-                  <Text fontSize="md" color="gray.600" fontWeight="700" fontsize="14px" whiteSpace="nowrap">
+                  <Text fontSize="md" color="gray.600" fontWeight="600" fontsize="14px" whiteSpace="nowrap">
                     {t('plans.card.currency')}
                   </Text>
                 </HStack>
@@ -374,7 +374,7 @@ const PlansSection = () => {
   const t = (key) => getTranslation(DEFAULT_LANGUAGE, key);
 
   return (
-    <Box as="section" py={24} bg="gray.50" id="plans" position="relative">
+    <Box as="section" py={24} bg="gray.50" id="plans" position="relative" overflow="hidden">
       <Box
         position="absolute"
         top="10%"
@@ -400,7 +400,7 @@ const PlansSection = () => {
         pointerEvents="none"
       />
 
-      <Container maxW="8xl" position="relative">
+      <Container maxW="8xl" position="relative" overflow="hidden">
         <VStack spacing={16}>
           <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
