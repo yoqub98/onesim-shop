@@ -264,23 +264,77 @@ export const fetchAllPackagesForCountry = async (
       return [];
     }
 
+    // DETAILED LOGGING - Let's see EXACTLY what we're getting
+    console.log('🔍 ========== RAW API PACKAGES ==========');
+    packages.forEach((pkg, index) => {
+      console.log(`Package #${index + 1}:`, {
+        packageCode: pkg.packageCode,
+        slug: pkg.slug,
+        name: pkg.name,
+        price: pkg.price,
+        priceUSD: (pkg.price / 10000).toFixed(2),
+        volume: pkg.volume,
+        volumeGB: Math.round(pkg.volume / 1073741824),
+        duration: pkg.duration,
+        location: pkg.location,
+      });
+    });
+    console.log('🔍 ========================================');
+
     // Transform all packages
     const transformed = packages.map((pkg) =>
       transformPackageData(pkg, countryCode, lang)
     );
 
-    // Deduplicate by packageCode (keep the first occurrence)
-    const seen = new Set();
-    const deduplicated = transformed.filter(pkg => {
-      if (seen.has(pkg.packageCode)) {
-        console.log(`🗑️ Removing duplicate: ${pkg.packageCode} (${pkg.data}, ${pkg.days} days)`);
-        return false;
+    // Detailed logging of transformed packages
+    console.log('🔄 ========== TRANSFORMED PACKAGES ==========');
+    transformed.forEach((pkg, index) => {
+      console.log(`Transformed #${index + 1}:`, {
+        packageCode: pkg.packageCode,
+        slug: pkg.slug,
+        dataGB: pkg.dataGB,
+        days: pkg.days,
+        priceUSD: pkg.priceUSD.toFixed(2),
+      });
+    });
+    console.log('🔄 ========================================');
+
+    // Deduplicate by dataGB + days combination, keeping the cheapest option
+    const seen = new Map();
+    const deduplicated = [];
+
+    transformed.forEach(pkg => {
+      const key = `${pkg.dataGB}GB_${pkg.days}days`;
+
+      if (seen.has(key)) {
+        const existing = seen.get(key);
+        console.log(`🗑️ DUPLICATE FOUND:`, {
+          key,
+          existing: { code: existing.packageCode, slug: existing.slug, priceUSD: existing.priceUSD.toFixed(2) },
+          current: { code: pkg.packageCode, slug: pkg.slug, priceUSD: pkg.priceUSD.toFixed(2) }
+        });
+
+        // Keep the cheaper one
+        if (pkg.priceUSD < existing.priceUSD) {
+          console.log(`  ↳ Replacing with cheaper: ${pkg.packageCode} ($${pkg.priceUSD.toFixed(2)} < $${existing.priceUSD.toFixed(2)})`);
+          // Find and replace the existing one
+          const index = deduplicated.findIndex(p => p.packageCode === existing.packageCode && p.dataGB === existing.dataGB && p.days === existing.days);
+          if (index !== -1) {
+            deduplicated[index] = pkg;
+          }
+          seen.set(key, pkg);
+        } else {
+          console.log(`  ↳ Keeping existing: ${existing.packageCode} ($${existing.priceUSD.toFixed(2)})`);
+        }
+      } else {
+        // First time seeing this combination
+        seen.set(key, pkg);
+        deduplicated.push(pkg);
       }
-      seen.add(pkg.packageCode);
-      return true;
     });
 
     console.log(`📊 Total packages: ${packages.length}, After deduplication: ${deduplicated.length}`);
+    console.log(`📊 Removed ${packages.length - deduplicated.length} duplicate packages`);
 
     return deduplicated;
   } catch (error) {

@@ -20,6 +20,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('🔍 [PACKAGES-API] Request body:', JSON.stringify(req.body));
+
     const response = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
       method: 'POST',
       headers: {
@@ -34,6 +36,25 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+
+    // Log what we got from eSIMAccess
+    if (data.success && data.obj?.packageList) {
+      console.log(`📦 [PACKAGES-API] eSIMAccess returned ${data.obj.packageList.length} packages`);
+
+      // Log first 3 packages for debugging
+      data.obj.packageList.slice(0, 3).forEach((pkg, idx) => {
+        console.log(`  Package ${idx + 1}:`, {
+          code: pkg.packageCode,
+          name: pkg.name,
+          location: pkg.location,
+          price: pkg.price,
+          priceUSD: (pkg.price / 10000).toFixed(2),
+          volume: Math.round(pkg.volume / 1073741824) + 'GB',
+          duration: pkg.duration + ' days'
+        });
+      });
+    }
+
     res.status(200).json(data);
   } catch (error) {
     console.error('API Error:', error.message);
