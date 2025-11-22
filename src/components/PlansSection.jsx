@@ -50,8 +50,9 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="320px"
-      maxWidth="320px"
+      minWidth="340px"
+      width="340px"
+      flexShrink={0}
     >
       <Box
         position="absolute"
@@ -171,28 +172,30 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
             borderTop="2px dashed"
             borderColor="gray.200"
           >
-            <HStack justify="space-between" align="center">
-              <VStack align="flex-start" spacing={0}>
+            <VStack align="stretch" spacing={3}>
+              <VStack align="flex-start" spacing={0.5}>
                 <Text fontSize="xs" color="gray.500" fontWeight="600">
                   {t('plans.card.price')}
                 </Text>
-                <HStack spacing={1.5} align="baseline">
+                <HStack spacing={1.5} align="baseline" flexWrap="nowrap">
                   <Heading
-                    fontSize="3xl"
+                    fontSize="14px"
                     fontWeight="800"
                     color="gray.800"
                     letterSpacing="tight"
+                    whiteSpace="nowrap"
                   >
                     {plan.price}
                   </Heading>
-                  <Text fontSize="md" color="gray.600" fontWeight="700">
+                  <Text fontSize="md" color="gray.600" fontWeight="700" whiteSpace="nowrap">
                     {t('plans.card.currency')}
                   </Text>
                 </HStack>
               </VStack>
 
               <Button
-                size="sm"
+                size="md"
+                width="full"
                 bg={isHovered ? 'purple.600' : 'gray.100'}
                 color={isHovered ? 'white' : 'gray.700'}
                 _hover={{
@@ -202,13 +205,12 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                 transition="all 0.3s"
                 borderRadius="lg"
                 fontWeight="700"
-                px={4}
                 rightIcon={<ArrowRight size={16} />}
                 onClick={handleBuyClick}
               >
                 {t('plans.card.buy')}
               </Button>
-            </HStack>
+            </VStack>
           </Box>
         </VStack>
       </Box>
@@ -224,8 +226,9 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       overflow="hidden"
       border="2px solid"
       borderColor="gray.100"
-      minWidth="320px"
-      maxWidth="320px"
+      minWidth="340px"
+      width="340px"
+      flexShrink={0}
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
@@ -302,7 +305,7 @@ const PlansSection = () => {
 
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 350; // Card width + gap
+      const scrollAmount = 364; // Card width (340px) + gap (24px)
       const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
@@ -453,53 +456,49 @@ const PlansSection = () => {
           )}
 
           <Box position="relative" mt={12}>
-            {/* Left Arrow */}
-            {showLeftArrow && (
-              <IconButton
-                position="absolute"
-                left="-20px"
-                top="50%"
-                transform="translateY(-50%)"
-                zIndex={10}
-                onClick={() => scroll('left')}
-                bg="white"
-                shadow="lg"
-                borderRadius="full"
-                size="lg"
-                _hover={{
-                  bg: 'purple.50',
-                  transform: 'translateY(-50%) scale(1.1)',
-                }}
-                transition="all 0.3s"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft size={24} color="#7c3aed" />
-              </IconButton>
-            )}
-
-            {/* Right Arrow */}
-            {showRightArrow && (
-              <IconButton
-                position="absolute"
-                right="-20px"
-                top="50%"
-                transform="translateY(-50%)"
-                zIndex={10}
-                onClick={() => scroll('right')}
-                bg="white"
-                shadow="lg"
-                borderRadius="full"
-                size="lg"
-                _hover={{
-                  bg: 'purple.50',
-                  transform: 'translateY(-50%) scale(1.1)',
-                }}
-                transition="all 0.3s"
-                aria-label="Scroll right"
-              >
-                <ChevronRight size={24} color="#7c3aed" />
-              </IconButton>
-            )}
+            {/* Navigation Arrows - Top Right */}
+            <HStack
+              position="absolute"
+              top="-60px"
+              right="0"
+              spacing={2}
+              zIndex={10}
+            >
+              {showLeftArrow && (
+                <IconButton
+                  onClick={() => scroll('left')}
+                  bg="white"
+                  shadow="lg"
+                  borderRadius="full"
+                  size="md"
+                  _hover={{
+                    bg: 'purple.50',
+                    transform: 'scale(1.1)',
+                  }}
+                  transition="all 0.3s"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={20} color="#7c3aed" />
+                </IconButton>
+              )}
+              {showRightArrow && (
+                <IconButton
+                  onClick={() => scroll('right')}
+                  bg="white"
+                  shadow="lg"
+                  borderRadius="full"
+                  size="md"
+                  _hover={{
+                    bg: 'purple.50',
+                    transform: 'scale(1.1)',
+                  }}
+                  transition="all 0.3s"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={20} color="#7c3aed" />
+                </IconButton>
+              )}
+            </HStack>
 
             {/* Scrollable Container */}
             <Box
