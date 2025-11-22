@@ -9,156 +9,8 @@ const supabase = createClient(
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
 const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
 
-// Send eSIM email notification via Resend
-async function sendEsimEmail(order, esim) {
-  console.log('📧 [WEBHOOK-EMAIL] ========== EMAIL SEND STARTING ==========');
-  console.log('📧 [WEBHOOK-EMAIL] Order:', { id: order.id, user_id: order.user_id, order_no: order.order_no });
-  console.log('📧 [WEBHOOK-EMAIL] eSIM:', { iccid: esim.iccid, qrCodeUrl: esim.qrCodeUrl ? 'present' : 'missing' });
-
-  // Validate SENDGRID_API_KEY
-  if (!process.env.SENDGRID_API_KEY) {
-    console.error('📧 [WEBHOOK-EMAIL] ❌ CRITICAL: SENDGRID_API_KEY is not set!');
-    return { success: false, error: 'SENDGRID_API_KEY not configured' };
-  }
-  console.log('📧 [WEBHOOK-EMAIL] ✅ SENDGRID_API_KEY configured');
-
-  try {
-    // Get user email from Supabase auth
-    console.log('📧 [WEBHOOK-EMAIL] Fetching user data for:', order.user_id);
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(order.user_id);
-
-    if (userError) {
-      console.error('📧 [WEBHOOK-EMAIL] ❌ Error fetching user:', userError);
-      return { success: false, error: userError.message };
-    }
-
-    const userEmail = userData?.user?.email;
-    console.log('📧 [WEBHOOK-EMAIL] User email:', userEmail || '❌ NOT FOUND');
-
-    if (!userEmail) {
-      console.error('📧 [WEBHOOK-EMAIL] ❌ No email found for user:', order.user_id);
-      return { success: false, error: 'No email found' };
-    }
-
-    // Build email HTML
-    const emailHtml = `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">OneSIM</h1>
-          <p style="color: rgba(255,255,255,0.9); margin-top: 10px;">Ваш eSIM готов к активации!</p>
-        </div>
-        <div style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 16px 16px;">
-          <h2 style="color: #1a202c; margin-top: 0;">Детали заказа</h2>
-          <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; color: #718096;">Номер заказа:</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${order.order_no}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; color: #718096;">Пакет:</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${order.package_name || order.package_code}</td>
-            </tr>
-            <tr>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; color: #718096;">ICCID:</td>
-              <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${esim.iccid}</td>
-            </tr>
-          </table>
-          <div style="background: #f7fafc; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
-            <p style="margin: 0 0 15px 0; color: #4a5568; font-weight: 600;">QR-код для активации:</p>
-            ${esim.qrCodeUrl
-              ? `<img src="${esim.qrCodeUrl}" alt="QR Code" style="max-width: 200px; height: auto;">`
-              : `<p style="font-family: monospace; word-break: break-all; background: #edf2f7; padding: 10px; border-radius: 8px; font-size: 12px;">${esim.ac || 'Код недоступен'}</p>`
-            }
-          </div>
-          <h3 style="color: #1a202c;">Инструкция по установке:</h3>
-          <ol style="color: #4a5568; line-height: 1.8;">
-            <li>Откройте <strong>Настройки</strong> на вашем телефоне</li>
-            <li>Перейдите в раздел <strong>Сотовая связь / Мобильные данные</strong></li>
-            <li>Выберите <strong>Добавить eSIM</strong> или <strong>Добавить тарифный план</strong></li>
-            <li>Отсканируйте QR-код выше</li>
-            <li>Подтвердите установку профиля</li>
-            <li>Активируйте eSIM и начните использовать!</li>
-          </ol>
-          <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 20px;">
-            <p style="margin: 0; color: #92400e; font-size: 14px;">
-              <strong>Важно:</strong> Сохраните это письмо. QR-код можно использовать только один раз.
-            </p>
-          </div>
-        </div>
-        <div style="text-align: center; padding: 20px; color: #718096; font-size: 12px;">
-          <p>© 2025 OneSIM. Все права защищены.</p>
-        </div>
-      </div>
-    `;
-
-    // Send email via SendGrid
-    console.log('📧 [WEBHOOK-EMAIL] ========== CALLING SENDGRID API ==========');
-    console.log('📧 [WEBHOOK-EMAIL] Target email:', userEmail);
-
-    const sendgridPayload = {
-      personalizations: [
-        {
-          to: [{ email: userEmail }]
-        }
-      ],
-      from: {
-        email: 'noreply@sendgrid.net',
-        name: 'OneSIM'
-      },
-      subject: 'Ваш eSIM готов к активации - OneSIM',
-      content: [
-        {
-          type: 'text/html',
-          value: emailHtml
-        }
-      ]
-    };
-    console.log('📧 [WEBHOOK-EMAIL] SendGrid payload prepared');
-
-    const sendgridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sendgridPayload),
-    });
-
-    console.log('📧 [WEBHOOK-EMAIL] SendGrid HTTP Status:', sendgridResponse.status, sendgridResponse.statusText);
-
-    // SendGrid returns 202 Accepted on success (not 200)
-    if (sendgridResponse.status === 202) {
-      console.log('📧 [WEBHOOK-EMAIL] ✅✅✅ Email sent successfully via SendGrid!');
-    } else {
-      const errorData = await sendgridResponse.text();
-      console.error('📧 [WEBHOOK-EMAIL] ❌ SendGrid API error:', errorData);
-      return { success: false, error: errorData || 'Failed to send email' };
-    }
-
-    // Update email_sent status in database
-    console.log('📧 [WEBHOOK-EMAIL] Updating database: setting email_sent = true...');
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({
-        email_sent: true,
-        email_sent_at: new Date().toISOString()
-      })
-      .eq('id', order.id);
-
-    if (updateError) {
-      console.error('📧 [WEBHOOK-EMAIL] ❌ Error updating email_sent status:', updateError);
-    } else {
-      console.log('📧 [WEBHOOK-EMAIL] ✅ Database updated: email_sent = true');
-    }
-
-    console.log('📧 [WEBHOOK-EMAIL] ========== EMAIL SEND COMPLETED ==========');
-    return { success: true, email: userEmail };
-  } catch (error) {
-    console.error('📧 [WEBHOOK-EMAIL] ❌❌❌ EXCEPTION:', error.message);
-    console.error('📧 [WEBHOOK-EMAIL] Stack:', error.stack);
-    return { success: false, error: error.message };
-  }
-}
+// NOTE: Email sending temporarily disabled until domain is ready
+// Orders are saved to database and users can access QR codes via "My eSIMs" page
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -298,17 +150,12 @@ export default async function handler(req, res) {
       }
 
       console.log('✅ [WEBHOOK] Order updated successfully');
-
-      // Send email to user
-      console.log('📧 [WEBHOOK] Triggering email send...');
-      const emailResult = await sendEsimEmail(updatedOrder || order, esim);
-      console.log('📧 [WEBHOOK] Email result:', emailResult);
+      console.log('ℹ️ [WEBHOOK] Email sending skipped - users will access QR code via My eSIMs page');
 
       console.log('🎉 [WEBHOOK] Webhook processing complete!');
       return res.status(200).json({
         success: true,
-        message: 'eSIM allocated and email sent',
-        emailSent: emailResult.success
+        message: 'eSIM allocated successfully. User can access QR code in My eSIMs page.'
       });
     }
 

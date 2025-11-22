@@ -104,7 +104,7 @@ const PackagePage = () => {
   const packageType = plan.smsSupported || plan.callsSupported ? 'Данные + Звонки/SMS' : 'Только данные';
 
   const installationSteps = [
-    { icon: Mail, text: 'После покупки вы получите QR-код на email' },
+    { icon: Mail, text: 'После покупки QR-код будет в разделе "Мои eSIM"' },
     { icon: Settings, text: 'Откройте настройки телефона' },
     { icon: QrCode, text: 'Отсканируйте QR-код' },
     { icon: Download, text: 'Установите профиль eSIM' },
@@ -487,17 +487,12 @@ const PackagePage = () => {
           <ModalBody pb={6}>
             <VStack align="stretch" spacing={4}>
               <Text color="gray.600">
-                Ваш eSIM успешно заказан и будет отправлен на вашу электронную почту:
+                Ваш eSIM успешно заказан! QR-код для активации будет доступен в разделе "Мои eSIM" через несколько минут.
               </Text>
-              <Box bg="purple.50" p={4} borderRadius="xl" textAlign="center">
-                <Text fontWeight="700" color="purple.700">
-                  {orderSuccess?.email}
-                </Text>
-              </Box>
-              <Alert status="info" borderRadius="lg">
+              <Alert status="success" borderRadius="lg">
                 <AlertIcon />
                 <Text fontSize="sm">
-                  Обработка заказа может занять несколько минут. Вы также можете отслеживать статус в личном кабинете.
+                  Обработка занимает 1-2 минуты. После этого вы сможете просмотреть и скачать QR-код в личном кабинете.
                 </Text>
               </Alert>
             </VStack>

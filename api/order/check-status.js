@@ -9,8 +9,9 @@ const supabase = createClient(
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
 const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
 
-// Send eSIM email notification via Resend
-async function sendEsimEmail(order, esim) {
+// NOTE: Email sending temporarily disabled until domain is ready
+// This function is kept for future use
+async function sendEsimEmail_DISABLED(order, esim) {
   console.log('📧 [EMAIL] ========== EMAIL SEND STARTING ==========');
   console.log('📧 [EMAIL] Order:', { id: order.id, user_id: order.user_id, order_no: order.order_no });
   console.log('📧 [EMAIL] eSIM:', { iccid: esim.iccid, qrCodeUrl: esim.qrCodeUrl ? 'present' : 'missing' });
@@ -181,8 +182,6 @@ export default async function handler(req, res) {
   try {
     const { orderId } = req.body;
     console.log('🔍 [CHECK-STATUS] Request received for orderId:', orderId);
-    console.log('🔍 [CHECK-STATUS] Environment check - SENDGRID_API_KEY exists:', !!process.env.SENDGRID_API_KEY);
-    console.log('🔍 [CHECK-STATUS] Environment check - SENDGRID_API_KEY length:', process.env.SENDGRID_API_KEY?.length || 0);
 
     if (!orderId) {
       console.error('❌ [CHECK-STATUS] Missing orderId');
@@ -268,28 +267,12 @@ export default async function handler(req, res) {
         throw updateError;
       }
       console.log('✅ [CHECK-STATUS] Order updated successfully');
-
-      // Send email notification
-      console.log('📧 [CHECK-STATUS] ========== TRIGGERING EMAIL SEND ==========');
-      console.log('📧 [CHECK-STATUS] About to call sendEsimEmail with:', {
-        orderId: updatedOrder.id,
-        orderNo: updatedOrder.order_no,
-        userId: updatedOrder.user_id,
-        esimIccid: esim.iccid
-      });
-
-      const emailResult = await sendEsimEmail(updatedOrder, esim);
-
-      console.log('📧 [CHECK-STATUS] ========== EMAIL RESULT RECEIVED ==========');
-      console.log('📧 [CHECK-STATUS] Email result:', JSON.stringify(emailResult, null, 2));
+      console.log('ℹ️ [CHECK-STATUS] Email sending skipped - users will access QR code via My eSIMs page');
 
       return res.json({
         success: true,
         data: updatedOrder,
-        message: 'eSIM allocated successfully',
-        emailSent: emailResult.success,
-        emailTo: emailResult.email,
-        emailError: emailResult.error || null
+        message: 'eSIM allocated successfully. QR code available in My eSIMs page.'
       });
     }
 

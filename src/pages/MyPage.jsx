@@ -43,6 +43,7 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Share2,
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -151,6 +152,50 @@ const MyPage = () => {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
+    }
+  };
+
+  // Share or download QR code
+  const handleShareQr = async () => {
+    if (!selectedOrder?.qr_code_url) return;
+
+    const qrCodeUrl = selectedOrder.qr_code_url;
+
+    try {
+      // Try to fetch the image as a blob
+      const response = await fetch(qrCodeUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `onesim-qr-${selectedOrder.iccid}.png`, { type: 'image/png' });
+
+      // Check if Web Share API is available and can share files
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'OneSIM QR-код',
+          text: `QR-код для активации eSIM (${selectedOrder.package_name})`,
+          files: [file],
+        });
+      } else {
+        // Fallback: Download the image
+        const link = document.createElement('a');
+        link.href = qrCodeUrl;
+        link.download = `onesim-qr-${selectedOrder.iccid}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      console.error('Failed to share QR code:', err);
+      // If sharing fails, try to just download
+      try {
+        const link = document.createElement('a');
+        link.href = qrCodeUrl;
+        link.download = `onesim-qr-${selectedOrder.iccid}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (downloadErr) {
+        console.error('Failed to download QR code:', downloadErr);
+      }
     }
   };
 
@@ -592,12 +637,22 @@ const MyPage = () => {
               </VStack>
             )}
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter gap={3}>
+            <Button
+              variant="outline"
+              colorScheme="purple"
+              leftIcon={<Share2 size={18} />}
+              onClick={handleShareQr}
+              flex={1}
+            >
+              Поделиться
+            </Button>
             <Button
               bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
               color="white"
               _hover={{ opacity: 0.9 }}
               onClick={onQrModalClose}
+              flex={1}
             >
               Закрыть
             </Button>
