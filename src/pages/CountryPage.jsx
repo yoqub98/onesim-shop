@@ -427,6 +427,7 @@ const CountryPage = () => {
       'es': 'https://images.unsplash.com/photo-1558642084-fd07fae5282e?w=1600&q=80', // Spain - Barcelona
       'kr': 'https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=1600&q=80', // South Korea - Seoul
       'uz': 'https://images.unsplash.com/photo-1597074866923-dc0589150ad7?w=1600&q=80', // Uzbekistan - Samarkand
+      'de': 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1600&q=80', // Germany - Berlin
     };
 
     return countryImages[countryCode?.toLowerCase()] || null; // Use gray background if no image
