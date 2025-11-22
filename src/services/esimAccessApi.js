@@ -204,7 +204,24 @@ export const fetchPackagesByCountry = async (locationCode) => {
 // ============================================
 export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LANGUAGE) => {
   const priceInUSD = apiPackage.price / 10000;
-  const dataInGB = Math.round(apiPackage.volume / 1073741824);
+
+  // Handle data display - show MB for values < 1GB
+  const volumeInBytes = apiPackage.volume;
+  const volumeInGB = volumeInBytes / 1073741824; // 1024^3
+  const volumeInMB = volumeInBytes / 1048576; // 1024^2
+
+  let dataDisplay, dataGB;
+  if (volumeInGB >= 1) {
+    // 1GB or more - show in GB
+    dataGB = Math.round(volumeInGB);
+    dataDisplay = `${dataGB}GB`;
+  } else {
+    // Less than 1GB - show in MB
+    const dataMB = Math.round(volumeInMB);
+    dataDisplay = `${dataMB}MB`;
+    dataGB = volumeInGB; // Keep decimal for filtering purposes
+  }
+
   const speed = apiPackage.speed || (apiPackage.name.includes('5G')
     ? '5G'
     : apiPackage.name.includes('4G')
@@ -238,8 +255,8 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
     slug: apiPackage.slug,
     country: countryName,
     countryCode: countryCode,
-    data: `${dataInGB}GB`,
-    dataGB: dataInGB,
+    data: dataDisplay, // Can be "3GB" or "500MB"
+    dataGB: dataGB, // Numeric value for filtering/sorting
     days: apiPackage.duration,
     speed: speed,
     priceUSD: priceInUSD,

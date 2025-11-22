@@ -29,17 +29,9 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
-  const handleBuyClick = () => {
+  const handleCardClick = () => {
     navigate(`/package/${plan.id}`, { state: { plan, countryCode } });
   };
-
-  // Debug logging
-  console.log('Plan data:', {
-    id: plan.id,
-    data: plan.data,
-    operatorList: plan.operatorList,
-    hasOperators: plan.operatorList && plan.operatorList.length > 0
-  });
 
   return (
     <Box
@@ -55,6 +47,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
       boxShadow={isHovered ? '0 20px 40px rgba(100, 100, 100, 0.25)' : '0 4px 12px rgba(100, 100, 100, 0.15)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
     >
       <Box
         position="absolute"
@@ -136,23 +129,21 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
               border="1px solid"
               borderColor="blue.100"
             >
-              <Text fontSize="xs" color="blue.600" fontWeight="600" textAlign="center" mb={1}>
-                Провайдер
-              </Text>
-              <VStack spacing={1} align="stretch">
-                {plan.operatorList.map((operator, idx) => (
-                  <HStack key={idx} justify="center" spacing={1}>
-                    <Text fontSize="sm" fontWeight="700" color="blue.800">
-                      {operator.operatorName}
-                    </Text>
-                    {operator.networkType && (
-                      <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
-                        {operator.networkType}
-                      </Badge>
-                    )}
-                  </HStack>
-                ))}
-              </VStack>
+              <HStack justify="center" spacing={2}>
+                <Text fontSize="sm" fontWeight="700" color="blue.800">
+                  {plan.operatorList[0].operatorName}
+                </Text>
+                {plan.operatorList[0].networkType && (
+                  <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
+                    {plan.operatorList[0].networkType}
+                  </Badge>
+                )}
+                {plan.operatorList.length > 1 && (
+                  <Badge colorScheme="blue" variant="solid" fontSize="xs" px={1.5} py={0.5}>
+                    +{plan.operatorList.length - 1}
+                  </Badge>
+                )}
+              </HStack>
             </Box>
           )}
 
@@ -192,7 +183,7 @@ const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
                 borderRadius="lg"
                 fontWeight="700"
                 px={3}
-                onClick={handleBuyClick}
+                pointerEvents="none"
               >
                 <HStack spacing={1}>
                   <Text>{t('plans.card.buy') || 'Купить'}</Text>
