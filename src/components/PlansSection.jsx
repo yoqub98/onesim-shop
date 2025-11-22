@@ -179,7 +179,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                 </Text>
                 <HStack spacing={1.5} align="baseline" flexWrap="nowrap">
                   <Heading
-                    fontSize="14px"
+                    fontSize="17px"
                     fontWeight="800"
                     color="gray.800"
                     letterSpacing="tight"
@@ -187,7 +187,7 @@ const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
                   >
                     {plan.price}
                   </Heading>
-                  <Text fontSize="md" color="gray.600" fontWeight="700" whiteSpace="nowrap">
+                  <Text fontSize="md" color="gray.600" fontWeight="700" fontsize="14px" whiteSpace="nowrap">
                     {t('plans.card.currency')}
                   </Text>
                 </HStack>
