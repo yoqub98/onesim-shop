@@ -207,18 +207,8 @@ export default async function handler(req, res) {
       iccid: order.iccid
     });
 
-    // If already allocated and email sent, return current data
-    if (order.order_status === 'ALLOCATED' && order.email_sent) {
-      console.log('✅ [CHECK-STATUS] Already allocated and email sent, returning cached data');
-      return res.json({ success: true, data: order, message: 'Already allocated and email sent' });
-    }
-
-    // If already allocated but email NOT sent, we'll query again and try to send email
-    if (order.order_status === 'ALLOCATED' && !order.email_sent) {
-      console.log('⚠️ [CHECK-STATUS] Order is allocated but email was not sent. Will attempt to send email now.');
-    }
-
-    // Query eSIMAccess for profile data
+    // Always query eSIMAccess to get the latest eSIM status (even if already allocated)
+    // This ensures we update the esim_status field (NOT_ACTIVATED, ACTIVATED, USED, etc.)
     console.log('📡 [CHECK-STATUS] Querying eSIMAccess for orderNo:', order.order_no);
     const queryPayload = {
       orderNo: order.order_no,

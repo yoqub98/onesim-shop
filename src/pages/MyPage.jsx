@@ -48,7 +48,7 @@ import {
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
-import { getUserOrders, getOrderStatusText, getOrderStatusColor, checkOrderStatus, cancelOrder } from '../services/orderService';
+import { getUserOrders, getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, cancelOrder } from '../services/orderService';
 
 const MyPage = () => {
   const lang = DEFAULT_LANGUAGE;
@@ -213,8 +213,10 @@ const MyPage = () => {
 
   // Order Card Component
   const OrderCard = ({ order }) => {
-    const statusColor = getOrderStatusColor(order.order_status);
-    const statusText = getOrderStatusText(order.order_status);
+    // For ALLOCATED orders, show eSIM status if available; otherwise show order status
+    const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
+    const statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status) : getOrderStatusColor(order.order_status);
+    const statusText = useEsimStatus ? getEsimStatusText(order.esim_status) : getOrderStatusText(order.order_status);
     const countryName = getCountryName(order.country_code, lang);
 
     return (

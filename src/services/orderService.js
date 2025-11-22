@@ -190,3 +190,41 @@ export const getOrderStatusColor = (status) => {
   };
   return colorMap[status] || 'gray';
 };
+
+/**
+ * Get eSIM status display text (Russian)
+ * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @returns {string} Translated eSIM status text
+ */
+export const getEsimStatusText = (esimStatus) => {
+  if (!esimStatus) return null;
+
+  const statusMap = {
+    'GOT_RESOURCE': 'Готов к активации',
+    'NOT_ACTIVATED': 'Не активирован',
+    'ACTIVATED': 'Активирован',
+    'USED': 'Используется',
+    'DELETED': 'Удален',
+    'CANCELLED': 'Отменен',
+  };
+  return statusMap[esimStatus] || esimStatus;
+};
+
+/**
+ * Get eSIM status color for Chakra UI
+ * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @returns {string} Chakra color scheme
+ */
+export const getEsimStatusColor = (esimStatus) => {
+  if (!esimStatus) return 'gray';
+
+  const colorMap = {
+    'GOT_RESOURCE': 'blue',
+    'NOT_ACTIVATED': 'yellow',
+    'ACTIVATED': 'green',
+    'USED': 'purple',
+    'DELETED': 'red',
+    'CANCELLED': 'gray',
+  };
+  return colorMap[esimStatus] || 'gray';
+};
