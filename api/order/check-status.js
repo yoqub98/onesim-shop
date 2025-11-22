@@ -15,12 +15,12 @@ async function sendEsimEmail(order, esim) {
   console.log('📧 [EMAIL] Order:', { id: order.id, user_id: order.user_id, order_no: order.order_no });
   console.log('📧 [EMAIL] eSIM:', { iccid: esim.iccid, qrCodeUrl: esim.qrCodeUrl ? 'present' : 'missing' });
 
-  // Validate RESEND_API_KEY
-  if (!process.env.RESEND_API_KEY) {
-    console.error('📧 [EMAIL] ❌ CRITICAL: RESEND_API_KEY is not set in environment variables!');
-    return { success: false, error: 'RESEND_API_KEY not configured' };
+  // Validate SENDGRID_API_KEY
+  if (!process.env.SENDGRID_API_KEY) {
+    console.error('📧 [EMAIL] ❌ CRITICAL: SENDGRID_API_KEY is not set in environment variables!');
+    return { success: false, error: 'SENDGRID_API_KEY not configured' };
   }
-  console.log('📧 [EMAIL] ✅ RESEND_API_KEY is configured (length:', process.env.RESEND_API_KEY.length, ')');
+  console.log('📧 [EMAIL] ✅ SENDGRID_API_KEY is configured (length:', process.env.SENDGRID_API_KEY.length, ')');
 
   try {
     // Get user email from Supabase auth
@@ -92,39 +92,51 @@ async function sendEsimEmail(order, esim) {
       </div>
     `;
 
-    // Send email via Resend
-    console.log('📧 [EMAIL] ========== CALLING RESEND API ==========');
+    // Send email via SendGrid
+    console.log('📧 [EMAIL] ========== CALLING SENDGRID API ==========');
     console.log('📧 [EMAIL] Target email:', userEmail);
-    console.log('📧 [EMAIL] Resend URL: https://api.resend.com/emails');
+    console.log('📧 [EMAIL] SendGrid URL: https://api.sendgrid.com/v3/mail/send');
 
-    const resendPayload = {
-      from: 'OneSIM <onboarding@resend.dev>',
-      to: [userEmail],
+    const sendgridPayload = {
+      personalizations: [
+        {
+          to: [{ email: userEmail }]
+        }
+      ],
+      from: {
+        email: 'noreply@sendgrid.net',
+        name: 'OneSIM'
+      },
       subject: 'Ваш eSIM готов к активации - OneSIM',
-      html: emailHtml,
+      content: [
+        {
+          type: 'text/html',
+          value: emailHtml
+        }
+      ]
     };
-    console.log('📧 [EMAIL] Payload:', JSON.stringify({ ...resendPayload, html: '[HTML_CONTENT]' }));
+    console.log('📧 [EMAIL] SendGrid payload prepared (to:', userEmail, ')');
 
-    const resendResponse = await fetch('https://api.resend.com/emails', {
+    const sendgridResponse = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(resendPayload),
+      body: JSON.stringify(sendgridPayload),
     });
 
-    console.log('📧 [EMAIL] Resend HTTP Status:', resendResponse.status, resendResponse.statusText);
-    const resendData = await resendResponse.json();
-    console.log('📧 [EMAIL] Resend response body:', JSON.stringify(resendData, null, 2));
+    console.log('📧 [EMAIL] SendGrid HTTP Status:', sendgridResponse.status, sendgridResponse.statusText);
 
-    if (!resendResponse.ok) {
-      console.error('📧 [EMAIL] ❌ Resend API returned error status:', resendResponse.status);
-      console.error('📧 [EMAIL] ❌ Error details:', JSON.stringify(resendData, null, 2));
-      return { success: false, error: resendData.message || 'Failed to send email' };
+    // SendGrid returns 202 Accepted on success (not 200)
+    if (sendgridResponse.status !== 202) {
+      const errorData = await sendgridResponse.text();
+      console.error('📧 [EMAIL] ❌ SendGrid API returned error status:', sendgridResponse.status);
+      console.error('📧 [EMAIL] ❌ Error details:', errorData);
+      return { success: false, error: errorData || 'Failed to send email' };
     }
 
-    console.log('📧 [EMAIL] ✅✅✅ Email sent successfully! Resend ID:', resendData.id);
+    console.log('📧 [EMAIL] ✅✅✅ Email sent successfully via SendGrid!');
 
     // Update email_sent status in database
     console.log('📧 [EMAIL] Updating database: setting email_sent = true...');
@@ -143,7 +155,7 @@ async function sendEsimEmail(order, esim) {
     }
 
     console.log('📧 [EMAIL] ========== EMAIL SEND COMPLETED SUCCESSFULLY ==========');
-    return { success: true, email: userEmail, resendId: resendData.id };
+    return { success: true, email: userEmail };
   } catch (error) {
     console.error('📧 [EMAIL] ❌❌❌ EXCEPTION CAUGHT:', error.message);
     console.error('📧 [EMAIL] Error name:', error.name);
@@ -169,8 +181,8 @@ export default async function handler(req, res) {
   try {
     const { orderId } = req.body;
     console.log('🔍 [CHECK-STATUS] Request received for orderId:', orderId);
-    console.log('🔍 [CHECK-STATUS] Environment check - RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
-    console.log('🔍 [CHECK-STATUS] Environment check - RESEND_API_KEY length:', process.env.RESEND_API_KEY?.length || 0);
+    console.log('🔍 [CHECK-STATUS] Environment check - SENDGRID_API_KEY exists:', !!process.env.SENDGRID_API_KEY);
+    console.log('🔍 [CHECK-STATUS] Environment check - SENDGRID_API_KEY length:', process.env.SENDGRID_API_KEY?.length || 0);
 
     if (!orderId) {
       console.error('❌ [CHECK-STATUS] Missing orderId');
