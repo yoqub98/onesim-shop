@@ -193,19 +193,29 @@ export const getOrderStatusColor = (status) => {
 
 /**
  * Get eSIM status display text (Russian)
+ * Based on eSIMAccess API documentation
  * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
  * @returns {string} Translated eSIM status text
  */
-export const getEsimStatusText = (esimStatus) => {
+export const getEsimStatusText = (esimStatus, smdpStatus) => {
   if (!esimStatus) return null;
 
+  // Match actual eSIMAccess API values from documentation
+  // New: smdpStatus=RELEASED, esimStatus=GOT_RESOURCE
+  // Onboard: smdpStatus=ENABLED, esimStatus=IN_USE or GOT_RESOURCE
+  // In Use: smdpStatus=ENABLED/DISABLED, esimStatus=IN_USE
+  // Depleted: smdpStatus=ENABLED/DISABLED, esimStatus=USED_UP
+  // Deleted: smdpStatus=DELETED, esimStatus=USED_UP or IN_USE
+
+  if (smdpStatus === 'DELETED') {
+    return 'Удален';
+  }
+
   const statusMap = {
-    'GOT_RESOURCE': 'Готов к активации',
-    'NOT_ACTIVATED': 'Не активирован',
-    'ACTIVATED': 'Активирован',
-    'USED': 'Используется',
-    'DELETED': 'Удален',
-    'CANCELLED': 'Отменен',
+    'GOT_RESOURCE': smdpStatus === 'RELEASED' ? 'Готов к активации' : 'Установлен',
+    'IN_USE': 'Используется',
+    'USED_UP': 'Израсходован',
   };
   return statusMap[esimStatus] || esimStatus;
 };
@@ -213,18 +223,20 @@ export const getEsimStatusText = (esimStatus) => {
 /**
  * Get eSIM status color for Chakra UI
  * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
  * @returns {string} Chakra color scheme
  */
-export const getEsimStatusColor = (esimStatus) => {
+export const getEsimStatusColor = (esimStatus, smdpStatus) => {
   if (!esimStatus) return 'gray';
 
+  if (smdpStatus === 'DELETED') {
+    return 'red';
+  }
+
   const colorMap = {
-    'GOT_RESOURCE': 'blue',
-    'NOT_ACTIVATED': 'yellow',
-    'ACTIVATED': 'green',
-    'USED': 'purple',
-    'DELETED': 'red',
-    'CANCELLED': 'gray',
+    'GOT_RESOURCE': smdpStatus === 'RELEASED' ? 'blue' : 'green',
+    'IN_USE': 'purple',
+    'USED_UP': 'orange',
   };
   return colorMap[esimStatus] || 'gray';
 };

@@ -215,8 +215,8 @@ const MyPage = () => {
   const OrderCard = ({ order }) => {
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
-    const statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status) : getOrderStatusColor(order.order_status);
-    const statusText = useEsimStatus ? getEsimStatusText(order.esim_status) : getOrderStatusText(order.order_status);
+    const statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
+    const statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
     const countryName = getCountryName(order.country_code, lang);
 
     return (

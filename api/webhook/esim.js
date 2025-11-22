@@ -138,7 +138,9 @@ export default async function handler(req, res) {
           qr_code_data: esim.ac,
           smdp_address: esim.smdpAddress,
           activation_code: esim.ac,
-          esim_status: esim.esimStatus
+          esim_status: esim.esimStatus,
+          smdp_status: esim.smdpStatus,
+          order_usage: esim.orderUsage || 0
         })
         .eq('order_no', orderNo)
         .select()
