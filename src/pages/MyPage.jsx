@@ -52,8 +52,10 @@ import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
 import { getUserOrders, getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, cancelOrder, queryEsimUsage } from '../services/orderService';
 
 const MyPage = () => {
+  console.log('🔵 MyPage component rendering...');
   const lang = DEFAULT_LANGUAGE;
   const { user, profile } = useAuth();
+  console.log('👤 User:', user?.id, 'Profile:', profile?.first_name);
 
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -240,16 +242,22 @@ const MyPage = () => {
     // Fetch usage data if ICCID is available
     useEffect(() => {
       const fetchUsageData = async () => {
-        if (!order.iccid || order.order_status !== 'ALLOCATED') return;
+        if (!order.iccid || order.order_status !== 'ALLOCATED') {
+          console.log('⏭️ Skipping usage fetch for order:', order.id, 'ICCID:', order.iccid, 'Status:', order.order_status);
+          return;
+        }
 
+        console.log('📊 Fetching usage data for ICCID:', order.iccid);
         setLoadingUsage(true);
         try {
           const data = await queryEsimUsage(order.iccid);
+          console.log('✅ Usage data received:', data);
           if (data.success && data.obj?.esimList?.[0]) {
             setUsageData(data.obj.esimList[0]);
+            console.log('📈 Usage data set:', data.obj.esimList[0]);
           }
         } catch (err) {
-          console.error('Failed to fetch usage data:', err);
+          console.error('❌ Failed to fetch usage data:', err);
         } finally {
           setLoadingUsage(false);
         }
@@ -390,19 +398,29 @@ const MyPage = () => {
                         {formatDataSize(usageData.orderUsage)} / {formatDataSize(usageData.totalVolume)}
                       </Text>
                     </HStack>
-                    <Progress
-                      value={((usageData.orderUsage / usageData.totalVolume) * 100)}
-                      size="sm"
-                      colorScheme={
-                        (usageData.orderUsage / usageData.totalVolume) > 0.8
-                          ? 'red'
-                          : (usageData.orderUsage / usageData.totalVolume) > 0.5
-                          ? 'orange'
-                          : 'purple'
-                      }
-                      borderRadius="full"
-                      bg="gray.200"
-                    />
+                    {typeof Progress !== 'undefined' ? (
+                      <Progress
+                        value={((usageData.orderUsage / usageData.totalVolume) * 100)}
+                        size="sm"
+                        colorScheme={
+                          (usageData.orderUsage / usageData.totalVolume) > 0.8
+                            ? 'red'
+                            : (usageData.orderUsage / usageData.totalVolume) > 0.5
+                            ? 'orange'
+                            : 'purple'
+                        }
+                        borderRadius="full"
+                        bg="gray.200"
+                      />
+                    ) : (
+                      <Box width="full" height="8px" bg="gray.200" borderRadius="full" overflow="hidden">
+                        <Box
+                          width={`${((usageData.orderUsage / usageData.totalVolume) * 100)}%`}
+                          height="full"
+                          bg="purple.500"
+                        />
+                      </Box>
+                    )}
                     <HStack justify="space-between" fontSize="xs" color="gray.500">
                       <Text>
                         {((usageData.orderUsage / usageData.totalVolume) * 100).toFixed(1)}% использовано
@@ -476,6 +494,8 @@ const MyPage = () => {
       </Box>
     );
   };
+
+  console.log('🎨 About to render MyPage JSX, orders count:', orders.length);
 
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={10}>
