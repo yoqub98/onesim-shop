@@ -252,12 +252,18 @@ const MyPage = () => {
         try {
           const data = await queryEsimUsage(order.iccid);
           console.log('✅ Usage data received:', data);
-          if (data.success && data.obj?.esimList?.[0]) {
-            setUsageData(data.obj.esimList[0]);
-            console.log('📈 Usage data set:', data.obj.esimList[0]);
+
+          // Check for successful response and data
+          if (data && data.success && data.obj?.esimList && data.obj.esimList.length > 0) {
+            const esimData = data.obj.esimList[0];
+            console.log('📈 Usage data set:', esimData);
+            setUsageData(esimData);
+          } else {
+            console.log('⚠️ No usage data found in response:', data);
           }
         } catch (err) {
           console.error('❌ Failed to fetch usage data:', err);
+          // Don't set error state, just log it - usage data is optional
         } finally {
           setLoadingUsage(false);
         }
@@ -398,29 +404,19 @@ const MyPage = () => {
                         {formatDataSize(usageData.orderUsage)} / {formatDataSize(usageData.totalVolume)}
                       </Text>
                     </HStack>
-                    {typeof Progress !== 'undefined' ? (
-                      <Progress
-                        value={((usageData.orderUsage / usageData.totalVolume) * 100)}
-                        size="sm"
-                        colorScheme={
-                          (usageData.orderUsage / usageData.totalVolume) > 0.8
-                            ? 'red'
-                            : (usageData.orderUsage / usageData.totalVolume) > 0.5
-                            ? 'orange'
-                            : 'purple'
-                        }
-                        borderRadius="full"
-                        bg="gray.200"
-                      />
-                    ) : (
-                      <Box width="full" height="8px" bg="gray.200" borderRadius="full" overflow="hidden">
-                        <Box
-                          width={`${((usageData.orderUsage / usageData.totalVolume) * 100)}%`}
-                          height="full"
-                          bg="purple.500"
-                        />
-                      </Box>
-                    )}
+                    <Progress
+                      value={((usageData.orderUsage / usageData.totalVolume) * 100)}
+                      size="sm"
+                      colorScheme={
+                        (usageData.orderUsage / usageData.totalVolume) > 0.8
+                          ? 'red'
+                          : (usageData.orderUsage / usageData.totalVolume) > 0.5
+                          ? 'orange'
+                          : 'purple'
+                      }
+                      borderRadius="full"
+                      bg="gray.200"
+                    />
                     <HStack justify="space-between" fontSize="xs" color="gray.500">
                       <Text>
                         {((usageData.orderUsage / usageData.totalVolume) * 100).toFixed(1)}% использовано
