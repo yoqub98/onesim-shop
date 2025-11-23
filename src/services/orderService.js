@@ -240,3 +240,31 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
   };
   return colorMap[esimStatus] || 'gray';
 };
+
+/**
+ * Query eSIM usage data by ICCID
+ * @param {string} iccid - ICCID of the eSIM
+ * @returns {Promise<Object>} Usage data including totalVolume and orderUsage
+ */
+export const queryEsimUsage = async (iccid) => {
+  try {
+    const response = await fetch(`${API_URL}/esim/usage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ iccid }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to query eSIM usage');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('eSIM usage query failed:', error);
+    throw error;
+  }
+};

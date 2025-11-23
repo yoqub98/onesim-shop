@@ -28,6 +28,7 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Progress,
 } from '@chakra-ui/react';
 import {
   User,
@@ -48,7 +49,7 @@ import {
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
-import { getUserOrders, getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, cancelOrder } from '../services/orderService';
+import { getUserOrders, getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, cancelOrder, queryEsimUsage } from '../services/orderService';
 
 const MyPage = () => {
   const lang = DEFAULT_LANGUAGE;
@@ -211,13 +212,67 @@ const MyPage = () => {
     });
   };
 
+  // Format expiry date for duration display
+  const formatExpiryDate = (expiryDateString) => {
+    if (!expiryDateString) return null;
+    const date = new Date(expiryDateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+    });
+  };
+
+  // Format bytes to MB/GB
+  const formatDataSize = (bytes) => {
+    if (!bytes) return '0 MB';
+    const mb = bytes / (1024 * 1024);
+    if (mb >= 1024) {
+      return `${(mb / 1024).toFixed(2)} GB`;
+    }
+    return `${mb.toFixed(0)} MB`;
+  };
+
   // Order Card Component
   const OrderCard = ({ order }) => {
+    const [usageData, setUsageData] = useState(null);
+    const [loadingUsage, setLoadingUsage] = useState(false);
+
+    // Fetch usage data if ICCID is available
+    useEffect(() => {
+      const fetchUsageData = async () => {
+        if (!order.iccid || order.order_status !== 'ALLOCATED') return;
+
+        setLoadingUsage(true);
+        try {
+          const data = await queryEsimUsage(order.iccid);
+          if (data.success && data.obj?.esimList?.[0]) {
+            setUsageData(data.obj.esimList[0]);
+          }
+        } catch (err) {
+          console.error('Failed to fetch usage data:', err);
+        } finally {
+          setLoadingUsage(false);
+        }
+      };
+
+      fetchUsageData();
+    }, [order.iccid, order.order_status]);
+
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
-    const statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
-    const statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
+
+    // Determine status based on usage data
+    let statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
+    let statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
+
+    // If usage data shows data is being used, update status
+    if (usageData && usageData.orderUsage > 0) {
+      statusText = 'Используется';
+      statusColor = 'purple';
+    }
+
     const countryName = getCountryName(order.country_code, lang);
+    const expiryDate = formatExpiryDate(usageData?.expiredTime || order.expiry_date);
 
     return (
       <Box
@@ -276,7 +331,11 @@ const MyPage = () => {
             <HStack spacing={2}>
               <Calendar size={16} color="#6b7280" />
               <Text fontSize="sm" color="gray.600">Срок:</Text>
-              <Text fontSize="sm" fontWeight="600">{order.validity_days ? `${order.validity_days} дней` : '-'}</Text>
+              <Text fontSize="sm" fontWeight="600">
+                {order.validity_days
+                  ? `${order.validity_days} дней${expiryDate ? ` (до ${expiryDate})` : ''}`
+                  : '-'}
+              </Text>
             </HStack>
             <HStack spacing={2}>
               <Globe size={16} color="#6b7280" />
@@ -320,7 +379,41 @@ const MyPage = () => {
 
           {/* Actions */}
           {order.order_status === 'ALLOCATED' && (
-            <VStack spacing={2} width="full">
+            <VStack spacing={3} width="full">
+              {/* Data Usage Progress Bar */}
+              {usageData && usageData.totalVolume > 0 && (
+                <Box width="full" bg="gray.50" p={3} borderRadius="lg">
+                  <VStack spacing={2} align="stretch">
+                    <HStack justify="space-between" fontSize="xs" color="gray.600">
+                      <Text fontWeight="600">Использовано данных</Text>
+                      <Text fontWeight="600">
+                        {formatDataSize(usageData.orderUsage)} / {formatDataSize(usageData.totalVolume)}
+                      </Text>
+                    </HStack>
+                    <Progress
+                      value={((usageData.orderUsage / usageData.totalVolume) * 100)}
+                      size="sm"
+                      colorScheme={
+                        (usageData.orderUsage / usageData.totalVolume) > 0.8
+                          ? 'red'
+                          : (usageData.orderUsage / usageData.totalVolume) > 0.5
+                          ? 'orange'
+                          : 'purple'
+                      }
+                      borderRadius="full"
+                      bg="gray.200"
+                    />
+                    <HStack justify="space-between" fontSize="xs" color="gray.500">
+                      <Text>
+                        {((usageData.orderUsage / usageData.totalVolume) * 100).toFixed(1)}% использовано
+                      </Text>
+                      <Text>
+                        {formatDataSize(usageData.totalVolume - usageData.orderUsage)} осталось
+                      </Text>
+                    </HStack>
+                  </VStack>
+                </Box>
+              )}
               {(order.qr_code_url || order.activation_code) && (
                 <Button
                   size="md"
@@ -334,18 +427,21 @@ const MyPage = () => {
                   Показать QR-код
                 </Button>
               )}
-              <Button
-                size="sm"
-                width="full"
-                variant="outline"
-                colorScheme="red"
-                leftIcon={<XCircle size={16} />}
-                onClick={() => handleCancelClick(order)}
-                isLoading={cancellingOrder === order.id}
-                loadingText="Отмена..."
-              >
-                Отменить eSIM
-              </Button>
+              {/* Only show cancel button if eSIM is not activated (smdpStatus is RELEASED) */}
+              {(!usageData || usageData.smdpStatus === 'RELEASED') && (
+                <Button
+                  size="sm"
+                  width="full"
+                  variant="outline"
+                  colorScheme="red"
+                  leftIcon={<XCircle size={16} />}
+                  onClick={() => handleCancelClick(order)}
+                  isLoading={cancellingOrder === order.id}
+                  loadingText="Отмена..."
+                >
+                  Отменить eSIM
+                </Button>
+              )}
             </VStack>
           )}
 

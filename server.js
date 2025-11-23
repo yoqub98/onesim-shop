@@ -208,6 +208,42 @@ app.post('/api/esim/query', async (req, res) => {
   }
 });
 
+// Query eSIM usage data by ICCID
+app.post('/api/esim/usage', async (req, res) => {
+  try {
+    const { iccid } = req.body;
+
+    if (!iccid) {
+      return res.status(400).json({ success: false, error: 'iccid is required' });
+    }
+
+    console.log('📊 Querying eSIM usage for ICCID:', iccid);
+
+    const response = await fetch(`${ESIMACCESS_API_URL}/esim/list`, {
+      method: 'POST',
+      headers: {
+        'RT-AccessCode': ESIMACCESS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        iccid,
+        pager: {
+          pageNum: 1,
+          pageSize: 20
+        }
+      }),
+    });
+
+    const data = await response.json();
+    console.log('📊 eSIM usage response:', data);
+
+    res.json(data);
+  } catch (error) {
+    console.error('❌ eSIM usage query error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Webhook endpoint for eSIMAccess callbacks
 app.post('/api/webhook/esim', async (req, res) => {
   try {

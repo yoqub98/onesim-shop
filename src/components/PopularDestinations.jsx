@@ -54,7 +54,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minH="180px"
+      minH="160px"
     >
       {/* Gradient overlay on hover */}
       <Box
@@ -96,9 +96,9 @@ const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) =>
                 }} 
               />
             </Box>
-            <Heading 
-              size="xl" 
-              fontWeight="800" 
+            <Heading
+              size="lg"
+              fontWeight="800"
               color="gray.900"
               whiteSpace="nowrap"
               overflow="hidden"

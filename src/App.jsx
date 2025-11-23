@@ -164,37 +164,48 @@ const Navigation = () => {
           {/* User Dropdown or Login/Signup Buttons */}
           <HStack spacing={3} display={{ base: 'none', md: 'flex' }}>
             {user && profile ? (
-              <Menu>
-                <MenuButton
-                  as={Button}
+              <>
+                <Button
+                  as="a"
+                  href="/mypage"
+                  size="md"
                   variant="ghost"
-                  px={3}
-                  py={2}
+                  fontWeight="600"
+                  color="gray.700"
                   _hover={{ bg: 'gray.50' }}
-                  _active={{ bg: 'gray.100' }}
+                  leftIcon={<User size={18} />}
                 >
-                  <HStack spacing={2}>
-                    <Avatar
-                      size="sm"
-                      name={`${profile.first_name} ${profile.last_name}`}
-                      bg="purple.500"
-                      color="white"
-                    />
-                    <Text fontWeight="600" color="gray.700">
-                      {profile.first_name} {profile.last_name}
-                    </Text>
-                    <ChevronDown size={18} />
-                  </HStack>
-                </MenuButton>
-                <MenuList>
-                  <MenuItem icon={<User size={18} />} as="a" href="/mypage">
-                    {t('nav.myPage')}
-                  </MenuItem>
-                  <MenuItem icon={<LogOut size={18} />} onClick={handleLogout} color="red.600">
-                    {t('nav.logout')}
-                  </MenuItem>
-                </MenuList>
-              </Menu>
+                  {t('nav.myPage')}
+                </Button>
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    variant="ghost"
+                    px={3}
+                    py={2}
+                    _hover={{ bg: 'gray.50' }}
+                    _active={{ bg: 'gray.100' }}
+                  >
+                    <HStack spacing={2}>
+                      <Avatar
+                        size="sm"
+                        name={`${profile.first_name} ${profile.last_name}`}
+                        bg="purple.500"
+                        color="white"
+                      />
+                      <Text fontWeight="600" color="gray.700">
+                        {profile.first_name} {profile.last_name}
+                      </Text>
+                      <ChevronDown size={18} />
+                    </HStack>
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem icon={<LogOut size={18} />} onClick={handleLogout} color="red.600">
+                      {t('nav.logout')}
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </>
             ) : (
               <>
                 <Button
@@ -305,11 +316,6 @@ const HeroSection = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
           <GridItem className="animate__animated animate__fadeInLeft">
             <VStack align="flex-start" spacing={8}>
-              <Box bg="purple.50" color="purple.700" px={5} py={2} borderRadius="full" fontSize="sm" fontWeight="700" display="inline-flex" alignItems="center" gap={2}>
-                <Zap size={16} />
-                {t('hero.badge')}
-              </Box>
-
               <Heading as="h1" fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="800" lineHeight="1.1" color="gray.900" letterSpacing="tight">
                 {t('hero.title')}{' '}
                 <Box as="span" background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" backgroundClip="text" display="inline">

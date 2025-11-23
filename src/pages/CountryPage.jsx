@@ -422,7 +422,7 @@ const CountryPage = () => {
       'th': 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=1600&q=80', // Thailand - Bangkok
       'it': 'https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=1600&q=80', // Italy - Rome
       'fr': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1600&q=80', // France - Paris
-      'ge': 'https://images.unsplash.com/photo-1580974852861-c381510bc98a?w=1600&q=80', // Georgia - Tbilisi
+      'ge': 'https://images.unsplash.com/photo-1598609041893-84bca8e28a7f?w=1600&q=80', // Georgia - Landscape
       'vn': 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=1600&q=80', // Vietnam - Ho Chi Minh
       'es': 'https://images.unsplash.com/photo-1558642084-fd07fae5282e?w=1600&q=80', // Spain - Barcelona
       'kr': 'https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=1600&q=80', // South Korea - Seoul
