@@ -20,6 +20,11 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from '@chakra-ui/react';
 import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
 import 'animate.css';
@@ -453,11 +458,121 @@ const Footer = () => {
   );
 };
 
+// FAQ Section Component
+const FAQSection = () => {
+  const lang = DEFAULT_LANGUAGE;
+  const t = (key) => getTranslation(lang, key);
+
+  const questions = [
+    {
+      id: 'whatIsEsim',
+      question: t('faq.questions.whatIsEsim.question'),
+      answer: t('faq.questions.whatIsEsim.answer'),
+    },
+    {
+      id: 'howToActivate',
+      question: t('faq.questions.howToActivate.question'),
+      answer: t('faq.questions.howToActivate.answer'),
+    },
+    {
+      id: 'deviceCompatibility',
+      question: t('faq.questions.deviceCompatibility.question'),
+      answer: t('faq.questions.deviceCompatibility.answer'),
+    },
+    {
+      id: 'canKeepNumber',
+      question: t('faq.questions.canKeepNumber.question'),
+      answer: t('faq.questions.canKeepNumber.answer'),
+    },
+    {
+      id: 'howMuchData',
+      question: t('faq.questions.howMuchData.question'),
+      answer: t('faq.questions.howMuchData.answer'),
+    },
+  ];
+
+  return (
+    <Box as="section" py={{ base: 16, md: 24 }} bg="white">
+      <Container maxW="5xl">
+        <VStack spacing={12}>
+          {/* Header */}
+          <VStack spacing={4} textAlign="center">
+            <Heading
+              fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
+              fontWeight="800"
+              color="gray.900"
+              className="animate__animated animate__fadeInUp"
+            >
+              {t('faq.title')}{' '}
+              <Box
+                as="span"
+                background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                backgroundClip="text"
+              >
+                {t('faq.titleHighlight')}
+              </Box>
+            </Heading>
+            <Text
+              fontSize={{ base: 'lg', md: 'xl' }}
+              color="gray.600"
+              maxW="2xl"
+              className="animate__animated animate__fadeInUp animate__delay-1s"
+            >
+              {t('faq.description')}
+            </Text>
+          </VStack>
+
+          {/* FAQ Accordion */}
+          <Accordion
+            allowToggle
+            w="full"
+            className="animate__animated animate__fadeInUp animate__delay-2s"
+          >
+            {questions.map((item, index) => (
+              <AccordionItem
+                key={item.id}
+                border="none"
+                bg="white"
+                mb={4}
+                borderRadius="xl"
+                shadow="sm"
+                _hover={{ shadow: 'md' }}
+                transition="all 0.3s"
+              >
+                <AccordionButton
+                  py={6}
+                  px={8}
+                  borderRadius="xl"
+                  _hover={{ bg: 'purple.50' }}
+                  _expanded={{ bg: 'purple.50', borderBottomRadius: 0 }}
+                >
+                  <Box flex="1" textAlign="left">
+                    <Text fontSize="lg" fontWeight="700" color="gray.800">
+                      {item.question}
+                    </Text>
+                  </Box>
+                  <AccordionIcon fontSize="24px" color="purple.600" />
+                </AccordionButton>
+                <AccordionPanel px={8} py={6} bg="purple.50" borderBottomRadius="xl">
+                  <Text fontSize="md" color="gray.700" lineHeight="1.8">
+                    {item.answer}
+                  </Text>
+                </AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </VStack>
+      </Container>
+    </Box>
+  );
+};
+
 // Home Page Component
 const HomePage = () => {
   return (
     <>
       <HeroSection />
+      <FAQSection />
       <PlansSection />
       <PopularDestinations />
     </>
