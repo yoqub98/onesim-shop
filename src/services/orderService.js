@@ -1,6 +1,8 @@
 // src/services/orderService.js
 // Service for handling eSIM orders
 
+import { getTranslation } from '../config/i18n';
+
 const getApiUrl = () => {
   if (process.env.NODE_ENV === 'production') {
     return '/api';
@@ -166,8 +168,6 @@ export const checkOrderStatus = async (orderId) => {
  * @returns {string} Translated status text
  */
 export const getOrderStatusText = (status, lang = 'ru') => {
-  // Import i18n at runtime to avoid circular dependencies
-  const { getTranslation } = require('../config/i18n');
   return getTranslation(lang, `esimStatus.${status}`) || status;
 };
 
@@ -197,9 +197,6 @@ export const getOrderStatusColor = (status) => {
  */
 export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
   if (!esimStatus) return null;
-
-  // Import i18n at runtime to avoid circular dependencies
-  const { getTranslation } = require('../config/i18n');
 
   // Match actual eSIMAccess API values from documentation
   // New: smdpStatus=RELEASED, esimStatus=GOT_RESOURCE
