@@ -242,18 +242,18 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
 };
 
 /**
- * Query eSIM usage data by ICCID
- * @param {string} iccid - ICCID of the eSIM
- * @returns {Promise<Object>} Usage data including totalVolume and orderUsage
+ * Query eSIM usage data by eSIM transaction number (order_no)
+ * @param {string} esimTranNo - eSIM transaction number (order_no from eSIMAccess)
+ * @returns {Promise<Object>} Usage data including totalVolume and orderUsage in bytes
  */
-export const queryEsimUsage = async (iccid) => {
+export const queryEsimUsage = async (esimTranNo) => {
   try {
     const response = await fetch(`${API_URL}/esim/usage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ iccid }),
+      body: JSON.stringify({ esimTranNo }),
     });
 
     const data = await response.json();

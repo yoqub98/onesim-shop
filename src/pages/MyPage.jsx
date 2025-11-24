@@ -239,18 +239,18 @@ const MyPage = () => {
     const [usageData, setUsageData] = useState(null);
     const [loadingUsage, setLoadingUsage] = useState(false);
 
-    // Fetch usage data if ICCID is available
+    // Fetch usage data if order_no is available
     useEffect(() => {
       const fetchUsageData = async () => {
-        if (!order.iccid || order.order_status !== 'ALLOCATED') {
-          console.log('⏭️ Skipping usage fetch for order:', order.id, 'ICCID:', order.iccid, 'Status:', order.order_status);
+        if (!order.order_no || order.order_status !== 'ALLOCATED') {
+          console.log('⏭️ Skipping usage fetch for order:', order.id, 'Order No:', order.order_no, 'Status:', order.order_status);
           return;
         }
 
-        console.log('📊 Fetching usage data for ICCID:', order.iccid);
+        console.log('📊 Fetching usage data for Order No:', order.order_no);
         setLoadingUsage(true);
         try {
-          const data = await queryEsimUsage(order.iccid);
+          const data = await queryEsimUsage(order.order_no);
           console.log('✅ Usage data received:', data);
 
           // Check for successful response and data
@@ -270,7 +270,7 @@ const MyPage = () => {
       };
 
       fetchUsageData();
-    }, [order.iccid, order.order_status]);
+    }, [order.order_no, order.order_status]);
 
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;

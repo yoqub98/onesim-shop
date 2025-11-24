@@ -208,34 +208,47 @@ app.post('/api/esim/query', async (req, res) => {
   }
 });
 
-// Query eSIM usage data by ICCID
+// Query eSIM usage data by eSIM transaction number (order_no)
 app.post('/api/esim/usage', async (req, res) => {
   try {
-    const { iccid } = req.body;
+    const { esimTranNo } = req.body;
 
-    if (!iccid) {
-      return res.status(400).json({ success: false, error: 'iccid is required' });
+    if (!esimTranNo) {
+      return res.status(400).json({ success: false, error: 'esimTranNo is required' });
     }
 
-    console.log('📊 Querying eSIM usage for ICCID:', iccid);
+    console.log('📊 Querying eSIM usage for esimTranNo:', esimTranNo);
 
-    const response = await fetch(`${ESIMACCESS_API_URL}/esim/list`, {
+    const response = await fetch(`${ESIMACCESS_API_URL}/esim/usage/query`, {
       method: 'POST',
       headers: {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        iccid,
-        pager: {
-          pageNum: 1,
-          pageSize: 20
-        }
+        esimTranNoList: [esimTranNo]
       }),
     });
 
     const data = await response.json();
     console.log('📊 eSIM usage response:', data);
+
+    // Transform the response to match the expected format
+    if (data.success && data.obj?.esimUsageList && data.obj.esimUsageList.length > 0) {
+      const usageInfo = data.obj.esimUsageList[0];
+
+      // Return formatted data with proper field names
+      return res.json({
+        success: true,
+        obj: {
+          esimList: [{
+            totalVolume: usageInfo.totalData,      // Total data in bytes
+            orderUsage: usageInfo.dataUsage,       // Used data in bytes
+            lastUpdateTime: usageInfo.lastUpdateTime
+          }]
+        }
+      });
+    }
 
     res.json(data);
   } catch (error) {
