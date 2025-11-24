@@ -328,6 +328,7 @@ app.post('/api/webhook/esim', async (req, res) => {
           qr_code_data: esim.ac,
           smdp_address: esim.smdpAddress,
           activation_code: esim.ac,
+          short_url: esim.shortUrl,
           esim_status: esim.esimStatus
         })
         .eq('order_no', orderNo);
@@ -367,6 +368,7 @@ app.post('/api/webhook/esim', async (req, res) => {
             qr_code_data: esim.ac,
             smdp_address: esim.smdpAddress,
             activation_code: esim.ac,
+            short_url: esim.shortUrl,
             esim_status: esim.esimStatus
           })
           .eq('order_no', orderNo);

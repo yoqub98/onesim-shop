@@ -45,6 +45,9 @@ import {
   XCircle,
   AlertTriangle,
   Share2,
+  ExternalLink,
+  Shield,
+  Info,
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -686,6 +689,27 @@ const MyPage = () => {
           <ModalBody pb={6}>
             {selectedOrder && (
               <VStack spacing={4}>
+                {/* Security Warning */}
+                <Alert
+                  status="warning"
+                  borderRadius="xl"
+                  bg="orange.50"
+                  borderWidth="1px"
+                  borderColor="orange.200"
+                >
+                  <Shield size={20} color="#f97316" style={{ marginRight: '12px', flexShrink: 0 }} />
+                  <VStack align="start" spacing={1} w="full">
+                    <Text fontSize="sm" fontWeight="600" color="orange.800">
+                      Важная информация
+                    </Text>
+                    <Text fontSize="xs" color="orange.700">
+                      • Не делитесь этим QR-кодом с другими людьми - они смогут легко установить ваш eSIM
+                      <br />
+                      • После активации eSIM его невозможно отменить или вернуть
+                    </Text>
+                  </VStack>
+                </Alert>
+
                 {/* QR Code */}
                 {selectedOrder.qr_code_url ? (
                   <Box
@@ -694,6 +718,7 @@ const MyPage = () => {
                     borderRadius="xl"
                     border="2px solid"
                     borderColor="purple.100"
+                    w="full"
                   >
                     <Image
                       src={selectedOrder.qr_code_url}
@@ -731,6 +756,27 @@ const MyPage = () => {
                   </Box>
                 ) : null}
 
+                {/* Activation Link Button */}
+                {selectedOrder.short_url && (
+                  <Button
+                    as="a"
+                    href={selectedOrder.short_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    w="full"
+                    size="lg"
+                    bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                    color="white"
+                    _hover={{ opacity: 0.9, transform: 'translateY(-1px)' }}
+                    _active={{ transform: 'translateY(0)' }}
+                    rightIcon={<ExternalLink size={18} />}
+                    boxShadow="md"
+                    transition="all 0.2s"
+                  >
+                    Открыть ссылку активации
+                  </Button>
+                )}
+
                 {/* SM-DP+ Address */}
                 {selectedOrder.smdp_address && (
                   <Box bg="blue.50" p={4} borderRadius="xl" w="full">
@@ -743,9 +789,9 @@ const MyPage = () => {
 
                 {/* Instructions */}
                 <Alert status="info" borderRadius="lg">
-                  <AlertIcon />
+                  <Info size={20} style={{ marginRight: '12px', flexShrink: 0 }} />
                   <Text fontSize="sm">
-                    Откройте настройки телефона, перейдите в раздел "Сотовая связь" и отсканируйте этот QR-код для установки eSIM.
+                    Откройте настройки телефона, перейдите в раздел "Сотовая связь" и отсканируйте QR-код или используйте ссылку активации выше для установки eSIM.
                   </Text>
                 </Alert>
               </VStack>
