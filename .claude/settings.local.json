@@ -8,7 +8,8 @@
       "Bash(npm run dev:*)",
       "Bash(npm start)",
       "Bash(timeout 15 bash:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

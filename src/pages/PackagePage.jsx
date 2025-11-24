@@ -46,16 +46,17 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
-import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { getCountryName, getTranslation } from '../config/i18n';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { createOrder } from '../services/orderService';
 
 const PackagePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
 
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderError, setOrderError] = useState(null);
@@ -98,7 +99,7 @@ const PackagePage = () => {
     );
   }
 
-  const countryName = getCountryName(countryCode, lang);
+  const countryName = getCountryName(countryCode, currentLanguage);
   const operatorName = plan.operatorList?.[0]?.operatorName || 'Не указан';
   const networkType = plan.operatorList?.[0]?.networkType || '4G/LTE';
   const packageType = plan.smsSupported || plan.callsSupported ? 'Данные + Звонки/SMS' : 'Только данные';

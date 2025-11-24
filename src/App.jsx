@@ -38,7 +38,7 @@ import MyPage from './pages/MyPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
-import { getTranslation, DEFAULT_LANGUAGE, LANGUAGES } from './config/i18n.js';
+import { getTranslation, LANGUAGES } from './config/i18n.js';
 
 // Navigation Component
 const Navigation = () => {

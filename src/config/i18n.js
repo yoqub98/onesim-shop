@@ -10,110 +10,216 @@ export const LANGUAGES = {
 // Default language
 export const DEFAULT_LANGUAGE = LANGUAGES.RU;
 
-// Country translations dictionary (Russian only)
+// Country translations dictionary (multilingual)
 export const COUNTRY_TRANSLATIONS = {
-  // Asia
-  TH: 'Таиланд',
-  AE: 'ОАЭ',
-  VN: 'Вьетнам',
-  MY: 'Малайзия',
-  CN: 'Китай',
-  JP: 'Япония',
-  KR: 'Южная Корея',
-  SG: 'Сингапур',
-  ID: 'Индонезия',
-  PH: 'Филиппины',
-  IN: 'Индия',
-  HK: 'Гонконг',
-  TW: 'Тайвань',
-  KH: 'Камбоджа',
-  LA: 'Лаос',
-  MM: 'Мьянма',
-  MO: 'Макао',
-  MN: 'Монголия',
-  NP: 'Непал',
-  LK: 'Шри-Ланка',
+  ru: {
+    // Asia
+    TH: 'Таиланд',
+    AE: 'ОАЭ',
+    VN: 'Вьетнам',
+    MY: 'Малайзия',
+    CN: 'Китай',
+    JP: 'Япония',
+    KR: 'Южная Корея',
+    SG: 'Сингапур',
+    ID: 'Индонезия',
+    PH: 'Филиппины',
+    IN: 'Индия',
+    HK: 'Гонконг',
+    TW: 'Тайвань',
+    KH: 'Камбоджа',
+    LA: 'Лаос',
+    MM: 'Мьянма',
+    MO: 'Макао',
+    MN: 'Монголия',
+    NP: 'Непал',
+    LK: 'Шри-Ланка',
 
-  // Europe
-  TR: 'Турция',
-  GE: 'Грузия',
-  IT: 'Италия',
-  FR: 'Франция',
-  AZ: 'Азербайджан',
-  ES: 'Испания',
-  DE: 'Германия',
-  GB: 'Великобритания',
-  PT: 'Португалия',
-  GR: 'Греция',
-  NL: 'Нидерланды',
-  BE: 'Бельгия',
-  AT: 'Австрия',
-  CH: 'Швейцария',
-  SE: 'Швеция',
-  NO: 'Норвегия',
-  DK: 'Дания',
-  FI: 'Финляндия',
-  PL: 'Польша',
-  CZ: 'Чехия',
-  HU: 'Венгрия',
-  RO: 'Румыния',
-  BG: 'Болгария',
-  HR: 'Хорватия',
-  RS: 'Сербия',
-  UA: 'Украина',
-  BY: 'Беларусь',
-  MD: 'Молдова',
-  AM: 'Армения',
-  IE: 'Ирландия',
-  IS: 'Исландия',
-  LU: 'Люксембург',
-  MT: 'Мальта',
-  CY: 'Кипр',
+    // Europe
+    TR: 'Турция',
+    GE: 'Грузия',
+    IT: 'Италия',
+    FR: 'Франция',
+    AZ: 'Азербайджан',
+    ES: 'Испания',
+    DE: 'Германия',
+    GB: 'Великобритания',
+    PT: 'Португалия',
+    GR: 'Греция',
+    NL: 'Нидерланды',
+    BE: 'Бельгия',
+    AT: 'Австрия',
+    CH: 'Швейцария',
+    SE: 'Швеция',
+    NO: 'Норвегия',
+    DK: 'Дания',
+    FI: 'Финляндия',
+    PL: 'Польша',
+    CZ: 'Чехия',
+    HU: 'Венгрия',
+    RO: 'Румыния',
+    BG: 'Болгария',
+    HR: 'Хорватия',
+    RS: 'Сербия',
+    UA: 'Украина',
+    BY: 'Беларусь',
+    MD: 'Молдова',
+    AM: 'Армения',
+    IE: 'Ирландия',
+    IS: 'Исландия',
+    LU: 'Люксембург',
+    MT: 'Мальта',
+    CY: 'Кипр',
 
-  // Americas
-  US: 'США',
-  CA: 'Канада',
-  MX: 'Мексика',
-  BR: 'Бразилия',
-  AR: 'Аргентина',
-  CL: 'Чили',
-  CO: 'Колумбия',
-  PE: 'Перу',
-  VE: 'Венесуэла',
-  EC: 'Эквадор',
-  UY: 'Уругвай',
-  PY: 'Парагвай',
-  BO: 'Боливия',
-  CR: 'Коста-Рика',
-  PA: 'Панама',
+    // Americas
+    US: 'США',
+    CA: 'Канада',
+    MX: 'Мексика',
+    BR: 'Бразилия',
+    AR: 'Аргентина',
+    CL: 'Чили',
+    CO: 'Колумбия',
+    PE: 'Перу',
+    VE: 'Венесуэла',
+    EC: 'Эквадор',
+    UY: 'Уругвай',
+    PY: 'Парагвай',
+    BO: 'Боливия',
+    CR: 'Коста-Рика',
+    PA: 'Панама',
 
-  // Middle East & Africa
-  SA: 'Саудовская Аравия',
-  QA: 'Катар',
-  KW: 'Кувейт',
-  BH: 'Бахрейн',
-  OM: 'Оман',
-  JO: 'Иордания',
-  IL: 'Израиль',
-  EG: 'Египет',
-  ZA: 'ЮАР',
-  MA: 'Марокко',
-  TN: 'Тунис',
-  KE: 'Кения',
-  NG: 'Нигерия',
-  GH: 'Гана',
+    // Middle East & Africa
+    SA: 'Саудовская Аравия',
+    QA: 'Катар',
+    KW: 'Кувейт',
+    BH: 'Бахрейн',
+    OM: 'Оман',
+    JO: 'Иордания',
+    IL: 'Израиль',
+    EG: 'Египет',
+    ZA: 'ЮАР',
+    MA: 'Марокко',
+    TN: 'Тунис',
+    KE: 'Кения',
+    NG: 'Нигерия',
+    GH: 'Гана',
 
-  // Oceania
-  AU: 'Австралия',
-  NZ: 'Новая Зеландия',
-  FJ: 'Фиджи',
+    // Oceania
+    AU: 'Австралия',
+    NZ: 'Новая Зеландия',
+    FJ: 'Фиджи',
 
-  // Central Asia
-  UZ: 'Узбекистан',
-  KZ: 'Казахстан',
-  KG: 'Кыргызстан',
-  TJ: 'Таджикистан',
-  TM: 'Туркменистан',
+    // Central Asia
+    UZ: 'Узбекистан',
+    KZ: 'Казахстан',
+    KG: 'Кыргызстан',
+    TJ: 'Таджикистан',
+    TM: 'Туркменистан',
+  },
+  uz: {
+    // Asia
+    TH: 'Tailand',
+    AE: 'BAA',
+    VN: 'Vyetnam',
+    MY: 'Malayziya',
+    CN: 'Xitoy',
+    JP: 'Yaponiya',
+    KR: 'Janubiy Koreya',
+    SG: 'Singapur',
+    ID: 'Indoneziya',
+    PH: 'Filippin',
+    IN: 'Hindiston',
+    HK: 'Gonkong',
+    TW: 'Tayvan',
+    KH: 'Kambodja',
+    LA: 'Laos',
+    MM: 'Myanma',
+    MO: 'Makao',
+    MN: 'Mo\'g\'uliston',
+    NP: 'Nepal',
+    LK: 'Shri-Lanka',
+
+    // Europe
+    TR: 'Turkiya',
+    GE: 'Gruziya',
+    IT: 'Italiya',
+    FR: 'Fransiya',
+    AZ: 'Ozarbayjon',
+    ES: 'Ispaniya',
+    DE: 'Germaniya',
+    GB: 'Buyuk Britaniya',
+    PT: 'Portugaliya',
+    GR: 'Gretsiya',
+    NL: 'Niderlandiya',
+    BE: 'Belgiya',
+    AT: 'Avstriya',
+    CH: 'Shveytsariya',
+    SE: 'Shvetsiya',
+    NO: 'Norvegiya',
+    DK: 'Daniya',
+    FI: 'Finlandiya',
+    PL: 'Polsha',
+    CZ: 'Chexiya',
+    HU: 'Vengriya',
+    RO: 'Ruminiya',
+    BG: 'Bolgariya',
+    HR: 'Xorvatiya',
+    RS: 'Serbiya',
+    UA: 'Ukraina',
+    BY: 'Belarus',
+    MD: 'Moldova',
+    AM: 'Armaniston',
+    IE: 'Irlandiya',
+    IS: 'Islandiya',
+    LU: 'Lyuksemburg',
+    MT: 'Malta',
+    CY: 'Kipr',
+
+    // Americas
+    US: 'AQSH',
+    CA: 'Kanada',
+    MX: 'Meksika',
+    BR: 'Braziliya',
+    AR: 'Argentina',
+    CL: 'Chili',
+    CO: 'Kolumbiya',
+    PE: 'Peru',
+    VE: 'Venesuela',
+    EC: 'Ekvador',
+    UY: 'Urugvay',
+    PY: 'Paragvay',
+    BO: 'Boliviya',
+    CR: 'Kosta-Rika',
+    PA: 'Panama',
+
+    // Middle East & Africa
+    SA: 'Saudiya Arabistoni',
+    QA: 'Qatar',
+    KW: 'Quvayt',
+    BH: 'Bahrayn',
+    OM: 'Ummon',
+    JO: 'Iordaniya',
+    IL: 'Isroil',
+    EG: 'Misr',
+    ZA: 'JAR',
+    MA: 'Marokash',
+    TN: 'Tunis',
+    KE: 'Keniya',
+    NG: 'Nigeriya',
+    GH: 'Gana',
+
+    // Oceania
+    AU: 'Avstraliya',
+    NZ: 'Yangi Zelandiya',
+    FJ: 'Fiji',
+
+    // Central Asia
+    UZ: 'O\'zbekiston',
+    KZ: 'Qozog\'iston',
+    KG: 'Qirg\'iziston',
+    TJ: 'Tojikiston',
+    TM: 'Turkmaniston',
+  },
 };
 
 // UI translations
@@ -567,13 +673,31 @@ export const getTranslation = (lang, key) => {
   }
 };
 
-export const getCountryName = (countryCode) => {
+export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
   try {
-    const country = COUNTRY_TRANSLATIONS[countryCode];
-    if (!country) {
+    // Validate inputs
+    if (!countryCode) {
+      console.warn('getCountryName: Missing countryCode parameter');
+      return '';
+    }
+
+    // Get the language-specific country translations, fallback to default language
+    const langCountries = COUNTRY_TRANSLATIONS[lang] || COUNTRY_TRANSLATIONS[DEFAULT_LANGUAGE];
+
+    if (!langCountries) {
+      console.warn(`getCountryName: No country translations found for language "${lang}"`);
       return countryCode;
     }
-    return country;
+
+    // Get the country name
+    const countryName = langCountries[countryCode];
+
+    if (!countryName) {
+      console.warn(`getCountryName: Country code "${countryCode}" not found for language "${lang}"`);
+      return countryCode;
+    }
+
+    return countryName;
   } catch (error) {
     console.error('getCountryName error:', error);
     return countryCode;

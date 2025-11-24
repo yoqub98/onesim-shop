@@ -18,13 +18,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
 import { calculateFinalPrice, formatPrice } from '../config/pricing';
-import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { getCountryName, getTranslation } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const PLANS_PER_PAGE = 12;
 const DEFAULT_DURATION_FILTER = 30; // Default to 30 days
 
 // Plan Card Component
-const CountryPlanCard = ({ plan, lang = DEFAULT_LANGUAGE, countryCode }) => {
+const CountryPlanCard = ({ plan, lang, countryCode }) => {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
@@ -312,8 +313,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 const CountryPage = () => {
   const { countryCode } = useParams();
   const navigate = useNavigate();
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
   
   const [allPlans, setAllPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -324,18 +325,18 @@ const CountryPage = () => {
   const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER.toString());
   const [currentPage, setCurrentPage] = useState(1);
   
-  const countryName = getCountryName(countryCode, lang);
+  const countryName = getCountryName(countryCode, currentLanguage);
 
   // Load plans once on mount
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadPlans = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const packages = await fetchAllPackagesForCountry(countryCode, lang);
+        const packages = await fetchAllPackagesForCountry(countryCode, currentLanguage);
         
         if (!isMounted) return;
         
@@ -370,7 +371,7 @@ const CountryPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [countryCode, lang]);
+  }, [countryCode, currentLanguage]);
 
   // Get unique filter options
   const dataOptions = useMemo(() => {
@@ -657,7 +658,7 @@ const CountryPage = () => {
                 gap={4}
               >
                 {paginatedPlans.map((plan) => (
-                  <CountryPlanCard key={plan.id} plan={plan} lang={lang} countryCode={countryCode} />
+                  <CountryPlanCard key={plan.id} plan={plan} lang={currentLanguage} countryCode={countryCode} />
                 ))}
               </Grid>
 

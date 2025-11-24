@@ -51,12 +51,13 @@ import {
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { getCountryName } from '../config/i18n';
 import { getUserOrders, getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, cancelOrder, queryEsimUsage } from '../services/orderService';
 
 const MyPage = () => {
   console.log('🔵 MyPage component rendering...');
-  const lang = DEFAULT_LANGUAGE;
+  const { currentLanguage } = useLanguage();
   const { user, profile } = useAuth();
   console.log('👤 User:', user?.id, 'Profile:', profile?.first_name);
 
@@ -282,7 +283,7 @@ const MyPage = () => {
     let statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
     let statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
 
-    const countryName = getCountryName(order.country_code, lang);
+    const countryName = getCountryName(order.country_code, currentLanguage);
     const expiryDate = formatExpiryDate(usageData?.expiredTime || order.expiry_date);
 
     return (
