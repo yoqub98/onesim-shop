@@ -208,34 +208,68 @@ app.post('/api/esim/query', async (req, res) => {
   }
 });
 
-// Query eSIM usage data by eSIM transaction number (order_no)
+// Query eSIM usage data by first getting esimTranNo, then querying usage
 app.post('/api/esim/usage', async (req, res) => {
   try {
-    const { esimTranNo } = req.body;
+    const { orderNo } = req.body;
 
-    if (!esimTranNo) {
-      return res.status(400).json({ success: false, error: 'esimTranNo is required' });
+    if (!orderNo) {
+      return res.status(400).json({ success: false, error: 'orderNo is required' });
     }
 
-    console.log('📊 Querying eSIM usage for esimTranNo:', esimTranNo);
+    console.log('📊 Step 1: Querying eSIM details for orderNo:', orderNo);
 
-    const response = await fetch(`${ESIMACCESS_API_URL}/esim/usage/query`, {
+    // Step 1: Query eSIM details to get esimTranNo
+    const queryPayload = {
+      orderNo,
+      iccid: '',
+      pager: {
+        pageNum: 1,
+        pageSize: 50
+      }
+    };
+    console.log('📊 Query payload:', JSON.stringify(queryPayload));
+
+    const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
       headers: {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        esimTranNoList: [esimTranNo]
-      }),
+      body: JSON.stringify(queryPayload),
     });
 
-    const data = await response.json();
-    console.log('📊 eSIM usage response:', data);
+    const queryData = await queryResponse.json();
+    console.log('📊 eSIM query response:', queryData);
+
+    if (!queryData.success || !queryData.obj?.esimList || queryData.obj.esimList.length === 0) {
+      return res.status(404).json({ success: false, error: 'eSIM not found for this order' });
+    }
+
+    const esimTranNo = queryData.obj.esimList[0].esimTranNo;
+    console.log('📊 Step 2: Got esimTranNo:', esimTranNo, '- Now querying usage data');
+
+    // Step 2: Query usage data using esimTranNo
+    const usagePayload = {
+      esimTranNoList: [esimTranNo]
+    };
+    console.log('📊 Usage query payload:', JSON.stringify(usagePayload));
+
+    const usageResponse = await fetch(`${ESIMACCESS_API_URL}/esim/usage/query`, {
+      method: 'POST',
+      headers: {
+        'RT-AccessCode': ESIMACCESS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(usagePayload),
+    });
+
+    const usageData = await usageResponse.json();
+    console.log('📊 eSIM usage response:', usageData);
 
     // Transform the response to match the expected format
-    if (data.success && data.obj?.esimUsageList && data.obj.esimUsageList.length > 0) {
-      const usageInfo = data.obj.esimUsageList[0];
+    if (usageData.success && usageData.obj?.esimUsageList && usageData.obj.esimUsageList.length > 0) {
+      const usageInfo = usageData.obj.esimUsageList[0];
 
       // Return formatted data with proper field names
       return res.json({
@@ -244,13 +278,14 @@ app.post('/api/esim/usage', async (req, res) => {
           esimList: [{
             totalVolume: usageInfo.totalData,      // Total data in bytes
             orderUsage: usageInfo.dataUsage,       // Used data in bytes
-            lastUpdateTime: usageInfo.lastUpdateTime
+            lastUpdateTime: usageInfo.lastUpdateTime,
+            esimTranNo: usageInfo.esimTranNo
           }]
         }
       });
     }
 
-    res.json(data);
+    res.json(usageData);
   } catch (error) {
     console.error('❌ eSIM usage query error:', error.message);
     res.status(500).json({ success: false, error: error.message });

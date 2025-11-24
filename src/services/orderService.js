@@ -242,18 +242,21 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
 };
 
 /**
- * Query eSIM usage data by eSIM transaction number (order_no)
- * @param {string} esimTranNo - eSIM transaction number (order_no from eSIMAccess)
+ * Query eSIM usage data by order number
+ * This makes two API calls:
+ * 1. First gets esimTranNo from /esim/query using orderNo
+ * 2. Then queries usage data from /esim/usage/query using esimTranNo
+ * @param {string} orderNo - Order number from eSIMAccess (e.g., "B25112216380014")
  * @returns {Promise<Object>} Usage data including totalVolume and orderUsage in bytes
  */
-export const queryEsimUsage = async (esimTranNo) => {
+export const queryEsimUsage = async (orderNo) => {
   try {
     const response = await fetch(`${API_URL}/esim/usage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ esimTranNo }),
+      body: JSON.stringify({ orderNo }),
     });
 
     const data = await response.json();
