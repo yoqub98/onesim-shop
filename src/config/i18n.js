@@ -1,9 +1,10 @@
 // src/config/i18n.js
 // Internationalization configuration for OneSIM
 
-// ONLY RUSSIAN LANGUAGE FOR NOW
+// Supported languages
 export const LANGUAGES = {
   RU: 'ru',
+  UZ: 'uz',
 };
 
 // Default language
@@ -189,6 +190,9 @@ export const TRANSLATIONS = {
       titleHighlight: 'отправляетесь?',
       description: 'Выберите страну и найдите идеальный тарифный план для вашего путешествия',
       explore: 'Смотреть планы',
+      search: 'Поиск',
+      searchPlaceholder: 'Введите название страны...',
+      notFound: 'Страна не найдена',
     },
     faq: {
       title: 'Часто задаваемые',
@@ -313,6 +317,207 @@ export const TRANSLATIONS = {
       terms: 'Условия использования',
       copyright: 'Все права защищены.',
       madeWith: 'Сделано с ❤️ для путешественников',
+    },
+  },
+  uz: {
+    nav: {
+      home: 'Bosh sahifa',
+      plans: 'Tariflar',
+      contacts: 'Aloqa',
+      login: 'Kirish',
+      myPage: 'Mening sahifam',
+      logout: 'Chiqish',
+    },
+    hero: {
+      badge: 'eSIM ni bir zumda faollashtirish',
+      title: 'Chegara siz sayohat qiling',
+      description: 'Dunyoning 190 dan ortiq mamlakatida global mobil aloqa. Qulay tariflarimiz bilan har doim va har joyda aloqada bo\'ling.',
+      features: {
+        coverage: '190+ mamlakat qamrovi',
+        activation: '2 daqiqada tezkor faollashtirish',
+        secure: 'Xavfsiz 5G aloqa',
+      },
+      cta: 'Batafsil',
+    },
+    benefits: {
+      title: 'Nima uchun',
+      titleHighlight: 'eSIM?',
+      description: 'Jismoniy SIM-kartasiz mobil aloqaning zamonaviy yechimi',
+      instant: {
+        title: 'Tezkor faollashtirish',
+        description: 'Qo\'nganingizdan keyin darhol internetga kirish imkoniyati. Navbatlar va kutish yo\'q.',
+      },
+      savings: {
+        title: 'Pulni tejash',
+        description: 'Qimmat roumingdan qoching. eSIM tariflari an\'anaviy roumingdan 5-10 marta arzonroq.',
+      },
+      noPhysical: {
+        title: 'Jismoniy karta yo\'q',
+        description: 'SIM-kartalarni almashtirish kerak emas. Hammasi to\'g\'ridan-to\'g\'ri qurilmangizda raqamli boshqariladi.',
+      },
+      multiCountry: {
+        title: 'Bir nechta mamlakat',
+        description: 'Bitta eSIM profil bir nechta mamlakatda ishlaydi. Chegara siz sayohat qiling.',
+      },
+      dataControl: {
+        title: 'Trafik nazorati',
+        description: 'Qancha ma\'lumot ishlatayotganingizni aniq bilib oling. Yashirin to\'lovlar va ajablanishlar yo\'q.',
+      },
+    },
+    plans: {
+      badge: 'Bizning tariflar',
+      title: 'Ideal',
+      titleHighlight: 'tarifni tanlang',
+      description: 'Har bir mamlakat uchun yuqori tezlikli internet bilan moslashuvchan tarif rejalari',
+      tabs: {
+        asia: 'OSIYO',
+        europe: 'EVROPA',
+      },
+      card: {
+        internet: 'INTERNET',
+        days: 'kun',
+        valid: 'AMAL QILADI',
+        price: 'NARX',
+        currency: 'UZS',
+        buy: 'Sotib olish',
+      },
+      empty: 'Ushbu mintaqa uchun tariflar tez orada paydo bo\'ladi',
+      emptyDescription: 'Biz ushbu mintaqa uchun tariflarni qo\'shish ustida ishlamoqdamiz',
+      error: 'Tariflarni yuklab bo\'lmadi. Iltimos, keyinroq urinib ko\'ring.',
+    },
+    destinations: {
+      badge: 'Mashhur yo\'nalishlar',
+      title: 'Qayerga',
+      titleHighlight: 'borasiz?',
+      description: 'Mamlakatni tanlang va sayohatingiz uchun ideal tarif rejasini toping',
+      explore: 'Tariflarni ko\'rish',
+      search: 'Qidirish',
+      searchPlaceholder: 'Mamlakat nomini kiriting...',
+      notFound: 'Mamlakat topilmadi',
+    },
+    faq: {
+      title: 'Tez-tez so\'raladigan',
+      titleHighlight: 'savollar',
+      description: 'eSIM haqida bilishingiz kerak bo\'lgan hamma narsa',
+      questions: {
+        whatIsEsim: {
+          question: 'eSIM nima?',
+          answer: 'eSIM - bu qurilmangizga allaqachon o\'rnatilgan o\'rnatilgan SIM-karta. Jismoniy karta o\'rniga, siz QR-kod yoki ilova orqali bir zumda faollashtirish mumkin bo\'lgan raqamli profilni olasiz.',
+        },
+        howToActivate: {
+          question: 'eSIM ni qanday faollashtirish mumkin?',
+          answer: 'Xariddan keyin QR-kodni olasiz. Uni telefoningiz kamerasi bilan uyali aloqa sozlamalarida skanerlang va eSIM avtomatik faollashadi. Butun jarayon 2 daqiqadan ko\'p vaqt olmaydi.',
+        },
+        deviceCompatibility: {
+          question: 'Qaysi qurilmalar eSIM ni qo\'llab-quvvatlaydi?',
+          answer: 'Ko\'pgina zamonaviy smartfonlar eSIM ni qo\'llab-quvvatlaydi: iPhone XS va undan keyingi, Samsung Galaxy S20 va undan keyingi, Google Pixel 3 va undan keyingi, shuningdek Huawei, Oppo va boshqa ko\'plab modellar. Xarid qilishdan oldin qurilmangiz muvofiqligini tekshiring.',
+        },
+        canKeepNumber: {
+          question: 'Raqamimni saqlash mumkinmi?',
+          answer: 'Ha, siz eSIM ni oddiy SIM-kartangiz bilan birga ishlatishingiz mumkin. Asosiy raqamingiz qo\'ng\'iroqlar va SMS uchun faol bo\'lib qoladi, eSIM esa mobil internet uchun ishlatiladi.',
+        },
+        howMuchData: {
+          question: 'Menga qancha ma\'lumot kerak?',
+          answer: 'Bu sizning foydalanishingizga bog\'liq. Oddiy ijtimoiy tarmoqlar va xaritalarni ko\'rish uchun haftasiga 1-3 GB yetarli. Video qo\'ng\'iroqlar va streaming uchun 5-10 GB tavsiya qilamiz. Barcha paketlarimizni istalgan vaqtda to\'ldirish mumkin.',
+        },
+      },
+    },
+    countryPage: {
+      title: 'eSIM tariflari',
+      backButton: 'Tariflarga qaytish',
+      filterLabel: 'Filtrlar',
+      dataLabel: 'Ma\'lumot hajmi',
+      durationLabel: 'Davr',
+      allData: 'Barcha hajmlar',
+      allDuration: 'Barcha davrlar',
+      noPlans: 'Tariflar topilmadi',
+      noPlansDescription: 'Filtrlarni o\'zgartirib ko\'ring yoki keyinroq qaytib keling',
+    },
+    auth: {
+      fields: {
+        firstName: 'Ism',
+        lastName: 'Familiya',
+        phone: 'Telefon',
+        email: 'Elektron pochta',
+        password: 'Parol',
+        confirmPassword: 'Parolni tasdiqlang',
+      },
+      placeholders: {
+        firstName: 'Ismingizni kiriting',
+        lastName: 'Familiyangizni kiriting',
+        phone: 'XX XXX XX XX',
+        email: 'example@mail.com',
+        password: 'Kamida 6 belgi',
+        confirmPassword: 'Parolni takrorlang',
+      },
+      errors: {
+        firstNameRequired: 'Ism majburiy',
+        lastNameRequired: 'Familiya majburiy',
+        phoneRequired: 'Telefon majburiy',
+        phoneInvalid: 'Noto\'g\'ri format (9 ta raqam bo\'lishi kerak)',
+        emailRequired: 'Email majburiy',
+        emailInvalid: 'Noto\'g\'ri email format',
+        passwordRequired: 'Parol majburiy',
+        passwordTooShort: 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak',
+        passwordMismatch: 'Parollar mos kelmaydi',
+        signupFailed: 'Ro\'yxatdan o\'tish xatosi',
+        loginFailed: 'Kirish xatosi',
+        verificationFailed: 'Tasdiqlash xatosi',
+        invalidPin: '8 raqamli kodni kiriting',
+      },
+      signup: {
+        title: 'Ro\'yxatdan o\'tish',
+        subtitle: 'Davom etish uchun hisob yarating',
+        button: 'Ro\'yxatdan o\'tish',
+        haveAccount: 'Hisobingiz bormi?',
+        loginLink: 'Kirish',
+        verificationSent: 'Kod yuborildi',
+        checkEmail: 'Pochtangizni tekshiring va tasdiqlash kodini kiriting',
+        success: 'Xush kelibsiz!',
+      },
+      login: {
+        title: 'Kirish',
+        subtitle: 'Hisobingizga kiring',
+        button: 'Kirish',
+        noAccount: 'Hisobingiz yo\'qmi?',
+        signupLink: 'Ro\'yxatdan o\'tish',
+        success: 'Siz tizimga kirdingiz',
+      },
+      verification: {
+        title: 'Email tasdiqlash',
+        description: 'Pochtangizga yuborilgan 8 raqamli kodni kiriting',
+        button: 'Tasdiqlash',
+      },
+    },
+    myPage: {
+      title: 'Mening sahifam',
+      name: 'Ism',
+      phone: 'Telefon',
+    },
+    esimStatus: {
+      // Order statuses
+      PENDING: 'Ishlov berilmoqda',
+      PROCESSING: 'Qayta ishlanmoqda',
+      ALLOCATED: 'Faollashtirishga tayyor',
+      FAILED: 'Xato',
+      CANCELLED: 'Bekor qilindi',
+      // eSIM statuses (esimStatus field)
+      GOT_RESOURCE_RELEASED: 'Faollashtirishga tayyor',
+      GOT_RESOURCE_INSTALLED: 'O\'rnatildi',
+      IN_USE: 'Ishlatilmoqda',
+      USED_UP: 'Tugadi',
+      USED_EXPIRED: 'Muddati tugadi',
+      CANCEL: 'Bekor qilindi',
+      DELETED: 'O\'chirildi',
+    },
+    footer: {
+      description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlarimiz bilan chegara siz sayohat qiling.',
+      quickLinks: 'Tezkor havolalar',
+      legal: 'Huquqiy ma\'lumot',
+      privacy: 'Maxfiylik',
+      terms: 'Foydalanish shartlari',
+      copyright: 'Barcha huquqlar himoyalangan.',
+      madeWith: 'Sayohatchilar uchun ❤️ bilan yaratildi',
     },
   },
 };

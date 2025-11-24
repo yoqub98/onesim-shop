@@ -16,11 +16,12 @@ import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
-import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { getTranslation } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 // Enhanced Plan Card Component
-const PlanCard = ({ plan, delay = 0, lang = DEFAULT_LANGUAGE }) => {
+const PlanCard = ({ plan, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const navigate = useNavigate();
@@ -288,6 +289,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
 
 // Main Plans Section Component
 const PlansSection = () => {
+  const { currentLanguage } = useLanguage();
   const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -366,9 +368,9 @@ const PlansSection = () => {
         setError(null);
 
         console.log('🎯 Loading handpicked packages by slug...');
-        
+
         // Fetch packages using slugs
-        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, DEFAULT_LANGUAGE);
+        const packages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, currentLanguage);
 
         console.log('💰 PRICING CALCULATION:');
         
@@ -394,16 +396,16 @@ const PlansSection = () => {
         console.log('📦 FINAL PLANS DATA:', transformedPackages);
       } catch (err) {
         console.error('Error loading handpicked packages:', err);
-        setError(getTranslation(DEFAULT_LANGUAGE, 'plans.error'));
+        setError(getTranslation(currentLanguage, 'plans.error'));
       } finally {
         setLoading(false);
       }
     };
 
     loadHandpickedPackages();
-  }, []);
+  }, [currentLanguage]);
 
-  const t = (key) => getTranslation(DEFAULT_LANGUAGE, key);
+  const t = (key) => getTranslation(currentLanguage, key);
 
   return (
     <Box as="section" py={24} bg="gray.50" id="plans" position="relative" overflow="hidden">
@@ -562,7 +564,7 @@ const PlansSection = () => {
                   </>
                 ) : plansData.length > 0 ? (
                   plansData.map((plan, index) => (
-                    <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={DEFAULT_LANGUAGE} />
+                    <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={currentLanguage} />
                   ))
                 ) : (
                   <Box w="100%" textAlign="center" py={16}>

@@ -18,11 +18,12 @@ import { ArrowRight, Search } from 'lucide-react';
 import Flag from 'react-world-flags';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
-import { getCountryName, getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { getCountryName, getTranslation } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 // Destination Card Component
-const DestinationCard = ({ countryCode, delay = 0, lang = DEFAULT_LANGUAGE }) => {
+const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const navigate = useNavigate();
@@ -177,15 +178,15 @@ const DestinationCardSkeleton = ({ delay = 0 }) => {
 
 // Main Popular Destinations Component
 const PopularDestinations = () => {
-  const lang = DEFAULT_LANGUAGE; // For MVP, hardcode to Russian
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // Filter destinations based on search query - first letter must match
   const filteredDestinations = POPULAR_DESTINATIONS.filter(destination => {
     if (!searchQuery) return true;
-    const countryName = getCountryName(destination.code, lang).toLowerCase();
+    const countryName = getCountryName(destination.code, currentLanguage).toLowerCase();
     return countryName.startsWith(searchQuery.toLowerCase());
   });
 
@@ -258,7 +259,7 @@ const PopularDestinations = () => {
                   size="md"
                   className="animate__animated animate__fadeIn"
                 >
-                  Поиск
+                  {t('destinations.search')}
                 </Button>
               ) : (
                 <InputGroup
@@ -269,7 +270,7 @@ const PopularDestinations = () => {
                     <Search size={18} color="#9333ea" />
                   </InputLeftElement>
                   <Input
-                    placeholder="Введите название страны..."
+                    placeholder={t('destinations.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onBlur={() => {
@@ -310,13 +311,13 @@ const PopularDestinations = () => {
                   key={destination.code}
                   countryCode={destination.code}
                   delay={index * 100}
-                  lang={lang}
+                  lang={currentLanguage}
                 />
               ))
             ) : (
               <Box gridColumn="1 / -1" textAlign="center" py={12}>
                 <Text fontSize="xl" color="gray.500" fontWeight="600">
-                  Страна не найдена
+                  {t('destinations.notFound')}
                 </Text>
               </Box>
             )}

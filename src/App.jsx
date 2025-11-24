@@ -37,12 +37,13 @@ import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
-import { getTranslation, DEFAULT_LANGUAGE } from './config/i18n';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
+import { getTranslation, DEFAULT_LANGUAGE, LANGUAGES } from './config/i18n.js';
 
 // Navigation Component
 const Navigation = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage, changeLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
   const { user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -94,7 +95,7 @@ const Navigation = () => {
             </Heading>
           </Link>
 
-          <HStack spacing={10} display={{ base: 'none', md: 'flex' }}>
+          <HStack spacing={6} display={{ base: 'none', md: 'flex' }}>
             <Link
               href="/#home"
               fontWeight="600"
@@ -164,6 +165,39 @@ const Navigation = () => {
             >
               {t('nav.contacts')}
             </Link>
+
+            {/* Language Switcher */}
+            <Menu>
+              <MenuButton
+                as={Button}
+                variant="ghost"
+                size="sm"
+                px={2}
+                _hover={{ bg: 'gray.50' }}
+              >
+                <HStack spacing={1}>
+                  <Text fontSize="lg">{currentLanguage === 'uz' ? '🇺🇿' : '🇷🇺'}</Text>
+                  <Text fontSize="sm" fontWeight="600">
+                    {currentLanguage === 'uz' ? 'UZ' : 'RU'}
+                  </Text>
+                  <ChevronDown size={14} />
+                </HStack>
+              </MenuButton>
+              <MenuList minW="120px">
+                <MenuItem onClick={() => changeLanguage(LANGUAGES.RU)}>
+                  <HStack spacing={2}>
+                    <Text fontSize="lg">🇷🇺</Text>
+                    <Text>Русский</Text>
+                  </HStack>
+                </MenuItem>
+                <MenuItem onClick={() => changeLanguage(LANGUAGES.UZ)}>
+                  <HStack spacing={2}>
+                    <Text fontSize="lg">🇺🇿</Text>
+                    <Text>O'zbekcha</Text>
+                  </HStack>
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </HStack>
 
           {/* User Dropdown or Login/Signup Buttons */}
@@ -269,6 +303,29 @@ const Navigation = () => {
               <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.contacts')}
               </Link>
+
+              {/* Language Switcher Mobile */}
+              <HStack spacing={3} py={3} px={4}>
+                <Button
+                  size="sm"
+                  variant={currentLanguage === 'ru' ? 'solid' : 'ghost'}
+                  colorScheme={currentLanguage === 'ru' ? 'purple' : 'gray'}
+                  onClick={() => changeLanguage(LANGUAGES.RU)}
+                  flex={1}
+                >
+                  🇷🇺 RU
+                </Button>
+                <Button
+                  size="sm"
+                  variant={currentLanguage === 'uz' ? 'solid' : 'ghost'}
+                  colorScheme={currentLanguage === 'uz' ? 'purple' : 'gray'}
+                  onClick={() => changeLanguage(LANGUAGES.UZ)}
+                  flex={1}
+                >
+                  🇺🇿 UZ
+                </Button>
+              </HStack>
+
               {user && profile ? (
                 <>
                   <Link href="/mypage" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
@@ -298,8 +355,8 @@ const Navigation = () => {
 
 // Hero Section Component
 const HeroSection = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
 
   return (
     <Box
@@ -407,8 +464,8 @@ const HeroSection = () => {
 
 // Footer Component
 const Footer = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
 
   return (
     <Box as="footer" background="linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)" color="white" py={16} mt={20} id="contacts">
@@ -460,8 +517,8 @@ const Footer = () => {
 
 // FAQ Section Component
 const FAQSection = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
 
   const questions = [
     {
@@ -611,9 +668,11 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }
