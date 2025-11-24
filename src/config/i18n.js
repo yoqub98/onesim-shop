@@ -285,6 +285,22 @@ export const TRANSLATIONS = {
       name: 'Имя',
       phone: 'Телефон',
     },
+    esimStatus: {
+      // Order statuses
+      PENDING: 'В обработке',
+      PROCESSING: 'Обрабатывается',
+      ALLOCATED: 'Готов к активации',
+      FAILED: 'Ошибка',
+      CANCELLED: 'Отменен',
+      // eSIM statuses (esimStatus field)
+      GOT_RESOURCE_RELEASED: 'Готов к активации',
+      GOT_RESOURCE_INSTALLED: 'Установлен',
+      IN_USE: 'Используется',
+      USED_UP: 'Израсходован',
+      USED_EXPIRED: 'Истек срок',
+      CANCEL: 'Отменен',
+      DELETED: 'Удален',
+    },
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
       quickLinks: 'Быстрые ссылки',

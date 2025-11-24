@@ -278,15 +278,9 @@ const MyPage = () => {
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
 
-    // Determine status based on usage data
+    // Determine status - use eSIM status if available, otherwise use order status
     let statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
     let statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
-
-    // If usage data shows data is being used, update status
-    if (usageData && usageData.orderUsage > 0) {
-      statusText = 'Используется';
-      statusColor = 'purple';
-    }
 
     const countryName = getCountryName(order.country_code, lang);
     const expiryDate = formatExpiryDate(usageData?.expiredTime || order.expiry_date);

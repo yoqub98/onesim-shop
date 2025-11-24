@@ -160,19 +160,15 @@ export const checkOrderStatus = async (orderId) => {
 };
 
 /**
- * Get order status display text (Russian)
+ * Get order status display text
  * @param {string} status - Order status
+ * @param {string} lang - Language code (default: 'ru')
  * @returns {string} Translated status text
  */
-export const getOrderStatusText = (status) => {
-  const statusMap = {
-    'PENDING': 'В обработке',
-    'PROCESSING': 'Обрабатывается',
-    'ALLOCATED': 'Готов к активации',
-    'FAILED': 'Ошибка',
-    'CANCELLED': 'Отменен',
-  };
-  return statusMap[status] || status;
+export const getOrderStatusText = (status, lang = 'ru') => {
+  // Import i18n at runtime to avoid circular dependencies
+  const { getTranslation } = require('../config/i18n');
+  return getTranslation(lang, `esimStatus.${status}`) || status;
 };
 
 /**
@@ -192,38 +188,47 @@ export const getOrderStatusColor = (status) => {
 };
 
 /**
- * Get eSIM status display text (Russian)
+ * Get eSIM status display text
  * Based on eSIMAccess API documentation
  * @param {string} esimStatus - eSIM status from eSIMAccess API
- * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API (optional)
+ * @param {string} lang - Language code (default: 'ru')
  * @returns {string} Translated eSIM status text
  */
-export const getEsimStatusText = (esimStatus, smdpStatus) => {
+export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
   if (!esimStatus) return null;
+
+  // Import i18n at runtime to avoid circular dependencies
+  const { getTranslation } = require('../config/i18n');
 
   // Match actual eSIMAccess API values from documentation
   // New: smdpStatus=RELEASED, esimStatus=GOT_RESOURCE
   // Onboard: smdpStatus=ENABLED, esimStatus=IN_USE or GOT_RESOURCE
   // In Use: smdpStatus=ENABLED/DISABLED, esimStatus=IN_USE
   // Depleted: smdpStatus=ENABLED/DISABLED, esimStatus=USED_UP
-  // Deleted: smdpStatus=DELETED, esimStatus=USED_UP or IN_USE
+  // Expired: esimStatus=USED_EXPIRED
+  // Cancelled: esimStatus=CANCEL
+  // Deleted: smdpStatus=DELETED
 
+  // Handle special cases
   if (smdpStatus === 'DELETED') {
-    return 'Удален';
+    return getTranslation(lang, 'esimStatus.DELETED');
   }
 
-  const statusMap = {
-    'GOT_RESOURCE': smdpStatus === 'RELEASED' ? 'Готов к активации' : 'Установлен',
-    'IN_USE': 'Используется',
-    'USED_UP': 'Израсходован',
-  };
-  return statusMap[esimStatus] || esimStatus;
+  // Handle GOT_RESOURCE with different smdpStatus
+  if (esimStatus === 'GOT_RESOURCE') {
+    const key = smdpStatus === 'RELEASED' ? 'GOT_RESOURCE_RELEASED' : 'GOT_RESOURCE_INSTALLED';
+    return getTranslation(lang, `esimStatus.${key}`);
+  }
+
+  // Handle other statuses directly
+  return getTranslation(lang, `esimStatus.${esimStatus}`) || esimStatus;
 };
 
 /**
  * Get eSIM status color for Chakra UI
  * @param {string} esimStatus - eSIM status from eSIMAccess API
- * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API (optional)
  * @returns {string} Chakra color scheme
  */
 export const getEsimStatusColor = (esimStatus, smdpStatus) => {
@@ -237,6 +242,8 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
     'GOT_RESOURCE': smdpStatus === 'RELEASED' ? 'blue' : 'green',
     'IN_USE': 'purple',
     'USED_UP': 'orange',
+    'USED_EXPIRED': 'red',
+    'CANCEL': 'gray',
   };
   return colorMap[esimStatus] || 'gray';
 };
