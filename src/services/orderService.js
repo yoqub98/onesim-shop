@@ -1,7 +1,7 @@
 // src/services/orderService.js
 // Service for handling eSIM orders
 
-import { getTranslation } from '../config/i18n';
+import { getTranslation } from '../config/i18n.js';
 
 const getApiUrl = () => {
   if (process.env.NODE_ENV === 'production') {
