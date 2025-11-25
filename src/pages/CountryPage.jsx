@@ -477,7 +477,7 @@ const CountryPage = () => {
             >
               <HStack spacing={2}>
                 <ArrowLeft size={20} />
-                <Text>Назад</Text>
+                <Text>{t('countryPage.back')}</Text>
               </HStack>
             </Button>
 
@@ -510,7 +510,7 @@ const CountryPage = () => {
                   lineHeight="1.2"
                   textShadow={headerBgImage ? '0 2px 10px rgba(0,0,0,0.3)' : 'none'}
                 >
-                  eSIM для {countryName}
+                  {t('countryPage.banner.title')} {countryName}
                 </Heading>
 
                 <Text
@@ -520,8 +520,7 @@ const CountryPage = () => {
                   lineHeight="1.6"
                   textShadow={headerBgImage ? '0 1px 5px rgba(0,0,0,0.3)' : 'none'}
                 >
-                  Выберите идеальный план мобильного интернета для вашей поездки.
-                  Быстрая активация, надежная связь и доступные цены.
+                  {t('countryPage.banner.description')}
                 </Text>
 
                 <Badge
@@ -561,9 +560,9 @@ const CountryPage = () => {
         <Container maxW="8xl">
           <HStack spacing={4} flexWrap="wrap">
             <Text fontWeight="600" color="gray.700">
-              Фильтры:
+              {t('countryPage.filters')}
             </Text>
-            
+
             <Box minW="180px">
               <select
                 value={selectedData}
@@ -579,7 +578,7 @@ const CountryPage = () => {
                   opacity: loading ? 0.6 : 1,
                 }}
               >
-                <option value="all">Все данные</option>
+                <option value="all">{t('countryPage.allDataOptions')}</option>
                 {dataOptions.map(gb => (
                   <option key={gb} value={gb}>
                     {gb}GB
@@ -603,10 +602,10 @@ const CountryPage = () => {
                   opacity: loading ? 0.6 : 1,
                 }}
               >
-                <option value="all">Все сроки</option>
+                <option value="all">{t('countryPage.allDurationOptions')}</option>
                 {durationOptions.map(days => (
                   <option key={days} value={days}>
-                    {days} дней
+                    {days} {t('countryPage.banner.days')}
                   </option>
                 ))}
               </select>
@@ -614,7 +613,7 @@ const CountryPage = () => {
 
             {!loading && (
               <Text color="gray.500" fontSize="sm" ml="auto">
-                Показано {paginatedPlans.length} из {filteredPlans.length}
+                {t('countryPage.showing')} {paginatedPlans.length} {t('countryPage.of')} {filteredPlans.length}
               </Text>
             )}
           </HStack>
@@ -674,10 +673,10 @@ const CountryPage = () => {
             <Box textAlign="center" py={12}>
               <VStack spacing={3}>
                 <Heading size="md" color="gray.700">
-                  Планы не найдены
+                  {t('countryPage.noPlans')}
                 </Heading>
                 <Text color="gray.500">
-                  Попробуйте изменить фильтры
+                  {t('countryPage.noPlansDescription')}
                 </Text>
                 <Button
                   mt={2}
@@ -689,7 +688,7 @@ const CountryPage = () => {
                   colorScheme="purple"
                   variant="outline"
                 >
-                  Сбросить фильтры
+                  {t('countryPage.resetFilters')}
                 </Button>
               </VStack>
             </Box>

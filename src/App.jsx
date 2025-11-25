@@ -27,6 +27,7 @@ import {
   AccordionIcon,
 } from '@chakra-ui/react';
 import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
+import Flag from 'react-world-flags';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
@@ -176,7 +177,20 @@ const Navigation = () => {
                 _hover={{ bg: 'gray.50' }}
               >
                 <HStack spacing={1}>
-                  <Text fontSize="lg">{currentLanguage === 'uz' ? '🇺🇿' : '🇷🇺'}</Text>
+                  <Box
+                    width="24px"
+                    height="18px"
+                    borderRadius="sm"
+                    overflow="hidden"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    flexShrink={0}
+                  >
+                    <Flag
+                      code={currentLanguage === 'uz' ? 'UZ' : 'RU'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </Box>
                   <Text fontSize="sm" fontWeight="600">
                     {currentLanguage === 'uz' ? 'UZ' : 'RU'}
                   </Text>
@@ -186,13 +200,33 @@ const Navigation = () => {
               <MenuList minW="120px">
                 <MenuItem onClick={() => changeLanguage(LANGUAGES.RU)}>
                   <HStack spacing={2}>
-                    <Text fontSize="lg">🇷🇺</Text>
+                    <Box
+                      width="24px"
+                      height="18px"
+                      borderRadius="sm"
+                      overflow="hidden"
+                      border="1px solid"
+                      borderColor="gray.200"
+                      flexShrink={0}
+                    >
+                      <Flag code="RU" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </Box>
                     <Text>Русский</Text>
                   </HStack>
                 </MenuItem>
                 <MenuItem onClick={() => changeLanguage(LANGUAGES.UZ)}>
                   <HStack spacing={2}>
-                    <Text fontSize="lg">🇺🇿</Text>
+                    <Box
+                      width="24px"
+                      height="18px"
+                      borderRadius="sm"
+                      overflow="hidden"
+                      border="1px solid"
+                      borderColor="gray.200"
+                      flexShrink={0}
+                    >
+                      <Flag code="UZ" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </Box>
                     <Text>O'zbekcha</Text>
                   </HStack>
                 </MenuItem>
@@ -312,8 +346,20 @@ const Navigation = () => {
                   colorScheme={currentLanguage === 'ru' ? 'purple' : 'gray'}
                   onClick={() => changeLanguage(LANGUAGES.RU)}
                   flex={1}
+                  leftIcon={
+                    <Box
+                      width="20px"
+                      height="15px"
+                      borderRadius="sm"
+                      overflow="hidden"
+                      border="1px solid"
+                      borderColor="gray.300"
+                    >
+                      <Flag code="RU" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </Box>
+                  }
                 >
-                  🇷🇺 RU
+                  RU
                 </Button>
                 <Button
                   size="sm"
@@ -321,8 +367,20 @@ const Navigation = () => {
                   colorScheme={currentLanguage === 'uz' ? 'purple' : 'gray'}
                   onClick={() => changeLanguage(LANGUAGES.UZ)}
                   flex={1}
+                  leftIcon={
+                    <Box
+                      width="20px"
+                      height="15px"
+                      borderRadius="sm"
+                      overflow="hidden"
+                      border="1px solid"
+                      borderColor="gray.300"
+                    >
+                      <Flag code="UZ" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </Box>
+                  }
                 >
-                  🇺🇿 UZ
+                  UZ
                 </Button>
               </HStack>
 
