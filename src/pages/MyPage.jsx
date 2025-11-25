@@ -76,16 +76,37 @@ const MyPage = () => {
 
   // Fetch user orders
   const fetchOrders = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('⏭️ [FETCH-ORDERS] No user ID, skipping fetch');
+      return;
+    }
 
+    console.log('📥 [FETCH-ORDERS] ========== FETCHING USER ORDERS ==========');
+    console.log('📥 [FETCH-ORDERS] User ID:', user.id);
     setIsLoading(true);
     setError(null);
 
     try {
       const userOrders = await getUserOrders(user.id);
+      console.log('✅ [FETCH-ORDERS] Received', userOrders.length, 'order(s)');
+
+      // Log each order's status
+      userOrders.forEach((order, index) => {
+        console.log(`📦 [FETCH-ORDERS] Order ${index + 1}:`, {
+          id: order.id,
+          order_no: order.order_no,
+          order_status: order.order_status,
+          esim_status: order.esim_status,
+          smdp_status: order.smdp_status,
+          has_qr_code: !!order.qr_code_url,
+          has_short_url: !!order.short_url,
+          iccid: order.iccid || 'NOT SET'
+        });
+      });
+
       setOrders(userOrders);
     } catch (err) {
-      console.error('Failed to fetch orders:', err);
+      console.error('❌ [FETCH-ORDERS] Failed to fetch orders:', err);
       setError('Не удалось загрузить заказы');
     } finally {
       setIsLoading(false);
@@ -95,6 +116,52 @@ const MyPage = () => {
   useEffect(() => {
     fetchOrders();
   }, [user?.id]);
+
+  // AUTO-CHECK PENDING ORDERS - Poll every 10 seconds
+  useEffect(() => {
+    if (!orders || orders.length === 0) return;
+
+    const pendingOrders = orders.filter(o => o.order_status === 'PENDING');
+
+    if (pendingOrders.length === 0) {
+      console.log('⏭️ [AUTO-CHECK] No pending orders to check');
+      return;
+    }
+
+    console.log('🔄 [AUTO-CHECK] Found', pendingOrders.length, 'pending order(s). Setting up auto-check...');
+
+    const checkPendingOrders = async () => {
+      console.log('🔄 [AUTO-CHECK] Checking status of pending orders...');
+
+      for (const order of pendingOrders) {
+        console.log('🔄 [AUTO-CHECK] Checking order:', order.id, 'Order No:', order.order_no);
+        try {
+          const result = await checkOrderStatus(order.id);
+          console.log('✅ [AUTO-CHECK] Status check result:', result);
+
+          if (result.success && result.data.order_status === 'ALLOCATED') {
+            console.log('✅ [AUTO-CHECK] Order allocated! Refreshing orders list...');
+            // Refresh orders list to show updated status
+            fetchOrders();
+            break; // Exit loop and let the next interval handle remaining orders
+          }
+        } catch (err) {
+          console.error('❌ [AUTO-CHECK] Failed to check order:', order.id, err);
+        }
+      }
+    };
+
+    // Check immediately on mount
+    checkPendingOrders();
+
+    // Then check every 10 seconds
+    const intervalId = setInterval(checkPendingOrders, 10000);
+
+    return () => {
+      console.log('🛑 [AUTO-CHECK] Stopping auto-check interval');
+      clearInterval(intervalId);
+    };
+  }, [orders]); // Re-run when orders change
 
   // Handle QR code modal
   const handleViewQr = (order) => {

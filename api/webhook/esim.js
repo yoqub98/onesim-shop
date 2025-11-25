@@ -93,15 +93,17 @@ export default async function handler(req, res) {
       });
 
       // Query eSIMAccess API to get full eSIM profile data
-      console.log('📡 [WEBHOOK] Querying eSIMAccess for full eSIM profile...');
+      console.log('📡 [WEBHOOK] ========== QUERYING ESIMACCESS API ==========');
+      console.log('📡 [WEBHOOK] Order Number:', orderNo);
       const queryPayload = {
         orderNo,
+        iccid: '',
         pager: {
-          pageNo: 1,
-          pageSize: 10
+          pageNum: 1,  // Fixed: was pageNo, should be pageNum
+          pageSize: 50
         }
       };
-      console.log('📡 [WEBHOOK] Query payload:', JSON.stringify(queryPayload));
+      console.log('📡 [WEBHOOK] Query payload:', JSON.stringify(queryPayload, null, 2));
 
       const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
         method: 'POST',
@@ -121,27 +123,40 @@ export default async function handler(req, res) {
       }
 
       const esim = queryData.obj.esimList[0];
-      console.log('✅ [WEBHOOK] eSIM data retrieved:', {
-        iccid: esim.iccid,
-        esimStatus: esim.esimStatus,
-        hasQrCode: !!esim.qrCodeUrl
-      });
+      console.log('✅ [WEBHOOK] ========== eSIM DATA RETRIEVED ==========');
+      console.log('✅ [WEBHOOK] ICCID:', esim.iccid);
+      console.log('✅ [WEBHOOK] eSIM Status:', esim.esimStatus);
+      console.log('✅ [WEBHOOK] SMDP Status:', esim.smdpStatus);
+      console.log('✅ [WEBHOOK] QR Code URL:', esim.qrCodeUrl ? 'PRESENT' : 'MISSING');
+      console.log('✅ [WEBHOOK] Short URL:', esim.shortUrl ? 'PRESENT' : 'MISSING');
+      console.log('✅ [WEBHOOK] Activation Code:', esim.ac ? 'PRESENT' : 'MISSING');
 
-      // Update order in database
-      console.log('💾 [WEBHOOK] Updating order in database...');
+      // Prepare update data
+      const updateData = {
+        order_status: 'ALLOCATED',
+        iccid: esim.iccid,
+        qr_code_url: esim.qrCodeUrl || null,
+        qr_code_data: esim.ac || null,
+        smdp_address: esim.smdpAddress || null,
+        activation_code: esim.ac || null,
+        short_url: esim.shortUrl || null,  // ADDED: Was missing!
+        esim_status: esim.esimStatus || null,
+        smdp_status: esim.smdpStatus || null,
+        order_usage: esim.orderUsage || 0,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('💾 [WEBHOOK] ========== UPDATING DATABASE ==========');
+      console.log('💾 [WEBHOOK] Update Data:', JSON.stringify({
+        ...updateData,
+        qr_code_url: updateData.qr_code_url ? 'SET' : 'NOT SET',
+        short_url: updateData.short_url ? 'SET' : 'NOT SET',
+        activation_code: updateData.activation_code ? 'SET' : 'NOT SET'
+      }, null, 2));
+
       const { data: updatedOrder, error: updateError } = await supabase
         .from('orders')
-        .update({
-          order_status: 'ALLOCATED',
-          iccid: esim.iccid,
-          qr_code_url: esim.qrCodeUrl,
-          qr_code_data: esim.ac,
-          smdp_address: esim.smdpAddress,
-          activation_code: esim.ac,
-          esim_status: esim.esimStatus,
-          smdp_status: esim.smdpStatus,
-          order_usage: esim.orderUsage || 0
-        })
+        .update(updateData)
         .eq('order_no', orderNo)
         .select()
         .single();

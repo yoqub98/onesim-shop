@@ -1,3 +1,4 @@
 - evertime when implementing new feature, new UI etc. in this project - always make static text parts via i18n - so later it can be translated to another language. If the thing you are implementing is too complex and big, make it only 1 language ( RUS ) but if its a small, easy thing ( make in 2 languages RUS, UZB )
 - > after making changes or running any task on this project, commit changes to github       
   always with proper commit message and push to main branch
+- when implementing task wher fetching, posting, etc backend related parts - try to include console logs and better error logging - so that IF something will not work, we know what went wrong and have better error handling
