@@ -131,18 +131,19 @@ export default async function handler(req, res) {
       console.log('✅ [WEBHOOK] Short URL:', esim.shortUrl ? 'PRESENT' : 'MISSING');
       console.log('✅ [WEBHOOK] Activation Code:', esim.ac ? 'PRESENT' : 'MISSING');
 
-      // Prepare update data
+      // Prepare update data - ONLY save profile data, NOT usage
+      // Usage will be fetched separately in real-time from the API
       const updateData = {
         order_status: 'ALLOCATED',
         iccid: esim.iccid,
+        esim_tran_no: esim.esimTranNo || null,  // Save esimTranNo for future usage queries
         qr_code_url: esim.qrCodeUrl || null,
         qr_code_data: esim.ac || null,
         smdp_address: esim.smdpAddress || null,
         activation_code: esim.ac || null,
-        short_url: esim.shortUrl || null,  // ADDED: Was missing!
+        short_url: esim.shortUrl || null,
         esim_status: esim.esimStatus || null,
         smdp_status: esim.smdpStatus || null,
-        order_usage: esim.orderUsage || 0,
         updated_at: new Date().toISOString()
       };
 

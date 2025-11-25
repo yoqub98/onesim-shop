@@ -261,10 +261,12 @@ export default async function handler(req, res) {
       console.log('✅ [CHECK-STATUS] eSIM Status:', esim.esimStatus);
       console.log('✅ [CHECK-STATUS] SMDP Status:', esim.smdpStatus);
 
-      // Prepare update data
+      // Prepare update data - ONLY save profile data, NOT usage
+      // Usage will be fetched separately in real-time from the API
       const updateData = {
         order_status: 'ALLOCATED',
         iccid: esim.iccid,
+        esim_tran_no: esim.esimTranNo || null,  // Save esimTranNo for future usage queries
         qr_code_url: esim.qrCodeUrl || null,
         qr_code_data: esim.ac || null,
         smdp_address: esim.smdpAddress || null,
@@ -272,7 +274,6 @@ export default async function handler(req, res) {
         short_url: esim.shortUrl || null,
         esim_status: esim.esimStatus || null,
         smdp_status: esim.smdpStatus || null,
-        order_usage: esim.orderUsage || 0,
         updated_at: new Date().toISOString()
       };
 
