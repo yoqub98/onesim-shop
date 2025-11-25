@@ -132,11 +132,10 @@ export default async function handler(req, res) {
       console.log('✅ [WEBHOOK] Activation Code:', esim.ac ? 'PRESENT' : 'MISSING');
 
       // Prepare update data - ONLY save profile data, NOT usage
-      // Usage will be fetched separately in real-time from the API
+      // Usage will be fetched separately in real-time from the API using orderNo
       const updateData = {
         order_status: 'ALLOCATED',
         iccid: esim.iccid,
-        esim_tran_no: esim.esimTranNo || null,  // Save esimTranNo for future usage queries
         qr_code_url: esim.qrCodeUrl || null,
         qr_code_data: esim.ac || null,
         smdp_address: esim.smdpAddress || null,
