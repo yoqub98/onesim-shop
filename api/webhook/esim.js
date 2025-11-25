@@ -131,8 +131,8 @@ export default async function handler(req, res) {
       console.log('✅ [WEBHOOK] Short URL:', esim.shortUrl ? 'PRESENT' : 'MISSING');
       console.log('✅ [WEBHOOK] Activation Code:', esim.ac ? 'PRESENT' : 'MISSING');
 
-      // Prepare update data - ONLY save profile data, NOT usage
-      // Usage will be fetched separately in real-time from the API using orderNo
+      // Prepare update data - ONLY columns that exist in database schema
+      // Note: short_url and smdp_status are NOT in schema, will be fetched in real-time if needed
       const updateData = {
         order_status: 'ALLOCATED',
         iccid: esim.iccid,
@@ -140,9 +140,7 @@ export default async function handler(req, res) {
         qr_code_data: esim.ac || null,
         smdp_address: esim.smdpAddress || null,
         activation_code: esim.ac || null,
-        short_url: esim.shortUrl || null,
         esim_status: esim.esimStatus || null,
-        smdp_status: esim.smdpStatus || null,
         updated_at: new Date().toISOString()
       };
 
@@ -150,7 +148,6 @@ export default async function handler(req, res) {
       console.log('💾 [WEBHOOK] Update Data:', JSON.stringify({
         ...updateData,
         qr_code_url: updateData.qr_code_url ? 'SET' : 'NOT SET',
-        short_url: updateData.short_url ? 'SET' : 'NOT SET',
         activation_code: updateData.activation_code ? 'SET' : 'NOT SET'
       }, null, 2));
 
