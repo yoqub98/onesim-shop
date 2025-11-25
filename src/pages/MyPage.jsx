@@ -243,30 +243,51 @@ const MyPage = () => {
     const [usageData, setUsageData] = useState(null);
     const [loadingUsage, setLoadingUsage] = useState(false);
 
-    // Fetch usage data if order_no is available
+    // Fetch usage data if order_no is available AND eSIM is activated
     useEffect(() => {
       const fetchUsageData = async () => {
+        // Only fetch usage data for ALLOCATED orders
         if (!order.order_no || order.order_status !== 'ALLOCATED') {
-          console.log('⏭️ Skipping usage fetch for order:', order.id, 'Order No:', order.order_no, 'Status:', order.order_status);
+          console.log('⏭️ [USAGE] Skipping - not allocated. Order:', order.id, 'Status:', order.order_status);
           return;
         }
 
-        console.log('📊 Fetching usage data for Order No:', order.order_no);
+        // Don't fetch usage for eSIMs that haven't been installed yet (smdpStatus === 'RELEASED')
+        // RELEASED means the eSIM is ready but not installed on any device yet
+        if (order.smdp_status === 'RELEASED') {
+          console.log('⏭️ [USAGE] Skipping - eSIM not installed yet (RELEASED). Order:', order.id, 'ICCID:', order.iccid);
+          return;
+        }
+
+        console.log('📊 [USAGE] Fetching usage data for Order No:', order.order_no, {
+          iccid: order.iccid,
+          esimStatus: order.esim_status,
+          smdpStatus: order.smdp_status
+        });
         setLoadingUsage(true);
         try {
           const data = await queryEsimUsage(order.order_no);
-          console.log('✅ Usage data received:', data);
+          console.log('✅ [USAGE] Usage data received:', data);
 
           // Check for successful response and data
           if (data && data.success && data.obj?.esimList && data.obj.esimList.length > 0) {
             const esimData = data.obj.esimList[0];
-            console.log('📈 Usage data set:', esimData);
+            console.log('📈 [USAGE] Usage data set:', {
+              totalVolume: esimData.totalVolume,
+              orderUsage: esimData.orderUsage,
+              esimStatus: esimData.esimStatus,
+              smdpStatus: esimData.smdpStatus
+            });
             setUsageData(esimData);
           } else {
-            console.log('⚠️ No usage data found in response:', data);
+            console.log('⚠️ [USAGE] No usage data found in response:', data);
           }
         } catch (err) {
-          console.error('❌ Failed to fetch usage data:', err);
+          console.error('❌ [USAGE] Failed to fetch usage data:', {
+            error: err.message,
+            orderNo: order.order_no,
+            iccid: order.iccid
+          });
           // Don't set error state, just log it - usage data is optional
         } finally {
           setLoadingUsage(false);
@@ -274,7 +295,7 @@ const MyPage = () => {
       };
 
       fetchUsageData();
-    }, [order.order_no, order.order_status]);
+    }, [order.order_no, order.order_status, order.smdp_status, order.iccid]);
 
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;

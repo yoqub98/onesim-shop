@@ -21,19 +21,22 @@ export default async function handler(req, res) {
     const { orderNo } = req.body;
 
     if (!orderNo) {
+      console.error('❌ [ESIM-QUERY] Missing orderNo in request');
       return res.status(400).json({ success: false, error: 'orderNo is required' });
     }
 
-    console.log('🔍 Querying eSIM profile for order:', orderNo);
+    console.log('🔍 [ESIM-QUERY] ========== QUERYING eSIM PROFILE ==========');
+    console.log('🔍 [ESIM-QUERY] Order Number:', orderNo);
 
     const queryPayload = {
       orderNo,
+      iccid: '',
       pager: {
-        pageNo: 1,
-        pageSize: 10
+        pageNum: 1,  // Changed from pageNo to pageNum to match API docs
+        pageSize: 50
       }
     };
-    console.log('🔍 Query payload:', JSON.stringify(queryPayload));
+    console.log('🔍 [ESIM-QUERY] Request Payload:', JSON.stringify(queryPayload, null, 2));
 
     const response = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
@@ -44,12 +47,27 @@ export default async function handler(req, res) {
       body: JSON.stringify(queryPayload),
     });
 
+    console.log('🔍 [ESIM-QUERY] Response Status:', response.status, response.statusText);
+
     const data = await response.json();
-    console.log('📄 eSIM query response:', data);
+    console.log('📄 [ESIM-QUERY] Response Data:', JSON.stringify({
+      success: data.success,
+      errorCode: data.errorCode,
+      errorMsg: data.errorMsg,
+      esimCount: data.obj?.esimList?.length || 0
+    }, null, 2));
+
+    if (data.obj?.esimList?.length > 0) {
+      console.log('✅ [ESIM-QUERY] Found', data.obj.esimList.length, 'eSIM(s)');
+    } else {
+      console.log('⚠️ [ESIM-QUERY] No eSIM data found');
+    }
 
     res.json(data);
   } catch (error) {
-    console.error('❌ eSIM query error:', error.message);
+    console.error('❌ [ESIM-QUERY] ========== ERROR ==========');
+    console.error('❌ [ESIM-QUERY] Error:', error.message);
+    console.error('❌ [ESIM-QUERY] Stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
   }
 };

@@ -209,15 +209,21 @@ export default async function handler(req, res) {
 
     // Always query eSIMAccess to get the latest eSIM status (even if already allocated)
     // This ensures we update the esim_status field (NOT_ACTIVATED, ACTIVATED, USED, etc.)
-    console.log('📡 [CHECK-STATUS] Querying eSIMAccess for orderNo:', order.order_no);
+    console.log('📡 [CHECK-STATUS] ========== QUERYING ESIMACCESS API ==========');
+    console.log('📡 [CHECK-STATUS] Order Number:', order.order_no);
+    console.log('📡 [CHECK-STATUS] Current DB Status:', order.order_status);
+    console.log('📡 [CHECK-STATUS] Current ICCID:', order.iccid || 'NOT SET');
+
     const queryPayload = {
       orderNo: order.order_no,
+      iccid: '',  // Empty to search by orderNo
       pager: {
-        pageNo: 1,
-        pageSize: 10
+        pageNum: 1,  // Changed from pageNo to pageNum to match API docs
+        pageSize: 50
       }
     };
-    console.log('📡 [CHECK-STATUS] Query payload:', JSON.stringify(queryPayload));
+    console.log('📡 [CHECK-STATUS] API Request:', JSON.stringify(queryPayload, null, 2));
+    console.log('📡 [CHECK-STATUS] API URL:', `${ESIMACCESS_API_URL}/esim/query`);
 
     const queryResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
@@ -228,38 +234,75 @@ export default async function handler(req, res) {
       body: JSON.stringify(queryPayload),
     });
 
+    console.log('📡 [CHECK-STATUS] API Response Status:', queryResponse.status, queryResponse.statusText);
+
     const queryData = await queryResponse.json();
-    console.log('📄 eSIM query response:', queryData);
+    console.log('📄 [CHECK-STATUS] ========== API RESPONSE ==========');
+    console.log('📄 [CHECK-STATUS] Success:', queryData.success);
+    console.log('📄 [CHECK-STATUS] Error Code:', queryData.errorCode);
+    console.log('📄 [CHECK-STATUS] Error Message:', queryData.errorMsg);
+    console.log('📄 [CHECK-STATUS] eSIM List Count:', queryData.obj?.esimList?.length || 0);
+    if (queryData.obj?.esimList?.length > 0) {
+      const esim = queryData.obj.esimList[0];
+      console.log('📄 [CHECK-STATUS] First eSIM:', JSON.stringify({
+        iccid: esim.iccid,
+        esimStatus: esim.esimStatus,
+        smdpStatus: esim.smdpStatus,
+        qrCodeUrl: esim.qrCodeUrl ? 'PRESENT' : 'MISSING',
+        shortUrl: esim.shortUrl ? 'PRESENT' : 'MISSING',
+        ac: esim.ac ? 'PRESENT' : 'MISSING'
+      }, null, 2));
+    }
 
     if (queryData.success && queryData.obj?.esimList?.length > 0) {
       const esim = queryData.obj.esimList[0];
-      console.log('✅ [CHECK-STATUS] eSIM found:', { iccid: esim.iccid, status: esim.esimStatus });
+      console.log('✅ [CHECK-STATUS] ========== eSIM FOUND ==========');
+      console.log('✅ [CHECK-STATUS] ICCID:', esim.iccid);
+      console.log('✅ [CHECK-STATUS] eSIM Status:', esim.esimStatus);
+      console.log('✅ [CHECK-STATUS] SMDP Status:', esim.smdpStatus);
 
-      // Update order with eSIM data
-      console.log('📝 [CHECK-STATUS] Updating order in database...');
+      // Prepare update data
+      const updateData = {
+        order_status: 'ALLOCATED',
+        iccid: esim.iccid,
+        qr_code_url: esim.qrCodeUrl || null,
+        qr_code_data: esim.ac || null,
+        smdp_address: esim.smdpAddress || null,
+        activation_code: esim.ac || null,
+        short_url: esim.shortUrl || null,
+        esim_status: esim.esimStatus || null,
+        smdp_status: esim.smdpStatus || null,
+        order_usage: esim.orderUsage || 0,
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('📝 [CHECK-STATUS] ========== UPDATING DATABASE ==========');
+      console.log('📝 [CHECK-STATUS] Update Data:', JSON.stringify({
+        ...updateData,
+        qr_code_url: updateData.qr_code_url ? 'PRESENT' : 'MISSING',
+        short_url: updateData.short_url ? 'PRESENT' : 'MISSING',
+        activation_code: updateData.activation_code ? 'PRESENT' : 'MISSING',
+        qr_code_data: updateData.qr_code_data ? 'PRESENT' : 'MISSING'
+      }, null, 2));
+
       const { data: updatedOrder, error: updateError } = await supabase
         .from('orders')
-        .update({
-          order_status: 'ALLOCATED',
-          iccid: esim.iccid,
-          qr_code_url: esim.qrCodeUrl,
-          qr_code_data: esim.ac,
-          smdp_address: esim.smdpAddress,
-          activation_code: esim.ac,
-          short_url: esim.shortUrl,
-          esim_status: esim.esimStatus,
-          smdp_status: esim.smdpStatus,
-          order_usage: esim.orderUsage || 0
-        })
+        .update(updateData)
         .eq('id', orderId)
         .select()
         .single();
 
       if (updateError) {
-        console.error('❌ [CHECK-STATUS] DB update error:', updateError);
+        console.error('❌ [CHECK-STATUS] ========== DB UPDATE FAILED ==========');
+        console.error('❌ [CHECK-STATUS] Error:', updateError);
         throw updateError;
       }
-      console.log('✅ [CHECK-STATUS] Order updated successfully');
+
+      console.log('✅ [CHECK-STATUS] ========== ORDER UPDATED SUCCESSFULLY ==========');
+      console.log('✅ [CHECK-STATUS] Order ID:', updatedOrder.id);
+      console.log('✅ [CHECK-STATUS] ICCID:', updatedOrder.iccid);
+      console.log('✅ [CHECK-STATUS] QR Code URL:', updatedOrder.qr_code_url ? 'SET' : 'NOT SET');
+      console.log('✅ [CHECK-STATUS] Short URL:', updatedOrder.short_url ? 'SET' : 'NOT SET');
       console.log('ℹ️ [CHECK-STATUS] Email sending skipped - users will access QR code via My eSIMs page');
 
       return res.json({
@@ -270,11 +313,13 @@ export default async function handler(req, res) {
     }
 
     // Not yet allocated
-    console.log('⏳ [CHECK-STATUS] eSIM not yet allocated, still processing');
+    console.log('⏳ [CHECK-STATUS] ========== eSIM NOT YET READY ==========');
+    console.log('⏳ [CHECK-STATUS] API returned success but no eSIM data');
+    console.log('⏳ [CHECK-STATUS] Order is still being processed');
     return res.json({
       success: true,
       data: order,
-      message: 'Still processing'
+      message: 'eSIM is still being processed. Please try again in a few moments.'
     });
 
   } catch (error) {
