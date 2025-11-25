@@ -40,6 +40,7 @@ export const POPULAR_DESTINATIONS = [
   { code: 'KR' }, // South Korea
   { code: 'UZ' }, // Uzbekistan
   { code: 'DE' }, // Germany
+  { code: 'BR' }, // Brazil
 ];
 
 /**
