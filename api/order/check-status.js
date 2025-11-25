@@ -261,8 +261,7 @@ export default async function handler(req, res) {
       console.log('✅ [CHECK-STATUS] eSIM Status:', esim.esimStatus);
       console.log('✅ [CHECK-STATUS] SMDP Status:', esim.smdpStatus);
 
-      // Prepare update data - ONLY columns that exist in database schema
-      // Note: short_url and smdp_status are NOT in schema, will be fetched in real-time if needed
+      // Prepare update data - Save all eSIM profile data
       const updateData = {
         order_status: 'ALLOCATED',
         iccid: esim.iccid,
@@ -270,7 +269,9 @@ export default async function handler(req, res) {
         qr_code_data: esim.ac || null,
         smdp_address: esim.smdpAddress || null,
         activation_code: esim.ac || null,
+        short_url: esim.shortUrl || null,
         esim_status: esim.esimStatus || null,
+        smdp_status: esim.smdpStatus || null,
         updated_at: new Date().toISOString()
       };
 
@@ -278,6 +279,7 @@ export default async function handler(req, res) {
       console.log('📝 [CHECK-STATUS] Update Data:', JSON.stringify({
         ...updateData,
         qr_code_url: updateData.qr_code_url ? 'PRESENT' : 'MISSING',
+        short_url: updateData.short_url ? 'PRESENT' : 'MISSING',
         activation_code: updateData.activation_code ? 'PRESENT' : 'MISSING',
         qr_code_data: updateData.qr_code_data ? 'PRESENT' : 'MISSING'
       }, null, 2));
@@ -299,6 +301,7 @@ export default async function handler(req, res) {
       console.log('✅ [CHECK-STATUS] Order ID:', updatedOrder.id);
       console.log('✅ [CHECK-STATUS] ICCID:', updatedOrder.iccid);
       console.log('✅ [CHECK-STATUS] QR Code URL:', updatedOrder.qr_code_url ? 'SET' : 'NOT SET');
+      console.log('✅ [CHECK-STATUS] Short URL:', updatedOrder.short_url ? 'SET' : 'NOT SET');
       console.log('ℹ️ [CHECK-STATUS] Email sending skipped - users will access QR code via My eSIMs page');
 
       return res.json({
