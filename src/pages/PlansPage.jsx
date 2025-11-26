@@ -10,6 +10,11 @@ import {
   VStack,
   Select,
   Input,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
   Table,
   Thead,
   Tbody,
@@ -374,15 +379,20 @@ const PlansPage = () => {
                     <Text fontWeight="medium" mb={2} color="gray.700">
                       {t('plansPage.filters.dataVolume')}
                     </Text>
-                    <Input
-                      type="number"
-                      placeholder={t('plansPage.filters.dataPlaceholder')}
+                    <NumberInput
                       value={filters.minDataVolume}
-                      onChange={(e) => setFilters({ ...filters, minDataVolume: e.target.value })}
+                      onChange={(value) => setFilters({ ...filters, minDataVolume: value })}
                       size="lg"
                       min={0.1}
-                      step={0.1}
-                    />
+                      step={0.5}
+                      precision={1}
+                    >
+                      <NumberInputField placeholder={t('plansPage.filters.dataPlaceholder')} />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
                   </Box>
                 </HStack>
 
@@ -391,26 +401,38 @@ const PlansPage = () => {
                   <Text fontWeight="medium" mb={2} color="gray.700">
                     {t('plansPage.filters.priceRange')} (USD)
                   </Text>
-                  <HStack spacing={2} maxW="400px">
-                    <Input
-                      type="number"
-                      placeholder={t('plansPage.filters.minPrice')}
+                  <HStack spacing={2} maxW="600px">
+                    <NumberInput
                       value={filters.minPrice}
-                      onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                      onChange={(value) => setFilters({ ...filters, minPrice: value })}
                       size="lg"
                       min={0}
-                      step={0.1}
-                    />
+                      step={1}
+                      precision={1}
+                      flex={1}
+                    >
+                      <NumberInputField placeholder={t('plansPage.filters.minPrice')} />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
                     <Text color="gray.500" fontSize="lg">—</Text>
-                    <Input
-                      type="number"
-                      placeholder={t('plansPage.filters.maxPrice')}
+                    <NumberInput
                       value={filters.maxPrice}
-                      onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                      onChange={(value) => setFilters({ ...filters, maxPrice: value })}
                       size="lg"
                       min={0}
-                      step={0.1}
-                    />
+                      step={1}
+                      precision={1}
+                      flex={1}
+                    >
+                      <NumberInputField placeholder={t('plansPage.filters.maxPrice')} />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
                   </HStack>
                 </Box>
               </Stack>
