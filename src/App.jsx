@@ -33,6 +33,7 @@ import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import CountryPage from './pages/CountryPage.jsx';
 import PackagePage from './pages/PackagePage.jsx';
+import PlansPage from './pages/PlansPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
@@ -120,13 +121,13 @@ const Navigation = () => {
             >
               {t('nav.home')}
             </Link>
-            <Link 
-              href="/#plans" 
-              fontWeight="600" 
+            <Link
+              href="/plans"
+              fontWeight="600"
               color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
                 color: 'purple.600',
                 _after: { width: '100%' }
               }}
@@ -331,7 +332,7 @@ const Navigation = () => {
               <Link href="/#home" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.home')}
               </Link>
-              <Link href="/#plans" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/plans" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.plans')}
               </Link>
               <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
@@ -544,7 +545,7 @@ const Footer = () => {
             <VStack align="flex-start" spacing={3}>
               <Heading size="md" fontWeight="700" mb={2}>{t('footer.quickLinks')}</Heading>
               <Link href="/#home" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.home')}</Link>
-              <Link href="/#plans" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.plans')}</Link>
+              <Link href="/plans" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.plans')}</Link>
               <Link href="/#contacts" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('nav.contacts')}</Link>
             </VStack>
           </GridItem>
@@ -705,6 +706,7 @@ function AppContent() {
       <Navigation />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/plans" element={<PlansPage />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
         <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
