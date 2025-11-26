@@ -34,7 +34,7 @@ import { Search, RotateCcw, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { calculateFinalPrice, formatPrice } from '../config/pricing';
+import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName, COUNTRY_TRANSLATIONS } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -88,7 +88,7 @@ const PlansPage = () => {
       }
 
       // Fetch the same 5 popular packages shown on landing page
-      const popularPackages = await fetchHandpickedPackages();
+      const popularPackages = await fetchHandpickedPackages(HANDPICKED_PLAN_SLUGS, currentLanguage);
 
       // Cache them
       packageCache.set(cacheKey, popularPackages);
@@ -120,7 +120,7 @@ const PlansPage = () => {
       console.log('🔍 [PLANS] Fetching packages for country:', countryCode);
 
       // Fetch from API
-      const response = await fetch('/api/esim/packages', {
+      const response = await fetch('/api/packages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ locationCode: countryCode }),
@@ -140,8 +140,8 @@ const PlansPage = () => {
         slug: pkg.slug,
         volume: pkg.volume, // in bytes
         duration: pkg.duration,
-        priceUsd: parseFloat(pkg.retailPrice),
-        priceUzs: calculateFinalPrice(parseFloat(pkg.retailPrice)),
+        priceUsd: pkg.price / 10000, // Price from API is in cents * 100
+        priceUzs: calculateFinalPrice(pkg.price / 10000),
         network: pkg.networkType,
       }));
 
