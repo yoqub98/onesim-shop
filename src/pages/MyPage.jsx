@@ -319,10 +319,10 @@ const MyPage = () => {
           return;
         }
 
-        // Don't fetch usage for eSIMs that haven't been installed yet (smdpStatus === 'RELEASED')
-        // RELEASED means the eSIM is ready but not installed on any device yet
-        if (order.smdp_status === 'RELEASED') {
-          console.log('⏭️ [USAGE] Skipping - eSIM not installed yet (RELEASED). Order:', order.id, 'ICCID:', order.iccid);
+        // Don't fetch usage for eSIMs that haven't been installed yet
+        // GOT_RESOURCE_RELEASED means the eSIM is ready but not installed on any device yet
+        if (order.esim_status === 'GOT_RESOURCE_RELEASED' || order.esim_status === 'GOT_RESOURCE') {
+          console.log('⏭️ [USAGE] Skipping - eSIM not installed yet. Order:', order.id, 'eSIM Status:', order.esim_status);
           return;
         }
 
@@ -362,7 +362,7 @@ const MyPage = () => {
       };
 
       fetchUsageData();
-    }, [order.order_no, order.order_status, order.smdp_status, order.iccid]);
+    }, [order.order_no, order.order_status, order.esim_status, order.iccid]);
 
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
     const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
