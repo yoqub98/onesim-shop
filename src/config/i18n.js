@@ -1061,6 +1061,12 @@ export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
       return '';
     }
 
+    // Check if this is a European multi-country plan (EU-30, EU-15, etc.)
+    if (countryCode.startsWith('EU-')) {
+      const langCountries = COUNTRY_TRANSLATIONS[lang] || COUNTRY_TRANSLATIONS[DEFAULT_LANGUAGE];
+      return langCountries['EU'] || 'Europe';
+    }
+
     // Get the language-specific country translations, fallback to default language
     const langCountries = COUNTRY_TRANSLATIONS[lang] || COUNTRY_TRANSLATIONS[DEFAULT_LANGUAGE];
 

@@ -32,13 +32,13 @@ const EUFlag = ({ style }) => (
 
 /**
  * CountryFlag component that handles both regular country flags and EU multi-country flags
- * @param {string} code - Country code (e.g., 'TR', 'US', 'EU', 'EUROPE')
+ * @param {string} code - Country code (e.g., 'TR', 'US', 'EU-30', 'EU-15')
  * @param {object} style - CSS styles to apply to the flag
  * @param {object} rest - Additional props to pass to the flag component
  */
 const CountryFlag = ({ code, style, ...rest }) => {
-  // Check if this is a European multi-country plan
-  const isEU = code === 'EU' || code === 'EUROPE' || code === 'Europe';
+  // Check if this is a European multi-country plan (locationCode starts with "EU-")
+  const isEU = code && (code.startsWith('EU-') || code === 'EU' || code === 'EUROPE' || code === 'Europe');
 
   if (isEU) {
     return <EUFlag style={style} {...rest} />;
