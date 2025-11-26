@@ -10,11 +10,14 @@ import {
   VStack,
   Select,
   Input,
+  InputGroup,
+  InputLeftElement,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  Icon,
   Table,
   Thead,
   Tbody,
@@ -35,7 +38,7 @@ import {
   Stack,
   Divider,
 } from '@chakra-ui/react';
-import { Search, RotateCcw, Package, Globe, Calendar } from 'lucide-react';
+import { Search, RotateCcw, Package, Globe, Calendar, ChevronDown, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
@@ -309,17 +312,22 @@ const PlansPage = () => {
               <Stack spacing={4}>
                 {/* Country Filter with Globe Icon */}
                 <Box>
-                  <Text fontWeight="medium" mb={2} color="gray.700">
+                  <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
                     {t('plansPage.filters.country')}
                   </Text>
-                  <HStack>
+                  <InputGroup size="lg">
+                    <InputLeftElement pointerEvents="none" height="100%">
+                      <Globe size={20} color="#9333ea" />
+                    </InputLeftElement>
                     <Select
                       placeholder={t('plansPage.filters.countryPlaceholder')}
                       value={filters.country}
                       onChange={(e) => setFilters({ ...filters, country: e.target.value })}
                       size="lg"
-                      flex={1}
-                      icon={<></>}
+                      icon={<ChevronDown size={20} />}
+                      pl={10}
+                      fontSize="sm"
+                      _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
                     >
                       {POPULAR_DESTINATIONS.map((dest) => (
                         <option key={dest.code} value={dest.code}>
@@ -327,34 +335,28 @@ const PlansPage = () => {
                         </option>
                       ))}
                     </Select>
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      p={3}
-                      borderRadius="lg"
-                      bg="purple.50"
-                      color="purple.600"
-                    >
-                      <Globe size={24} />
-                    </Box>
-                  </HStack>
+                  </InputGroup>
                 </Box>
 
                 {/* Duration and Data Volume */}
                 <HStack spacing={4} align="flex-start">
                   <Box flex={1}>
-                    <Text fontWeight="medium" mb={2} color="gray.700">
+                    <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
                       {t('plansPage.filters.duration')}
                     </Text>
-                    <HStack>
+                    <InputGroup size="lg">
+                      <InputLeftElement pointerEvents="none" height="100%">
+                        <Calendar size={20} color="#10b981" />
+                      </InputLeftElement>
                       <Select
                         placeholder={t('plansPage.filters.durationPlaceholder')}
                         value={filters.minDuration}
                         onChange={(e) => setFilters({ ...filters, minDuration: e.target.value })}
                         size="lg"
-                        flex={1}
-                        icon={<></>}
+                        icon={<ChevronDown size={20} />}
+                        pl={10}
+                        fontSize="sm"
+                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
                       >
                         {DURATION_OPTIONS.map((days) => (
                           <option key={days} value={days}>
@@ -362,21 +364,10 @@ const PlansPage = () => {
                           </option>
                         ))}
                       </Select>
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        p={3}
-                        borderRadius="lg"
-                        bg="green.50"
-                        color="green.600"
-                      >
-                        <Calendar size={24} />
-                      </Box>
-                    </HStack>
+                    </InputGroup>
                   </Box>
                   <Box flex={1}>
-                    <Text fontWeight="medium" mb={2} color="gray.700">
+                    <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
                       {t('plansPage.filters.dataVolume')}
                     </Text>
                     <NumberInput
@@ -387,7 +378,11 @@ const PlansPage = () => {
                       step={0.5}
                       precision={1}
                     >
-                      <NumberInputField placeholder={t('plansPage.filters.dataPlaceholder')} />
+                      <NumberInputField
+                        placeholder={t('plansPage.filters.dataPlaceholder')}
+                        fontSize="sm"
+                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
+                      />
                       <NumberInputStepper>
                         <NumberIncrementStepper />
                         <NumberDecrementStepper />
@@ -396,12 +391,12 @@ const PlansPage = () => {
                   </Box>
                 </HStack>
 
-                {/* Price Range - Narrower */}
+                {/* Price Range */}
                 <Box>
-                  <Text fontWeight="medium" mb={2} color="gray.700">
+                  <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
                     {t('plansPage.filters.priceRange')} (USD)
                   </Text>
-                  <HStack spacing={2} maxW="600px">
+                  <HStack spacing={3} maxW="600px">
                     <NumberInput
                       value={filters.minPrice}
                       onChange={(value) => setFilters({ ...filters, minPrice: value })}
@@ -411,13 +406,17 @@ const PlansPage = () => {
                       precision={1}
                       flex={1}
                     >
-                      <NumberInputField placeholder={t('plansPage.filters.minPrice')} />
+                      <NumberInputField
+                        placeholder={t('plansPage.filters.minPrice')}
+                        fontSize="sm"
+                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
+                      />
                       <NumberInputStepper>
                         <NumberIncrementStepper />
                         <NumberDecrementStepper />
                       </NumberInputStepper>
                     </NumberInput>
-                    <Text color="gray.500" fontSize="lg">—</Text>
+                    <Text color="gray.400" fontSize="lg" fontWeight="bold">—</Text>
                     <NumberInput
                       value={filters.maxPrice}
                       onChange={(value) => setFilters({ ...filters, maxPrice: value })}
@@ -427,7 +426,11 @@ const PlansPage = () => {
                       precision={1}
                       flex={1}
                     >
-                      <NumberInputField placeholder={t('plansPage.filters.maxPrice')} />
+                      <NumberInputField
+                        placeholder={t('plansPage.filters.maxPrice')}
+                        fontSize="sm"
+                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
+                      />
                       <NumberInputStepper>
                         <NumberIncrementStepper />
                         <NumberDecrementStepper />
