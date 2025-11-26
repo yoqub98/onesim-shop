@@ -49,7 +49,7 @@ import {
   Shield,
   Info,
 } from 'lucide-react';
-import Flag from 'react-world-flags';
+import CountryFlag from '../components/CountryFlag';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getCountryName } from '../config/i18n';
@@ -399,7 +399,7 @@ const MyPage = () => {
                   borderColor="gray.200"
                   flexShrink={0}
                 >
-                  <Flag
+                  <CountryFlag
                     code={order.country_code}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />

@@ -115,6 +115,10 @@ export const COUNTRY_TRANSLATIONS = {
     KG: 'Кыргызстан',
     TJ: 'Таджикистан',
     TM: 'Туркменистан',
+
+    // Multi-country regions
+    EU: 'Европа',
+    EUROPE: 'Европа',
   },
   uz: {
     // Asia
@@ -219,6 +223,10 @@ export const COUNTRY_TRANSLATIONS = {
     KG: 'Qirg\'iziston',
     TJ: 'Tojikiston',
     TM: 'Turkmaniston',
+
+    // Multi-country regions
+    EU: 'Yevropa',
+    EUROPE: 'Yevropa',
   },
 };
 

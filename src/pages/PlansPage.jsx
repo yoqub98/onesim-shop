@@ -32,7 +32,7 @@ import {
 } from '@chakra-ui/react';
 import { Search, RotateCcw, Package, Globe, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Flag from 'react-world-flags';
+import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, POPULAR_DESTINATIONS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName } from '../config/i18n';
@@ -519,7 +519,7 @@ const PlansPage = () => {
                               borderColor="gray.200"
                               flexShrink={0}
                             >
-                              <Flag
+                              <CountryFlag
                                 code={pkg.countryCode}
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />

@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Flag from 'react-world-flags';
+import CountryFlag from '../components/CountryFlag';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
 import { calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
@@ -495,7 +495,7 @@ const CountryPage = () => {
                 borderColor="white"
                 bg="white"
               >
-                <Flag
+                <CountryFlag
                   code={countryCode}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />

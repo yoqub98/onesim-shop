@@ -15,7 +15,7 @@ import {
   InputLeftElement,
 } from '@chakra-ui/react';
 import { ArrowRight, Search } from 'lucide-react';
-import Flag from 'react-world-flags';
+import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
@@ -88,13 +88,13 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
               transition="all 0.3s"
               transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
             >
-              <Flag 
-                code={countryCode} 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover' 
-                }} 
+              <CountryFlag
+                code={countryCode}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
               />
             </Box>
             <Heading

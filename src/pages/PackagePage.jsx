@@ -45,7 +45,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Flag from 'react-world-flags';
+import CountryFlag from '../components/CountryFlag';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -193,7 +193,7 @@ const PackagePage = () => {
                   borderColor="gray.200"
                   flexShrink={0}
                 >
-                  <Flag
+                  <CountryFlag
                     code={countryCode}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />

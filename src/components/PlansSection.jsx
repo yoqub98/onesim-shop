@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { Calendar, Wifi, MapPin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Flag from 'react-world-flags';
+import CountryFlag from './CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
@@ -85,13 +85,13 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
                 transition="all 0.3s"
                 transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
               >
-                <Flag 
-                  code={plan.countryCode} 
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'cover' 
-                  }} 
+                <CountryFlag
+                  code={plan.countryCode}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
                 />
               </Box>
               <HStack spacing={2} overflow="hidden" flexGrow={1}>
