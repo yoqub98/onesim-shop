@@ -132,18 +132,26 @@ const PlansPage = () => {
         throw new Error('Failed to fetch packages');
       }
 
-      const fetchedPackages = data.obj.packageList.map(pkg => ({
-        id: pkg.slug,
-        packageCode: pkg.packageCode,
-        name: pkg.name,
-        countryCode: pkg.locationCode,
-        slug: pkg.slug,
-        volume: pkg.volume, // in bytes
-        duration: pkg.duration,
-        priceUsd: pkg.price / 10000, // Price from API is in cents * 100
-        priceUzs: calculateFinalPrice(pkg.price / 10000),
-        network: pkg.networkType,
-      }));
+      const fetchedPackages = data.obj.packageList.map(pkg => {
+        const priceUSD = pkg.price / 10000; // Price from API is in cents * 100
+        const volumeInGB = pkg.volume / (1024 * 1024 * 1024);
+
+        return {
+          id: pkg.slug,
+          packageCode: pkg.packageCode,
+          name: pkg.name,
+          countryCode: pkg.locationCode,
+          slug: pkg.slug,
+          volume: pkg.volume, // in bytes (for filtering)
+          dataGB: volumeInGB, // in GB (for filtering)
+          days: pkg.duration, // Match popular packages structure
+          duration: pkg.duration, // Keep for compatibility
+          priceUSD: priceUSD, // Match popular packages structure (capital USD)
+          priceUsd: priceUSD, // Keep lowercase for compatibility
+          priceUzs: calculateFinalPrice(priceUSD),
+          network: pkg.networkType,
+        };
+      });
 
       // Cache the results
       packageCache.set(countryCode, fetchedPackages);
@@ -170,26 +178,26 @@ const PlansPage = () => {
     // Filter by minimum duration
     if (filters.minDuration) {
       const minDays = parseInt(filters.minDuration);
-      filtered = filtered.filter(pkg => pkg.duration >= minDays);
+      filtered = filtered.filter(pkg => (pkg.days || pkg.duration) >= minDays);
     }
 
-    // Filter by minimum data volume (convert bytes to GB)
+    // Filter by minimum data volume (use dataGB field)
     if (filters.minDataVolume) {
       const minGB = parseFloat(filters.minDataVolume);
       filtered = filtered.filter(pkg => {
-        const volumeGB = pkg.volume / (1024 * 1024 * 1024);
+        const volumeGB = pkg.dataGB || (pkg.volume / (1024 * 1024 * 1024));
         return volumeGB >= minGB;
       });
     }
 
-    // Filter by price range
+    // Filter by price range (use priceUSD field)
     if (filters.minPrice) {
       const minPrice = parseFloat(filters.minPrice);
-      filtered = filtered.filter(pkg => pkg.priceUsd >= minPrice);
+      filtered = filtered.filter(pkg => (pkg.priceUSD || pkg.priceUsd) >= minPrice);
     }
     if (filters.maxPrice) {
       const maxPrice = parseFloat(filters.maxPrice);
-      filtered = filtered.filter(pkg => pkg.priceUsd <= maxPrice);
+      filtered = filtered.filter(pkg => (pkg.priceUSD || pkg.priceUsd) <= maxPrice);
     }
 
     setDisplayedPackages(filtered);
@@ -237,10 +245,21 @@ const PlansPage = () => {
     });
   };
 
-  // Convert bytes to GB for display
-  const bytesToGB = (bytes) => {
-    const gb = bytes / (1024 * 1024 * 1024);
+  // Get data volume in GB for display
+  const getDataVolumeGB = (pkg) => {
+    // Use dataGB if available, otherwise calculate from volume
+    const gb = pkg.dataGB || (pkg.volume / (1024 * 1024 * 1024));
     return gb % 1 === 0 ? gb.toFixed(0) : gb.toFixed(2);
+  };
+
+  // Get duration in days
+  const getDays = (pkg) => {
+    return pkg.days || pkg.duration || 0;
+  };
+
+  // Get price in USD
+  const getPriceUSD = (pkg) => {
+    return pkg.priceUSD || pkg.priceUsd || 0;
   };
 
   return (
@@ -477,21 +496,21 @@ const PlansPage = () => {
                         </Td>
                         <Td isNumeric>
                           <Badge colorScheme="blue" fontSize="sm">
-                            {bytesToGB(pkg.volume)} GB
+                            {getDataVolumeGB(pkg)} GB
                           </Badge>
                         </Td>
                         <Td isNumeric>
                           <Badge colorScheme="green" fontSize="sm">
-                            {pkg.duration} {t('countryPage.filters.days')}
+                            {getDays(pkg)} {t('packagePage.details.days')}
                           </Badge>
                         </Td>
                         <Td isNumeric>
                           <VStack spacing={0} align="flex-end">
                             <Text fontWeight="bold" color="purple.600">
-                              ${pkg.priceUsd.toFixed(2)}
+                              ${getPriceUSD(pkg).toFixed(2)}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
-                              {formatPrice(pkg.priceUzs)} UZS
+                              {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
                             </Text>
                           </VStack>
                         </Td>
