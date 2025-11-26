@@ -30,19 +30,19 @@ import {
   Stack,
   Divider,
 } from '@chakra-ui/react';
-import { Search, RotateCcw, Package } from 'lucide-react';
+import { Search, RotateCcw, Package, Globe, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Flag from 'react-world-flags';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
-import { getTranslation, getCountryName, COUNTRY_TRANSLATIONS } from '../config/i18n';
+import { HANDPICKED_PLAN_SLUGS, POPULAR_DESTINATIONS, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { getTranslation, getCountryName } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
 
-// Supported countries list (from your existing translations)
-const SUPPORTED_COUNTRIES = Object.keys(COUNTRY_TRANSLATIONS.ru);
+// Duration options for dropdown
+const DURATION_OPTIONS = [1, 7, 10, 15, 30, 180];
 
 const PlansPage = () => {
   const { currentLanguage } = useLanguage();
@@ -302,23 +302,38 @@ const PlansPage = () => {
 
               {/* Filter Inputs */}
               <Stack spacing={4}>
-                {/* Country Filter */}
+                {/* Country Filter with Globe Icon */}
                 <Box>
                   <Text fontWeight="medium" mb={2} color="gray.700">
                     {t('plansPage.filters.country')}
                   </Text>
-                  <Select
-                    placeholder={t('plansPage.filters.countryPlaceholder')}
-                    value={filters.country}
-                    onChange={(e) => setFilters({ ...filters, country: e.target.value })}
-                    size="lg"
-                  >
-                    {SUPPORTED_COUNTRIES.sort().map((code) => (
-                      <option key={code} value={code}>
-                        {getCountryName(code, currentLanguage)}
-                      </option>
-                    ))}
-                  </Select>
+                  <HStack>
+                    <Select
+                      placeholder={t('plansPage.filters.countryPlaceholder')}
+                      value={filters.country}
+                      onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+                      size="lg"
+                      flex={1}
+                      icon={<></>}
+                    >
+                      {POPULAR_DESTINATIONS.map((dest) => (
+                        <option key={dest.code} value={dest.code}>
+                          {getCountryName(dest.code, currentLanguage)}
+                        </option>
+                      ))}
+                    </Select>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      p={3}
+                      borderRadius="lg"
+                      bg="purple.50"
+                      color="purple.600"
+                    >
+                      <Globe size={24} />
+                    </Box>
+                  </HStack>
                 </Box>
 
                 {/* Duration and Data Volume */}
@@ -327,14 +342,33 @@ const PlansPage = () => {
                     <Text fontWeight="medium" mb={2} color="gray.700">
                       {t('plansPage.filters.duration')}
                     </Text>
-                    <Input
-                      type="number"
-                      placeholder={t('plansPage.filters.durationPlaceholder')}
-                      value={filters.minDuration}
-                      onChange={(e) => setFilters({ ...filters, minDuration: e.target.value })}
-                      size="lg"
-                      min={1}
-                    />
+                    <HStack>
+                      <Select
+                        placeholder={t('plansPage.filters.durationPlaceholder')}
+                        value={filters.minDuration}
+                        onChange={(e) => setFilters({ ...filters, minDuration: e.target.value })}
+                        size="lg"
+                        flex={1}
+                        icon={<></>}
+                      >
+                        {DURATION_OPTIONS.map((days) => (
+                          <option key={days} value={days}>
+                            {days} {t('packagePage.details.days')}
+                          </option>
+                        ))}
+                      </Select>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        p={3}
+                        borderRadius="lg"
+                        bg="green.50"
+                        color="green.600"
+                      >
+                        <Calendar size={24} />
+                      </Box>
+                    </HStack>
                   </Box>
                   <Box flex={1}>
                     <Text fontWeight="medium" mb={2} color="gray.700">
@@ -352,12 +386,12 @@ const PlansPage = () => {
                   </Box>
                 </HStack>
 
-                {/* Price Range */}
+                {/* Price Range - Narrower */}
                 <Box>
                   <Text fontWeight="medium" mb={2} color="gray.700">
-                    {t('plansPage.filters.priceRange')}
+                    {t('plansPage.filters.priceRange')} (USD)
                   </Text>
-                  <HStack spacing={4}>
+                  <HStack spacing={2} maxW="400px">
                     <Input
                       type="number"
                       placeholder={t('plansPage.filters.minPrice')}
@@ -367,7 +401,7 @@ const PlansPage = () => {
                       min={0}
                       step={0.1}
                     />
-                    <Text color="gray.500">—</Text>
+                    <Text color="gray.500" fontSize="lg">—</Text>
                     <Input
                       type="number"
                       placeholder={t('plansPage.filters.maxPrice')}
@@ -385,11 +419,15 @@ const PlansPage = () => {
               <HStack spacing={4}>
                 <Button
                   leftIcon={<Search size={18} />}
-                  colorScheme="purple"
+                  colorScheme="blue"
                   size="lg"
                   onClick={handleSearch}
                   isLoading={loading}
                   flex={1}
+                  bgGradient="linear(to-r, blue.400, blue.600)"
+                  _hover={{
+                    bgGradient: "linear(to-r, blue.500, blue.700)",
+                  }}
                 >
                   {t('plansPage.filters.searchButton')}
                 </Button>
@@ -505,14 +543,9 @@ const PlansPage = () => {
                           </Badge>
                         </Td>
                         <Td isNumeric>
-                          <VStack spacing={0} align="flex-end">
-                            <Text fontWeight="bold" color="purple.600">
-                              ${getPriceUSD(pkg).toFixed(2)}
-                            </Text>
-                            <Text fontSize="xs" color="gray.500">
-                              {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
-                            </Text>
-                          </VStack>
+                          <Text fontWeight="bold" color="purple.600" fontSize="lg">
+                            {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
+                          </Text>
                         </Td>
                         <Td>
                           <Button
