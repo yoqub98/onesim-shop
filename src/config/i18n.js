@@ -548,6 +548,8 @@ export const TRANSLATIONS = {
         dataUsed: 'Использовано данных',
         dataRemaining: 'осталось',
         percentUsed: 'использовано',
+        loadingUsage: 'Загрузка данных...',      // ADD THIS
+        usageError: 'Не удалось загрузить данные об использовании',  // ADD THIS
       },
       actions: {
         showQr: 'Показать QR-код',
@@ -594,20 +596,23 @@ export const TRANSLATIONS = {
       },
     },
     esimStatus: {
-      // Order statuses
+     // Order statuses
       PENDING: 'В обработке',
       PROCESSING: 'Обрабатывается',
       ALLOCATED: 'Готов к активации',
       FAILED: 'Ошибка',
       CANCELLED: 'Отменен',
-      // eSIM statuses (esimStatus field)
-      GOT_RESOURCE_RELEASED: 'Готов к активации',
-      GOT_RESOURCE_INSTALLED: 'Установлен',
-      IN_USE: 'Используется',
-      USED_UP: 'Израсходован',
-      USED_EXPIRED: 'Истек срок',
+      // eSIM statuses (esimStatus field from API)
+      GOT_RESOURCE: 'Готов к активации',
+      GOT_RESOURCE_RELEASED: 'Готов к установке',
+      GOT_RESOURCE_INSTALLED: 'Установлен на устройство',
+      IN_USE: 'Активен',
+      USED_UP: 'Данные израсходованы',
+      USED_EXPIRED: 'Срок действия истек',
       CANCEL: 'Отменен',
       DELETED: 'Удален',
+      // Additional statuses for clarity
+      ONBOARD: 'Установлен',
     },
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
@@ -934,7 +939,10 @@ export const TRANSLATIONS = {
         price: 'Narx',
         dataUsed: 'Ishlatilgan ma\'lumot',
         dataRemaining: 'qoldi',
-        percentUsed: 'ishlatilgan',
+       percentUsed: 'ishlatilgan',
+        loadingUsage: 'Ma\'lumotlar yuklanmoqda...',  // ADD THIS
+        usageError: 'Foydalanish ma\'lumotlarini yuklab bo\'lmadi',  // ADD THIS
+
       },
       actions: {
         showQr: 'QR-kodni ko\'rsatish',
@@ -987,14 +995,17 @@ export const TRANSLATIONS = {
       ALLOCATED: 'Faollashtirishga tayyor',
       FAILED: 'Xato',
       CANCELLED: 'Bekor qilindi',
-      // eSIM statuses (esimStatus field)
-      GOT_RESOURCE_RELEASED: 'Faollashtirishga tayyor',
-      GOT_RESOURCE_INSTALLED: 'O\'rnatildi',
-      IN_USE: 'Ishlatilmoqda',
-      USED_UP: 'Tugadi',
-      USED_EXPIRED: 'Muddati tugadi',
+      // eSIM statuses (esimStatus field from API)
+      GOT_RESOURCE: 'Faollashtirishga tayyor',
+      GOT_RESOURCE_RELEASED: 'O\'rnatishga tayyor',
+      GOT_RESOURCE_INSTALLED: 'Qurilmaga o\'rnatildi',
+      IN_USE: 'Faol',
+      USED_UP: 'Ma\'lumotlar tugadi',
+      USED_EXPIRED: 'Amal qilish muddati tugadi',
       CANCEL: 'Bekor qilindi',
       DELETED: 'O\'chirildi',
+      // Additional statuses for clarity
+      ONBOARD: 'O\'rnatildi',
     },
     footer: {
       description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlarimiz bilan chegara siz sayohat qiling.',

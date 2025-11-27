@@ -28,8 +28,17 @@ import {
 } from 'lucide-react';
 import CountryFlag from '../components/CountryFlag';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
-import { getCountryName } from '../config/i18n';
-import { getOrderStatusText, getOrderStatusColor, getEsimStatusText, getEsimStatusColor, checkOrderStatus, queryEsimUsage } from '../services/orderService';
+import { getCountryName, getTranslation } from '../config/i18n';
+import { 
+  getOrderStatusText, 
+  getOrderStatusColor, 
+  getEsimStatusText, 
+  getEsimStatusColor, 
+  checkOrderStatus, 
+  queryEsimUsage,
+  shouldShowUsage,
+  canCancelEsim
+} from '../services/orderService';
 
 const MyEsims = ({
   orders,
@@ -43,11 +52,13 @@ const MyEsims = ({
   handleCheckStatus,
 }) => {
   const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
 
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
+    const locale = currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU';
+    return date.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -60,7 +71,8 @@ const MyEsims = ({
   const formatExpiryDate = (expiryDateString) => {
     if (!expiryDateString) return null;
     const date = new Date(expiryDateString);
-    return date.toLocaleDateString('ru-RU', {
+    const locale = currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU';
+    return date.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
     });
@@ -68,7 +80,7 @@ const MyEsims = ({
 
   // Format bytes to MB/GB
   const formatDataSize = (bytes) => {
-    if (!bytes) return '0 MB';
+    if (!bytes || bytes <= 0) return '0 MB';
     const mb = bytes / (1024 * 1024);
     if (mb >= 1024) {
       return `${(mb / 1024).toFixed(2)} GB`;
@@ -89,29 +101,50 @@ const MyEsims = ({
   const OrderCard = ({ order }) => {
     const [usageData, setUsageData] = useState(null);
     const [loadingUsage, setLoadingUsage] = useState(false);
+    const [usageError, setUsageError] = useState(null);
 
-    // Fetch usage data if order_no is available AND eSIM is activated
+    // Determine if we should fetch usage based on status
+    // Using the raw esim_status and smdp_status from the order
+    const esimStatus = order.esim_status;
+    const smdpStatus = order.smdp_status;
+    
+    // Check if this eSIM should show usage data
+    const showUsage = order.order_status === 'ALLOCATED' && shouldShowUsage(esimStatus, smdpStatus);
+    
+    // Check if this eSIM can be cancelled
+    const isCancellable = order.order_status === 'ALLOCATED' && canCancelEsim(esimStatus, smdpStatus);
+
+    // Fetch usage data if applicable
     useEffect(() => {
       const fetchUsageData = async () => {
-        // Only fetch usage data for ALLOCATED orders
-        if (!order.order_no || order.order_status !== 'ALLOCATED') {
-          console.log('⏭️ [USAGE] Skipping - not allocated. Order:', order.id, 'Status:', order.order_status);
+        // Only fetch if we have an order number and should show usage
+        if (!order.order_no) {
+          console.log('⏭️ [USAGE] Skipping - no order_no. Order ID:', order.id);
           return;
         }
 
-        // Don't fetch usage for eSIMs that haven't been installed yet
-        // GOT_RESOURCE_RELEASED means the eSIM is ready but not installed on any device yet
-        if (order.esim_status === 'GOT_RESOURCE_RELEASED' || order.esim_status === 'GOT_RESOURCE') {
-          console.log('⏭️ [USAGE] Skipping - eSIM not installed yet. Order:', order.id, 'eSIM Status:', order.esim_status);
+        if (order.order_status !== 'ALLOCATED') {
+          console.log('⏭️ [USAGE] Skipping - not ALLOCATED. Order:', order.id, 'Status:', order.order_status);
+          return;
+        }
+
+        if (!showUsage) {
+          console.log('⏭️ [USAGE] Skipping - shouldShowUsage=false. Order:', order.id, {
+            esimStatus: esimStatus,
+            smdpStatus: smdpStatus
+          });
           return;
         }
 
         console.log('📊 [USAGE] Fetching usage data for Order No:', order.order_no, {
           iccid: order.iccid,
-          esimStatus: order.esim_status,
-          smdpStatus: order.smdp_status
+          esimStatus: esimStatus,
+          smdpStatus: smdpStatus
         });
+
         setLoadingUsage(true);
+        setUsageError(null);
+
         try {
           const data = await queryEsimUsage(order.order_no);
           console.log('✅ [USAGE] Usage data received:', data);
@@ -123,11 +156,24 @@ const MyEsims = ({
               totalVolume: esimData.totalVolume,
               orderUsage: esimData.orderUsage,
               esimStatus: esimData.esimStatus,
-              smdpStatus: esimData.smdpStatus
+              smdpStatus: esimData.smdpStatus,
+              percentUsed: esimData.totalVolume > 0 
+                ? ((esimData.orderUsage / esimData.totalVolume) * 100).toFixed(1) + '%'
+                : 'N/A'
             });
             setUsageData(esimData);
           } else {
             console.log('⚠️ [USAGE] No usage data found in response:', data);
+            // For USED_UP status, we can still show the progress bar with full usage
+            if (esimStatus === 'USED_UP') {
+              // Use order data as fallback for depleted eSIMs
+              setUsageData({
+                totalVolume: order.data_amount_bytes || 0,
+                orderUsage: order.data_amount_bytes || 0, // 100% used
+                esimStatus: 'USED_UP',
+                smdpStatus: smdpStatus
+              });
+            }
           }
         } catch (err) {
           console.error('❌ [USAGE] Failed to fetch usage data:', {
@@ -135,24 +181,33 @@ const MyEsims = ({
             orderNo: order.order_no,
             iccid: order.iccid
           });
-          // Don't set error state, just log it - usage data is optional
+          setUsageError(err.message);
         } finally {
           setLoadingUsage(false);
         }
       };
 
       fetchUsageData();
-    }, [order.order_no, order.order_status, order.esim_status, order.iccid]);
+    }, [order.order_no, order.order_status, esimStatus, smdpStatus, order.iccid, showUsage]);
 
     // For ALLOCATED orders, show eSIM status if available; otherwise show order status
-    const useEsimStatus = order.order_status === 'ALLOCATED' && order.esim_status;
+    const useEsimStatus = order.order_status === 'ALLOCATED' && esimStatus;
 
-    // Determine status - use eSIM status if available, otherwise use order status
-    let statusText = useEsimStatus ? getEsimStatusText(order.esim_status, order.smdp_status) : getOrderStatusText(order.order_status);
-    let statusColor = useEsimStatus ? getEsimStatusColor(order.esim_status, order.smdp_status) : getOrderStatusColor(order.order_status);
+    // Determine status display - use eSIM status if available, otherwise use order status
+    let statusText = useEsimStatus 
+      ? getEsimStatusText(esimStatus, smdpStatus, currentLanguage) 
+      : getOrderStatusText(order.order_status, currentLanguage);
+    let statusColor = useEsimStatus 
+      ? getEsimStatusColor(esimStatus, smdpStatus) 
+      : getOrderStatusColor(order.order_status);
 
     const countryName = getCountryName(order.country_code, currentLanguage);
     const expiryDate = formatExpiryDate(usageData?.expiredTime || order.expiry_date);
+
+    // Calculate usage percentage
+    const usagePercentage = usageData && usageData.totalVolume > 0
+      ? (usageData.orderUsage / usageData.totalVolume) * 100
+      : 0;
 
     return (
       <Box
@@ -190,7 +245,7 @@ const MyEsims = ({
                   {order.package_name || `eSIM ${countryName}`}
                 </Text>
                 <Text fontSize="xs" color="gray.500">
-                  Заказ #{order.order_no || order.id.slice(0, 8)}
+                  {t('myPage.orders.orderNumber')} #{order.order_no || order.id.slice(0, 8)}
                 </Text>
               </VStack>
             </HStack>
@@ -205,26 +260,26 @@ const MyEsims = ({
           <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap={3}>
             <HStack spacing={2}>
               <Database size={16} color="#6b7280" />
-              <Text fontSize="sm" color="gray.600">Данные:</Text>
+              <Text fontSize="sm" color="gray.600">{t('myPage.orders.data')}:</Text>
               <Text fontSize="sm" fontWeight="600">{order.data_amount || '-'}</Text>
             </HStack>
             <HStack spacing={2}>
               <Calendar size={16} color="#6b7280" />
-              <Text fontSize="sm" color="gray.600">Срок:</Text>
+              <Text fontSize="sm" color="gray.600">{t('myPage.orders.validity')}:</Text>
               <Text fontSize="sm" fontWeight="600">
                 {order.validity_days
-                  ? `${order.validity_days} дней${expiryDate ? ` (до ${expiryDate})` : ''}`
+                  ? `${order.validity_days} ${t('myPage.orders.days')}${expiryDate ? ` (${t('myPage.orders.until')} ${expiryDate})` : ''}`
                   : '-'}
               </Text>
             </HStack>
             <HStack spacing={2}>
               <Globe size={16} color="#6b7280" />
-              <Text fontSize="sm" color="gray.600">Регион:</Text>
+              <Text fontSize="sm" color="gray.600">{t('myPage.orders.region')}:</Text>
               <Text fontSize="sm" fontWeight="600">{countryName || '-'}</Text>
             </HStack>
             <HStack spacing={2}>
               <Calendar size={16} color="#6b7280" />
-              <Text fontSize="sm" color="gray.600">Дата:</Text>
+              <Text fontSize="sm" color="gray.600">{t('myPage.orders.date')}:</Text>
               <Text fontSize="sm" fontWeight="600">{formatDate(order.created_at)}</Text>
             </HStack>
           </Grid>
@@ -251,33 +306,47 @@ const MyEsims = ({
 
           {/* Price */}
           <HStack justify="space-between" pt={2}>
-            <Text fontSize="sm" color="gray.500">Стоимость:</Text>
+            <Text fontSize="sm" color="gray.500">{t('myPage.orders.price')}:</Text>
             <Text fontSize="lg" fontWeight="800" color="purple.600">
               {order.price_uzs ? `${Number(order.price_uzs).toLocaleString('ru-RU')} UZS` : '-'}
             </Text>
           </HStack>
 
-          {/* Actions */}
+          {/* Actions for ALLOCATED orders */}
           {order.order_status === 'ALLOCATED' && (
             <VStack spacing={3} width="full">
-              {/* Data Usage Progress Bar */}
-              {usageData && usageData.totalVolume > 0 && (
+              {/* Data Usage Progress Bar - show if we have usage data OR if loading */}
+              {loadingUsage && (
+                <Box width="full" bg="gray.50" p={3} borderRadius="lg">
+                  <HStack justify="center" spacing={2}>
+                    <Spinner size="sm" color="purple.500" />
+                    <Text fontSize="sm" color="gray.600">
+                      {t('myPage.orders.loadingUsage') || 'Загрузка данных об использовании...'}
+                    </Text>
+                  </HStack>
+                </Box>
+              )}
+
+              {/* Show usage data if available */}
+              {!loadingUsage && usageData && usageData.totalVolume > 0 && (
                 <Box width="full" bg="gray.50" p={3} borderRadius="lg">
                   <VStack spacing={2} align="stretch">
                     <HStack justify="space-between" fontSize="xs" color="gray.600">
-                      <Text fontWeight="600">Использовано данных</Text>
+                      <Text fontWeight="600">{t('myPage.orders.dataUsed')}</Text>
                       <Text fontWeight="600">
                         {formatDataSize(usageData.orderUsage)} / {formatDataSize(usageData.totalVolume)}
                       </Text>
                     </HStack>
                     <Progress
-                      value={((usageData.orderUsage / usageData.totalVolume) * 100)}
+                      value={Math.min(usagePercentage, 100)}
                       size="sm"
                       colorScheme={
-                        (usageData.orderUsage / usageData.totalVolume) > 0.8
+                        usagePercentage >= 100
                           ? 'red'
-                          : (usageData.orderUsage / usageData.totalVolume) > 0.5
+                          : usagePercentage > 80
                           ? 'orange'
+                          : usagePercentage > 50
+                          ? 'yellow'
                           : 'purple'
                       }
                       borderRadius="full"
@@ -285,15 +354,26 @@ const MyEsims = ({
                     />
                     <HStack justify="space-between" fontSize="xs" color="gray.500">
                       <Text>
-                        {((usageData.orderUsage / usageData.totalVolume) * 100).toFixed(1)}% использовано
+                        {usagePercentage.toFixed(1)}% {t('myPage.orders.percentUsed')}
                       </Text>
                       <Text>
-                        {formatDataSize(usageData.totalVolume - usageData.orderUsage)} осталось
+                        {formatDataSize(Math.max(0, usageData.totalVolume - usageData.orderUsage))} {t('myPage.orders.dataRemaining')}
                       </Text>
                     </HStack>
                   </VStack>
                 </Box>
               )}
+
+              {/* Show error if usage fetch failed but eSIM should have usage */}
+              {!loadingUsage && usageError && showUsage && (
+                <Box width="full" bg="red.50" p={3} borderRadius="lg">
+                  <Text fontSize="xs" color="red.600">
+                    {t('myPage.orders.usageError') || 'Не удалось загрузить данные об использовании'}
+                  </Text>
+                </Box>
+              )}
+
+              {/* QR Code button - show for eSIMs that have QR code or activation code */}
               {(order.qr_code_url || order.activation_code) && (
                 <Button
                   size="md"
@@ -304,11 +384,12 @@ const MyEsims = ({
                   onClick={() => handleViewQr(order)}
                   leftIcon={<QrCode size={18} />}
                 >
-                  Показать QR-код
+                  {t('myPage.actions.showQr')}
                 </Button>
               )}
-              {/* Only show cancel button if eSIM is not activated (smdpStatus is RELEASED) */}
-              {(!usageData || usageData.smdpStatus === 'RELEASED') && (
+
+              {/* Cancel button - only show if eSIM is not installed (cancellable) */}
+              {isCancellable && (
                 <Button
                   size="sm"
                   width="full"
@@ -317,19 +398,20 @@ const MyEsims = ({
                   leftIcon={<XCircle size={16} />}
                   onClick={() => handleCancelClick(order)}
                   isLoading={cancellingOrder === order.id}
-                  loadingText="Отмена..."
+                  loadingText={t('myPage.actions.cancelling')}
                 >
-                  Отменить eSIM
+                  {t('myPage.actions.cancelEsim')}
                 </Button>
               )}
             </VStack>
           )}
 
+          {/* PENDING order actions */}
           {order.order_status === 'PENDING' && (
             <VStack spacing={3}>
               <Alert status="info" borderRadius="lg" fontSize="sm">
                 <AlertIcon />
-                Ваш eSIM обрабатывается. Это может занять несколько минут.
+                {t('myPage.status.processing')}
               </Alert>
               <Button
                 size="sm"
@@ -339,17 +421,26 @@ const MyEsims = ({
                 leftIcon={<RefreshCw size={16} />}
                 onClick={() => handleCheckStatus(order.id)}
                 isLoading={checkingStatus === order.id}
-                loadingText="Проверка..."
+                loadingText={t('myPage.actions.checking')}
               >
-                Проверить статус
+                {t('myPage.actions.checkStatus')}
               </Button>
             </VStack>
           )}
 
+          {/* FAILED order status */}
           {order.order_status === 'FAILED' && (
             <Alert status="error" borderRadius="lg" fontSize="sm">
               <AlertIcon />
-              {order.error_message || 'Произошла ошибка при обработке заказа'}
+              {order.error_message || t('myPage.status.error')}
+            </Alert>
+          )}
+
+          {/* CANCELLED order status */}
+          {order.order_status === 'CANCELLED' && (
+            <Alert status="warning" borderRadius="lg" fontSize="sm">
+              <AlertIcon />
+              {t('esimStatus.CANCELLED')}
             </Alert>
           )}
         </VStack>
@@ -361,7 +452,7 @@ const MyEsims = ({
     <VStack align="stretch" spacing={4}>
       {/* Header */}
       <HStack justify="space-between" flexWrap="wrap" gap={2}>
-        <Heading size="md" color="gray.800">Мои заказы</Heading>
+        <Heading size="md" color="gray.800">{t('myPage.orders.title')}</Heading>
         <Button
           size="sm"
           variant="outline"
@@ -370,7 +461,7 @@ const MyEsims = ({
           onClick={fetchOrders}
           isLoading={isLoading}
         >
-          Обновить
+          {t('myPage.orders.refresh')}
         </Button>
       </HStack>
 
@@ -378,7 +469,7 @@ const MyEsims = ({
       {isLoading && (
         <Box textAlign="center" py={12}>
           <Spinner size="xl" color="purple.500" />
-          <Text mt={4} color="gray.600">Загрузка заказов...</Text>
+          <Text mt={4} color="gray.600">{t('myPage.orders.loading')}</Text>
         </Box>
       )}
 
@@ -403,10 +494,10 @@ const MyEsims = ({
             <Package size={40} color="#9ca3af" />
           </Box>
           <Heading size="md" color="gray.700" mb={2}>
-            У вас пока нет заказов
+            {t('myPage.empty.title')}
           </Heading>
           <Text color="gray.500" mb={6}>
-            Выберите подходящий eSIM пакет и оформите первый заказ
+            {t('myPage.empty.description')}
           </Text>
           <Button
             as="a"
@@ -415,7 +506,7 @@ const MyEsims = ({
             color="white"
             _hover={{ opacity: 0.9 }}
           >
-            Выбрать eSIM
+            {t('myPage.empty.button')}
           </Button>
         </Box>
       )}

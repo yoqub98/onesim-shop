@@ -67,17 +67,64 @@ export default async function handler(req, res) {
       });
     }
 
-    const esimTranNo = queryData.obj.esimList[0].esimTranNo;
-    const esimStatus = queryData.obj.esimList[0].esimStatus;
-    const smdpStatus = queryData.obj.esimList[0].smdpStatus;
+    const esimInfo = queryData.obj.esimList[0];
+    const esimTranNo = esimInfo.esimTranNo;
+    const esimStatus = esimInfo.esimStatus;
+    const smdpStatus = esimInfo.smdpStatus;
+    const totalVolume = esimInfo.totalVolume; // Total data from profile
+    const orderUsage = esimInfo.orderUsage;   // Already used data from profile
+    const expiredTime = esimInfo.expiredTime;
 
     console.log('📊 [USAGE] Step 2: eSIM Details Retrieved');
     console.log('📊 [USAGE] - esimTranNo:', esimTranNo);
     console.log('📊 [USAGE] - esimStatus:', esimStatus);
     console.log('📊 [USAGE] - smdpStatus:', smdpStatus);
-    console.log('📊 [USAGE] Now querying usage data...');
+    console.log('📊 [USAGE] - totalVolume (from profile):', totalVolume);
+    console.log('📊 [USAGE] - orderUsage (from profile):', orderUsage);
 
-    // Step 2: Query usage data using esimTranNo
+    // Check if eSIM is in a state where usage makes sense
+    // GOT_RESOURCE + RELEASED = not installed yet, no usage to query
+    if (esimStatus === 'GOT_RESOURCE' && smdpStatus === 'RELEASED') {
+      console.log('📊 [USAGE] eSIM not installed yet, returning profile data only');
+      return res.json({
+        success: true,
+        obj: {
+          esimList: [{
+            totalVolume: totalVolume || 0,
+            orderUsage: 0,
+            esimTranNo: esimTranNo,
+            smdpStatus: smdpStatus,
+            esimStatus: esimStatus,
+            expiredTime: expiredTime,
+            source: 'profile' // Indicates data came from profile, not usage API
+          }]
+        }
+      });
+    }
+
+    // For USED_UP or USED_EXPIRED, we can use the profile data directly
+    // as the usage API might not return data for expired/depleted eSIMs
+    if (esimStatus === 'USED_UP' || esimStatus === 'USED_EXPIRED') {
+      console.log('📊 [USAGE] eSIM depleted/expired, returning profile data');
+      return res.json({
+        success: true,
+        obj: {
+          esimList: [{
+            totalVolume: totalVolume || 0,
+            orderUsage: orderUsage || totalVolume || 0, // If depleted, usage equals total
+            esimTranNo: esimTranNo,
+            smdpStatus: smdpStatus,
+            esimStatus: esimStatus,
+            expiredTime: expiredTime,
+            source: 'profile'
+          }]
+        }
+      });
+    }
+
+    // For active eSIMs, query the usage API for real-time data
+    console.log('📊 [USAGE] Step 3: Querying usage data from usage API...');
+    
     const usagePayload = {
       esimTranNoList: [esimTranNo]
     };
@@ -102,38 +149,58 @@ export default async function handler(req, res) {
       usageListCount: usageData.obj?.esimUsageList?.length || 0
     }, null, 2));
 
-    // Transform the response to match the expected format
+    // If usage API returns data, use it (more accurate/real-time)
     if (usageData.success && usageData.obj?.esimUsageList && usageData.obj.esimUsageList.length > 0) {
       const usageInfo = usageData.obj.esimUsageList[0];
 
-      console.log('✅ [USAGE] Usage Data Retrieved:', {
+      console.log('✅ [USAGE] Usage Data from usage API:', {
         totalData: usageInfo.totalData,
         dataUsage: usageInfo.dataUsage,
-        percentageUsed: ((usageInfo.dataUsage / usageInfo.totalData) * 100).toFixed(2) + '%'
+        lastUpdateTime: usageInfo.lastUpdateTime,
+        percentageUsed: usageInfo.totalData > 0 
+          ? ((usageInfo.dataUsage / usageInfo.totalData) * 100).toFixed(2) + '%'
+          : 'N/A'
       });
 
-      // Return formatted data with proper field names
+      // Return formatted data using usage API response
       return res.json({
         success: true,
         obj: {
           esimList: [{
-            totalVolume: usageInfo.totalData,      // Total data in bytes
-            orderUsage: usageInfo.dataUsage,       // Used data in bytes
+            totalVolume: usageInfo.totalData,      // Total data in bytes from usage API
+            orderUsage: usageInfo.dataUsage,       // Used data in bytes from usage API
             lastUpdateTime: usageInfo.lastUpdateTime,
             esimTranNo: usageInfo.esimTranNo,
             smdpStatus: smdpStatus,
-            esimStatus: esimStatus
+            esimStatus: esimStatus,
+            expiredTime: expiredTime,
+            source: 'usage_api' // Indicates data came from usage API
           }]
         }
       });
     }
 
-    console.log('⚠️ [USAGE] No usage data available');
-    res.json(usageData);
+    // Fallback: If usage API didn't return data, use profile data
+    console.log('⚠️ [USAGE] Usage API returned no data, falling back to profile data');
+    return res.json({
+      success: true,
+      obj: {
+        esimList: [{
+          totalVolume: totalVolume || 0,
+          orderUsage: orderUsage || 0,
+          esimTranNo: esimTranNo,
+          smdpStatus: smdpStatus,
+          esimStatus: esimStatus,
+          expiredTime: expiredTime,
+          source: 'profile_fallback'
+        }]
+      }
+    });
+
   } catch (error) {
     console.error('❌ [USAGE] ========== ERROR ==========');
     console.error('❌ [USAGE] Error:', error.message);
     console.error('❌ [USAGE] Stack:', error.stack);
     res.status(500).json({ success: false, error: error.message });
   }
-};
+}

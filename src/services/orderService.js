@@ -188,8 +188,69 @@ export const getOrderStatusColor = (status) => {
 };
 
 /**
+ * Check if eSIM should show usage data
+ * Based on eSIMAccess API documentation:
+ * - GOT_RESOURCE + RELEASED = New (not installed) - NO usage
+ * - GOT_RESOURCE + ENABLED = Onboard (installed) - YES usage
+ * - IN_USE = Active - YES usage
+ * - USED_UP = Depleted - YES usage
+ * - USED_EXPIRED = Expired - NO usage (plan ended)
+ * - CANCEL = Cancelled - NO usage
+ * - DELETED = Deleted - NO usage
+ * 
+ * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
+ * @returns {boolean} Whether to show usage data
+ */
+export const shouldShowUsage = (esimStatus, smdpStatus) => {
+  // Don't show usage for deleted eSIMs
+  if (smdpStatus === 'DELETED') {
+    return false;
+  }
+
+  // Show usage for these statuses (eSIM is/was in use)
+  const usageStatuses = ['IN_USE', 'USED_UP'];
+  if (usageStatuses.includes(esimStatus)) {
+    return true;
+  }
+
+  // For GOT_RESOURCE, only show usage if installed (not RELEASED)
+  if (esimStatus === 'GOT_RESOURCE' && smdpStatus !== 'RELEASED') {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Check if eSIM can be cancelled
+ * Cancel is only available when eSIM is not installed:
+ * - esimStatus = GOT_RESOURCE
+ * - smdpStatus = RELEASED
+ * 
+ * @param {string} esimStatus - eSIM status from eSIMAccess API
+ * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
+ * @returns {boolean} Whether eSIM can be cancelled
+ */
+export const canCancelEsim = (esimStatus, smdpStatus) => {
+  return esimStatus === 'GOT_RESOURCE' && smdpStatus === 'RELEASED';
+};
+
+/**
  * Get eSIM status display text
- * Based on eSIMAccess API documentation
+ * Based on eSIMAccess API documentation:
+ * 
+ * Status Matrix:
+ * | eSIM Status    | smdpStatus           | esimStatus      | Meaning           |
+ * |----------------|----------------------|-----------------|-------------------|
+ * | New            | RELEASED             | GOT_RESOURCE    | Ready to install  |
+ * | Onboard        | ENABLED              | IN_USE/GOT_RES  | Installed         |
+ * | In Use         | ENABLED/DISABLED     | IN_USE          | Active usage      |
+ * | Depleted       | ENABLED/DISABLED     | USED_UP         | Data exhausted    |
+ * | Expired        | -                    | USED_EXPIRED    | Validity ended    |
+ * | Cancelled      | -                    | CANCEL          | Cancelled         |
+ * | Deleted        | DELETED              | -               | Removed           |
+ * 
  * @param {string} esimStatus - eSIM status from eSIMAccess API
  * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API (optional)
  * @param {string} lang - Language code (default: 'ru')
@@ -198,27 +259,43 @@ export const getOrderStatusColor = (status) => {
 export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
   if (!esimStatus) return null;
 
-  // Match actual eSIMAccess API values from documentation
-  // New: smdpStatus=RELEASED, esimStatus=GOT_RESOURCE
-  // Onboard: smdpStatus=ENABLED, esimStatus=IN_USE or GOT_RESOURCE
-  // In Use: smdpStatus=ENABLED/DISABLED, esimStatus=IN_USE
-  // Depleted: smdpStatus=ENABLED/DISABLED, esimStatus=USED_UP
-  // Expired: esimStatus=USED_EXPIRED
-  // Cancelled: esimStatus=CANCEL
-  // Deleted: smdpStatus=DELETED
-
-  // Handle special cases
+  // Handle DELETED smdpStatus first (highest priority)
   if (smdpStatus === 'DELETED') {
     return getTranslation(lang, 'esimStatus.DELETED');
   }
 
   // Handle GOT_RESOURCE with different smdpStatus
   if (esimStatus === 'GOT_RESOURCE') {
-    const key = smdpStatus === 'RELEASED' ? 'GOT_RESOURCE_RELEASED' : 'GOT_RESOURCE_INSTALLED';
-    return getTranslation(lang, `esimStatus.${key}`);
+    if (smdpStatus === 'RELEASED') {
+      // New - ready to install, not yet on device
+      return getTranslation(lang, 'esimStatus.GOT_RESOURCE_RELEASED');
+    } else {
+      // Onboard - installed on device (ENABLED, DISABLED, or INSTALLATION)
+      return getTranslation(lang, 'esimStatus.GOT_RESOURCE_INSTALLED');
+    }
   }
 
-  // Handle other statuses directly
+  // Handle IN_USE status
+  if (esimStatus === 'IN_USE') {
+    return getTranslation(lang, 'esimStatus.IN_USE');
+  }
+
+  // Handle USED_UP status (data depleted)
+  if (esimStatus === 'USED_UP') {
+    return getTranslation(lang, 'esimStatus.USED_UP');
+  }
+
+  // Handle USED_EXPIRED status (validity ended)
+  if (esimStatus === 'USED_EXPIRED') {
+    return getTranslation(lang, 'esimStatus.USED_EXPIRED');
+  }
+
+  // Handle CANCEL status
+  if (esimStatus === 'CANCEL') {
+    return getTranslation(lang, 'esimStatus.CANCEL');
+  }
+
+  // Fallback - return the raw status
   return getTranslation(lang, `esimStatus.${esimStatus}`) || esimStatus;
 };
 
@@ -231,30 +308,43 @@ export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
 export const getEsimStatusColor = (esimStatus, smdpStatus) => {
   if (!esimStatus) return 'gray';
 
+  // Deleted - red
   if (smdpStatus === 'DELETED') {
     return 'red';
   }
 
+  // GOT_RESOURCE - depends on smdpStatus
+  if (esimStatus === 'GOT_RESOURCE') {
+    if (smdpStatus === 'RELEASED') {
+      return 'blue'; // Ready to install
+    }
+    return 'green'; // Installed
+  }
+
+  // Status color map
   const colorMap = {
-    'GOT_RESOURCE': smdpStatus === 'RELEASED' ? 'blue' : 'green',
-    'IN_USE': 'purple',
-    'USED_UP': 'orange',
-    'USED_EXPIRED': 'red',
-    'CANCEL': 'gray',
+    'IN_USE': 'purple',      // Active - purple
+    'USED_UP': 'orange',     // Depleted - orange
+    'USED_EXPIRED': 'red',   // Expired - red
+    'CANCEL': 'gray',        // Cancelled - gray
   };
+
   return colorMap[esimStatus] || 'gray';
 };
 
 /**
  * Query eSIM usage data by order number
- * This makes two API calls:
+ * This makes two API calls on the backend:
  * 1. First gets esimTranNo from /esim/query using orderNo
  * 2. Then queries usage data from /esim/usage/query using esimTranNo
+ * 
  * @param {string} orderNo - Order number from eSIMAccess (e.g., "B25112216380014")
  * @returns {Promise<Object>} Usage data including totalVolume and orderUsage in bytes
  */
 export const queryEsimUsage = async (orderNo) => {
   try {
+    console.log('📊 [SERVICE] Querying usage for orderNo:', orderNo);
+    
     const response = await fetch(`${API_URL}/esim/usage`, {
       method: 'POST',
       headers: {
@@ -264,14 +354,26 @@ export const queryEsimUsage = async (orderNo) => {
     });
 
     const data = await response.json();
+    
+    console.log('📊 [SERVICE] Usage response:', {
+      success: data.success,
+      hasEsimList: !!data.obj?.esimList,
+      esimCount: data.obj?.esimList?.length || 0
+    });
 
-    if (!response.ok || !data.success) {
+    if (!response.ok) {
+      console.error('📊 [SERVICE] HTTP error:', response.status);
       throw new Error(data.error || 'Failed to query eSIM usage');
+    }
+
+    if (!data.success) {
+      console.error('📊 [SERVICE] API error:', data.error || data.errorMsg);
+      throw new Error(data.error || data.errorMsg || 'Failed to query eSIM usage');
     }
 
     return data;
   } catch (error) {
-    console.error('eSIM usage query failed:', error);
+    console.error('📊 [SERVICE] eSIM usage query failed:', error);
     throw error;
   }
 };
