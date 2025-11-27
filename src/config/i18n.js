@@ -533,7 +533,7 @@ export const TRANSLATIONS = {
         totalOrders: 'Всего заказов',
         activeEsims: 'Активных eSIM',
       },
-      orders: {
+     orders: {
         title: 'Мои заказы',
         refresh: 'Обновить',
         loading: 'Загрузка заказов...',
@@ -548,8 +548,8 @@ export const TRANSLATIONS = {
         dataUsed: 'Использовано данных',
         dataRemaining: 'осталось',
         percentUsed: 'использовано',
-        loadingUsage: 'Загрузка данных...',      // ADD THIS
-        usageError: 'Не удалось загрузить данные об использовании',  // ADD THIS
+        loadingUsage: 'Загрузка данных...',
+        usageError: 'Не удалось загрузить данные',
       },
       actions: {
         showQr: 'Показать QR-код',
@@ -595,24 +595,28 @@ export const TRANSLATIONS = {
         ok: 'Понятно',
       },
     },
-    esimStatus: {
-     // Order statuses
+ esimStatus: {
+      // Order statuses (internal database statuses)
       PENDING: 'В обработке',
       PROCESSING: 'Обрабатывается',
       ALLOCATED: 'Готов к активации',
       FAILED: 'Ошибка',
       CANCELLED: 'Отменен',
-      // eSIM statuses (esimStatus field from API)
+      
+      // eSIM statuses from eSIMAccess API
+      // GOT_RESOURCE with smdpStatus variations:
       GOT_RESOURCE: 'Готов к активации',
-      GOT_RESOURCE_RELEASED: 'Готов к установке',
-      GOT_RESOURCE_INSTALLED: 'Установлен на устройство',
-      IN_USE: 'Активен',
-      USED_UP: 'Данные израсходованы',
-      USED_EXPIRED: 'Срок действия истек',
-      CANCEL: 'Отменен',
-      DELETED: 'Удален',
-      // Additional statuses for clarity
-      ONBOARD: 'Установлен',
+      GOT_RESOURCE_RELEASED: 'Готов к установке',    // Not yet installed on device
+      GOT_RESOURCE_INSTALLED: 'Установлен',          // Installed on device
+      
+      // Active usage statuses:
+      IN_USE: 'Активен',                             // Currently in use
+      USED_UP: 'Данные израсходованы',               // All data used (100%)
+      USED_EXPIRED: 'Срок действия истек',           // Validity period ended
+      
+      // Terminal statuses:
+      CANCEL: 'Отменен',                             // eSIM was cancelled
+      DELETED: 'Удален',                             // eSIM was deleted
     },
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
@@ -925,25 +929,29 @@ export const TRANSLATIONS = {
         totalOrders: 'Jami buyurtmalar',
         activeEsims: 'Faol eSIM',
       },
-      orders: {
-        title: 'Mening buyurtmalarim',
-        refresh: 'Yangilash',
-        loading: 'Buyurtmalar yuklanmoqda...',
-        orderNumber: 'Buyurtma',
-        data: 'Ma\'lumot',
-        validity: 'Muddat',
-        days: 'kun',
-        until: 'gacha',
-        region: 'Mintaqa',
-        date: 'Sana',
-        price: 'Narx',
-        dataUsed: 'Ishlatilgan ma\'lumot',
-        dataRemaining: 'qoldi',
-       percentUsed: 'ishlatilgan',
-        loadingUsage: 'Ma\'lumotlar yuklanmoqda...',  // ADD THIS
-        usageError: 'Foydalanish ma\'lumotlarini yuklab bo\'lmadi',  // ADD THIS
-
-      },
+  esimStatus: {
+      // Order statuses (internal database statuses)
+      PENDING: 'Ishlov berilmoqda',
+      PROCESSING: 'Qayta ishlanmoqda',
+      ALLOCATED: 'Faollashtirishga tayyor',
+      FAILED: 'Xato',
+      CANCELLED: 'Bekor qilindi',
+      
+      // eSIM statuses from eSIMAccess API
+      // GOT_RESOURCE with smdpStatus variations:
+      GOT_RESOURCE: 'Faollashtirishga tayyor',
+      GOT_RESOURCE_RELEASED: 'O\'rnatishga tayyor',   // Not yet installed on device
+      GOT_RESOURCE_INSTALLED: 'O\'rnatildi',          // Installed on device
+      
+      // Active usage statuses:
+      IN_USE: 'Faol',                                 // Currently in use
+      USED_UP: 'Ma\'lumotlar tugadi',                 // All data used (100%)
+      USED_EXPIRED: 'Amal qilish muddati tugadi',     // Validity period ended
+      
+      // Terminal statuses:
+      CANCEL: 'Bekor qilindi',                        // eSIM was cancelled
+      DELETED: 'O\'chirildi',                         // eSIM was deleted
+    },
       actions: {
         showQr: 'QR-kodni ko\'rsatish',
         cancelEsim: 'eSIM ni bekor qilish',

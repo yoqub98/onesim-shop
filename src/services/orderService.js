@@ -78,11 +78,14 @@ export const getUserOrders = async (userId) => {
 
 /**
  * Query eSIM profile data for an order
+ * Returns LIVE status from eSIMAccess API
  * @param {string} orderNo - Order number from eSIMAccess
- * @returns {Promise<Object>} eSIM profile data
+ * @returns {Promise<Object>} eSIM profile data with current status
  */
 export const queryEsimProfile = async (orderNo) => {
   try {
+    console.log('🔍 [SERVICE] Querying eSIM profile for orderNo:', orderNo);
+    
     const response = await fetch(`${API_URL}/esim/query`, {
       method: 'POST',
       headers: {
@@ -92,6 +95,12 @@ export const queryEsimProfile = async (orderNo) => {
     });
 
     const data = await response.json();
+    
+    console.log('🔍 [SERVICE] Profile response:', {
+      success: data.success,
+      hasEsimList: !!data.obj?.esimList,
+      esimCount: data.obj?.esimList?.length || 0
+    });
 
     if (!response.ok || !data.success) {
       throw new Error(data.error || 'Failed to query eSIM profile');
@@ -190,35 +199,68 @@ export const getOrderStatusColor = (status) => {
 /**
  * Check if eSIM should show usage data
  * Based on eSIMAccess API documentation:
- * - GOT_RESOURCE + RELEASED = New (not installed) - NO usage
- * - GOT_RESOURCE + ENABLED = Onboard (installed) - YES usage
- * - IN_USE = Active - YES usage
- * - USED_UP = Depleted - YES usage
- * - USED_EXPIRED = Expired - NO usage (plan ended)
- * - CANCEL = Cancelled - NO usage
- * - DELETED = Deleted - NO usage
+ * 
+ * Status Matrix (from API):
+ * | eSIM Status    | smdpStatus           | esimStatus      | Show Usage? |
+ * |----------------|----------------------|-----------------|-------------|
+ * | New            | RELEASED             | GOT_RESOURCE    | NO          |
+ * | Onboard        | ENABLED/INSTALLATION | GOT_RESOURCE    | YES         |
+ * | In Use         | ENABLED/DISABLED     | IN_USE          | YES         |
+ * | Depleted       | ENABLED/DISABLED     | USED_UP         | YES (100%)  |
+ * | Expired        | -                    | USED_EXPIRED    | YES (show)  |
+ * | Cancelled      | -                    | CANCEL          | NO          |
+ * | Deleted        | DELETED              | -               | NO          |
  * 
  * @param {string} esimStatus - eSIM status from eSIMAccess API
  * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
  * @returns {boolean} Whether to show usage data
  */
 export const shouldShowUsage = (esimStatus, smdpStatus) => {
+  console.log('📊 [shouldShowUsage] Checking:', { esimStatus, smdpStatus });
+  
   // Don't show usage for deleted eSIMs
   if (smdpStatus === 'DELETED') {
+    console.log('📊 [shouldShowUsage] DELETED -> false');
     return false;
   }
 
-  // Show usage for these statuses (eSIM is/was in use)
-  const usageStatuses = ['IN_USE', 'USED_UP'];
-  if (usageStatuses.includes(esimStatus)) {
+  // Don't show usage for cancelled eSIMs
+  if (esimStatus === 'CANCEL') {
+    console.log('📊 [shouldShowUsage] CANCEL -> false');
+    return false;
+  }
+
+  // Show usage for IN_USE (active eSIM)
+  if (esimStatus === 'IN_USE') {
+    console.log('📊 [shouldShowUsage] IN_USE -> true');
     return true;
   }
 
-  // For GOT_RESOURCE, only show usage if installed (not RELEASED)
-  if (esimStatus === 'GOT_RESOURCE' && smdpStatus !== 'RELEASED') {
+  // Show usage for USED_UP (depleted - 100% used)
+  if (esimStatus === 'USED_UP') {
+    console.log('📊 [shouldShowUsage] USED_UP -> true');
     return true;
   }
 
+  // Show usage for USED_EXPIRED (expired but had usage)
+  if (esimStatus === 'USED_EXPIRED') {
+    console.log('📊 [shouldShowUsage] USED_EXPIRED -> true');
+    return true;
+  }
+
+  // For GOT_RESOURCE, check smdpStatus
+  if (esimStatus === 'GOT_RESOURCE') {
+    // RELEASED means not installed yet - no usage to show
+    if (smdpStatus === 'RELEASED') {
+      console.log('📊 [shouldShowUsage] GOT_RESOURCE + RELEASED -> false');
+      return false;
+    }
+    // ENABLED, DISABLED, or INSTALLATION means installed - show usage
+    console.log('📊 [shouldShowUsage] GOT_RESOURCE + ' + smdpStatus + ' -> true');
+    return true;
+  }
+
+  console.log('📊 [shouldShowUsage] Default -> false');
   return false;
 };
 
@@ -228,12 +270,19 @@ export const shouldShowUsage = (esimStatus, smdpStatus) => {
  * - esimStatus = GOT_RESOURCE
  * - smdpStatus = RELEASED
  * 
+ * Once installed or used, cannot be cancelled.
+ * 
  * @param {string} esimStatus - eSIM status from eSIMAccess API
  * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API
  * @returns {boolean} Whether eSIM can be cancelled
  */
 export const canCancelEsim = (esimStatus, smdpStatus) => {
-  return esimStatus === 'GOT_RESOURCE' && smdpStatus === 'RELEASED';
+  console.log('🚫 [canCancelEsim] Checking:', { esimStatus, smdpStatus });
+  
+  const canCancel = esimStatus === 'GOT_RESOURCE' && smdpStatus === 'RELEASED';
+  
+  console.log('🚫 [canCancelEsim] Result:', canCancel);
+  return canCancel;
 };
 
 /**
@@ -241,15 +290,15 @@ export const canCancelEsim = (esimStatus, smdpStatus) => {
  * Based on eSIMAccess API documentation:
  * 
  * Status Matrix:
- * | eSIM Status    | smdpStatus           | esimStatus      | Meaning           |
- * |----------------|----------------------|-----------------|-------------------|
- * | New            | RELEASED             | GOT_RESOURCE    | Ready to install  |
- * | Onboard        | ENABLED              | IN_USE/GOT_RES  | Installed         |
- * | In Use         | ENABLED/DISABLED     | IN_USE          | Active usage      |
- * | Depleted       | ENABLED/DISABLED     | USED_UP         | Data exhausted    |
- * | Expired        | -                    | USED_EXPIRED    | Validity ended    |
- * | Cancelled      | -                    | CANCEL          | Cancelled         |
- * | Deleted        | DELETED              | -               | Removed           |
+ * | eSIM Status    | smdpStatus           | esimStatus      | Display Text Key      |
+ * |----------------|----------------------|-----------------|----------------------|
+ * | New            | RELEASED             | GOT_RESOURCE    | GOT_RESOURCE_RELEASED |
+ * | Onboard        | ENABLED/etc          | GOT_RESOURCE    | GOT_RESOURCE_INSTALLED|
+ * | In Use         | ENABLED/DISABLED     | IN_USE          | IN_USE               |
+ * | Depleted       | ENABLED/DISABLED     | USED_UP         | USED_UP              |
+ * | Expired        | -                    | USED_EXPIRED    | USED_EXPIRED         |
+ * | Cancelled      | -                    | CANCEL          | CANCEL               |
+ * | Deleted        | DELETED              | -               | DELETED              |
  * 
  * @param {string} esimStatus - eSIM status from eSIMAccess API
  * @param {string} smdpStatus - SM-DP+ status from eSIMAccess API (optional)
@@ -259,9 +308,31 @@ export const canCancelEsim = (esimStatus, smdpStatus) => {
 export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
   if (!esimStatus) return null;
 
+  console.log('🏷️ [getEsimStatusText] Getting text for:', { esimStatus, smdpStatus, lang });
+
   // Handle DELETED smdpStatus first (highest priority)
   if (smdpStatus === 'DELETED') {
     return getTranslation(lang, 'esimStatus.DELETED');
+  }
+
+  // Handle CANCEL status
+  if (esimStatus === 'CANCEL') {
+    return getTranslation(lang, 'esimStatus.CANCEL');
+  }
+
+  // Handle USED_UP status (depleted)
+  if (esimStatus === 'USED_UP') {
+    return getTranslation(lang, 'esimStatus.USED_UP');
+  }
+
+  // Handle USED_EXPIRED status
+  if (esimStatus === 'USED_EXPIRED') {
+    return getTranslation(lang, 'esimStatus.USED_EXPIRED');
+  }
+
+  // Handle IN_USE status
+  if (esimStatus === 'IN_USE') {
+    return getTranslation(lang, 'esimStatus.IN_USE');
   }
 
   // Handle GOT_RESOURCE with different smdpStatus
@@ -275,28 +346,9 @@ export const getEsimStatusText = (esimStatus, smdpStatus, lang = 'ru') => {
     }
   }
 
-  // Handle IN_USE status
-  if (esimStatus === 'IN_USE') {
-    return getTranslation(lang, 'esimStatus.IN_USE');
-  }
-
-  // Handle USED_UP status (data depleted)
-  if (esimStatus === 'USED_UP') {
-    return getTranslation(lang, 'esimStatus.USED_UP');
-  }
-
-  // Handle USED_EXPIRED status (validity ended)
-  if (esimStatus === 'USED_EXPIRED') {
-    return getTranslation(lang, 'esimStatus.USED_EXPIRED');
-  }
-
-  // Handle CANCEL status
-  if (esimStatus === 'CANCEL') {
-    return getTranslation(lang, 'esimStatus.CANCEL');
-  }
-
-  // Fallback - return the raw status
-  return getTranslation(lang, `esimStatus.${esimStatus}`) || esimStatus;
+  // Fallback - return the raw status or try to translate it
+  const translated = getTranslation(lang, `esimStatus.${esimStatus}`);
+  return translated !== `esimStatus.${esimStatus}` ? translated : esimStatus;
 };
 
 /**
@@ -313,6 +365,26 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
     return 'red';
   }
 
+  // Cancelled - gray
+  if (esimStatus === 'CANCEL') {
+    return 'gray';
+  }
+
+  // Used up (depleted) - orange
+  if (esimStatus === 'USED_UP') {
+    return 'orange';
+  }
+
+  // Expired - red
+  if (esimStatus === 'USED_EXPIRED') {
+    return 'red';
+  }
+
+  // In Use - purple (active)
+  if (esimStatus === 'IN_USE') {
+    return 'purple';
+  }
+
   // GOT_RESOURCE - depends on smdpStatus
   if (esimStatus === 'GOT_RESOURCE') {
     if (smdpStatus === 'RELEASED') {
@@ -321,15 +393,7 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
     return 'green'; // Installed
   }
 
-  // Status color map
-  const colorMap = {
-    'IN_USE': 'purple',      // Active - purple
-    'USED_UP': 'orange',     // Depleted - orange
-    'USED_EXPIRED': 'red',   // Expired - red
-    'CANCEL': 'gray',        // Cancelled - gray
-  };
-
-  return colorMap[esimStatus] || 'gray';
+  return 'gray';
 };
 
 /**
