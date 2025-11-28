@@ -42,6 +42,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
+import logoColor from './assets/images/logo-color.svg';
+import logoWhite from './assets/images/logo-white.svg';
 
 // Navigation Component
 const Navigation = () => {
@@ -84,18 +86,14 @@ const Navigation = () => {
       <Container maxW="8xl">
         <Flex h="80px" alignItems="center" justifyContent="space-between">
           <Link href="/" textDecoration="none">
-            <Heading
-              size="2xl"
-              background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              backgroundClip="text"
-              fontWeight="800"
-              letterSpacing="tight"
+            <Image
+              src={logoColor}
+              alt="OneSIM"
+              h="40px"
               cursor="pointer"
               transition="all 0.3s"
               _hover={{ transform: 'scale(1.05)' }}
-            >
-              OneSIM
-            </Heading>
+            />
           </Link>
 
           <HStack spacing={6} display={{ base: 'none', md: 'flex' }}>
@@ -559,9 +557,11 @@ const Footer = () => {
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={12} mb={12}>
           <GridItem>
             <VStack align="flex-start" spacing={4}>
-              <Heading size="xl" background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" backgroundClip="text" fontWeight="800">
-                OneSIM
-              </Heading>
+              <Image
+                src={logoWhite}
+                alt="OneSIM"
+                h="35px"
+              />
               <Text color="gray.400" fontSize="sm" lineHeight="1.7">
                 {t('footer.description')}
               </Text>
