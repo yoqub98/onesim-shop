@@ -618,6 +618,28 @@ export const TRANSLATIONS = {
       CANCEL: 'Отменен',                             // eSIM was cancelled
       DELETED: 'Удален',                             // eSIM was deleted
     },
+    howToInstall: {
+      title: {
+        part1: 'Как установить',
+        highlight: 'eSim',
+        part2: '?',
+      },
+      subtitle: 'Выберите операционную систему вашего телефона',
+      ios: {
+        step1: 'Откройте Настройки и перейдите в "Сотовая связь"',
+        step2: 'Нажмите "Добавить eSIM"',
+        step3: 'Выберите "Использовать QR-код"',
+        step4: 'Отсканируйте QR-код от вашего оператора',
+        step5: 'Дождитесь полной активации тарифного плана',
+      },
+      android: {
+        step1: 'Откройте Настройки и перейдите в SIM-карты',
+        step2: 'Нажмите "Добавить eSIM" или "Мобильная сеть"',
+        step3: 'Выберите установку через QR-код',
+        step4: 'Отсканируйте QR-код от вашего оператора',
+        step5: 'Подтвердите активацию eSIM',
+      },
+    },
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
       quickLinks: 'Быстрые ссылки',
@@ -1014,6 +1036,28 @@ export const TRANSLATIONS = {
       DELETED: 'O\'chirildi',
       // Additional statuses for clarity
       ONBOARD: 'O\'rnatildi',
+    },
+    howToInstall: {
+      title: {
+        part1: 'Qanday o\'rnatish kerak',
+        highlight: 'eSim',
+        part2: '?',
+      },
+      subtitle: 'Telefoningiz operatsion tizimini tanlang',
+      ios: {
+        step1: 'Sozlamalarni oching va "Uyali aloqa" ga o\'ting',
+        step2: '"eSIM qo\'shish" tugmasini bosing',
+        step3: '"QR-kodni ishlatish" ni tanlang',
+        step4: 'Operatoringiz bergan QR-kodni skanerlang',
+        step5: 'Tarifning to\'liq faollashuvini kuting',
+      },
+      android: {
+        step1: 'Sozlamalarni oching va SIM-kartalarga o\'ting',
+        step2: '"eSIM qo\'shish" yoki "Mobil tarmoq" tugmasini bosing',
+        step3: 'QR-kod orqali o\'rnatishni tanlang',
+        step4: 'Operatoringiz bergan QR-kodni skanerlang',
+        step5: 'eSIM faollashtirishni tasdiqlang',
+      },
     },
     footer: {
       description: 'Mobil aloqa dunyosida ishonchli hamkoringiz. eSIM yechimlarimiz bilan chegara siz sayohat qiling.',

@@ -37,6 +37,7 @@ import PlansPage from './pages/PlansPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
+import HowToInstall from './pages/HowToInstall.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
@@ -707,6 +708,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/plans" element={<PlansPage />} />
+        <Route path="/how-to-install" element={<HowToInstall />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
         <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
