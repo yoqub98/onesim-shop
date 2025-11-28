@@ -54,6 +54,13 @@ const HowToInstall = () => {
   const currentImages = activeOS === 'iOS' ? iosImages : androidImages;
   const currentSteps = activeOS === 'iOS' ? iosSteps : androidSteps;
 
+  // V-shape offsets: outer phones higher, center phone lower
+  // Index: 0, 1, 2, 3, 4 -> offsets create shallow V
+  const getVerticalOffset = (index) => {
+    const offsets = [0, 15, 30, 15, 0]; // pixels from top
+    return offsets[index] || 0;
+  };
+
   return (
     <Box
       minH="100vh"
@@ -144,6 +151,7 @@ const HowToInstall = () => {
             w="full"
             mt={{ base: 8, md: 10, lg: 12 }}
             px={{ base: 4, md: 0 }}
+            alignItems="flex-start"
           >
             {currentSteps.map((step, index) => (
               <MotionBox
@@ -155,11 +163,12 @@ const HowToInstall = () => {
                   delay: index * 0.15,
                   ease: 'easeOut',
                 }}
-                _hover={{
-                  transform: 'scale(1.08)',
-                  transition: 'transform 0.3s ease-in-out',
+                whileHover={{
+                  scale: 1.05,
+                  transition: { duration: 0.3, ease: 'easeOut' },
                 }}
                 cursor="pointer"
+                pt={{ base: 0, lg: `${getVerticalOffset(index)}px` }}
               >
                 <VStack spacing={4} align="center">
                   {/* Phone Image */}
@@ -180,20 +189,23 @@ const HowToInstall = () => {
                     />
                   </Box>
 
-                  {/* Step Card */}
+                  {/* Step Card - Fixed height for consistency */}
                   <Box
                     w="full"
-                    minH="180px"
+                    h={{ base: '200px', md: '220px', lg: '240px' }}
                     borderRadius="24px"
                     background="linear-gradient(180deg, rgba(166, 134, 246, 0.54) 0%, rgba(179, 90, 178, 0.00) 100%)"
                     p={6}
                     position="relative"
+                    display="flex"
+                    flexDirection="column"
                   >
-                    <VStack align="flex-start" spacing={3}>
+                    <VStack align="flex-start" spacing={3} h="full">
                       {/* Step Number Badge */}
                       <Box
                         w="45px"
                         h="45px"
+                        minH="45px"
                         borderRadius="50%"
                         bg="rgba(166, 134, 246, 0.35)"
                         display="flex"
