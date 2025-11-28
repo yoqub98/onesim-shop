@@ -65,7 +65,7 @@ const HowToInstall = () => {
           {/* Header Section */}
           <VStack spacing={4} textAlign="center">
             <Heading
-              fontSize={{ base: '28px', md: '36px', lg: '42px' }}
+              fontSize={{ base: '32px', md: '44px', lg: '52px' }}
               fontWeight="700"
               color="#1E1E2F"
               lineHeight="1.2"
@@ -77,7 +77,7 @@ const HowToInstall = () => {
               {t('howToInstall.title.part2')}
             </Heading>
             <Text
-              fontSize={{ base: '14px', md: '16px', lg: '18px' }}
+              fontSize={{ base: '16px', md: '18px', lg: '20px' }}
               color="#6B6B7A"
               fontWeight="500"
             >
@@ -155,13 +155,18 @@ const HowToInstall = () => {
                   delay: index * 0.15,
                   ease: 'easeOut',
                 }}
+                _hover={{
+                  transform: 'scale(1.08)',
+                  transition: 'transform 0.3s ease-in-out',
+                }}
+                cursor="pointer"
               >
                 <VStack spacing={4} align="center">
                   {/* Phone Image */}
                   <Box
                     position="relative"
-                    w={{ base: '200px', md: '180px', lg: '200px' }}
-                    h={{ base: '400px', md: '360px', lg: '400px' }}
+                    w={{ base: '220px', md: '198px', lg: '220px' }}
+                    h={{ base: '440px', md: '396px', lg: '440px' }}
                     filter="drop-shadow(0 10px 30px rgba(0,0,0,0.08))"
                   >
                     <img
@@ -178,35 +183,35 @@ const HowToInstall = () => {
                   {/* Step Card */}
                   <Box
                     w="full"
-                    minH="140px"
+                    minH="180px"
                     borderRadius="24px"
-                    background="linear-gradient(180deg, #A686F6 0%, #B35AB2 60%, rgba(179,90,178,0) 100%)"
-                    p={5}
+                    background="linear-gradient(180deg, rgba(166, 134, 246, 0.54) 0%, rgba(179, 90, 178, 0.00) 100%)"
+                    p={6}
                     position="relative"
                   >
                     <VStack align="flex-start" spacing={3}>
                       {/* Step Number Badge */}
                       <Box
-                        w="40px"
-                        h="40px"
+                        w="45px"
+                        h="45px"
                         borderRadius="50%"
-                        bg="rgba(255, 255, 255, 0.25)"
+                        bg="rgba(166, 134, 246, 0.35)"
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         fontWeight="700"
-                        fontSize="16px"
-                        color="white"
+                        fontSize="18px"
+                        color="#5a3ba8"
                       >
                         {step.number}
                       </Box>
 
                       {/* Step Description */}
                       <Text
-                        color="white"
-                        fontSize="14px"
-                        fontWeight="500"
-                        lineHeight="1.5"
+                        color="#2D2D44"
+                        fontSize="15px"
+                        fontWeight="600"
+                        lineHeight="1.6"
                       >
                         {step.text}
                       </Text>
