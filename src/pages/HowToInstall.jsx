@@ -164,7 +164,7 @@ const HowToInstall = () => {
                   ease: 'easeOut',
                 }}
                 whileHover={{
-                  scale: 1.05,
+                  scale: 1.08,
                   transition: { duration: 0.3, ease: 'easeOut' },
                 }}
                 cursor="pointer"
@@ -207,13 +207,13 @@ const HowToInstall = () => {
                         h="45px"
                         minH="45px"
                         borderRadius="50%"
-                        bg="rgba(166, 134, 246, 0.35)"
+                        background="linear-gradient(180deg, rgba(156, 80, 207, 0.79) 0%, rgba(180, 74, 154, 0.79) 100%)"
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         fontWeight="700"
                         fontSize="18px"
-                        color="#5a3ba8"
+                        color="white"
                       >
                         {step.number}
                       </Box>

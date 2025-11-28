@@ -236,6 +236,7 @@ export const TRANSLATIONS = {
     nav: {
       home: 'Главная',
       plans: 'Планы',
+      howToInstall: 'Установка eSIM',
       contacts: 'Контакты',
       login: 'Войти',
       myPage: 'Моя страница',
@@ -654,6 +655,7 @@ export const TRANSLATIONS = {
     nav: {
       home: 'Bosh sahifa',
       plans: 'Tariflar',
+      howToInstall: 'eSIM o\'rnatish',
       contacts: 'Aloqa',
       login: 'Kirish',
       myPage: 'Mening sahifam',

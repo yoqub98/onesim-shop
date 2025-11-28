@@ -145,13 +145,36 @@ const Navigation = () => {
             >
               {t('nav.plans')}
             </Link>
-            <Link 
-              href="/#contacts" 
-              fontWeight="600" 
+            <Link
+              href="/how-to-install"
+              fontWeight="600"
               color="gray.700"
               fontSize="md"
               position="relative"
-              _hover={{ 
+              _hover={{
+                color: 'purple.600',
+                _after: { width: '100%' }
+              }}
+              _after={{
+                content: '""',
+                position: 'absolute',
+                bottom: '-4px',
+                left: 0,
+                width: 0,
+                height: '2px',
+                bg: 'purple.600',
+                transition: 'width 0.3s ease',
+              }}
+            >
+              {t('nav.howToInstall')}
+            </Link>
+            <Link
+              href="/#contacts"
+              fontWeight="600"
+              color="gray.700"
+              fontSize="md"
+              position="relative"
+              _hover={{
                 color: 'purple.600',
                 _after: { width: '100%' }
               }}
@@ -335,6 +358,9 @@ const Navigation = () => {
               </Link>
               <Link href="/plans" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.plans')}
+              </Link>
+              <Link href="/how-to-install" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.howToInstall')}
               </Link>
               <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.contacts')}
