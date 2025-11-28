@@ -35,7 +35,7 @@ import {
   getEsimStatusText, 
   getEsimStatusColor, 
   checkOrderStatus, 
-  queryEsimUsage,
+  queryEsimProfile,
   shouldShowUsage,
   canCancelEsim
 } from '../services/orderService';
@@ -99,101 +99,91 @@ const MyEsims = ({
 
   // Order Card Component
   const OrderCard = ({ order }) => {
-    const [usageData, setUsageData] = useState(null);
-    const [loadingUsage, setLoadingUsage] = useState(false);
-    const [usageError, setUsageError] = useState(null);
+    // State for LIVE data from API
+    const [liveData, setLiveData] = useState(null);
+    const [loadingLiveData, setLoadingLiveData] = useState(false);
+    const [liveDataError, setLiveDataError] = useState(null);
 
-    // Determine if we should fetch usage based on status
-    // Using the raw esim_status and smdp_status from the order
-    const esimStatus = order.esim_status;
-    const smdpStatus = order.smdp_status;
-    
-    // Check if this eSIM should show usage data
-    const showUsage = order.order_status === 'ALLOCATED' && shouldShowUsage(esimStatus, smdpStatus);
-    
-    // Check if this eSIM can be cancelled
-    const isCancellable = order.order_status === 'ALLOCATED' && canCancelEsim(esimStatus, smdpStatus);
-
-    // Fetch usage data if applicable
+    // Fetch LIVE data for ALLOCATED orders
     useEffect(() => {
-      const fetchUsageData = async () => {
-        // Only fetch if we have an order number and should show usage
-        if (!order.order_no) {
-          console.log('⏭️ [USAGE] Skipping - no order_no. Order ID:', order.id);
-          return;
-        }
-
-        if (order.order_status !== 'ALLOCATED') {
-          console.log('⏭️ [USAGE] Skipping - not ALLOCATED. Order:', order.id, 'Status:', order.order_status);
-          return;
-        }
-
-        if (!showUsage) {
-          console.log('⏭️ [USAGE] Skipping - shouldShowUsage=false. Order:', order.id, {
-            esimStatus: esimStatus,
-            smdpStatus: smdpStatus
+      const fetchLiveData = async () => {
+        // Only fetch for ALLOCATED orders that have an order_no
+        if (order.order_status !== 'ALLOCATED' || !order.order_no) {
+          console.log('⏭️ [LIVE] Skipping - not ALLOCATED or no order_no:', {
+            orderId: order.id,
+            status: order.order_status,
+            orderNo: order.order_no
           });
           return;
         }
 
-        console.log('📊 [USAGE] Fetching usage data for Order No:', order.order_no, {
-          iccid: order.iccid,
-          esimStatus: esimStatus,
-          smdpStatus: smdpStatus
-        });
-
-        setLoadingUsage(true);
-        setUsageError(null);
+        console.log('🔄 [LIVE] Fetching live data for Order No:', order.order_no);
+        setLoadingLiveData(true);
+        setLiveDataError(null);
 
         try {
-          const data = await queryEsimUsage(order.order_no);
-          console.log('✅ [USAGE] Usage data received:', data);
+          // Query the eSIM profile to get CURRENT status
+          const response = await queryEsimProfile(order.order_no);
+          
+          console.log('✅ [LIVE] Response received:', response);
 
-          // Check for successful response and data
-          if (data && data.success && data.obj?.esimList && data.obj.esimList.length > 0) {
-            const esimData = data.obj.esimList[0];
-            console.log('📈 [USAGE] Usage data set:', {
-              totalVolume: esimData.totalVolume,
-              orderUsage: esimData.orderUsage,
+          if (response && response.success && response.obj?.esimList?.length > 0) {
+            const esimData = response.obj.esimList[0];
+            
+            console.log('📊 [LIVE] Live eSIM data:', {
               esimStatus: esimData.esimStatus,
               smdpStatus: esimData.smdpStatus,
-              percentUsed: esimData.totalVolume > 0 
-                ? ((esimData.orderUsage / esimData.totalVolume) * 100).toFixed(1) + '%'
-                : 'N/A'
+              totalVolume: esimData.totalVolume,
+              orderUsage: esimData.orderUsage,
+              expiredTime: esimData.expiredTime
             });
-            setUsageData(esimData);
+
+            setLiveData({
+              esimStatus: esimData.esimStatus,
+              smdpStatus: esimData.smdpStatus,
+              totalVolume: esimData.totalVolume,
+              orderUsage: esimData.orderUsage,
+              expiredTime: esimData.expiredTime,
+              iccid: esimData.iccid,
+              qrCodeUrl: esimData.qrCodeUrl,
+              activationCode: esimData.ac,
+            });
           } else {
-            console.log('⚠️ [USAGE] No usage data found in response:', data);
-            // For USED_UP status, we can still show the progress bar with full usage
-            if (esimStatus === 'USED_UP') {
-              // Use order data as fallback for depleted eSIMs
-              setUsageData({
-                totalVolume: order.data_amount_bytes || 0,
-                orderUsage: order.data_amount_bytes || 0, // 100% used
-                esimStatus: 'USED_UP',
-                smdpStatus: smdpStatus
-              });
-            }
+            console.log('⚠️ [LIVE] No eSIM data in response');
           }
         } catch (err) {
-          console.error('❌ [USAGE] Failed to fetch usage data:', {
-            error: err.message,
-            orderNo: order.order_no,
-            iccid: order.iccid
-          });
-          setUsageError(err.message);
+          console.error('❌ [LIVE] Failed to fetch live data:', err.message);
+          setLiveDataError(err.message);
         } finally {
-          setLoadingUsage(false);
+          setLoadingLiveData(false);
         }
       };
 
-      fetchUsageData();
-    }, [order.order_no, order.order_status, esimStatus, smdpStatus, order.iccid, showUsage]);
+      fetchLiveData();
+    }, [order.order_no, order.order_status, order.id]);
 
-    // For ALLOCATED orders, show eSIM status if available; otherwise show order status
+    // Use LIVE status if available, otherwise fall back to database status
+    const esimStatus = liveData?.esimStatus || order.esim_status;
+    const smdpStatus = liveData?.smdpStatus || order.smdp_status;
+    
+    // Determine what to show based on LIVE status
+    const showUsage = shouldShowUsage(esimStatus, smdpStatus);
+    const isCancellable = canCancelEsim(esimStatus, smdpStatus);
+
+    // Usage data from live response
+    const totalVolume = liveData?.totalVolume || 0;
+    const orderUsage = liveData?.orderUsage || 0;
+    
+    // Calculate usage percentage (cap at 100%)
+    const usagePercentage = totalVolume > 0
+      ? Math.min((orderUsage / totalVolume) * 100, 100)
+      : 0;
+    
+    // Calculate remaining data (don't show negative)
+    const remainingData = Math.max(0, totalVolume - orderUsage);
+
+    // Determine status display
     const useEsimStatus = order.order_status === 'ALLOCATED' && esimStatus;
-
-    // Determine status display - use eSIM status if available, otherwise use order status
     let statusText = useEsimStatus 
       ? getEsimStatusText(esimStatus, smdpStatus, currentLanguage) 
       : getOrderStatusText(order.order_status, currentLanguage);
@@ -202,12 +192,12 @@ const MyEsims = ({
       : getOrderStatusColor(order.order_status);
 
     const countryName = getCountryName(order.country_code, currentLanguage);
-    const expiryDate = formatExpiryDate(usageData?.expiredTime || order.expiry_date);
+    const expiryDate = formatExpiryDate(liveData?.expiredTime || order.expiry_date);
 
-    // Calculate usage percentage
-    const usagePercentage = usageData && usageData.totalVolume > 0
-      ? (usageData.orderUsage / usageData.totalVolume) * 100
-      : 0;
+    // Show QR button only for non-cancelled and non-deleted eSIMs
+    const showQrButton = (order.qr_code_url || order.activation_code || liveData?.qrCodeUrl) 
+      && esimStatus !== 'CANCEL' 
+      && smdpStatus !== 'DELETED';
 
     return (
       <Box
@@ -249,9 +239,18 @@ const MyEsims = ({
                 </Text>
               </VStack>
             </HStack>
-            <Badge colorScheme={statusColor} fontSize="sm" px={3} py={1} borderRadius="full">
-              {statusText}
-            </Badge>
+            
+            {/* Status Badge - show loading indicator if fetching */}
+            {loadingLiveData ? (
+              <HStack spacing={2}>
+                <Spinner size="xs" color="purple.500" />
+                <Text fontSize="xs" color="gray.500">{t('myPage.orders.loadingUsage') || 'Загрузка...'}</Text>
+              </HStack>
+            ) : (
+              <Badge colorScheme={statusColor} fontSize="sm" px={3} py={1} borderRadius="full">
+                {statusText}
+              </Badge>
+            )}
           </HStack>
 
           <Divider />
@@ -285,18 +284,20 @@ const MyEsims = ({
           </Grid>
 
           {/* ICCID if available */}
-          {order.iccid && (
+          {(order.iccid || liveData?.iccid) && (
             <Box bg="gray.50" p={3} borderRadius="lg">
               <HStack justify="space-between" flexWrap="wrap" gap={2}>
                 <VStack align="flex-start" spacing={0}>
                   <Text fontSize="xs" color="gray.500">ICCID</Text>
-                  <Text fontSize="sm" fontWeight="600" fontFamily="mono">{order.iccid}</Text>
+                  <Text fontSize="sm" fontWeight="600" fontFamily="mono">
+                    {liveData?.iccid || order.iccid}
+                  </Text>
                 </VStack>
                 <Button
                   size="xs"
                   variant="ghost"
                   colorScheme="purple"
-                  onClick={() => handleCopyCode(order.iccid)}
+                  onClick={() => handleCopyCode(liveData?.iccid || order.iccid)}
                 >
                   <Copy size={14} />
                 </Button>
@@ -315,30 +316,18 @@ const MyEsims = ({
           {/* Actions for ALLOCATED orders */}
           {order.order_status === 'ALLOCATED' && (
             <VStack spacing={3} width="full">
-              {/* Data Usage Progress Bar - show if we have usage data OR if loading */}
-              {loadingUsage && (
-                <Box width="full" bg="gray.50" p={3} borderRadius="lg">
-                  <HStack justify="center" spacing={2}>
-                    <Spinner size="sm" color="purple.500" />
-                    <Text fontSize="sm" color="gray.600">
-                      {t('myPage.orders.loadingUsage') || 'Загрузка данных об использовании...'}
-                    </Text>
-                  </HStack>
-                </Box>
-              )}
-
-              {/* Show usage data if available */}
-              {!loadingUsage && usageData && usageData.totalVolume > 0 && (
+              {/* Data Usage Progress Bar - show for active/used eSIMs */}
+              {!loadingLiveData && showUsage && totalVolume > 0 && (
                 <Box width="full" bg="gray.50" p={3} borderRadius="lg">
                   <VStack spacing={2} align="stretch">
                     <HStack justify="space-between" fontSize="xs" color="gray.600">
                       <Text fontWeight="600">{t('myPage.orders.dataUsed')}</Text>
                       <Text fontWeight="600">
-                        {formatDataSize(usageData.orderUsage)} / {formatDataSize(usageData.totalVolume)}
+                        {formatDataSize(orderUsage)} / {formatDataSize(totalVolume)}
                       </Text>
                     </HStack>
                     <Progress
-                      value={Math.min(usagePercentage, 100)}
+                      value={usagePercentage}
                       size="sm"
                       colorScheme={
                         usagePercentage >= 100
@@ -357,24 +346,24 @@ const MyEsims = ({
                         {usagePercentage.toFixed(1)}% {t('myPage.orders.percentUsed')}
                       </Text>
                       <Text>
-                        {formatDataSize(Math.max(0, usageData.totalVolume - usageData.orderUsage))} {t('myPage.orders.dataRemaining')}
+                        {formatDataSize(remainingData)} {t('myPage.orders.dataRemaining')}
                       </Text>
                     </HStack>
                   </VStack>
                 </Box>
               )}
 
-              {/* Show error if usage fetch failed but eSIM should have usage */}
-              {!loadingUsage && usageError && showUsage && (
-                <Box width="full" bg="red.50" p={3} borderRadius="lg">
-                  <Text fontSize="xs" color="red.600">
-                    {t('myPage.orders.usageError') || 'Не удалось загрузить данные об использовании'}
+              {/* Show error if live data fetch failed */}
+              {!loadingLiveData && liveDataError && (
+                <Box width="full" bg="orange.50" p={3} borderRadius="lg">
+                  <Text fontSize="xs" color="orange.600">
+                    {t('myPage.orders.usageError') || 'Не удалось загрузить данные'}
                   </Text>
                 </Box>
               )}
 
-              {/* QR Code button - show for eSIMs that have QR code or activation code */}
-              {(order.qr_code_url || order.activation_code) && (
+              {/* QR Code button - show for valid eSIMs */}
+              {showQrButton && (
                 <Button
                   size="md"
                   width="full"
@@ -388,7 +377,7 @@ const MyEsims = ({
                 </Button>
               )}
 
-              {/* Cancel button - only show if eSIM is not installed (cancellable) */}
+              {/* Cancel button - only for non-installed eSIMs */}
               {isCancellable && (
                 <Button
                   size="sm"
