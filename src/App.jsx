@@ -49,6 +49,7 @@ import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
 import logoColor from './assets/images/logo-color.svg';
 import logoWhite from './assets/images/logo-white.svg';
+import CurrencyDebug from './components/CurrencyDebug';
 
 // Navigation Component
 const Navigation = () => {
@@ -736,7 +737,10 @@ function AppContent() {
       <style>
         {`@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');`}
       </style>
-      
+
+      {/* TEMPORARY: Currency Debug Panel - Remove after testing */}
+      <CurrencyDebug />
+
       <Navigation />
       <Routes>
         <Route path="/" element={<HomePage />} />

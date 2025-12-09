@@ -11,7 +11,8 @@
       "Bash(npm install)",
       "Bash(npm run build:*)",
       "Bash(timeout 10 bash:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
