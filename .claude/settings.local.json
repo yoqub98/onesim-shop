@@ -13,7 +13,8 @@
       "Bash(timeout 10 bash:*)",
       "Bash(mkdir:*)",
       "Bash(git push:*)",
-      "WebFetch(domain:cbu.uz)"
+      "WebFetch(domain:cbu.uz)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

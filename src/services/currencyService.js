@@ -9,14 +9,18 @@
  * - Fallback rate: 12800 UZS/USD
  */
 
+// Vercel Serverless Function endpoint (best solution - no CORS issues)
+const SERVERLESS_API = '/api/exchange-rate';
+
 // CBU API endpoint (requires date or returns last week's data)
 // Format: https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/YYYY-MM-DD/
 const CBU_API_BASE = 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD';
 
-// CORS Proxy options (temporary solution until backend proxy is implemented)
+// CORS Proxy options (fallback if serverless fails)
 const CORS_PROXIES = [
-  'https://api.allorigins.win/raw?url=', // Public CORS proxy
-  'https://corsproxy.io/?', // Alternative CORS proxy
+  'https://corsproxy.io/?', // CORS proxy #1
+  'https://api.codetabs.com/v1/proxy?quest=', // CORS proxy #2
+  'https://api.allorigins.win/raw?url=', // CORS proxy #3 (backup)
 ];
 
 const CACHE_KEY = 'cbu_exchange_rate';
@@ -75,6 +79,41 @@ const getTodayDate = () => {
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+/**
+ * Fetch exchange rate from Vercel Serverless Function
+ * This is the best method (no CORS issues)
+ * @returns {Promise<number>}
+ */
+const fetchFromServerless = async () => {
+  console.log('[CurrencyService] Fetching from serverless function...');
+
+  const response = await fetch(SERVERLESS_API, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Serverless API returned status ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.success || !data.rate) {
+    throw new Error(data.error || 'Invalid response from serverless API');
+  }
+
+  const finalRate = data.rate;
+  console.log('[CurrencyService] Rate from serverless:', finalRate);
+  console.log('[CurrencyService] Official CBU rate:', data.officialRate);
+
+  // Cache the rate
+  cacheRate(finalRate);
+
+  return finalRate;
 };
 
 /**
@@ -169,8 +208,9 @@ const processApiResponse = (data) => {
 /**
  * Get current USD to UZS exchange rate
  * - Checks cache first
- * - If cache is invalid or missing, fetches from CBU API
- * - Returns fallback rate if API fails
+ * - Tries serverless function (best method)
+ * - Falls back to CORS proxies if serverless fails
+ * - Returns fallback rate if all methods fail
  * @returns {Promise<number>}
  */
 export const getExchangeRate = async () => {
@@ -180,14 +220,25 @@ export const getExchangeRate = async () => {
     return cachedRate;
   }
 
-  // Fetch from API
+  // Try serverless function first (best method - no CORS issues)
   try {
-    return await fetchExchangeRateFromCBU();
-  } catch (error) {
-    console.error('[CurrencyService] All fetch attempts failed:', error.message);
-    console.log('[CurrencyService] Using fallback rate:', FALLBACK_RATE);
-    return FALLBACK_RATE;
+    console.log('[CurrencyService] Attempting serverless function...');
+    return await fetchFromServerless();
+  } catch (serverlessError) {
+    console.warn('[CurrencyService] Serverless function failed:', serverlessError.message);
   }
+
+  // Fall back to CORS proxy method
+  try {
+    console.log('[CurrencyService] Falling back to CORS proxy method...');
+    return await fetchExchangeRateFromCBU();
+  } catch (proxyError) {
+    console.error('[CurrencyService] All fetch methods failed:', proxyError.message);
+  }
+
+  // Use fallback rate
+  console.log('[CurrencyService] Using fallback rate:', FALLBACK_RATE);
+  return FALLBACK_RATE;
 };
 
 /**
