@@ -1,150 +1,102 @@
 // src/components/CurrencyDebug.jsx
-import React from 'react';
-import { Box, VStack, Heading, Text, Button, Code } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import { Box, HStack, VStack, Text, IconButton, Collapse } from '@chakra-ui/react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useCurrency } from '../contexts/CurrencyContext';
-import { getCacheInfo } from '../services/currencyService';
 
 /**
- * CurrencyDebug - Debug component to verify CBU API integration
- * Add this temporarily to any page to check if currency service is working
- *
- * Usage:
- * import CurrencyDebug from '../components/CurrencyDebug';
- * <CurrencyDebug />
+ * CurrencyDebug - Minimal currency status widget for footer
+ * Shows CBU API connection status and current rate
  */
 const CurrencyDebug = () => {
-  const { exchangeRate, loading, error, refresh } = useCurrency();
-  const cacheInfo = getCacheInfo();
-
-  const handleRefresh = async () => {
-    console.log('🔄 Manual refresh triggered...');
-    await refresh();
-    window.location.reload(); // Reload to see updated cache info
-  };
-
-  const handleClearCache = () => {
-    localStorage.removeItem('cbu_exchange_rate');
-    localStorage.removeItem('cbu_exchange_rate_timestamp');
-    console.log('🗑️ Cache cleared! Reload page to fetch fresh rate.');
-    alert('Cache cleared! Reload the page to fetch a fresh rate from CBU API.');
-  };
+  const [isOpen, setIsOpen] = useState(false);
+  const { exchangeRate, loading } = useCurrency();
 
   const isUsingFallback = exchangeRate === 12800;
   const isUsingAPI = exchangeRate && exchangeRate !== 12800;
 
+  // Calculate official rate (reverse the 1% markup)
+  const officialRate = isUsingAPI ? Math.round(exchangeRate / 1.01) : null;
+  const markupAmount = isUsingAPI ? exchangeRate - officialRate : null;
+
   return (
     <Box
       position="fixed"
-      bottom="20px"
+      bottom="0"
       right="20px"
       bg="white"
-      p={6}
-      borderRadius="xl"
-      shadow="2xl"
-      border="2px solid"
-      borderColor="purple.300"
-      maxW="400px"
+      borderRadius="xl xl 0 0"
+      shadow="lg"
+      border="1px solid"
+      borderColor="gray.200"
       zIndex={9999}
+      minW="280px"
     >
-      <VStack align="stretch" spacing={4}>
-        <Heading size="md" color="purple.600">
-          💱 Currency Debug Panel
-        </Heading>
+      {/* Toggle Button */}
+      <HStack
+        px={4}
+        py={2}
+        cursor="pointer"
+        onClick={() => setIsOpen(!isOpen)}
+        _hover={{ bg: 'gray.50' }}
+        borderRadius="xl xl 0 0"
+        spacing={2}
+      >
+        <Box
+          w="8px"
+          h="8px"
+          borderRadius="full"
+          bg={isUsingAPI ? 'green.500' : 'orange.500'}
+        />
+        <Text fontSize="xs" fontWeight="600" color="gray.700" flex={1}>
+          Currency Status
+        </Text>
+        <IconButton
+          size="xs"
+          variant="ghost"
+          aria-label="Toggle currency info"
+          icon={isOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+        />
+      </HStack>
 
-        {/* Current Rate */}
-        <Box>
-          <Text fontSize="sm" fontWeight="600" color="gray.600">
-            Current Exchange Rate:
-          </Text>
-          <Text fontSize="2xl" fontWeight="bold" color={isUsingAPI ? 'green.600' : 'orange.600'}>
-            {loading ? 'Loading...' : `${exchangeRate} UZS/USD`}
-          </Text>
-          {isUsingFallback && (
-            <Text fontSize="xs" color="orange.600" mt={1}>
-              ⚠️ Using fallback rate (API may have failed)
+      {/* Collapsible Content */}
+      <Collapse in={isOpen} animateOpacity>
+        <VStack align="stretch" spacing={3} px={4} pb={4} pt={2} borderTop="1px solid" borderColor="gray.100">
+          {/* Status */}
+          <HStack spacing={2}>
+            <Text fontSize="xs" color="gray.600">
+              Status:
             </Text>
-          )}
+            <Text fontSize="xs" fontWeight="600" color={isUsingAPI ? 'green.600' : 'orange.600'}>
+              {loading ? 'Loading...' : isUsingAPI ? '✅ Connected to CBU' : '⚠️ Using Fallback'}
+            </Text>
+          </HStack>
+
+          {/* Current Exchange Rate */}
           {isUsingAPI && (
-            <Text fontSize="xs" color="green.600" mt={1}>
-              ✅ Loaded from CBU API (includes 1% markup)
+            <>
+              <Box>
+                <Text fontSize="xs" color="gray.600" mb={1}>
+                  Current Exchange Rate:
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" color="gray.900">
+                  {officialRate?.toLocaleString('en-US').replace(/,/g, ' ')} UZS
+                </Text>
+                <Text fontSize="xs" color="gray.500" mt={1}>
+                  +1% markup: {markupAmount?.toLocaleString('en-US').replace(/,/g, ' ')} UZS
+                </Text>
+              </Box>
+            </>
+          )}
+
+          {/* Fallback message */}
+          {isUsingFallback && (
+            <Text fontSize="xs" color="orange.600">
+              Using fallback rate: {exchangeRate} UZS
             </Text>
           )}
-        </Box>
-
-        {/* Cache Info */}
-        <Box>
-          <Text fontSize="sm" fontWeight="600" color="gray.600">
-            Cache Status:
-          </Text>
-          <Box bg="gray.50" p={3} borderRadius="md" fontSize="xs">
-            <Text>
-              <strong>Valid:</strong> {cacheInfo.isValid ? '✅ Yes' : '❌ No'}
-            </Text>
-            <Text>
-              <strong>Cached Rate:</strong> {cacheInfo.rate || 'N/A'}
-            </Text>
-            <Text>
-              <strong>Cached At:</strong>{' '}
-              {cacheInfo.timestamp
-                ? new Date(cacheInfo.timestamp).toLocaleString('ru-RU')
-                : 'N/A'}
-            </Text>
-            <Text>
-              <strong>Expires In:</strong>{' '}
-              {cacheInfo.expiresIn
-                ? `${Math.round(cacheInfo.expiresIn / 1000 / 60 / 60)} hours`
-                : 'N/A'}
-            </Text>
-          </Box>
-        </Box>
-
-        {/* Error */}
-        {error && (
-          <Box bg="red.50" p={3} borderRadius="md">
-            <Text fontSize="xs" color="red.700">
-              ❌ <strong>Error:</strong> {error}
-            </Text>
-          </Box>
-        )}
-
-        {/* Actions */}
-        <VStack spacing={2}>
-          <Button
-            size="sm"
-            colorScheme="purple"
-            w="full"
-            onClick={handleRefresh}
-            isLoading={loading}
-          >
-            🔄 Force Refresh from API
-          </Button>
-          <Button size="sm" variant="outline" colorScheme="red" w="full" onClick={handleClearCache}>
-            🗑️ Clear Cache
-          </Button>
         </VStack>
-
-        {/* Instructions */}
-        <Box bg="blue.50" p={3} borderRadius="md">
-          <Text fontSize="xs" color="blue.800">
-            <strong>💡 Tip:</strong> Open browser console (F12) to see detailed logs with{' '}
-            <Code fontSize="xs">[CurrencyService]</Code> prefix.
-          </Text>
-        </Box>
-
-        {/* How to Verify */}
-        <Box bg="green.50" p={3} borderRadius="md">
-          <Text fontSize="xs" color="green.800" fontWeight="600" mb={1}>
-            ✅ API Working if:
-          </Text>
-          <Text fontSize="xs" color="green.800">
-            • Rate is NOT 12800 (fallback)
-            <br />
-            • Cache info shows valid timestamp
-            <br />
-            • Console shows "Rate cached" log
-          </Text>
-        </Box>
-      </VStack>
+      </Collapse>
     </Box>
   );
 };
