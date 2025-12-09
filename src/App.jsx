@@ -38,9 +38,14 @@ import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import MyPage from './pages/MyPage';
 import HowToInstall from './pages/HowToInstall.jsx';
+import PublicOffer from './pages/legal/PublicOffer.jsx';
+import PrivacyPolicy from './pages/legal/PrivacyPolicy.jsx';
+import TermsOfService from './pages/legal/TermsOfService.jsx';
+import RefundPolicy from './pages/legal/RefundPolicy.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
+import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
 import logoColor from './assets/images/logo-color.svg';
 import logoWhite from './assets/images/logo-white.svg';
@@ -580,8 +585,10 @@ const Footer = () => {
           <GridItem>
             <VStack align="flex-start" spacing={3}>
               <Heading size="md" fontWeight="700" mb={2}>{t('footer.legal')}</Heading>
-              <Link href="#privacy" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('footer.privacy')}</Link>
-              <Link href="#terms" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">{t('footer.terms')}</Link>
+              <Link href="/legal/offer" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">Публичная оферта</Link>
+              <Link href="/legal/privacy" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">Политика конфиденциальности</Link>
+              <Link href="/legal/terms" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">Пользовательское соглашение</Link>
+              <Link href="/legal/refund" color="gray.400" _hover={{ color: 'white' }} fontWeight="500">Политика возврата</Link>
             </VStack>
           </GridItem>
         </Grid>
@@ -589,7 +596,7 @@ const Footer = () => {
         <Box pt={8} borderTop="1px solid" borderColor="whiteAlpha.200">
           <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align="center" gap={4}>
             <Text color="gray.400" fontSize="sm" fontWeight="500">
-              © 2025 OneSIM. {t('footer.copyright')}
+              © 2025 ONETECH PRO LLC. {t('footer.copyright')}
             </Text>
             <Text color="gray.500" fontSize="xs">
               {t('footer.madeWith')}
@@ -739,6 +746,10 @@ function AppContent() {
         <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/legal/offer" element={<PublicOffer />} />
+        <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+        <Route path="/legal/terms" element={<TermsOfService />} />
+        <Route path="/legal/refund" element={<RefundPolicy />} />
         <Route
           path="/mypage"
           element={
@@ -757,9 +768,11 @@ function App() {
   return (
     <Router>
       <LanguageProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <CurrencyProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </CurrencyProvider>
       </LanguageProvider>
     </Router>
   );

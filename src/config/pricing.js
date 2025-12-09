@@ -1,8 +1,9 @@
 // src/config/pricing.js
 
-// Pricing configuration with environment variable support
+// DEPRECATED: Static rate is no longer used. Exchange rate is now fetched dynamically from CBU API via currencyService.js
+// Keeping this for backwards compatibility and fallback purposes only
 export const PRICING_CONFIG = {
-  USD_TO_UZS_RATE: parseInt(process.env.REACT_APP_USD_TO_UZS_RATE) || 12000,
+  USD_TO_UZS_RATE: parseInt(process.env.REACT_APP_USD_TO_UZS_RATE) || 12000, // Fallback rate
   PROFIT_MARGIN: parseInt(process.env.REACT_APP_PROFIT_MARGIN) || 50, // percentage
 };
 
@@ -45,11 +46,27 @@ export const POPULAR_DESTINATIONS = [
 
 /**
  * Calculate final price with margin
+ * @deprecated Use useCurrency().convertToUZS() instead for dynamic rates
+ * This function now uses the static fallback rate and should only be used as fallback
  * @param {number} usdPrice - Price in USD (from API, already divided by 10000)
  * @returns {number} Final price in UZS with margin applied
  */
 export const calculateFinalPrice = (usdPrice) => {
   const uzsPrice = usdPrice * PRICING_CONFIG.USD_TO_UZS_RATE;
+  const margin = (uzsPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
+  return Math.round(uzsPrice + margin);
+};
+
+/**
+ * Calculate final price with margin using dynamic exchange rate
+ * @param {number} usdPrice - Price in USD (from API, already divided by 10000)
+ * @param {number} exchangeRate - Current exchange rate from CBU (already includes 1% markup)
+ * @returns {number} Final price in UZS with margin applied
+ */
+export const calculateFinalPriceWithRate = (usdPrice, exchangeRate) => {
+  // Exchange rate from CBU already includes 1% markup, so just convert
+  const uzsPrice = usdPrice * exchangeRate;
+  // Apply profit margin
   const margin = (uzsPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
   return Math.round(uzsPrice + margin);
 };

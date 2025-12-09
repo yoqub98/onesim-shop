@@ -19,6 +19,7 @@ import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
+import ConsentCheckbox from '../components/legal/ConsentCheckbox';
 
 const LoginPage = () => {
   const lang = DEFAULT_LANGUAGE;
@@ -129,6 +130,15 @@ const LoginPage = () => {
                 </HStack>
                 {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
               </FormControl>
+
+              {/* Consent Checkbox - Informational (does not block login) */}
+              <Box mt={4}>
+                <ConsentCheckbox
+                  isChecked={true}
+                  onChange={() => {}}
+                  variant="login"
+                />
+              </Box>
 
               <Button
                 type="submit"

@@ -19,6 +19,7 @@ import { Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
+import ConsentCheckbox from '../components/legal/ConsentCheckbox';
 // Note: Dialog and PinInput may need to be added as snippets
 // Run: npx @chakra-ui/cli snippet add dialog
 // Run: npx @chakra-ui/cli snippet add pin-input
@@ -35,6 +36,7 @@ const SignupPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -72,6 +74,8 @@ const SignupPage = () => {
     else if (password.length < 6) newErrors.password = t('auth.errors.passwordTooShort');
     
     if (password !== confirmPassword) newErrors.confirmPassword = t('auth.errors.passwordMismatch');
+
+    if (!agreedToTerms) newErrors.agreedToTerms = 'Вы должны согласиться с условиями';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -261,6 +265,16 @@ const SignupPage = () => {
                 {errors.confirmPassword && <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>}
               </FormControl>
 
+              {/* Consent Checkbox */}
+              <FormControl isInvalid={!!errors.agreedToTerms} mt={4}>
+                <ConsentCheckbox
+                  isChecked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  variant="signup"
+                />
+                {errors.agreedToTerms && <FormErrorMessage>{errors.agreedToTerms}</FormErrorMessage>}
+              </FormControl>
+
               <Button
                 type="submit"
                 w="full"
@@ -269,6 +283,7 @@ const SignupPage = () => {
                 color="white"
                 fontWeight="700"
                 isLoading={loading}
+                isDisabled={!agreedToTerms || loading}
                 _hover={{
                   transform: 'translateY(-2px)',
                   shadow: 'lg',
