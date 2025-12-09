@@ -12,7 +12,8 @@
       "Bash(npm run build:*)",
       "Bash(timeout 10 bash:*)",
       "Bash(mkdir:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:cbu.uz)"
     ],
     "deny": [],
     "ask": []

@@ -9,7 +9,16 @@
  * - Fallback rate: 12800 UZS/USD
  */
 
-const CBU_API_URL = 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD';
+// CBU API endpoint (requires date or returns last week's data)
+// Format: https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/YYYY-MM-DD/
+const CBU_API_BASE = 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD';
+
+// CORS Proxy options (temporary solution until backend proxy is implemented)
+const CORS_PROXIES = [
+  'https://api.allorigins.win/raw?url=', // Public CORS proxy
+  'https://corsproxy.io/?', // Alternative CORS proxy
+];
+
 const CACHE_KEY = 'cbu_exchange_rate';
 const CACHE_TIMESTAMP_KEY = 'cbu_exchange_rate_timestamp';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -57,53 +66,104 @@ const cacheRate = (rate) => {
 };
 
 /**
+ * Get today's date in YYYY-MM-DD format for CBU API
+ * @returns {string}
+ */
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/**
  * Fetch exchange rate from Central Bank of Uzbekistan API
+ * Uses CORS proxy to bypass browser CORS restrictions
  * @returns {Promise<number>}
  */
 const fetchExchangeRateFromCBU = async () => {
-  try {
-    console.log('[CurrencyService] Fetching exchange rate from CBU API...');
+  const todayDate = getTodayDate();
+  const cbuUrl = `${CBU_API_BASE}/${todayDate}/`;
 
-    const response = await fetch(CBU_API_URL, {
+  console.log('[CurrencyService] Fetching exchange rate from CBU API...');
+  console.log('[CurrencyService] CBU URL:', cbuUrl);
+
+  // Try direct fetch first (works in some environments)
+  try {
+    const directResponse = await fetch(cbuUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`CBU API returned status ${response.status}`);
+    if (directResponse.ok) {
+      const data = await directResponse.json();
+      return processApiResponse(data);
     }
-
-    const data = await response.json();
-
-    // CBU API returns an array with one object for USD
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid response format from CBU API');
-    }
-
-    const usdData = data[0];
-    const officialRate = parseFloat(usdData.Rate);
-
-    if (isNaN(officialRate) || officialRate <= 0) {
-      throw new Error('Invalid exchange rate received from CBU API');
-    }
-
-    console.log('[CurrencyService] Official CBU rate:', officialRate);
-
-    // Apply 1% markup
-    const finalRate = Math.round(officialRate * MARKUP_PERCENTAGE);
-    console.log('[CurrencyService] Final rate with 1% markup:', finalRate);
-
-    // Cache the rate
-    cacheRate(finalRate);
-
-    return finalRate;
   } catch (error) {
-    console.error('[CurrencyService] Error fetching from CBU API:', error.message);
-    console.log('[CurrencyService] Using fallback rate:', FALLBACK_RATE);
-    return FALLBACK_RATE;
+    console.log('[CurrencyService] Direct fetch failed (CORS issue), trying proxy...');
   }
+
+  // Try with CORS proxies
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    try {
+      const proxyUrl = CORS_PROXIES[i] + encodeURIComponent(cbuUrl);
+      console.log(`[CurrencyService] Trying proxy ${i + 1}/${CORS_PROXIES.length}...`);
+
+      const response = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Proxy returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+      return processApiResponse(data);
+    } catch (error) {
+      console.error(`[CurrencyService] Proxy ${i + 1} failed:`, error.message);
+      if (i === CORS_PROXIES.length - 1) {
+        throw error; // Last proxy failed, throw error
+      }
+    }
+  }
+
+  throw new Error('All proxies failed');
+};
+
+/**
+ * Process CBU API response and extract rate
+ * @param {Array|Object} data - Response from CBU API
+ * @returns {number}
+ */
+const processApiResponse = (data) => {
+  // CBU API returns an array with one object for USD
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error('Invalid response format from CBU API');
+  }
+
+  const usdData = data[0];
+  const officialRate = parseFloat(usdData.Rate);
+
+  if (isNaN(officialRate) || officialRate <= 0) {
+    throw new Error('Invalid exchange rate received from CBU API');
+  }
+
+  console.log('[CurrencyService] Official CBU rate:', officialRate);
+
+  // Apply 1% markup
+  const finalRate = Math.round(officialRate * MARKUP_PERCENTAGE);
+  console.log('[CurrencyService] Final rate with 1% markup:', finalRate);
+
+  // Cache the rate
+  cacheRate(finalRate);
+
+  return finalRate;
 };
 
 /**
@@ -121,7 +181,13 @@ export const getExchangeRate = async () => {
   }
 
   // Fetch from API
-  return await fetchExchangeRateFromCBU();
+  try {
+    return await fetchExchangeRateFromCBU();
+  } catch (error) {
+    console.error('[CurrencyService] All fetch attempts failed:', error.message);
+    console.log('[CurrencyService] Using fallback rate:', FALLBACK_RATE);
+    return FALLBACK_RATE;
+  }
 };
 
 /**
