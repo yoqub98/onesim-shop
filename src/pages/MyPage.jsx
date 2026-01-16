@@ -1,5 +1,5 @@
 // src/pages/MyPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -61,7 +61,7 @@ const MyPage = () => {
   const { isOpen: isCancelSuccessOpen, onOpen: onCancelSuccessOpen, onClose: onCancelSuccessClose } = useDisclosure();
 
   // Fetch user orders
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!user?.id) {
       console.log('⏭️ [FETCH-ORDERS] No user ID, skipping fetch');
       return;
@@ -97,11 +97,11 @@ const MyPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     fetchOrders();
-  }, [user?.id]);
+  }, [fetchOrders]);
 
   // AUTO-CHECK PENDING ORDERS - Poll every 10 seconds
   useEffect(() => {
@@ -147,7 +147,7 @@ const MyPage = () => {
       console.log('🛑 [AUTO-CHECK] Stopping auto-check interval');
       clearInterval(intervalId);
     };
-  }, [orders]); // Re-run when orders change
+  }, [orders, fetchOrders]); // Re-run when orders change
 
   // Handle QR code modal
   const handleViewQr = (order) => {

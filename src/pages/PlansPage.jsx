@@ -75,11 +75,7 @@ const PlansPage = () => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   // Load popular packages on mount (cached from landing page)
-  useEffect(() => {
-    loadPopularPackages();
-  }, []);
-
-  const loadPopularPackages = async () => {
+  const loadPopularPackages = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -109,7 +105,11 @@ const PlansPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    loadPopularPackages();
+  }, [loadPopularPackages]);
 
   // Fetch packages for selected country
   const fetchPackagesByCountry = async (countryCode) => {
