@@ -37,7 +37,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
       position="relative"
       cursor="pointer"
       bg="white"
-      borderRadius="24px"
+      borderRadius="3xl"
       overflow="visible"
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
       transform={isHovered ? 'translateY(-8px)' : 'translateY(0)'}
@@ -49,144 +49,160 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="340px"
-      width="340px"
+      minWidth="400px"
+      width="400px"
       flexShrink={0}
     >
-      <Box p={8}>
-        <VStack align="stretch" spacing={5} height="100%">
-          {/* Country Name and Flag */}
-          <HStack spacing={3} mb={2}>
-            <Heading
-              size="xl"
-              fontWeight="700"
-              color="#151618"
-              flex={1}
-            >
-              {plan.country}
-            </Heading>
-            <Box
-              borderRadius="12px"
-              overflow="hidden"
-              shadow="sm"
-              width="52px"
-              height="38px"
-              flexShrink={0}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              border="1px solid"
-              borderColor="#E8E9EE"
-              transition="all 0.3s"
-              transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
-            >
-              <CountryFlag
-                code={plan.countryCode}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-          </HStack>
+      <VStack align="stretch" spacing={8} p={8}>
+        {/* Country Name and Flag */}
+        <HStack justify="space-between" align="center">
+          <Heading
+            fontSize="4xl"
+            fontWeight="800"
+            color="#151618"
+            letterSpacing="tight"
+          >
+            {plan.country}
+          </Heading>
+          <Box
+            borderRadius="15px"
+            overflow="hidden"
+            width="80px"
+            height="60px"
+            flexShrink={0}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            border="1px solid"
+            borderColor="#E8E9EE"
+            transition="all 0.3s"
+            transform={isHovered ? 'scale(1.05)' : 'scale(1)'}
+          >
+            <CountryFlag
+              code={plan.countryCode}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+          </Box>
+        </HStack>
 
-          {/* Network Type and Duration Pills */}
-          <HStack spacing={3}>
-            <HStack
-              spacing={2}
-              px={4}
-              py={2}
-              borderRadius="full"
-              border="2px solid"
-              borderColor="#E8E9EE"
-              bg="white"
-            >
-              <SignalIcon className="w-4 h-4 text-[#FE4F18]" />
-              <Text fontSize="sm" fontWeight="700" color="#151618">
-                {plan.speed}
-              </Text>
-            </HStack>
-            <HStack
-              spacing={2}
-              px={4}
-              py={2}
-              borderRadius="full"
-              border="2px solid"
-              borderColor="#E8E9EE"
-              bg="white"
-            >
-              <CalendarIcon className="w-4 h-4 text-[#FE4F18]" />
-              <Text fontSize="sm" fontWeight="700" color="#151618">
-                {plan.days} {t('plans.card.days')}
-              </Text>
-            </HStack>
-          </HStack>
-
-          {/* Data Amount */}
-          <Box py={4}>
-            <Text
-              fontSize="sm"
-              color="#6B7280"
-              fontWeight="600"
-              mb={2}
-            >
-              Количество трафика
+        {/* Network Type and Duration Pills */}
+        <HStack spacing={4}>
+          <HStack
+            spacing={3}
+            px={5}
+            py={4}
+            borderRadius="16px"
+            border="1px solid"
+            borderColor="#E8E9EE"
+            bg="white"
+          >
+            <SignalIcon className="w-6 h-6 text-[#FE4F18]" />
+            <Text fontSize="xl" fontWeight="600" color="#151618">
+              {plan.speed}
             </Text>
-            <Heading
+          </HStack>
+          <HStack
+            spacing={3}
+            px={5}
+            py={4}
+            borderRadius="16px"
+            border="1px solid"
+            borderColor="#E8E9EE"
+            bg="white"
+          >
+            <CalendarIcon className="w-6 h-6 text-[#FE4F18]" />
+            <Text fontSize="xl" fontWeight="600" color="#151618">
+              {plan.days} {t('plans.card.days')}
+            </Text>
+          </HStack>
+        </HStack>
+
+        {/* Data Amount */}
+        <VStack align="flex-start" spacing={2}>
+          <Text
+            fontSize="lg"
+            color="#6B7280"
+            fontWeight="500"
+          >
+            {t('plans.card.dataLabel')}
+          </Text>
+          <HStack align="baseline" spacing={1}>
+            <Text
               fontSize="5xl"
               fontWeight="700"
-              color="#151618"
+              color="#374151"
               letterSpacing="tight"
             >
-              {plan.data}
-            </Heading>
-          </Box>
+              {plan.data.replace(/\s?(GB|ГБ)/i, '')}
+            </Text>
+            <Text
+              fontSize="3xl"
+              fontWeight="600"
+              color="#6B7280"
+            >
+              GB
+            </Text>
+          </HStack>
+        </VStack>
 
-          {/* Price Section */}
-          <Box mt="auto">
-            <HStack align="baseline" spacing={2} mb={1}>
-              <Text fontSize="xl" color="#6B7280" fontWeight="600">
+        {/* Pricing Section - Gray Box */}
+        <Box
+          bg="#F3F4F6"
+          borderRadius="28px"
+          p={5}
+        >
+          <HStack justify="space-between" align="center">
+            {/* Price Information */}
+            <VStack align="flex-start" spacing={0.5}>
+              <Text fontSize="2xl" fontWeight="600" color="#6B7280">
                 {plan.priceUSD}$
               </Text>
-            </HStack>
-            <HStack align="baseline" spacing={2} mb={4}>
-              <Heading
-                fontSize="3xl"
-                fontWeight="700"
-                color="#151618"
-                letterSpacing="tight"
-              >
-                {plan.price}
-              </Heading>
-              <Text fontSize="md" color="#6B7280" fontWeight="600">
-                {t('plans.card.currency')}
-              </Text>
-            </HStack>
+              <HStack align="baseline" spacing={1.5}>
+                <Text
+                  fontSize="3xl"
+                  fontWeight="800"
+                  color="#151618"
+                  letterSpacing="tight"
+                >
+                  {plan.price}
+                </Text>
+                <Text fontSize="xl" fontWeight="500" color="#6B7280">
+                  {t('plans.card.currency')}
+                </Text>
+              </HStack>
+            </VStack>
 
-            {/* Buy Button */}
+            {/* Buy Button - Outlined */}
             <Button
               size="lg"
-              width="full"
-              bg="#FE4F18"
-              color="white"
+              variant="outline"
+              borderColor="#FE4F18"
+              color="#FE4F18"
+              bg="rgba(255, 255, 255, 0.6)"
+              borderWidth="3px"
               _hover={{
-                bg: '#FF6B3D',
+                bg: 'rgba(255, 255, 255, 0.9)',
                 transform: 'translateY(-2px)',
                 shadow: '0 10px 30px rgba(254, 79, 24, 0.3)',
               }}
               transition="all 0.3s"
               borderRadius="full"
               fontWeight="700"
-              fontSize="md"
+              fontSize="xl"
+              px={10}
               py={6}
+              h="auto"
               onClick={handleBuyClick}
             >
               {t('plans.card.buy')}
             </Button>
-          </Box>
-        </VStack>
-      </Box>
+          </HStack>
+        </Box>
+      </VStack>
     </Box>
   );
 };
@@ -195,66 +211,76 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
 const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
     <Box
-      borderRadius="2xl"
+      borderRadius="3xl"
       overflow="hidden"
-      border="2px solid"
+      border="1px solid"
       borderColor="gray.100"
-      minWidth="340px"
-      width="340px"
+      bg="white"
+      minWidth="400px"
+      width="400px"
       flexShrink={0}
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
       }}
     >
-      <Box p={8}>
-        <VStack align="stretch" spacing={6}>
-          <Box>
-            <HStack spacing={4} mb={4}>
-              <Box
-                borderRadius="xl"
-                width="56px"
-                height="42px"
-                bg="gray.200"
-                flexShrink={0}
-                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-              />
-              <Box
-                width="140px"
-                height="28px"
-                bg="gray.200"
-                borderRadius="lg"
-                animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-              />
-            </HStack>
-            <Box
-              width="60px"
-              height="24px"
-              bg="gray.200"
-              borderRadius="full"
-              animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-            />
-          </Box>
+      <VStack align="stretch" spacing={8} p={8}>
+        <HStack justify="space-between">
           <Box
-            height="80px"
-            bg="gray.100"
-            borderRadius="xl"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-          />
-          <Box
-            height="60px"
-            bg="gray.100"
+            width="180px"
+            height="42px"
+            bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            height="80px"
-            bg="gray.100"
+            borderRadius="15px"
+            width="80px"
+            height="60px"
+            bg="gray.200"
+            flexShrink={0}
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+          />
+        </HStack>
+        <HStack spacing={4}>
+          <Box
+            width="130px"
+            height="56px"
+            bg="gray.200"
+            borderRadius="16px"
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+          />
+          <Box
+            width="160px"
+            height="56px"
+            bg="gray.200"
+            borderRadius="16px"
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+          />
+        </HStack>
+        <VStack align="flex-start" spacing={2}>
+          <Box
+            width="180px"
+            height="24px"
+            bg="gray.200"
+            borderRadius="lg"
+            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+          />
+          <Box
+            width="120px"
+            height="48px"
+            bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
-      </Box>
+        <Box
+          height="90px"
+          bg="gray.100"
+          borderRadius="28px"
+          animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+        />
+      </VStack>
     </Box>
   );
 };
@@ -281,8 +307,8 @@ const PlansSection = () => {
 
   const scroll = (direction, isAutoScroll = false) => {
     if (scrollContainerRef.current) {
-      // For manual clicks: scroll 2 cards (728px), for auto-scroll: scroll 1px
-      const scrollAmount = isAutoScroll ? 1 : 728; // 2 cards (364px * 2)
+      // For manual clicks: scroll 2 cards (832px = 400px * 2 + 32px gap), for auto-scroll: scroll 1px
+      const scrollAmount = isAutoScroll ? 1 : 832; // 2 cards (400px * 2 + 32px gap)
       const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
