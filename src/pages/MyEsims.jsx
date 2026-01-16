@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
   Heading,
   Text,
   VStack,
@@ -29,12 +28,11 @@ import {
 import CountryFlag from '../components/CountryFlag';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getCountryName, getTranslation } from '../config/i18n';
-import { 
-  getOrderStatusText, 
-  getOrderStatusColor, 
-  getEsimStatusText, 
-  getEsimStatusColor, 
-  checkOrderStatus, 
+import {
+  getOrderStatusText,
+  getOrderStatusColor,
+  getEsimStatusText,
+  getEsimStatusColor,
   queryEsimProfile,
   shouldShowUsage,
   canCancelEsim

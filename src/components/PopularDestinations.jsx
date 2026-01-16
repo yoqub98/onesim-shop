@@ -138,44 +138,6 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   );
 };
 
-// Loading Skeleton Component
-const DestinationCardSkeleton = ({ delay = 0 }) => {
-  return (
-    <Box
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor="gray.100"
-      minH="180px"
-      className="animate__animated animate__fadeIn"
-      style={{
-        animationDelay: `${delay}ms`,
-      }}
-    >
-      <Box p={8}>
-        <HStack spacing={4}>
-          <Box
-            borderRadius="xl"
-            width="64px"
-            height="48px"
-            bg="gray.200"
-            flexShrink={0}
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-          />
-          <Box
-            width="140px"
-            height="28px"
-            bg="gray.200"
-            borderRadius="lg"
-            animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-          />
-        </HStack>
-      </Box>
-    </Box>
-
-  );
-};
-
 // Main Popular Destinations Component
 const PopularDestinations = () => {
   const { currentLanguage } = useLanguage();

@@ -1,13 +1,11 @@
 // src/pages/MyProfile.jsx
 import {
   Box,
-  Container,
   Heading,
   Text,
   VStack,
   HStack,
   Grid,
-  Badge,
   Divider,
 } from '@chakra-ui/react';
 import {

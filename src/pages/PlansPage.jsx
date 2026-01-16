@@ -9,7 +9,6 @@ import {
   HStack,
   VStack,
   Select,
-  Input,
   InputGroup,
   InputLeftElement,
   NumberInput,
@@ -17,7 +16,6 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  Icon,
   Table,
   Thead,
   Tbody,
@@ -38,7 +36,7 @@ import {
   Stack,
   Divider,
 } from '@chakra-ui/react';
-import { Search, RotateCcw, Package, Globe, Calendar, ChevronDown, DollarSign } from 'lucide-react';
+import { Search, RotateCcw, Package, Globe, Calendar, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';

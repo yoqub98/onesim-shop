@@ -2,7 +2,6 @@
 // Custom flag component that handles EU multi-country flags and regular country flags
 import React from 'react';
 import Flag from 'react-world-flags';
-import { Box } from '@chakra-ui/react';
 
 // Custom EU Flag SVG Component
 const EUFlag = ({ style }) => (

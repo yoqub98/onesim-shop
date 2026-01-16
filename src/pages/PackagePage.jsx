@@ -46,7 +46,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
-import { getCountryName, getTranslation } from '../config/i18n';
+import { getCountryName } from '../config/i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { createOrder } from '../services/orderService';
@@ -54,13 +54,11 @@ import { createOrder } from '../services/orderService';
 const PackagePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { currentLanguage } = useLanguage();
-  const t = (key) => getTranslation(currentLanguage, key);
 
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderError, setOrderError] = useState(null);
-  const [orderSuccess, setOrderSuccess] = useState(null);
 
   // Modal controls
   const {
@@ -140,12 +138,8 @@ const PackagePage = () => {
         priceUsd: plan.priceUSD || 0,
       };
 
-      const result = await createOrder(orderData);
+      await createOrder(orderData);
 
-      setOrderSuccess({
-        orderNo: result.data.orderNo,
-        email: user.email,
-      });
       onSuccessModalOpen();
 
     } catch (error) {
