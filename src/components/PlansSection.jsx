@@ -1,5 +1,5 @@
 // src/components/PlansSection.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -9,9 +9,9 @@ import {
   Badge,
   HStack,
   VStack,
-  IconButton,
+  Grid,
 } from '@chakra-ui/react';
-import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, WifiIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, WifiIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from './CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
@@ -49,9 +49,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="350px"
-      width="350px"
-      flexShrink={0}
+      width="100%"
     >
       <VStack align="stretch" spacing={5} p={6}>
         {/* Country Name and Flag */}
@@ -229,9 +227,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       border="1px solid"
       borderColor="gray.100"
       bg="white"
-      minWidth="350px"
-      width="350px"
-      flexShrink={0}
+      width="100%"
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
@@ -304,73 +300,6 @@ const PlansSection = () => {
   const [plansData, setPlansData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const scrollContainerRef = useRef(null);
-  const autoScrollIntervalRef = useRef(null);
-
-  const checkScroll = () => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scroll = (direction, isAutoScroll = false) => {
-    if (scrollContainerRef.current) {
-      // For manual clicks: scroll 2 cards (724px = 350px * 2 + 24px gap), for auto-scroll: scroll 1px
-      const scrollAmount = isAutoScroll ? 1 : 724; // 2 cards (350px * 2 + 24px gap)
-      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      scrollContainerRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: isAutoScroll ? 'auto' : 'smooth'
-      });
-    }
-  };
-
-  // Auto-scroll functionality
-  useEffect(() => {
-    if (!loading && plansData.length > 0 && !isHovered) {
-      // Start auto-scrolling to the right slowly
-      autoScrollIntervalRef.current = setInterval(() => {
-        if (scrollContainerRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-
-          // If reached the end, scroll back to start
-          if (scrollLeft >= scrollWidth - clientWidth - 10) {
-            scrollContainerRef.current.scrollTo({
-              left: 0,
-              behavior: 'smooth'
-            });
-          } else {
-            // Scroll slowly to the right
-            scroll('right', true);
-          }
-        }
-      }, 30); // Scroll every 30ms for smooth animation
-
-      return () => {
-        if (autoScrollIntervalRef.current) {
-          clearInterval(autoScrollIntervalRef.current);
-        }
-      };
-    }
-  }, [loading, plansData, isHovered]);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      checkScroll();
-      container.addEventListener('scroll', checkScroll);
-      window.addEventListener('resize', checkScroll);
-      return () => {
-        container.removeEventListener('scroll', checkScroll);
-        window.removeEventListener('resize', checkScroll);
-      };
-    }
-  }, [plansData]);
 
   useEffect(() => {
     const loadHandpickedPackages = async () => {
@@ -501,108 +430,53 @@ const PlansSection = () => {
             </Box>
           )}
 
-          <Box position="relative" mt={12}>
-            {/* Navigation Arrows - Top Right */}
-            <HStack
-              position="absolute"
-              top="-60px"
-              right="0"
-              spacing={2}
-              zIndex={10}
-            >
-              {showLeftArrow && (
-                <IconButton
-                  onClick={() => scroll('left')}
-                  bg="white"
-                  shadow="lg"
-                  borderRadius="full"
-                  size="md"
-                  _hover={{
-                    bg: '#FFF4F0',
-                    transform: 'scale(1.1)',
-                  }}
-                  transition="all 0.3s"
-                  aria-label="Scroll left"
-                >
-                  <ChevronLeftIcon className="w-5 h-5 text-[#FE4F18]" />
-                </IconButton>
-              )}
-              {showRightArrow && (
-                <IconButton
-                  onClick={() => scroll('right')}
-                  bg="white"
-                  shadow="lg"
-                  borderRadius="full"
-                  size="md"
-                  _hover={{
-                    bg: '#FFF4F0',
-                    transform: 'scale(1.1)',
-                  }}
-                  transition="all 0.3s"
-                  aria-label="Scroll right"
-                >
-                  <ChevronRightIcon className="w-5 h-5 text-[#FE4F18]" />
-                </IconButton>
-              )}
-            </HStack>
-
-            {/* Scrollable Container */}
-            <Box
-              ref={scrollContainerRef}
-              overflowX="auto"
-              overflowY="hidden"
-              css={{
-                '&::-webkit-scrollbar': {
-                  display: 'none',
-                },
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
+          {/* Responsive Grid Container */}
+          <Box width="100%" mt={8}>
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)',
+                xl: 'repeat(4, 1fr)',
               }}
-              pb={4}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
+              gap={6}
+              className="animate__animated animate__fadeIn"
+              style={{ animationDelay: '200ms' }}
             >
-              <HStack
-                spacing={6}
-                align="stretch"
-                className="animate__animated animate__fadeIn"
-                style={{ animationDelay: '200ms' }}
-              >
-                {loading ? (
-                  <>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <PlanCardSkeleton key={i} delay={i * 100} />
-                    ))}
-                  </>
-                ) : plansData.length > 0 ? (
-                  plansData.map((plan, index) => (
-                    <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={currentLanguage} />
-                  ))
-                ) : (
-                  <Box w="100%" textAlign="center" py={16}>
-                    <VStack spacing={4}>
-                      <Box
-                        w="80px"
-                        h="80px"
-                        bg="gray.100"
-                        borderRadius="full"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <MapPinIcon className="w-10 h-10 text-gray-400" />
-                      </Box>
-                      <Heading size="lg" color="gray.700">
-                        {t('plans.empty')}
-                      </Heading>
-                      <Text fontSize="md" color="gray.500" fontWeight="500">
-                        {t('plans.emptyDescription')}
-                      </Text>
-                    </VStack>
-                  </Box>
-                )}
-              </HStack>
-            </Box>
+              {loading ? (
+                <>
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <PlanCardSkeleton key={i} delay={i * 100} />
+                  ))}
+                </>
+              ) : plansData.length > 0 ? (
+                plansData.map((plan, index) => (
+                  <PlanCard key={plan.id} plan={plan} delay={index * 100} lang={currentLanguage} />
+                ))
+              ) : (
+                <Box gridColumn="1 / -1" textAlign="center" py={16}>
+                  <VStack spacing={4}>
+                    <Box
+                      w="80px"
+                      h="80px"
+                      bg="gray.100"
+                      borderRadius="full"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <MapPinIcon className="w-10 h-10 text-gray-400" />
+                    </Box>
+                    <Heading size="lg" color="gray.700">
+                      {t('plans.empty')}
+                    </Heading>
+                    <Text fontSize="md" color="gray.500" fontWeight="500">
+                      {t('plans.emptyDescription')}
+                    </Text>
+                  </VStack>
+                </Box>
+              )}
+            </Grid>
           </Box>
         </VStack>
       </Container>

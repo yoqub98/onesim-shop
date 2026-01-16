@@ -484,9 +484,19 @@ const HeroSection = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
           <GridItem className="animate__animated animate__fadeInLeft">
             <VStack align="flex-start" spacing={8}>
-              <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', lg: '7xl' }} fontWeight="700" lineHeight="1.1" color="gray.900" letterSpacing="tight">
+              <Heading
+                as="h1"
+                fontSize={{ base: '5xl', md: '6xl', lg: '7xl' }}
+                fontWeight="800"
+                lineHeight="1.1"
+                color="gray.900"
+                letterSpacing="tight"
+                sx={{
+                  WebkitTextStroke: '0.5px #151618',
+                }}
+              >
                 {t('hero.title')}{' '}
-                <Box as="span" color="#FE4F18" display="inline">
+                <Box as="span" color="#FE4F18" display="inline" sx={{ WebkitTextStroke: '0.5px #FE4F18' }}>
                   OneSIM
                 </Box>
               </Heading>
@@ -497,19 +507,19 @@ const HeroSection = () => {
 
               <VStack align="flex-start" spacing={4} mt={2}>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                  <Box bg="#FEEADE" p={3} borderRadius="lg">
                     <Box as={GlobeAltIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.coverage')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                  <Box bg="#FEEADE" p={3} borderRadius="lg">
                     <Box as={BoltIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.activation')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                  <Box bg="#FEEADE" p={3} borderRadius="lg">
                     <Box as={ShieldCheckIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.secure')}</Text>
@@ -545,14 +555,15 @@ const HeroSection = () => {
               position="relative"
               overflow="visible"
             >
-              {/* Gray rectangle decoration behind the image */}
+              {/* Gradient rectangle decoration behind the image */}
               <Box
                 position="absolute"
                 top="30px"
                 left="30px"
                 width="100%"
                 height="100%"
-                bg="#E8E9EE"
+                bgGradient="linear(137deg, #FD916A 6.42%, #7D7571 57.11%, #727272 100%)"
+                opacity={0.2}
                 borderRadius="3xl"
                 zIndex={0}
               />
