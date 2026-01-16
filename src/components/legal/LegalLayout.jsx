@@ -149,56 +149,77 @@ const LegalLayout = ({ title, lastUpdated, tableOfContents = [], children }) => 
               {/* Document Content */}
               <Box
                 sx={{
+                  // Main section headings (h2)
                   'h2': {
-                    fontSize: { base: 'xl', md: '2xl' },
-                    fontWeight: '700',
+                    fontSize: { base: 'xl', md: '2xl', lg: '3xl' },
+                    fontWeight: '800',
                     color: 'gray.900',
-                    mt: 8,
-                    mb: 4,
+                    mt: 10,
+                    mb: 5,
+                    pb: 3,
+                    borderBottom: '2px solid',
+                    borderColor: 'purple.100',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
                   },
+                  // Sub-section headings (h3)
                   'h3': {
                     fontSize: { base: 'lg', md: 'xl' },
-                    fontWeight: '600',
-                    color: 'gray.800',
+                    fontWeight: '700',
+                    color: 'purple.700',
                     mt: 6,
                     mb: 3,
+                    letterSpacing: '0.3px',
                   },
+                  // Paragraph text
                   'p': {
-                    fontSize: 'md',
+                    fontSize: { base: 'sm', md: 'md' },
                     color: 'gray.700',
-                    lineHeight: '1.8',
+                    lineHeight: '1.9',
                     mb: 4,
+                    textAlign: 'justify',
                   },
+                  // Lists
                   'ul, ol': {
                     pl: 6,
                     mb: 4,
+                    mt: 2,
                   },
                   'li': {
-                    fontSize: 'md',
+                    fontSize: { base: 'sm', md: 'md' },
                     color: 'gray.700',
-                    lineHeight: '1.8',
+                    lineHeight: '1.9',
                     mb: 2,
+                    '&::marker': {
+                      color: 'purple.500',
+                    },
                   },
+                  // Bold text
                   'strong': {
-                    fontWeight: '600',
+                    fontWeight: '700',
                     color: 'gray.900',
                   },
+                  // Warning boxes
                   '.warning': {
                     bg: 'orange.50',
-                    border: '1px solid',
-                    borderColor: 'orange.200',
-                    borderRadius: 'md',
-                    p: 4,
-                    my: 4,
+                    border: '2px solid',
+                    borderColor: 'orange.300',
+                    borderRadius: 'lg',
+                    p: 5,
+                    my: 6,
+                    shadow: 'sm',
                   },
+                  // Important/critical boxes
                   '.important': {
                     bg: 'red.50',
-                    border: '1px solid',
-                    borderColor: 'red.200',
-                    borderRadius: 'md',
-                    p: 4,
-                    my: 4,
+                    border: '2px solid',
+                    borderColor: 'red.300',
+                    borderRadius: 'lg',
+                    p: 5,
+                    my: 6,
+                    shadow: 'sm',
                   },
+                  // Print styles
                   '@media print': {
                     'nav, aside': {
                       display: 'none',
