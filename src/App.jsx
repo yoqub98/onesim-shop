@@ -543,13 +543,26 @@ const HeroSection = () => {
             <Box
               position="relative"
               borderRadius="3xl"
-              overflow="hidden"
+              overflow="visible"
             >
+              {/* Orange rectangle decoration behind the image */}
+              <Box
+                position="absolute"
+                top="20px"
+                right="-20px"
+                width="90%"
+                height="90%"
+                bg="#FE4F18"
+                borderRadius="3xl"
+                zIndex={0}
+              />
               <Image
                 src="https://ik.imagekit.io/php1jcf0t/OneSim/banner-image.png"
                 alt="OneSIM Global Coverage"
                 borderRadius="3xl"
                 w="full"
+                position="relative"
+                zIndex={1}
               />
             </Box>
           </GridItem>
