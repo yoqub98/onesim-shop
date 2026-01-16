@@ -14,7 +14,7 @@ import {
   InputGroup,
   InputLeftElement,
 } from '@chakra-ui/react';
-import { ArrowRight, Search } from 'lucide-react';
+import { ArrowRightIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
@@ -43,10 +43,10 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
       borderRadius="2xl"
       overflow="hidden"
       border="2px solid"
-      borderColor={isHovered ? 'purple.200' : 'gray.100'}
+      borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
-      shadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
+      shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleExplore}
@@ -118,15 +118,15 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
           >
             <Button
               width="100%"
-              bg="purple.600"
+              bg="#FE4F18"
               color="white"
               _hover={{
-                bg: 'purple.700',
+                bg: '#FF6B3D',
               }}
               transition="all 0.3s"
               borderRadius="lg"
               fontWeight="700"
-              rightIcon={<ArrowRight size={18} />}
+              rightIcon={<ArrowRightIcon className="w-[18px] h-[18px]" />}
               onClick={handleExplore}
             >
               {t('destinations.explore')}
@@ -153,7 +153,7 @@ const PopularDestinations = () => {
   });
 
   return (
-    <Box as="section" py={24} bg="white" position="relative">
+    <Box as="section" py={24} bg="#F5F6F8" position="relative">
       {/* Background decoration */}
       <Box
         position="absolute"
@@ -161,7 +161,7 @@ const PopularDestinations = () => {
         right="-10%"
         width="500px"
         height="500px"
-        bg="purple.50"
+        bg="#FFF4F0"
         borderRadius="full"
         filter="blur(100px)"
         opacity="0.5"
@@ -173,7 +173,8 @@ const PopularDestinations = () => {
           {/* Section Header */}
           <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn" width="100%">
             <Badge
-              colorScheme="purple"
+              bg="#FFF4F0"
+              color="#FE4F18"
               fontSize="sm"
               fontWeight="700"
               px={5}
@@ -193,8 +194,7 @@ const PopularDestinations = () => {
               {t('destinations.title')}{' '}
               <Box
                 as="span"
-                background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                backgroundClip="text"
+                color="#FE4F18"
               >
                 {t('destinations.titleHighlight')}
               </Box>
@@ -212,13 +212,15 @@ const PopularDestinations = () => {
             <Box width="100%" display="flex" justifyContent="flex-start" mt={6}>
               {!isSearchExpanded ? (
                 <Button
-                  leftIcon={<Search size={18} />}
+                  leftIcon={<MagnifyingGlassIcon className="w-[18px] h-[18px]" />}
                   onClick={() => setIsSearchExpanded(true)}
                   variant="outline"
-                  colorScheme="purple"
+                  borderColor="#FE4F18"
+                  color="#FE4F18"
                   borderWidth="2px"
                   fontWeight="700"
                   size="md"
+                  _hover={{ bg: '#FFF4F0' }}
                   className="animate__animated animate__fadeIn"
                 >
                   {t('destinations.search')}
@@ -229,7 +231,7 @@ const PopularDestinations = () => {
                   className="animate__animated animate__fadeIn animate__faster"
                 >
                   <InputLeftElement pointerEvents="none">
-                    <Search size={18} color="#9333ea" />
+                    <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#FE4F18]" />
                   </InputLeftElement>
                   <Input
                     placeholder={t('destinations.searchPlaceholder')}
@@ -242,10 +244,10 @@ const PopularDestinations = () => {
                     }}
                     autoFocus
                     borderWidth="2px"
-                    borderColor="purple.200"
+                    borderColor="#E8E9EE"
                     _focus={{
-                      borderColor: 'purple.500',
-                      boxShadow: '0 0 0 1px #9333ea',
+                      borderColor: '#FE4F18',
+                      boxShadow: '0 0 0 1px #FE4F18',
                     }}
                     fontWeight="600"
                     size="md"

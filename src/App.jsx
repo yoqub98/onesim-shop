@@ -26,7 +26,17 @@ import {
   AccordionPanel,
   AccordionIcon,
 } from '@chakra-ui/react';
-import { ChevronRight, Menu as MenuIcon, X, Globe, Zap, Shield, ChevronDown, User, LogOut } from 'lucide-react';
+import {
+  ChevronRightIcon,
+  Bars3Icon,
+  XMarkIcon,
+  GlobeAltIcon,
+  BoltIcon,
+  ShieldCheckIcon,
+  ChevronDownIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon
+} from '@heroicons/react/24/outline';
 import Flag from 'react-world-flags';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
@@ -110,7 +120,7 @@ const Navigation = () => {
               fontSize="md"
               position="relative"
               _hover={{
-                color: 'purple.600',
+                color: '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -120,7 +130,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: 'purple.600',
+                bg: '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -133,7 +143,7 @@ const Navigation = () => {
               fontSize="md"
               position="relative"
               _hover={{
-                color: 'purple.600',
+                color: '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -143,7 +153,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: 'purple.600',
+                bg: '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -156,7 +166,7 @@ const Navigation = () => {
               fontSize="md"
               position="relative"
               _hover={{
-                color: 'purple.600',
+                color: '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -166,7 +176,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: 'purple.600',
+                bg: '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -179,7 +189,7 @@ const Navigation = () => {
               fontSize="md"
               position="relative"
               _hover={{
-                color: 'purple.600',
+                color: '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -189,7 +199,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: 'purple.600',
+                bg: '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -223,7 +233,7 @@ const Navigation = () => {
                   <Text fontSize="sm" fontWeight="600">
                     {currentLanguage === 'uz' ? 'UZ' : 'RU'}
                   </Text>
-                  <ChevronDown size={14} />
+                  <ChevronDownIcon className="w-3.5 h-3.5" />
                 </HStack>
               </MenuButton>
               <MenuList minW="120px">
@@ -275,7 +285,7 @@ const Navigation = () => {
                   fontWeight="600"
                   color="gray.700"
                   _hover={{ bg: 'gray.50' }}
-                  leftIcon={<User size={18} />}
+                  leftIcon={<UserIcon className="w-[18px] h-[18px]" />}
                 >
                   {t('nav.myPage')}
                 </Button>
@@ -298,11 +308,11 @@ const Navigation = () => {
                       <Text fontWeight="600" color="gray.700">
                         {profile.first_name} {profile.last_name}
                       </Text>
-                      <ChevronDown size={18} />
+                      <ChevronDownIcon className="w-[18px] h-[18px]" />
                     </HStack>
                   </MenuButton>
                   <MenuList>
-                    <MenuItem icon={<LogOut size={18} />} onClick={handleLogout} color="red.600">
+                    <MenuItem icon={<ArrowRightOnRectangleIcon className="w-[18px] h-[18px]" />} onClick={handleLogout} color="red.600">
                       {t('nav.logout')}
                     </MenuItem>
                   </MenuList>
@@ -315,11 +325,13 @@ const Navigation = () => {
                   href="/signup"
                   size="md"
                   variant="outline"
-                  colorScheme="purple"
+                  borderColor="#FE4F18"
+                  color="#FE4F18"
                   fontWeight="700"
                   borderWidth="2px"
+                  borderRadius="full"
                   _hover={{
-                    bg: 'purple.50',
+                    bg: '#FFF4F0',
                   }}
                 >
                   Регистрация
@@ -328,12 +340,14 @@ const Navigation = () => {
                   as="a"
                   href="/login"
                   size="md"
-                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  bg="#FE4F18"
                   color="white"
                   fontWeight="700"
+                  borderRadius="full"
                   _hover={{
+                    bg: '#FF6B3D',
                     transform: 'translateY(-2px)',
-                    shadow: 'lg',
+                    shadow: '0 10px 30px rgba(254, 79, 24, 0.3)',
                   }}
                 >
                   {t('nav.login')}
@@ -350,7 +364,7 @@ const Navigation = () => {
             color="gray.700"
             _hover={{ bg: 'gray.100' }}
           >
-            {mobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
+            {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </IconButton>
         </Flex>
 
@@ -452,7 +466,7 @@ const HeroSection = () => {
     <Box
       as="section"
       id="home"
-      background="linear-gradient(180deg, #fafafa 0%, #ffffff 100%)"
+      bg="#F5F6F8"
       pt={0}
       pb={{ base: 20, md: 28 }}
       minH="calc(100vh - 80px)"
@@ -461,8 +475,8 @@ const HeroSection = () => {
       position="relative"
       overflow="hidden"
     >
-      <Box position="absolute" top="-50%" right="-20%" width="600px" height="600px" bg="purple.50" borderRadius="full" filter="blur(100px)" opacity="0.5" pointerEvents="none" />
-      <Box position="absolute" bottom="-30%" left="-10%" width="500px" height="500px" bg="blue.50" borderRadius="full" filter="blur(100px)" opacity="0.4" pointerEvents="none" />
+      <Box position="absolute" top="-50%" right="-20%" width="600px" height="600px" bg="#FFF4F0" borderRadius="full" filter="blur(100px)" opacity="0.5" pointerEvents="none" />
+      <Box position="absolute" bottom="-30%" left="-10%" width="500px" height="500px" bg="#E8E9EE" borderRadius="full" filter="blur(100px)" opacity="0.4" pointerEvents="none" />
 
       <Container maxW="8xl" position="relative">
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
@@ -470,7 +484,7 @@ const HeroSection = () => {
             <VStack align="flex-start" spacing={8}>
               <Heading as="h1" fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="700" lineHeight="1.1" color="gray.900" letterSpacing="tight">
                 {t('hero.title')}{' '}
-                <Box as="span" background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" backgroundClip="text" display="inline">
+                <Box as="span" color="#FE4F18" display="inline">
                   OneSIM
                 </Box>
               </Heading>
@@ -481,20 +495,20 @@ const HeroSection = () => {
 
               <VStack align="flex-start" spacing={4} mt={2}>
                 <HStack spacing={3}>
-                  <Box bg="purple.100" p={2} borderRadius="lg">
-                    <Globe size={20} color="#7c3aed" />
+                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
+                    <GlobeAltIcon className="w-5 h-5 text-[#FE4F18]" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.coverage')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="purple.100" p={2} borderRadius="lg">
-                    <Zap size={20} color="#7c3aed" />
+                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
+                    <BoltIcon className="w-5 h-5 text-[#FE4F18]" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.activation')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="purple.100" p={2} borderRadius="lg">
-                    <Shield size={20} color="#7c3aed" />
+                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
+                    <ShieldCheckIcon className="w-5 h-5 text-[#FE4F18]" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.secure')}</Text>
                 </HStack>
@@ -502,47 +516,52 @@ const HeroSection = () => {
 
               <Button
                 size="lg"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                bg="#151618"
                 color="white"
                 px={10}
                 py={7}
                 fontSize="lg"
                 fontWeight="700"
-                borderRadius="xl"
+                borderRadius="full"
                 _hover={{
+                  bg: '#2D2F33',
                   transform: 'translateY(-3px)',
-                  shadow: '0 20px 40px rgba(102, 126, 234, 0.4)',
+                  shadow: '0 20px 40px rgba(21, 22, 24, 0.4)',
                 }}
                 _active={{ transform: 'translateY(-1px)' }}
                 transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                shadow="0 10px 30px rgba(102, 126, 234, 0.3)"
+                shadow="0 10px 30px rgba(21, 22, 24, 0.3)"
               >
                 {t('hero.cta')}
-                <ChevronRight size={22} style={{ marginLeft: '8px' }} />
+                <ChevronRightIcon className="w-5 h-5 ml-2" />
               </Button>
             </VStack>
           </GridItem>
 
           <GridItem className="animate__animated animate__fadeInRight">
-            <Box position="relative" _before={{
-              content: '""',
-              position: 'absolute',
-              top: '10%',
-              left: '10%',
-              right: '-10%',
-              bottom: '-10%',
-              bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: '3xl',
-              opacity: 0.1,
-              zIndex: 0,
-            }}>
+            <Box
+              position="relative"
+              borderRadius="3xl"
+              overflow="hidden"
+              _before={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(137deg, rgba(253, 145, 106, 0.22) 6.42%, rgba(125, 117, 113, 0.22) 75.63%, rgba(114, 114, 114, 0.22) 100%)',
+                zIndex: 1,
+                pointerEvents: 'none',
+              }}
+            >
               <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/Gemini_Generated_Image_lvrtw5lvrtw5lvrt%20(1).png?updatedAt=1762971827953"
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-hero-1.png"
                 alt="OneSIM Global Coverage"
                 borderRadius="3xl"
                 w="full"
                 position="relative"
-                zIndex={1}
+                zIndex={0}
               />
             </Box>
           </GridItem>
@@ -558,7 +577,7 @@ const Footer = () => {
   const t = (key) => getTranslation(currentLanguage, key);
 
   return (
-    <Box as="footer" background="linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)" color="white" py={16} mt={20} id="contacts">
+    <Box as="footer" bg="#151618" color="white" py={16} mt={20} id="contacts">
       <Container maxW="8xl">
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={12} mb={12}>
           <GridItem>
@@ -643,7 +662,7 @@ const FAQSection = () => {
   ];
 
   return (
-    <Box as="section" py={{ base: 16, md: 24 }} bg="white">
+    <Box as="section" py={{ base: 16, md: 24 }} bg="#F5F6F8">
       <Container maxW="5xl">
         <VStack spacing={12}>
           {/* Header */}
@@ -657,8 +676,7 @@ const FAQSection = () => {
               {t('faq.title')}{' '}
               <Box
                 as="span"
-                background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                backgroundClip="text"
+                color="#FE4F18"
               >
                 {t('faq.titleHighlight')}
               </Box>
@@ -694,17 +712,17 @@ const FAQSection = () => {
                   py={6}
                   px={8}
                   borderRadius="xl"
-                  _hover={{ bg: 'purple.50' }}
-                  _expanded={{ bg: 'purple.50', borderBottomRadius: 0 }}
+                  _hover={{ bg: '#FFF4F0' }}
+                  _expanded={{ bg: '#FFF4F0', borderBottomRadius: 0 }}
                 >
                   <Box flex="1" textAlign="left">
                     <Text fontSize="lg" fontWeight="700" color="gray.800">
                       {item.question}
                     </Text>
                   </Box>
-                  <AccordionIcon fontSize="24px" color="purple.600" />
+                  <AccordionIcon fontSize="24px" color="#FE4F18" />
                 </AccordionButton>
-                <AccordionPanel px={8} py={6} bg="purple.50" borderBottomRadius="xl">
+                <AccordionPanel px={8} py={6} bg="#FFF4F0" borderBottomRadius="xl">
                   <Text fontSize="md" color="gray.700" lineHeight="1.8">
                     {item.answer}
                   </Text>
@@ -733,9 +751,9 @@ const HomePage = () => {
 // Main App Component
 function AppContent() {
   return (
-    <Box fontFamily="'Inter Tight', sans-serif">
+    <Box fontFamily="'Manrope', sans-serif">
       <style>
-        {`@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap');`}
+        {`@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');`}
       </style>
 
       {/* TEMPORARY: Currency Debug Panel - Remove after testing */}

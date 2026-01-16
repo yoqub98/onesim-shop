@@ -11,7 +11,7 @@ import {
   VStack,
   IconButton,
 } from '@chakra-ui/react';
-import { Calendar, Wifi, MapPin, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, SignalIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from './CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
@@ -37,13 +37,11 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
       position="relative"
       cursor="pointer"
       bg="white"
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor={isHovered ? 'purple.200' : 'gray.100'}
+      borderRadius="24px"
+      overflow="visible"
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-      transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
-      shadow={isHovered ? '0 25px 50px rgba(102, 126, 234, 0.25)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
+      transform={isHovered ? 'translateY(-8px)' : 'translateY(0)'}
+      shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.06)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       opacity={isVisible ? 1 : 0}
@@ -55,163 +53,137 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
       width="340px"
       flexShrink={0}
     >
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        height="6px"
-        background="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
-        opacity={isHovered ? 1 : 0}
-        transition="opacity 0.3s"
-      />
-
       <Box p={8}>
-        <VStack align="stretch" spacing={6} height="100%">
-          <Box>
-            <HStack spacing={3} mb={4} flexWrap="nowrap">
-              <Box
-                borderRadius="xl"
-                overflow="hidden"
-                shadow="md"
-                width="56px"
-                height="42px"
-                flexShrink={0}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                border="2px solid"
-                borderColor="gray.100"
-                transition="all 0.3s"
-                transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
-              >
-                <CountryFlag
-                  code={plan.countryCode}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </Box>
-              <HStack spacing={2} overflow="hidden" flexGrow={1}>
-                <MapPin size={16} color="#9333ea" flexShrink={0} />
-                <Heading 
-                  size="xl" 
-                  fontWeight="700" 
-                  color="gray.900"
-                  whiteSpace="nowrap"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
-                >
-                  {plan.country}
-                </Heading>
-              </HStack>
-            </HStack>
-
-            <Badge
-              colorScheme="purple"
-              fontSize="xs"
+        <VStack align="stretch" spacing={5} height="100%">
+          {/* Country Name and Flag */}
+          <HStack spacing={3} mb={2}>
+            <Heading
+              size="xl"
               fontWeight="700"
-              px={3}
-              py={1.5}
-              borderRadius="full"
-              textTransform="uppercase"
-              display="inline-flex"
-              alignItems="center"
-              gap={1.5}
+              color="#151618"
+              flex={1}
             >
-              <Wifi size={12} />
-              {plan.speed}
-            </Badge>
-          </Box>
+              {plan.country}
+            </Heading>
+            <Box
+              borderRadius="12px"
+              overflow="hidden"
+              shadow="sm"
+              width="52px"
+              height="38px"
+              flexShrink={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              border="1px solid"
+              borderColor="#E8E9EE"
+              transition="all 0.3s"
+              transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
+            >
+              <CountryFlag
+                code={plan.countryCode}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+            </Box>
+          </HStack>
 
-          <Box
-            bg="purple.50"
-            p={4}
-            borderRadius="xl"
-            border="1px solid"
-            borderColor="purple.100"
-          >
-            <Text 
-              fontSize="3xl" 
-              fontWeight="700" 
-              color="purple.700"
-              textAlign="center"
+          {/* Network Type and Duration Pills */}
+          <HStack spacing={3}>
+            <HStack
+              spacing={2}
+              px={4}
+              py={2}
+              borderRadius="full"
+              border="2px solid"
+              borderColor="#E8E9EE"
+              bg="white"
+            >
+              <SignalIcon className="w-4 h-4 text-[#FE4F18]" />
+              <Text fontSize="sm" fontWeight="700" color="#151618">
+                {plan.speed}
+              </Text>
+            </HStack>
+            <HStack
+              spacing={2}
+              px={4}
+              py={2}
+              borderRadius="full"
+              border="2px solid"
+              borderColor="#E8E9EE"
+              bg="white"
+            >
+              <CalendarIcon className="w-4 h-4 text-[#FE4F18]" />
+              <Text fontSize="sm" fontWeight="700" color="#151618">
+                {plan.days} {t('plans.card.days')}
+              </Text>
+            </HStack>
+          </HStack>
+
+          {/* Data Amount */}
+          <Box py={4}>
+            <Text
+              fontSize="sm"
+              color="#6B7280"
+              fontWeight="600"
+              mb={2}
+            >
+              Количество трафика
+            </Text>
+            <Heading
+              fontSize="5xl"
+              fontWeight="700"
+              color="#151618"
               letterSpacing="tight"
             >
               {plan.data}
-            </Text>
-            <Text 
-              fontSize="xs" 
-              color="purple.600" 
-              textAlign="center"
-              fontWeight="600"
-              mt={1}
-            >
-              {t('plans.card.internet')}
-            </Text>
+            </Heading>
           </Box>
 
-          <HStack
-            spacing={3}
-            color="gray.600"
-            p={3}
-            bg="gray.50"
-            borderRadius="lg"
-            justify="center"
-          >
-            <Calendar size={20} color="#9333ea" />
-            <Text fontSize="lg" fontWeight="700" color="gray.900">
-              {plan.days} {t('plans.card.days')}
-            </Text>
-          </HStack>
-
-          <Box
-            mt="auto"
-            pt={4}
-            borderTop="2px dashed"
-            borderColor="gray.200"
-          >
-            <VStack align="stretch" spacing={3}>
-              <VStack align="flex-start" spacing={0.5}>
-                <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  {t('plans.card.price')}
-                </Text>
-                <HStack spacing={1.5} align="baseline" flexWrap="nowrap">
-                  <Heading
-                    fontSize="17px"
-                    fontWeight="700"
-                    color="gray.800"
-                    letterSpacing="tight"
-                    whiteSpace="nowrap"
-                  >
-                    {plan.price}
-                  </Heading>
-                  <Text fontSize="md" color="gray.600" fontWeight="600" fontsize="14px" whiteSpace="nowrap">
-                    {t('plans.card.currency')}
-                  </Text>
-                </HStack>
-              </VStack>
-
-              <Button
-                size="md"
-                width="full"
-                bg={isHovered ? 'purple.600' : 'gray.100'}
-                color={isHovered ? 'white' : 'gray.700'}
-                _hover={{
-                  bg: 'purple.700',
-                  color: 'white',
-                }}
-                transition="all 0.3s"
-                borderRadius="lg"
+          {/* Price Section */}
+          <Box mt="auto">
+            <HStack align="baseline" spacing={2} mb={1}>
+              <Text fontSize="xl" color="#6B7280" fontWeight="600">
+                {plan.priceUSD}$
+              </Text>
+            </HStack>
+            <HStack align="baseline" spacing={2} mb={4}>
+              <Heading
+                fontSize="3xl"
                 fontWeight="700"
-                rightIcon={<ArrowRight size={16} />}
-                onClick={handleBuyClick}
+                color="#151618"
+                letterSpacing="tight"
               >
-                {t('plans.card.buy')}
-              </Button>
-            </VStack>
+                {plan.price}
+              </Heading>
+              <Text fontSize="md" color="#6B7280" fontWeight="600">
+                {t('plans.card.currency')}
+              </Text>
+            </HStack>
+
+            {/* Buy Button */}
+            <Button
+              size="lg"
+              width="full"
+              bg="#FE4F18"
+              color="white"
+              _hover={{
+                bg: '#FF6B3D',
+                transform: 'translateY(-2px)',
+                shadow: '0 10px 30px rgba(254, 79, 24, 0.3)',
+              }}
+              transition="all 0.3s"
+              borderRadius="full"
+              fontWeight="700"
+              fontSize="md"
+              py={6}
+              onClick={handleBuyClick}
+            >
+              {t('plans.card.buy')}
+            </Button>
           </Box>
         </VStack>
       </Box>
@@ -378,15 +350,16 @@ const PlansSection = () => {
         const transformedPackages = packages.map(pkg => {
           const finalPriceUZS = calculateFinalPrice(pkg.priceUSD);
           const formattedPrice = formatPrice(finalPriceUZS);
-          
+
           console.log(`💵 ${pkg.country}:`, {
             priceUSD: pkg.priceUSD,
             finalPriceUZS: finalPriceUZS,
             formattedPrice: formattedPrice,
           });
-          
+
           return {
             ...pkg,
+            priceUSD: pkg.priceUSD,
             price: formattedPrice,
           };
         });
@@ -408,14 +381,14 @@ const PlansSection = () => {
   const t = (key) => getTranslation(currentLanguage, key);
 
   return (
-    <Box as="section" py={24} bg="gray.50" id="plans" position="relative" overflow="hidden">
+    <Box as="section" py={24} bg="#E8E9EE" id="plans" position="relative" overflow="hidden">
       <Box
         position="absolute"
         top="10%"
         left="-10%"
         width="500px"
         height="500px"
-        bg="purple.50"
+        bg="#FFF4F0"
         borderRadius="full"
         filter="blur(100px)"
         opacity="0.5"
@@ -427,7 +400,7 @@ const PlansSection = () => {
         right="-10%"
         width="500px"
         height="500px"
-        bg="blue.50"
+        bg="#FFF4F0"
         borderRadius="full"
         filter="blur(100px)"
         opacity="0.4"
@@ -438,7 +411,8 @@ const PlansSection = () => {
         <VStack spacing={16}>
           <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn">
             <Badge
-              colorScheme="purple"
+              bg="#FFF4F0"
+              color="#FE4F18"
               fontSize="sm"
               fontWeight="700"
               px={5}
@@ -458,8 +432,7 @@ const PlansSection = () => {
               {t('plans.title')}{' '}
               <Box
                 as="span"
-                background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                backgroundClip="text"
+                color="#FE4F18"
               >
                 {t('plans.titleHighlight')}
               </Box>
@@ -506,13 +479,13 @@ const PlansSection = () => {
                   borderRadius="full"
                   size="md"
                   _hover={{
-                    bg: 'purple.50',
+                    bg: '#FFF4F0',
                     transform: 'scale(1.1)',
                   }}
                   transition="all 0.3s"
                   aria-label="Scroll left"
                 >
-                  <ChevronLeft size={20} color="#7c3aed" />
+                  <ChevronLeftIcon className="w-5 h-5 text-[#FE4F18]" />
                 </IconButton>
               )}
               {showRightArrow && (
@@ -523,13 +496,13 @@ const PlansSection = () => {
                   borderRadius="full"
                   size="md"
                   _hover={{
-                    bg: 'purple.50',
+                    bg: '#FFF4F0',
                     transform: 'scale(1.1)',
                   }}
                   transition="all 0.3s"
                   aria-label="Scroll right"
                 >
-                  <ChevronRight size={20} color="#7c3aed" />
+                  <ChevronRightIcon className="w-5 h-5 text-[#FE4F18]" />
                 </IconButton>
               )}
             </HStack>
@@ -578,7 +551,7 @@ const PlansSection = () => {
                         alignItems="center"
                         justifyContent="center"
                       >
-                        <MapPin size={40} color="#9ca3af" />
+                        <MapPinIcon className="w-10 h-10 text-gray-400" />
                       </Box>
                       <Heading size="lg" color="gray.700">
                         {t('plans.empty')}
