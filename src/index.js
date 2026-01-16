@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { ChakraProvider } from '@chakra-ui/react';
 import chakraTheme from './config/chakraTheme';
 import App from './App.jsx';
+import './index.css';
 
 import 'animate.css';
 

@@ -8,12 +8,22 @@
   box-sizing: border-box;
 }
 
+/* Force Manrope font on ALL elements */
+html, body, * {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
 body {
   margin: 0;
-  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #151618;
+}
+
+/* Override Chakra UI heading fonts */
+h1, h2, h3, h4, h5, h6,
+.chakra-heading {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 html {

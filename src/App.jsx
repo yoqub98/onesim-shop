@@ -57,8 +57,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
-// Logo will be loaded from public folder
+// Logo imports
 import logoWhite from './assets/images/logo-white.svg';
+import logoColored from './assets/new-logo.svg';
 import CurrencyDebug from './components/CurrencyDebug';
 
 // Navigation Component
@@ -103,9 +104,9 @@ const Navigation = () => {
         <Flex h="80px" alignItems="center" justifyContent="space-between">
           <Link href="/" textDecoration="none">
             <Image
-              src="/logo-colored.svg"
+              src={logoColored}
               alt="OneSIM"
-              h="40px"
+              h="32px"
               cursor="pointer"
               transition="all 0.3s"
               _hover={{ transform: 'scale(1.05)' }}
@@ -542,17 +543,16 @@ const HeroSection = () => {
           <GridItem className="animate__animated animate__fadeInRight">
             <Box
               position="relative"
-              borderRadius="3xl"
               overflow="visible"
             >
-              {/* Orange rectangle decoration behind the image */}
+              {/* Gray rectangle decoration behind the image */}
               <Box
                 position="absolute"
-                top="20px"
-                right="-20px"
-                width="90%"
-                height="90%"
-                bg="#FE4F18"
+                top="30px"
+                left="30px"
+                width="100%"
+                height="100%"
+                bg="#E8E9EE"
                 borderRadius="3xl"
                 zIndex={0}
               />
