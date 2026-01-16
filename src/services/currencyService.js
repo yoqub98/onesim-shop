@@ -301,10 +301,12 @@ export const getCacheInfo = () => {
   };
 };
 
-export default {
+const currencyService = {
   getExchangeRate,
   convertUSDToUZS,
   formatUZS,
   refreshExchangeRate,
   getCacheInfo,
 };
+
+export default currencyService;
