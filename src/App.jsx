@@ -482,7 +482,7 @@ const HeroSection = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
           <GridItem className="animate__animated animate__fadeInLeft">
             <VStack align="flex-start" spacing={8}>
-              <Heading as="h1" fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="700" lineHeight="1.1" color="gray.900" letterSpacing="tight">
+              <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', lg: '7xl' }} fontWeight="700" lineHeight="1.1" color="gray.900" letterSpacing="tight">
                 {t('hero.title')}{' '}
                 <Box as="span" color="#FE4F18" display="inline">
                   OneSIM
@@ -705,8 +705,8 @@ const FAQSection = () => {
                 mb={4}
                 borderRadius="xl"
                 shadow="sm"
-                _hover={{ shadow: 'md' }}
-                transition="all 0.3s"
+                _hover={{ shadow: '0 20px 40px rgba(0, 0, 0, 0.08)' }}
+                transition="all 0.3s ease-in-out"
               >
                 <AccordionButton
                   py={6}

@@ -104,8 +104,12 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
             border="1px solid"
             borderColor="#E8E9EE"
             bg="white"
+            align="center"
           >
             <Box as={WifiIcon} w="20px" h="20px" color="#FE4F18" />
+            <Text fontSize="sm" fontWeight="600" color="#151618" whiteSpace="nowrap">
+              {plan.speed}
+            </Text>
           </HStack>
           <HStack
             spacing={2}
@@ -115,6 +119,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
             border="1px solid"
             borderColor="#E8E9EE"
             bg="white"
+            align="center"
           >
             <Box as={CalendarIcon} w="20px" h="20px" color="#FE4F18" />
             <Text fontSize="sm" fontWeight="600" color="#151618" whiteSpace="nowrap">
@@ -191,16 +196,17 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
               bg="rgba(255, 255, 255, 0.6)"
               borderWidth="2px"
               _hover={{
-                bg: 'rgba(255, 255, 255, 0.9)',
+                bg: '#FE4F18',
+                color: 'white',
                 transform: 'translateY(-2px)',
-                shadow: '0 10px 30px rgba(254, 79, 24, 0.3)',
+                shadow: '0 10px 30px rgba(254, 79, 24, 0.4)',
               }}
-              transition="all 0.3s"
+              transition="all 0.3s ease-in-out"
               borderRadius="full"
               fontWeight="700"
               fontSize="md"
               px={8}
-              py={5}
+              py={4}
               h="auto"
               onClick={handleBuyClick}
               whiteSpace="nowrap"
