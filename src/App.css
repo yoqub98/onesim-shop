@@ -42,7 +42,7 @@ body {
 
 .nav-logo {
   font-size: 1.875rem;
-  font-weight: 800;
+  font-weight: 700;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -149,7 +149,7 @@ body {
 
 .hero-title {
   font-size: 3.75rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
   margin-bottom: 1.5rem;
   background: linear-gradient(135deg, #111827 0%, #374151 100%);
@@ -217,7 +217,7 @@ body {
 .section-title {
   text-align: center;
   font-size: 3rem;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 3rem;
   background: linear-gradient(135deg, #111827 0%, #374151 100%);
   -webkit-background-clip: text;
@@ -350,7 +350,7 @@ body {
 
 .card-price {
   font-size: 2.25rem;
-  font-weight: 800;
+  font-weight: 700;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

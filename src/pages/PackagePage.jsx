@@ -212,7 +212,7 @@ const PackagePage = () => {
                     </Box>
                     <VStack align="flex-start" spacing={0}>
                       <Text fontSize="xs" color="purple.600" fontWeight="600">Объем данных</Text>
-                      <Text fontSize="xl" fontWeight="800" color="purple.700">{plan.data}</Text>
+                      <Text fontSize="xl" fontWeight="700" color="purple.700">{plan.data}</Text>
                     </VStack>
                   </HStack>
                 </Box>
@@ -225,7 +225,7 @@ const PackagePage = () => {
                     </Box>
                     <VStack align="flex-start" spacing={0}>
                       <Text fontSize="xs" color="blue.600" fontWeight="600">Срок действия</Text>
-                      <Text fontSize="xl" fontWeight="800" color="blue.700">{plan.days} дней</Text>
+                      <Text fontSize="xl" fontWeight="700" color="blue.700">{plan.days} дней</Text>
                     </VStack>
                   </HStack>
                 </Box>
@@ -238,7 +238,7 @@ const PackagePage = () => {
                     </Box>
                     <VStack align="flex-start" spacing={0}>
                       <Text fontSize="xs" color="green.600" fontWeight="600">Тип сети</Text>
-                      <Text fontSize="xl" fontWeight="800" color="green.700">{plan.speed || networkType}</Text>
+                      <Text fontSize="xl" fontWeight="700" color="green.700">{plan.speed || networkType}</Text>
                     </VStack>
                   </HStack>
                 </Box>
@@ -251,7 +251,7 @@ const PackagePage = () => {
                     </Box>
                     <VStack align="flex-start" spacing={0}>
                       <Text fontSize="xs" color="orange.600" fontWeight="600">Тип пакета</Text>
-                      <Text fontSize="lg" fontWeight="800" color="orange.700">{packageType}</Text>
+                      <Text fontSize="lg" fontWeight="700" color="orange.700">{packageType}</Text>
                     </VStack>
                   </HStack>
                 </Box>
@@ -353,7 +353,7 @@ const PackagePage = () => {
                     Стоимость пакета
                   </Text>
                   <HStack justify="center" spacing={2}>
-                    <Heading fontSize="4xl" fontWeight="800" color="gray.800">
+                    <Heading fontSize="4xl" fontWeight="700" color="gray.800">
                       {plan.price}
                     </Heading>
                     <Text fontSize="xl" color="gray.600" fontWeight="700">

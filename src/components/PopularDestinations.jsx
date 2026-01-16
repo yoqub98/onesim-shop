@@ -99,7 +99,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
             </Box>
             <Heading
               size="lg"
-              fontWeight="800"
+              fontWeight="700"
               color="gray.900"
               whiteSpace="nowrap"
               overflow="hidden"
@@ -175,7 +175,7 @@ const PopularDestinations = () => {
             <Badge
               colorScheme="purple"
               fontSize="sm"
-              fontWeight="800"
+              fontWeight="700"
               px={5}
               py={2}
               borderRadius="full"
@@ -186,7 +186,7 @@ const PopularDestinations = () => {
             <Heading
               as="h2"
               fontSize={{ base: '4xl', md: '5xl' }}
-              fontWeight="800"
+              fontWeight="700"
               color="gray.900"
               letterSpacing="tight"
             >

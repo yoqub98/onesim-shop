@@ -306,7 +306,7 @@ const MyEsims = ({
           {/* Price */}
           <HStack justify="space-between" pt={2}>
             <Text fontSize="sm" color="gray.500">{t('myPage.orders.price')}:</Text>
-            <Text fontSize="lg" fontWeight="800" color="purple.600">
+            <Text fontSize="lg" fontWeight="700" color="purple.600">
               {order.price_uzs ? `${Number(order.price_uzs).toLocaleString('ru-RU')} UZS` : '-'}
             </Text>
           </HStack>

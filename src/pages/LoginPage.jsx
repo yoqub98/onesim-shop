@@ -80,7 +80,7 @@ const LoginPage = () => {
               size="2xl"
               background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
               backgroundClip="text"
-              fontWeight="800"
+              fontWeight="700"
             >
               {t('auth.login.title')}
             </Heading>

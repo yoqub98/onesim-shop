@@ -98,7 +98,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
                 <MapPin size={16} color="#9333ea" flexShrink={0} />
                 <Heading 
                   size="xl" 
-                  fontWeight="800" 
+                  fontWeight="700" 
                   color="gray.900"
                   whiteSpace="nowrap"
                   overflow="hidden"
@@ -112,7 +112,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
             <Badge
               colorScheme="purple"
               fontSize="xs"
-              fontWeight="800"
+              fontWeight="700"
               px={3}
               py={1.5}
               borderRadius="full"
@@ -135,7 +135,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
           >
             <Text 
               fontSize="3xl" 
-              fontWeight="800" 
+              fontWeight="700" 
               color="purple.700"
               textAlign="center"
               letterSpacing="tight"
@@ -181,7 +181,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
                 <HStack spacing={1.5} align="baseline" flexWrap="nowrap">
                   <Heading
                     fontSize="17px"
-                    fontWeight="800"
+                    fontWeight="700"
                     color="gray.800"
                     letterSpacing="tight"
                     whiteSpace="nowrap"
@@ -440,7 +440,7 @@ const PlansSection = () => {
             <Badge
               colorScheme="purple"
               fontSize="sm"
-              fontWeight="800"
+              fontWeight="700"
               px={5}
               py={2}
               borderRadius="full"
@@ -451,7 +451,7 @@ const PlansSection = () => {
             <Heading
               as="h2"
               fontSize={{ base: '4xl', md: '5xl' }}
-              fontWeight="800"
+              fontWeight="700"
               color="gray.900"
               letterSpacing="tight"
             >

@@ -74,13 +74,13 @@ const MyProfile = ({ user, profile, orders }) => {
 
           <Grid templateColumns="repeat(2, 1fr)" gap={4}>
             <Box bg="purple.50" p={4} borderRadius="xl" textAlign="center">
-              <Text fontSize="3xl" fontWeight="800" color="purple.600">
+              <Text fontSize="3xl" fontWeight="700" color="purple.600">
                 {orders.length}
               </Text>
               <Text fontSize="sm" color="gray.600">Всего заказов</Text>
             </Box>
             <Box bg="green.50" p={4} borderRadius="xl" textAlign="center">
-              <Text fontSize="3xl" fontWeight="800" color="green.600">
+              <Text fontSize="3xl" fontWeight="700" color="green.600">
                 {orders.filter(o => o.order_status === 'ALLOCATED').length}
               </Text>
               <Text fontSize="sm" color="gray.600">Активных eSIM</Text>

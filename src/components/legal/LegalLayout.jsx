@@ -133,7 +133,7 @@ const LegalLayout = ({ title, lastUpdated, tableOfContents = [], children }) => 
                 <Heading
                   as="h1"
                   fontSize={{ base: '2xl', md: '3xl', lg: '4xl' }}
-                  fontWeight="800"
+                  fontWeight="700"
                   color="gray.900"
                   mb={2}
                 >
@@ -152,7 +152,7 @@ const LegalLayout = ({ title, lastUpdated, tableOfContents = [], children }) => 
                   // Main section headings (h2)
                   'h2': {
                     fontSize: { base: 'xl', md: '2xl', lg: '3xl' },
-                    fontWeight: '800',
+                    fontWeight: '600',
                     color: 'gray.900',
                     mt: 10,
                     mb: 5,

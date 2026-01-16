@@ -468,7 +468,7 @@ const HeroSection = () => {
         <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
           <GridItem className="animate__animated animate__fadeInLeft">
             <VStack align="flex-start" spacing={8}>
-              <Heading as="h1" fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="800" lineHeight="1.1" color="gray.900" letterSpacing="tight">
+              <Heading as="h1" fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }} fontWeight="700" lineHeight="1.1" color="gray.900" letterSpacing="tight">
                 {t('hero.title')}{' '}
                 <Box as="span" background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" backgroundClip="text" display="inline">
                   OneSIM
@@ -650,7 +650,7 @@ const FAQSection = () => {
           <VStack spacing={4} textAlign="center">
             <Heading
               fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
-              fontWeight="800"
+              fontWeight="700"
               color="gray.900"
               className="animate__animated animate__fadeInUp"
             >

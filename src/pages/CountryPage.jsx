@@ -92,7 +92,7 @@ const CountryPlanCard = ({ plan, lang, countryCode }) => {
           >
             <Text
               fontSize="2xl"
-              fontWeight="800"
+              fontWeight="700"
               color="purple.700"
               textAlign="center"
             >
@@ -161,7 +161,7 @@ const CountryPlanCard = ({ plan, lang, countryCode }) => {
                 <HStack spacing={1.5} align="baseline">
                   <Heading
                     fontSize="2xl"
-                    fontWeight="800"
+                    fontWeight="700"
                     color="gray.800"
                   >
                     {plan.price}

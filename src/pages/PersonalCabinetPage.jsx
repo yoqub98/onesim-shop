@@ -94,7 +94,7 @@ const PersonalCabinetPage = () => {
                 color="white"
               />
               <VStack align="flex-start" spacing={2} flex={1}>
-                <Heading fontSize="3xl" fontWeight="800" color="gray.900">
+                <Heading fontSize="3xl" fontWeight="700" color="gray.900">
                   {t('cabinet.welcome')}, {fullName}!
                 </Heading>
                 <Text fontSize="md" color="gray.600">{user.email}</Text>
@@ -122,7 +122,7 @@ const PersonalCabinetPage = () => {
             <VStack spacing={6} align="stretch">
               <HStack spacing={3}>
                 <Package size={28} color="#667eea" />
-                <Heading fontSize="2xl" fontWeight="800" color="gray.900">
+                <Heading fontSize="2xl" fontWeight="700" color="gray.900">
                   {t('cabinet.ordersTitle')}
                 </Heading>
               </HStack>
