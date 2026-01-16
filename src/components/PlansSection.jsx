@@ -11,7 +11,7 @@ import {
   VStack,
   IconButton,
 } from '@chakra-ui/react';
-import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, SignalIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, WifiIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from './CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
@@ -37,7 +37,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
       position="relative"
       cursor="pointer"
       bg="white"
-      borderRadius="3xl"
+      borderRadius="2xl"
       overflow="visible"
       transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
       transform={isHovered ? 'translateY(-8px)' : 'translateY(0)'}
@@ -49,26 +49,31 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="400px"
-      width="400px"
+      minWidth="320px"
+      width="320px"
       flexShrink={0}
     >
-      <VStack align="stretch" spacing={8} p={8}>
+      <VStack align="stretch" spacing={5} p={6}>
         {/* Country Name and Flag */}
-        <HStack justify="space-between" align="center">
+        <HStack justify="space-between" align="center" spacing={3}>
           <Heading
-            fontSize="4xl"
-            fontWeight="800"
+            fontSize="2xl"
+            fontWeight="700"
             color="#151618"
             letterSpacing="tight"
+            fontFamily="'Manrope', sans-serif"
+            whiteSpace="nowrap"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            flex={1}
           >
             {plan.country}
           </Heading>
           <Box
-            borderRadius="15px"
+            borderRadius="12px"
             overflow="hidden"
-            width="80px"
-            height="60px"
+            width="56px"
+            height="42px"
             flexShrink={0}
             display="flex"
             alignItems="center"
@@ -90,59 +95,59 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         </HStack>
 
         {/* Network Type and Duration Pills */}
-        <HStack spacing={4}>
+        <HStack spacing={2}>
           <HStack
-            spacing={3}
-            px={5}
-            py={4}
-            borderRadius="16px"
+            spacing={2}
+            px={3}
+            py={2}
+            borderRadius="12px"
             border="1px solid"
             borderColor="#E8E9EE"
             bg="white"
           >
-            <SignalIcon className="w-6 h-6 text-[#FE4F18]" />
-            <Text fontSize="xl" fontWeight="600" color="#151618">
-              {plan.speed}
-            </Text>
+            <WifiIcon className="w-5 h-5 text-[#FE4F18]" />
           </HStack>
           <HStack
-            spacing={3}
-            px={5}
-            py={4}
-            borderRadius="16px"
+            spacing={2}
+            px={3}
+            py={2}
+            borderRadius="12px"
             border="1px solid"
             borderColor="#E8E9EE"
             bg="white"
           >
-            <CalendarIcon className="w-6 h-6 text-[#FE4F18]" />
-            <Text fontSize="xl" fontWeight="600" color="#151618">
+            <CalendarIcon className="w-5 h-5 text-[#FE4F18]" />
+            <Text fontSize="sm" fontWeight="600" color="#151618" whiteSpace="nowrap">
               {plan.days} {t('plans.card.days')}
             </Text>
           </HStack>
         </HStack>
 
         {/* Data Amount */}
-        <VStack align="flex-start" spacing={2}>
+        <VStack align="flex-start" spacing={1}>
           <Text
-            fontSize="lg"
+            fontSize="sm"
             color="#6B7280"
             fontWeight="500"
+            whiteSpace="nowrap"
           >
             {t('plans.card.dataLabel')}
           </Text>
           <HStack align="baseline" spacing={1}>
             <Text
-              fontSize="5xl"
+              fontSize="4xl"
               fontWeight="700"
               color="#374151"
               letterSpacing="tight"
+              whiteSpace="nowrap"
             >
               {plan.data.replace(/\s?(GB|ГБ)/i, '')}
             </Text>
             <Text
-              fontSize="3xl"
+              fontSize="2xl"
               fontWeight="600"
               color="#6B7280"
+              whiteSpace="nowrap"
             >
               GB
             </Text>
@@ -152,25 +157,26 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         {/* Pricing Section - Gray Box */}
         <Box
           bg="#F3F4F6"
-          borderRadius="28px"
-          p={5}
+          borderRadius="20px"
+          p={4}
         >
-          <HStack justify="space-between" align="center">
+          <HStack justify="space-between" align="center" spacing={2}>
             {/* Price Information */}
-            <VStack align="flex-start" spacing={0.5}>
-              <Text fontSize="2xl" fontWeight="600" color="#6B7280">
+            <VStack align="flex-start" spacing={0}>
+              <Text fontSize="lg" fontWeight="600" color="#6B7280" whiteSpace="nowrap">
                 {plan.priceUSD}$
               </Text>
-              <HStack align="baseline" spacing={1.5}>
+              <HStack align="baseline" spacing={1}>
                 <Text
-                  fontSize="3xl"
+                  fontSize="2xl"
                   fontWeight="800"
                   color="#151618"
                   letterSpacing="tight"
+                  whiteSpace="nowrap"
                 >
                   {plan.price}
                 </Text>
-                <Text fontSize="xl" fontWeight="500" color="#6B7280">
+                <Text fontSize="md" fontWeight="500" color="#6B7280" whiteSpace="nowrap">
                   {t('plans.card.currency')}
                 </Text>
               </HStack>
@@ -178,12 +184,12 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
 
             {/* Buy Button - Outlined */}
             <Button
-              size="lg"
+              size="md"
               variant="outline"
               borderColor="#FE4F18"
               color="#FE4F18"
               bg="rgba(255, 255, 255, 0.6)"
-              borderWidth="3px"
+              borderWidth="2px"
               _hover={{
                 bg: 'rgba(255, 255, 255, 0.9)',
                 transform: 'translateY(-2px)',
@@ -192,11 +198,12 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
               transition="all 0.3s"
               borderRadius="full"
               fontWeight="700"
-              fontSize="xl"
-              px={10}
-              py={6}
+              fontSize="md"
+              px={6}
+              py={5}
               h="auto"
               onClick={handleBuyClick}
+              whiteSpace="nowrap"
             >
               {t('plans.card.buy')}
             </Button>
@@ -211,73 +218,73 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
 const PlanCardSkeleton = ({ delay = 0 }) => {
   return (
     <Box
-      borderRadius="3xl"
+      borderRadius="2xl"
       overflow="hidden"
       border="1px solid"
       borderColor="gray.100"
       bg="white"
-      minWidth="400px"
-      width="400px"
+      minWidth="320px"
+      width="320px"
       flexShrink={0}
       className="animate__animated animate__fadeIn"
       style={{
         animationDelay: `${delay}ms`,
       }}
     >
-      <VStack align="stretch" spacing={8} p={8}>
+      <VStack align="stretch" spacing={5} p={6}>
         <HStack justify="space-between">
           <Box
-            width="180px"
-            height="42px"
+            width="140px"
+            height="32px"
             bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            borderRadius="15px"
-            width="80px"
-            height="60px"
+            borderRadius="12px"
+            width="56px"
+            height="42px"
             bg="gray.200"
             flexShrink={0}
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </HStack>
-        <HStack spacing={4}>
+        <HStack spacing={2}>
           <Box
-            width="130px"
-            height="56px"
+            width="48px"
+            height="40px"
             bg="gray.200"
-            borderRadius="16px"
+            borderRadius="12px"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            width="160px"
-            height="56px"
+            width="120px"
+            height="40px"
             bg="gray.200"
-            borderRadius="16px"
+            borderRadius="12px"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </HStack>
-        <VStack align="flex-start" spacing={2}>
+        <VStack align="flex-start" spacing={1}>
           <Box
-            width="180px"
-            height="24px"
+            width="140px"
+            height="20px"
             bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            width="120px"
-            height="48px"
+            width="100px"
+            height="40px"
             bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </VStack>
         <Box
-          height="90px"
+          height="76px"
           bg="gray.100"
-          borderRadius="28px"
+          borderRadius="20px"
           animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
         />
       </VStack>
@@ -307,8 +314,8 @@ const PlansSection = () => {
 
   const scroll = (direction, isAutoScroll = false) => {
     if (scrollContainerRef.current) {
-      // For manual clicks: scroll 2 cards (832px = 400px * 2 + 32px gap), for auto-scroll: scroll 1px
-      const scrollAmount = isAutoScroll ? 1 : 832; // 2 cards (400px * 2 + 32px gap)
+      // For manual clicks: scroll 2 cards (664px = 320px * 2 + 24px gap), for auto-scroll: scroll 1px
+      const scrollAmount = isAutoScroll ? 1 : 664; // 2 cards (320px * 2 + 24px gap)
       const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
