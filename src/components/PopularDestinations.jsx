@@ -44,7 +44,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
       overflow="hidden"
       border="2px solid"
       borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
-      transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+      transition="all 0.15s ease-out"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
@@ -64,9 +64,9 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
         left={0}
         right={0}
         height="6px"
-        background="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
+        background="linear-gradient(90deg, #FE4F18 0%, #FF6B3D 100%)"
         opacity={isHovered ? 1 : 0}
-        transition="opacity 0.3s"
+        transition="opacity 0.15s"
       />
 
       <Box p={8}>
@@ -101,6 +101,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
               size="lg"
               fontWeight="700"
               color="gray.900"
+              fontFamily="'Manrope', sans-serif"
               whiteSpace="nowrap"
               overflow="hidden"
               textOverflow="ellipsis"
@@ -114,7 +115,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
             opacity={isHovered ? 1 : 0}
             maxHeight={isHovered ? '60px' : '0'}
             overflow="hidden"
-            transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+            transition="all 0.15s ease-out"
           >
             <Button
               width="100%"

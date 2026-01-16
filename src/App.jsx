@@ -57,7 +57,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
-import logoColor from './assets/images/logo-color.svg';
+// Logo will be loaded from public folder
 import logoWhite from './assets/images/logo-white.svg';
 import CurrencyDebug from './components/CurrencyDebug';
 
@@ -103,7 +103,7 @@ const Navigation = () => {
         <Flex h="80px" alignItems="center" justifyContent="space-between">
           <Link href="/" textDecoration="none">
             <Image
-              src={logoColor}
+              src="/logo-colored.svg"
               alt="OneSIM"
               h="40px"
               cursor="pointer"
@@ -325,13 +325,14 @@ const Navigation = () => {
                   href="/signup"
                   size="md"
                   variant="outline"
-                  borderColor="#FE4F18"
-                  color="#FE4F18"
+                  borderColor="#E8E9EE"
+                  color="#151618"
                   fontWeight="700"
                   borderWidth="2px"
                   borderRadius="full"
                   _hover={{
-                    bg: '#FFF4F0',
+                    bg: '#F5F6F8',
+                    borderColor: '#D1D3D9',
                   }}
                 >
                   Регистрация
@@ -543,25 +544,12 @@ const HeroSection = () => {
               position="relative"
               borderRadius="3xl"
               overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'linear-gradient(137deg, rgba(253, 145, 106, 0.22) 6.42%, rgba(125, 117, 113, 0.22) 75.63%, rgba(114, 114, 114, 0.22) 100%)',
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
             >
               <Image
                 src="https://ik.imagekit.io/php1jcf0t/OneSim/banner-image.png"
                 alt="OneSIM Global Coverage"
                 borderRadius="3xl"
                 w="full"
-                position="relative"
-                zIndex={0}
               />
             </Box>
           </GridItem>
