@@ -249,7 +249,7 @@ export const TRANSLATIONS = {
       features: {
         coverage: '190+ стран покрытия',
         activation: 'Мгновенная активация за 2 минуты',
-        secure: 'Безопасное соединение 5G',
+        secure: 'Без роуминговых сборов',
       },
       cta: 'Узнать больше',
     },
@@ -669,7 +669,7 @@ export const TRANSLATIONS = {
       features: {
         coverage: '190+ mamlakat qamrovi',
         activation: '2 daqiqada tezkor faollashtirish',
-        secure: 'Xavfsiz 5G aloqa',
+        secure: 'Roaming to\'lovsiz',
       },
       cta: 'Batafsil',
     },

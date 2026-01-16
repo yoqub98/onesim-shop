@@ -495,20 +495,20 @@ const HeroSection = () => {
 
               <VStack align="flex-start" spacing={4} mt={2}>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
-                    <GlobeAltIcon className="w-5 h-5 text-[#FE4F18]" />
+                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                    <Box as={GlobeAltIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.coverage')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
-                    <BoltIcon className="w-5 h-5 text-[#FE4F18]" />
+                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                    <Box as={BoltIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.activation')}</Text>
                 </HStack>
                 <HStack spacing={3}>
-                  <Box bg="#FFF4F0" p={2} borderRadius="lg">
-                    <ShieldCheckIcon className="w-5 h-5 text-[#FE4F18]" />
+                  <Box bg="#FFF4F0" p={3} borderRadius="lg">
+                    <Box as={ShieldCheckIcon} w="24px" h="24px" color="#FE4F18" />
                   </Box>
                   <Text fontWeight="600" color="gray.700">{t('hero.features.secure')}</Text>
                 </HStack>
@@ -556,7 +556,7 @@ const HeroSection = () => {
               }}
             >
               <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-hero-1.png"
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/banner-image.png"
                 alt="OneSIM Global Coverage"
                 borderRadius="3xl"
                 w="full"
@@ -705,7 +705,7 @@ const FAQSection = () => {
                 mb={4}
                 borderRadius="xl"
                 shadow="sm"
-                _hover={{ shadow: '0 20px 40px rgba(0, 0, 0, 0.08)' }}
+                _hover={{ shadow: '0 20px 40px rgba(254, 79, 24, 0.15)' }}
                 transition="all 0.3s ease-in-out"
               >
                 <AccordionButton
