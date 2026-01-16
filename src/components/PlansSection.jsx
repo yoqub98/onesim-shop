@@ -49,8 +49,8 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minWidth="320px"
-      width="320px"
+      minWidth="350px"
+      width="350px"
       flexShrink={0}
     >
       <VStack align="stretch" spacing={5} p={6}>
@@ -95,7 +95,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
         </HStack>
 
         {/* Network Type and Duration Pills */}
-        <HStack spacing={2}>
+        <HStack spacing={3}>
           <HStack
             spacing={2}
             px={3}
@@ -105,7 +105,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
             borderColor="#E8E9EE"
             bg="white"
           >
-            <WifiIcon className="w-5 h-5 text-[#FE4F18]" />
+            <Box as={WifiIcon} w="20px" h="20px" color="#FE4F18" />
           </HStack>
           <HStack
             spacing={2}
@@ -116,7 +116,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
             borderColor="#E8E9EE"
             bg="white"
           >
-            <CalendarIcon className="w-5 h-5 text-[#FE4F18]" />
+            <Box as={CalendarIcon} w="20px" h="20px" color="#FE4F18" />
             <Text fontSize="sm" fontWeight="600" color="#151618" whiteSpace="nowrap">
               {plan.days} {t('plans.card.days')}
             </Text>
@@ -199,7 +199,7 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
               borderRadius="full"
               fontWeight="700"
               fontSize="md"
-              px={6}
+              px={8}
               py={5}
               h="auto"
               onClick={handleBuyClick}
@@ -223,8 +223,8 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       border="1px solid"
       borderColor="gray.100"
       bg="white"
-      minWidth="320px"
-      width="320px"
+      minWidth="350px"
+      width="350px"
       flexShrink={0}
       className="animate__animated animate__fadeIn"
       style={{
@@ -234,7 +234,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
       <VStack align="stretch" spacing={5} p={6}>
         <HStack justify="space-between">
           <Box
-            width="140px"
+            width="160px"
             height="32px"
             bg="gray.200"
             borderRadius="lg"
@@ -249,7 +249,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
         </HStack>
-        <HStack spacing={2}>
+        <HStack spacing={3}>
           <Box
             width="48px"
             height="40px"
@@ -258,7 +258,7 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            width="120px"
+            width="130px"
             height="40px"
             bg="gray.200"
             borderRadius="12px"
@@ -267,14 +267,14 @@ const PlanCardSkeleton = ({ delay = 0 }) => {
         </HStack>
         <VStack align="flex-start" spacing={1}>
           <Box
-            width="140px"
+            width="150px"
             height="20px"
             bg="gray.200"
             borderRadius="lg"
             animation="pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
           />
           <Box
-            width="100px"
+            width="110px"
             height="40px"
             bg="gray.200"
             borderRadius="lg"
@@ -314,8 +314,8 @@ const PlansSection = () => {
 
   const scroll = (direction, isAutoScroll = false) => {
     if (scrollContainerRef.current) {
-      // For manual clicks: scroll 2 cards (664px = 320px * 2 + 24px gap), for auto-scroll: scroll 1px
-      const scrollAmount = isAutoScroll ? 1 : 664; // 2 cards (320px * 2 + 24px gap)
+      // For manual clicks: scroll 2 cards (724px = 350px * 2 + 24px gap), for auto-scroll: scroll 1px
+      const scrollAmount = isAutoScroll ? 1 : 724; // 2 cards (350px * 2 + 24px gap)
       const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
