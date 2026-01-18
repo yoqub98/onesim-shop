@@ -486,7 +486,7 @@ const HeroSection = () => {
             <VStack align="flex-start" spacing={8}>
               <Heading
                 as="h1"
-                fontSize={{ base: '5xl', md: '6xl', lg: '7xl' }}
+                fontSize={{ base: '2.5rem', md: '3rem', lg: '3.6rem' }}
                 fontWeight="800"
                 lineHeight="1.1"
                 color="gray.900"
@@ -558,8 +558,8 @@ const HeroSection = () => {
               {/* Gradient rectangle decoration behind the image */}
               <Box
                 position="absolute"
-                top="30px"
-                left="30px"
+                bottom="-30px"
+                right="-30px"
                 width="100%"
                 height="100%"
                 bgGradient="linear(137deg, #FD916A 6.42%, #7D7571 57.11%, #727272 100%)"
@@ -574,6 +574,7 @@ const HeroSection = () => {
                 w="full"
                 position="relative"
                 zIndex={1}
+                display="block"
               />
             </Box>
           </GridItem>
