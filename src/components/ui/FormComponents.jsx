@@ -247,9 +247,4 @@ export const GoogleSignInButton = ({ children, onClick, ...props }) => {
   );
 };
 
-export default {
-  StyledInput,
-  StyledButton,
-  StyledCard,
-  GoogleSignInButton,
-};
+// Named exports are preferred - use: import { StyledInput, StyledButton } from './FormComponents'

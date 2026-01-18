@@ -17,7 +17,7 @@ import {
   InputGroup,
   InputLeftAddon,
 } from '@chakra-ui/react';
-import { Mail, Lock, User, Phone } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getTranslation } from '../config/i18n';
