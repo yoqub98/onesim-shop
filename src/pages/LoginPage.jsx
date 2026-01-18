@@ -11,7 +11,6 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
-  Image,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -25,7 +24,6 @@ import {
   StyledCard,
   GoogleSignInButton,
 } from '../components/ui/FormComponents';
-import logoColored from '../assets/new-logo.svg';
 
 const LoginPage = () => {
   const { currentLanguage } = useLanguage();
@@ -88,33 +86,19 @@ const LoginPage = () => {
     <Flex minH="100vh" direction={{ base: 'column', lg: 'row' }}>
       {/* Left Side - Login Form */}
       <Box
-        w={{ base: '100%', lg: '50%' }}
+        w={{ base: '100%', lg: '35%' }}
         minH={{ base: 'auto', lg: '100vh' }}
         bg="#F5F6F8"
         display="flex"
         flexDirection="column"
         position="relative"
       >
-        {/* Logo */}
-        <Box p={{ base: 6, md: 10 }}>
-          <Link href="/">
-            <Image
-              src={logoColored}
-              alt="OneSIM"
-              h="32px"
-              cursor="pointer"
-              transition="all 0.3s"
-              _hover={{ transform: 'scale(1.05)' }}
-            />
-          </Link>
-        </Box>
-
         {/* Form Container */}
         <Flex
           flex={1}
           justify="center"
           align="center"
-          px={{ base: 4, md: 10 }}
+          px={{ base: 4, md: 8 }}
           py={{ base: 8, lg: 0 }}
         >
           <StyledCard w="full" maxW="420px">
@@ -218,7 +202,7 @@ const LoginPage = () => {
 
       {/* Right Side - Hero Image */}
       <Box
-        w={{ base: '100%', lg: '50%' }}
+        w={{ base: '100%', lg: '65%' }}
         minH={{ base: '300px', lg: '100vh' }}
         position="relative"
         display={{ base: 'none', lg: 'block' }}
@@ -231,28 +215,25 @@ const LoginPage = () => {
         {/* Tagline */}
         <Flex
           position="absolute"
-          bottom={0}
+          bottom={{ base: '15%', xl: '20%' }}
           left={0}
           right={0}
           p={{ base: 8, md: 12 }}
           direction="column"
-          justify="flex-end"
         >
           <Text
-            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontSize={{ base: '2xl', md: '3xl', lg: '4xl', xl: '5xl' }}
             fontWeight="400"
             color="white"
-            lineHeight="1.3"
-            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+            lineHeight="1.2"
           >
             {t('auth.login.tagline1')}
           </Text>
           <Text
-            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontSize={{ base: '2xl', md: '3xl', lg: '4xl', xl: '5xl' }}
             fontWeight="700"
             color="white"
-            lineHeight="1.3"
-            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+            lineHeight="1.2"
           >
             {t('auth.login.tagline2')}
           </Text>

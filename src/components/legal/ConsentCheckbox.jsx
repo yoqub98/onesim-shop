@@ -36,16 +36,29 @@ const ConsentCheckbox = ({
 
   return (
     <Checkbox
-      colorScheme="purple"
       isChecked={isChecked}
       onChange={onChange}
       alignItems="flex-start"
+      sx={{
+        '& .chakra-checkbox__control': {
+          borderColor: '#DFE1EB',
+          borderRadius: '4px',
+          _checked: {
+            bg: '#404144',
+            borderColor: '#404144',
+            _hover: {
+              bg: '#2D2F33',
+              borderColor: '#2D2F33',
+            },
+          },
+        },
+      }}
     >
       <Text fontSize="sm" color="gray.600" lineHeight="1.6">
         {content.text}
         <Link
           href="/legal/offer"
-          color="purple.600"
+          color="#1F2023"
           fontWeight="600"
           target="_blank"
           _hover={{ textDecoration: 'underline' }}
@@ -55,7 +68,7 @@ const ConsentCheckbox = ({
         {content.and}
         <Link
           href="/legal/privacy"
-          color="purple.600"
+          color="#1F2023"
           fontWeight="600"
           target="_blank"
           _hover={{ textDecoration: 'underline' }}
