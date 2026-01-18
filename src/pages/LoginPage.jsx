@@ -29,7 +29,7 @@ const LoginPage = () => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -77,9 +77,23 @@ const LoginPage = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // TODO: Implement Google Sign In
-    console.log('Google Sign In clicked');
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Redirect will happen automatically via Supabase OAuth
+    } catch (error) {
+      console.error('[Login] Google Sign-In error:', error);
+      toaster.create({
+        title: t('auth.errors.loginFailed'),
+        description: error.message,
+        type: 'error',
+        duration: 5000,
+      });
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -176,7 +190,10 @@ const LoginPage = () => {
                   </StyledButton>
 
                   {/* Google Sign In */}
-                  <GoogleSignInButton onClick={handleGoogleSignIn}>
+                  <GoogleSignInButton
+                    onClick={handleGoogleSignIn}
+                    isLoading={googleLoading}
+                  >
                     {t('auth.login.googleButton')}
                   </GoogleSignInButton>
 

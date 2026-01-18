@@ -35,7 +35,7 @@ const SignupPage = () => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
   const navigate = useNavigate();
-  const { signUp, verifyOtp } = useAuth();
+  const { signUp, verifyOtp, signInWithGoogle } = useAuth();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -152,9 +152,34 @@ const SignupPage = () => {
     }
   };
 
-  const handleGoogleSignUp = () => {
-    // TODO: Implement Google Sign Up
-    console.log('Google Sign Up clicked');
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignUp = async () => {
+    if (!agreedToTerms) {
+      setErrors({ agreedToTerms: 'Вы должны согласиться с условиями' });
+      toaster.create({
+        title: 'Необходимо согласие',
+        description: 'Пожалуйста, примите условия использования и политику конфиденциальности',
+        type: 'warning',
+        duration: 4000,
+      });
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Redirect will happen automatically via Supabase OAuth
+    } catch (error) {
+      console.error('[Signup] Google Sign-Up error:', error);
+      toaster.create({
+        title: t('auth.errors.signupFailed'),
+        description: error.message,
+        type: 'error',
+        duration: 5000,
+      });
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -350,7 +375,11 @@ const SignupPage = () => {
                   </StyledButton>
 
                   {/* Google Sign Up */}
-                  <GoogleSignInButton onClick={handleGoogleSignUp}>
+                  <GoogleSignInButton
+                    onClick={handleGoogleSignUp}
+                    isLoading={googleLoading}
+                    isDisabled={!agreedToTerms}
+                  >
                     {t('auth.signup.googleButton')}
                   </GoogleSignInButton>
 

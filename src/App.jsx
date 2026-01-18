@@ -46,6 +46,7 @@ import PackagePage from './pages/PackagePage.jsx';
 import PlansPage from './pages/PlansPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
+import AuthCallback from './pages/AuthCallback.jsx';
 import MyPage from './pages/MyPage';
 import HowToInstall from './pages/HowToInstall.jsx';
 import PublicOffer from './pages/legal/PublicOffer.jsx';
@@ -781,6 +782,7 @@ function AppContent() {
         <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/legal/offer" element={<PublicOffer />} />
         <Route path="/legal/privacy" element={<PrivacyPolicy />} />
         <Route path="/legal/terms" element={<TermsOfService />} />
