@@ -3,30 +3,37 @@ import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
-  Container,
+  Flex,
   Heading,
   Text,
-  Button,
-  Input,
   VStack,
   HStack,
   Link,
   FormControl,
   FormLabel,
   FormErrorMessage,
+  Image,
+  Input,
+  InputGroup,
+  InputLeftAddon,
 } from '@chakra-ui/react';
-import { Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User, Phone } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { getTranslation } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
 import ConsentCheckbox from '../components/legal/ConsentCheckbox';
-// Note: Dialog and PinInput may need to be added as snippets
-// Run: npx @chakra-ui/cli snippet add dialog
-// Run: npx @chakra-ui/cli snippet add pin-input
+import {
+  StyledInput,
+  StyledButton,
+  StyledCard,
+  GoogleSignInButton,
+} from '../components/ui/FormComponents';
+import logoColored from '../assets/new-logo.svg';
 
 const SignupPage = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
   const navigate = useNavigate();
   const { signUp, verifyOtp } = useAuth();
 
@@ -66,13 +73,13 @@ const SignupPage = () => {
     if (!lastName.trim()) newErrors.lastName = t('auth.errors.lastNameRequired');
     if (!phone.trim()) newErrors.phone = t('auth.errors.phoneRequired');
     else if (phone.length !== 9) newErrors.phone = t('auth.errors.phoneInvalid');
-    
+
     if (!email.trim()) newErrors.email = t('auth.errors.emailRequired');
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = t('auth.errors.emailInvalid');
-    
+
     if (!password) newErrors.password = t('auth.errors.passwordRequired');
     else if (password.length < 6) newErrors.password = t('auth.errors.passwordTooShort');
-    
+
     if (password !== confirmPassword) newErrors.confirmPassword = t('auth.errors.passwordMismatch');
 
     if (!agreedToTerms) newErrors.agreedToTerms = 'Вы должны согласиться с условиями';
@@ -88,7 +95,7 @@ const SignupPage = () => {
     setLoading(true);
     try {
       await signUp(email, password, firstName, lastName, `+998${phone}`);
-      
+
       toaster.create({
         title: t('auth.signup.verificationSent'),
         description: t('auth.signup.checkEmail'),
@@ -98,6 +105,7 @@ const SignupPage = () => {
 
       setShowPinModal(true);
     } catch (error) {
+      console.error('Signup error:', error);
       toaster.create({
         title: t('auth.errors.signupFailed'),
         description: error.message,
@@ -122,7 +130,7 @@ const SignupPage = () => {
     setVerifyLoading(true);
     try {
       await verifyOtp(email, pin);
-      
+
       toaster.create({
         title: t('auth.signup.success'),
         type: 'success',
@@ -132,6 +140,7 @@ const SignupPage = () => {
       setShowPinModal(false);
       navigate('/');
     } catch (error) {
+      console.error('Verification error:', error);
       toaster.create({
         title: t('auth.errors.verificationFailed'),
         description: error.message,
@@ -143,169 +152,272 @@ const SignupPage = () => {
     }
   };
 
+  const handleGoogleSignUp = () => {
+    // TODO: Implement Google Sign Up
+    console.log('Google Sign Up clicked');
+  };
+
   return (
-    <Box minH="100vh" bg="gray.50" py={20}>
-      <Container maxW="md">
-        <VStack spacing={8}>
-          <VStack spacing={2}>
-            <Heading
-              size="2xl"
-              background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              backgroundClip="text"
-              fontWeight="700"
-            >
-              {t('auth.signup.title')}
-            </Heading>
-            <Text color="gray.600" fontSize="lg">
-              {t('auth.signup.subtitle')}
-            </Text>
-          </VStack>
+    <Flex minH="100vh" direction={{ base: 'column', lg: 'row' }}>
+      {/* Left Side - Signup Form */}
+      <Box
+        w={{ base: '100%', lg: '50%' }}
+        minH={{ base: 'auto', lg: '100vh' }}
+        bg="#F5F6F8"
+        display="flex"
+        flexDirection="column"
+        position="relative"
+        overflowY="auto"
+      >
+        {/* Logo */}
+        <Box p={{ base: 6, md: 10 }}>
+          <Link href="/">
+            <Image
+              src={logoColored}
+              alt="OneSIM"
+              h="32px"
+              cursor="pointer"
+              transition="all 0.3s"
+              _hover={{ transform: 'scale(1.05)' }}
+            />
+          </Link>
+        </Box>
 
-          <Box
-            as="form"
-            onSubmit={handleSubmit}
-            w="full"
-            bg="white"
-            p={8}
-            borderRadius="2xl"
-            shadow="lg"
-          >
-            <VStack spacing={4}>
-              <FormControl isInvalid={!!errors.firstName}>
-                <FormLabel>{t('auth.fields.firstName')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box color="gray.500" px={3}>
-                    <User size={18} />
-                  </Box>
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder={t('auth.placeholders.firstName')}
-                  />
-                </HStack>
-                {errors.firstName && <FormErrorMessage>{errors.firstName}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.lastName}>
-                <FormLabel>{t('auth.fields.lastName')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box color="gray.500" px={3}>
-                    <User size={18} />
-                  </Box>
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder={t('auth.placeholders.lastName')}
-                  />
-                </HStack>
-                {errors.lastName && <FormErrorMessage>{errors.lastName}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.phone}>
-                <FormLabel>{t('auth.fields.phone')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box bg="gray.100" px={3} py={2} borderRadius="md">
-                    <Text fontWeight="600">+998</Text>
-                  </Box>
-                  <Input
-                    type="tel"
-                    value={formatPhoneDisplay(phone)}
-                    onChange={handlePhoneChange}
-                    placeholder={t('auth.placeholders.phone')}
-                  />
-                </HStack>
-                {errors.phone && <FormErrorMessage>{errors.phone}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.email}>
-                <FormLabel>{t('auth.fields.email')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box color="gray.500" px={3}>
-                    <Mail size={18} />
-                  </Box>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('auth.placeholders.email')}
-                  />
-                </HStack>
-                {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.password}>
-                <FormLabel>{t('auth.fields.password')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box color="gray.500" px={3}>
-                    <Lock size={18} />
-                  </Box>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('auth.placeholders.password')}
-                  />
-                </HStack>
-                {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.confirmPassword}>
-                <FormLabel>{t('auth.fields.confirmPassword')}</FormLabel>
-                <HStack spacing={0}>
-                  <Box color="gray.500" px={3}>
-                    <Lock size={18} />
-                  </Box>
-                  <Input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder={t('auth.placeholders.confirmPassword')}
-                  />
-                </HStack>
-                {errors.confirmPassword && <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>}
-              </FormControl>
-
-              {/* Consent Checkbox */}
-              <FormControl isInvalid={!!errors.agreedToTerms} mt={4}>
-                <ConsentCheckbox
-                  isChecked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  variant="signup"
-                />
-                {errors.agreedToTerms && <FormErrorMessage>{errors.agreedToTerms}</FormErrorMessage>}
-              </FormControl>
-
-              <Button
-                type="submit"
-                w="full"
-                size="lg"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                color="white"
+        {/* Form Container */}
+        <Flex
+          flex={1}
+          justify="center"
+          align="center"
+          px={{ base: 4, md: 10 }}
+          py={{ base: 6, lg: 4 }}
+        >
+          <StyledCard w="full" maxW="420px">
+            <VStack spacing={5} align="stretch">
+              <Heading
+                fontSize="2xl"
                 fontWeight="700"
-                isLoading={loading}
-                isDisabled={!agreedToTerms || loading}
-                _hover={{
-                  transform: 'translateY(-2px)',
-                  shadow: 'lg',
-                }}
-                mt={2}
+                color="gray.900"
               >
-                {t('auth.signup.button')}
-              </Button>
+                {t('auth.signup.title')}
+              </Heading>
 
-              <Text fontSize="sm" color="gray.600">
-                {t('auth.signup.haveAccount')}{' '}
-                <Link as={RouterLink} to="/login" color="purple.600" fontWeight="600">
-                  {t('auth.signup.loginLink')}
-                </Link>
-              </Text>
+              <Box as="form" onSubmit={handleSubmit}>
+                <VStack spacing={4}>
+                  {/* Name Fields - Side by Side */}
+                  <HStack spacing={3} w="full">
+                    <FormControl isInvalid={!!errors.firstName} flex={1}>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                        {t('auth.fields.firstName')}
+                      </FormLabel>
+                      <StyledInput
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder={t('auth.placeholders.firstName')}
+                        leftIcon={<User size={18} />}
+                      />
+                      {errors.firstName && (
+                        <FormErrorMessage fontSize="xs">{errors.firstName}</FormErrorMessage>
+                      )}
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.lastName} flex={1}>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                        {t('auth.fields.lastName')}
+                      </FormLabel>
+                      <StyledInput
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder={t('auth.placeholders.lastName')}
+                        leftIcon={<User size={18} />}
+                      />
+                      {errors.lastName && (
+                        <FormErrorMessage fontSize="xs">{errors.lastName}</FormErrorMessage>
+                      )}
+                    </FormControl>
+                  </HStack>
+
+                  {/* Phone Field */}
+                  <FormControl isInvalid={!!errors.phone}>
+                    <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                      {t('auth.fields.phone')}
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftAddon
+                        h="48px"
+                        borderRadius="36px 0 0 36px"
+                        border="1.2px solid"
+                        borderColor="#DFE1EB"
+                        borderRight="none"
+                        bg="gray.50"
+                        px={4}
+                        fontWeight="600"
+                        color="gray.700"
+                      >
+                        +998
+                      </InputLeftAddon>
+                      <Input
+                        type="tel"
+                        value={formatPhoneDisplay(phone)}
+                        onChange={handlePhoneChange}
+                        placeholder={t('auth.placeholders.phone')}
+                        h="48px"
+                        borderRadius="0 36px 36px 0"
+                        border="1.2px solid"
+                        borderColor="#DFE1EB"
+                        bg="white"
+                        fontSize="md"
+                        fontWeight="500"
+                        _hover={{ borderColor: '#C5C8D4' }}
+                        _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
+                      />
+                    </InputGroup>
+                    {errors.phone && (
+                      <FormErrorMessage>{errors.phone}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Email Field */}
+                  <FormControl isInvalid={!!errors.email}>
+                    <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                      {t('auth.fields.email')}
+                    </FormLabel>
+                    <StyledInput
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t('auth.placeholders.email')}
+                      leftIcon={<Mail size={18} />}
+                    />
+                    {errors.email && (
+                      <FormErrorMessage>{errors.email}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Password Field */}
+                  <FormControl isInvalid={!!errors.password}>
+                    <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                      {t('auth.fields.password')}
+                    </FormLabel>
+                    <StyledInput
+                      isPassword
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t('auth.placeholders.password')}
+                      leftIcon={<Lock size={18} />}
+                    />
+                    {errors.password && (
+                      <FormErrorMessage>{errors.password}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Confirm Password Field */}
+                  <FormControl isInvalid={!!errors.confirmPassword}>
+                    <FormLabel fontSize="sm" fontWeight="600" color="gray.700" mb={2}>
+                      {t('auth.fields.confirmPassword')}
+                    </FormLabel>
+                    <StyledInput
+                      isPassword
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder={t('auth.placeholders.confirmPassword')}
+                      leftIcon={<Lock size={18} />}
+                    />
+                    {errors.confirmPassword && (
+                      <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Consent Checkbox */}
+                  <FormControl isInvalid={!!errors.agreedToTerms}>
+                    <ConsentCheckbox
+                      isChecked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      variant="signup"
+                    />
+                    {errors.agreedToTerms && (
+                      <FormErrorMessage>{errors.agreedToTerms}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Signup Button */}
+                  <StyledButton
+                    type="submit"
+                    w="full"
+                    isLoading={loading}
+                    isDisabled={!agreedToTerms}
+                  >
+                    {t('auth.signup.button')}
+                  </StyledButton>
+
+                  {/* Google Sign Up */}
+                  <GoogleSignInButton onClick={handleGoogleSignUp}>
+                    {t('auth.signup.googleButton')}
+                  </GoogleSignInButton>
+
+                  {/* Login Link */}
+                  <Text fontSize="sm" color="gray.600" textAlign="center">
+                    {t('auth.signup.haveAccount')}{' '}
+                    <Link
+                      as={RouterLink}
+                      to="/login"
+                      color="gray.900"
+                      fontWeight="700"
+                      _hover={{ textDecoration: 'underline' }}
+                    >
+                      {t('auth.signup.loginLink')}
+                    </Link>
+                  </Text>
+                </VStack>
+              </Box>
             </VStack>
-          </Box>
-        </VStack>
-      </Container>
+          </StyledCard>
+        </Flex>
+      </Box>
 
-      {/* Note: Replace this with Dialog component from snippets */}
-      {/* The Modal API has changed completely in v3 */}
+      {/* Right Side - Hero Image */}
+      <Box
+        w={{ base: '100%', lg: '50%' }}
+        minH={{ base: '300px', lg: '100vh' }}
+        position="relative"
+        display={{ base: 'none', lg: 'block' }}
+        sx={{
+          background: `linear-gradient(326deg, rgba(0, 0, 0, 0.41) 41.86%, #F3561D 102.54%), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=80') lightgray center / cover no-repeat`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Tagline */}
+        <Flex
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          p={{ base: 8, md: 12 }}
+          direction="column"
+          justify="flex-end"
+        >
+          <Text
+            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontWeight="400"
+            color="white"
+            lineHeight="1.3"
+            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+          >
+            {t('auth.signup.tagline1')}
+          </Text>
+          <Text
+            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontWeight="700"
+            color="white"
+            lineHeight="1.3"
+            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+          >
+            {t('auth.signup.tagline2')}
+          </Text>
+        </Flex>
+      </Box>
+
+      {/* Verification Modal */}
       {showPinModal && (
         <Box
           position="fixed"
@@ -319,37 +431,39 @@ const SignupPage = () => {
           justifyContent="center"
           zIndex="modal"
         >
-          <Box bg="white" p={6} borderRadius="xl" maxW="md" w="full" mx={4}>
-            <Heading size="lg" mb={4}>{t('auth.verification.title')}</Heading>
-            <VStack spacing={4}>
+          <StyledCard maxW="400px" w="full" mx={4}>
+            <VStack spacing={5}>
+              <Heading size="lg" color="gray.900">
+                {t('auth.verification.title')}
+              </Heading>
               <Text fontSize="sm" color="gray.600" textAlign="center">
                 {t('auth.verification.description')}
               </Text>
-              
-              <Input
+
+              <StyledInput
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="Enter 8-digit code"
+                placeholder="12345678"
                 maxLength={8}
                 textAlign="center"
-                fontSize="lg"
+                fontSize="xl"
+                letterSpacing="0.5em"
+                fontWeight="600"
               />
 
-              <Button
+              <StyledButton
                 w="full"
-                bg="purple.600"
-                color="white"
                 onClick={handleVerifyPin}
                 isLoading={verifyLoading}
                 isDisabled={pin.length !== 8}
               >
                 {t('auth.verification.button')}
-              </Button>
+              </StyledButton>
             </VStack>
-          </Box>
+          </StyledCard>
         </Box>
       )}
-    </Box>
+    </Flex>
   );
 };
 

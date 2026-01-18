@@ -3,27 +3,33 @@ import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
-  Container,
+  Flex,
   Heading,
   Text,
-  Button,
-  Input,
   VStack,
-  HStack,
   Link,
   FormControl,
   FormLabel,
   FormErrorMessage,
+  Image,
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { getTranslation, DEFAULT_LANGUAGE } from '../config/i18n';
+import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { getTranslation } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
 import ConsentCheckbox from '../components/legal/ConsentCheckbox';
+import {
+  StyledInput,
+  StyledButton,
+  StyledCard,
+  GoogleSignInButton,
+} from '../components/ui/FormComponents';
+import logoColored from '../assets/new-logo.svg';
 
 const LoginPage = () => {
-  const lang = DEFAULT_LANGUAGE;
-  const t = (key) => getTranslation(lang, key);
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
@@ -31,13 +37,14 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!email.trim()) newErrors.email = t('auth.errors.emailRequired');
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = t('auth.errors.emailInvalid');
-    
+
     if (!password) newErrors.password = t('auth.errors.passwordRequired');
 
     setErrors(newErrors);
@@ -51,7 +58,7 @@ const LoginPage = () => {
     setLoading(true);
     try {
       await signIn(email, password);
-      
+
       toaster.create({
         title: t('auth.login.success'),
         type: 'success',
@@ -60,6 +67,7 @@ const LoginPage = () => {
 
       navigate('/');
     } catch (error) {
+      console.error('Login error:', error);
       toaster.create({
         title: t('auth.errors.loginFailed'),
         description: error.message,
@@ -71,103 +79,186 @@ const LoginPage = () => {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    // TODO: Implement Google Sign In
+    console.log('Google Sign In clicked');
+  };
+
   return (
-    <Box minH="100vh" bg="gray.50" py={20}>
-      <Container maxW="md">
-        <VStack spacing={8}>
-          <VStack spacing={2}>
-            <Heading
-              size="2xl"
-              background="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              backgroundClip="text"
-              fontWeight="700"
-            >
-              {t('auth.login.title')}
-            </Heading>
-            <Text color="gray.600" fontSize="lg">
-              {t('auth.login.subtitle')}
-            </Text>
-          </VStack>
+    <Flex minH="100vh" direction={{ base: 'column', lg: 'row' }}>
+      {/* Left Side - Login Form */}
+      <Box
+        w={{ base: '100%', lg: '50%' }}
+        minH={{ base: 'auto', lg: '100vh' }}
+        bg="#F5F6F8"
+        display="flex"
+        flexDirection="column"
+        position="relative"
+      >
+        {/* Logo */}
+        <Box p={{ base: 6, md: 10 }}>
+          <Link href="/">
+            <Image
+              src={logoColored}
+              alt="OneSIM"
+              h="32px"
+              cursor="pointer"
+              transition="all 0.3s"
+              _hover={{ transform: 'scale(1.05)' }}
+            />
+          </Link>
+        </Box>
 
-          <Box
-            as="form"
-            onSubmit={handleSubmit}
-            w="full"
-            bg="white"
-            p={8}
-            borderRadius="2xl"
-            shadow="lg"
-          >
-            <VStack spacing={4}>
-              <FormControl isInvalid={!!errors.email}>
-                <FormLabel>{t('auth.fields.email')}</FormLabel>
-                <HStack>
-                  <Box color="gray.500" px={3}>
-                    <Mail size={18} />
-                  </Box>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('auth.placeholders.email')}
-                  />
-                </HStack>
-                {errors.email && <FormErrorMessage>{errors.email}</FormErrorMessage>}
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.password}>
-                <FormLabel>{t('auth.fields.password')}</FormLabel>
-                <HStack>
-                  <Box color="gray.500" px={3}>
-                    <Lock size={18} />
-                  </Box>
-                  <Input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('auth.placeholders.password')}
-                  />
-                </HStack>
-                {errors.password && <FormErrorMessage>{errors.password}</FormErrorMessage>}
-              </FormControl>
-
-              {/* Consent Checkbox - Informational (does not block login) */}
-              <Box mt={4}>
-                <ConsentCheckbox
-                  isChecked={true}
-                  onChange={() => {}}
-                  variant="login"
-                />
-              </Box>
-
-              <Button
-                type="submit"
-                w="full"
-                size="lg"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                color="white"
+        {/* Form Container */}
+        <Flex
+          flex={1}
+          justify="center"
+          align="center"
+          px={{ base: 4, md: 10 }}
+          py={{ base: 8, lg: 0 }}
+        >
+          <StyledCard w="full" maxW="420px">
+            <VStack spacing={6} align="stretch">
+              <Heading
+                fontSize="2xl"
                 fontWeight="700"
-                isLoading={loading}
-                _hover={{
-                  transform: 'translateY(-2px)',
-                  shadow: 'lg',
-                }}
-                mt={2}
+                color="gray.900"
               >
-                {t('auth.login.button')}
-              </Button>
+                {t('auth.login.title')}
+              </Heading>
 
-              <Text fontSize="sm" color="gray.600">
-                {t('auth.login.noAccount')}{' '}
-                <Link as={RouterLink} to="/signup" color="purple.600" fontWeight="600">
-                  {t('auth.login.signupLink')}
-                </Link>
-              </Text>
+              <Box as="form" onSubmit={handleSubmit}>
+                <VStack spacing={5}>
+                  {/* Email Field */}
+                  <FormControl isInvalid={!!errors.email}>
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="600"
+                      color="gray.700"
+                      mb={2}
+                    >
+                      {t('auth.login.emailLabel')}
+                    </FormLabel>
+                    <StyledInput
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t('auth.placeholders.email')}
+                      leftIcon={<Mail size={18} />}
+                    />
+                    {errors.email && (
+                      <FormErrorMessage>{errors.email}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Password Field */}
+                  <FormControl isInvalid={!!errors.password}>
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="600"
+                      color="gray.700"
+                      mb={2}
+                    >
+                      {t('auth.login.passwordLabel')}
+                    </FormLabel>
+                    <StyledInput
+                      isPassword
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t('auth.placeholders.password')}
+                      leftIcon={<Lock size={18} />}
+                    />
+                    {errors.password && (
+                      <FormErrorMessage>{errors.password}</FormErrorMessage>
+                    )}
+                  </FormControl>
+
+                  {/* Consent Checkbox */}
+                  <Box w="full">
+                    <ConsentCheckbox
+                      isChecked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      variant="login"
+                    />
+                  </Box>
+
+                  {/* Login Button */}
+                  <StyledButton
+                    type="submit"
+                    w="full"
+                    isLoading={loading}
+                  >
+                    {t('auth.login.button')}
+                  </StyledButton>
+
+                  {/* Google Sign In */}
+                  <GoogleSignInButton onClick={handleGoogleSignIn}>
+                    {t('auth.login.googleButton')}
+                  </GoogleSignInButton>
+
+                  {/* Sign Up Link */}
+                  <Text fontSize="sm" color="gray.600" textAlign="center">
+                    {t('auth.login.noAccount')}{' '}
+                    <Link
+                      as={RouterLink}
+                      to="/signup"
+                      color="gray.900"
+                      fontWeight="700"
+                      _hover={{ textDecoration: 'underline' }}
+                    >
+                      {t('auth.login.signupLink')}
+                    </Link>
+                  </Text>
+                </VStack>
+              </Box>
             </VStack>
-          </Box>
-        </VStack>
-      </Container>
-    </Box>
+          </StyledCard>
+        </Flex>
+      </Box>
+
+      {/* Right Side - Hero Image */}
+      <Box
+        w={{ base: '100%', lg: '50%' }}
+        minH={{ base: '300px', lg: '100vh' }}
+        position="relative"
+        display={{ base: 'none', lg: 'block' }}
+        sx={{
+          background: `linear-gradient(326deg, rgba(0, 0, 0, 0.41) 41.86%, #F3561D 102.54%), url('https://static.vecteezy.com/system/resources/thumbnails/035/118/518/small_2x/social-media-and-people-young-redhead-girl-sits-on-street-uses-mobile-phone-app-looks-up-information-in-internet-holds-smartphone-photo.jpg') lightgray 1.625px 0px / 108.331% 100% no-repeat`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Tagline */}
+        <Flex
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          p={{ base: 8, md: 12 }}
+          direction="column"
+          justify="flex-end"
+        >
+          <Text
+            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontWeight="400"
+            color="white"
+            lineHeight="1.3"
+            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+          >
+            {t('auth.login.tagline1')}
+          </Text>
+          <Text
+            fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }}
+            fontWeight="700"
+            color="white"
+            lineHeight="1.3"
+            textShadow="0 2px 10px rgba(0,0,0,0.3)"
+          >
+            {t('auth.login.tagline2')}
+          </Text>
+        </Flex>
+      </Box>
+    </Flex>
   );
 };
 
