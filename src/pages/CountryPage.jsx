@@ -12,10 +12,12 @@ import {
   Badge,
   IconButton,
   Spinner,
+  Select,
 } from '@chakra-ui/react';
-import { ArrowLeft, Calendar, Wifi, ArrowRight, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
+import DataPlanCard from '../components/DataPlanCard';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
 import { calculateFinalPrice, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
@@ -24,210 +26,93 @@ import { useLanguage } from '../contexts/LanguageContext';
 const PLANS_PER_PAGE = 12;
 const DEFAULT_DURATION_FILTER = 30; // Default to 30 days
 
-// Plan Card Component
-const CountryPlanCard = ({ plan, lang, countryCode }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const navigate = useNavigate();
-  const t = (key) => getTranslation(lang, key);
-
-  const handleCardClick = () => {
-    navigate(`/package/${plan.id}`, { state: { plan, countryCode } });
-  };
-
-  return (
-    <Box
-      position="relative"
-      cursor="pointer"
-      bg="white"
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor={isHovered ? 'purple.200' : 'gray.100'}
-      transition="all 0.3s ease"
-      transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
-      boxShadow={isHovered ? '0 20px 40px rgba(100, 100, 100, 0.25)' : '0 4px 12px rgba(100, 100, 100, 0.15)'}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
-    >
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        height="4px"
-        background="linear-gradient(90deg, #667eea 0%, #764ba2 100%)"
-        opacity={isHovered ? 1 : 0}
-        transition="opacity 0.3s"
-      />
-
-      <Box p={6}>
-        <VStack align="stretch" spacing={4}>
-          <HStack justify="space-between">
-            <Badge
-              colorScheme="purple"
-              fontSize="xs"
-              fontWeight="700"
-              px={2}
-              py={1}
-              borderRadius="full"
-              textTransform="uppercase"
-            >
-              <HStack spacing={1}>
-                <Wifi size={10} />
-                <Text>{plan.speed}</Text>
-              </HStack>
-            </Badge>
-            <Box color="purple.600">
-              <CreditCard size={20} />
-            </Box>
-          </HStack>
-
-          <Box
-            bg="purple.50"
-            p={3}
-            borderRadius="lg"
-            border="1px solid"
-            borderColor="purple.100"
-          >
-            <Text
-              fontSize="2xl"
-              fontWeight="700"
-              color="purple.700"
-              textAlign="center"
-            >
-              {plan.data}
-            </Text>
-            <Text
-              fontSize="xs"
-              color="purple.600"
-              textAlign="center"
-              fontWeight="600"
-            >
-              {t('plans.card.internet') || 'Интернет'}
-            </Text>
-          </Box>
-
-          <HStack
-            spacing={2}
-            p={2}
-            bg="gray.50"
-            borderRadius="md"
-            justify="center"
-          >
-            <Calendar size={16} color="#9333ea" />
-            <Text fontSize="md" fontWeight="700" color="gray.900">
-              {plan.days} {t('plans.card.days') || 'дней'}
-            </Text>
-          </HStack>
-
-          {/* Operator/Telecom Provider */}
-          {plan.operatorList && plan.operatorList.length > 0 && (
-            <Box
-              p={2}
-              bg="blue.50"
-              borderRadius="md"
-              border="1px solid"
-              borderColor="blue.100"
-            >
-              <HStack justify="center" spacing={2}>
-                <Text fontSize="sm" fontWeight="700" color="blue.800">
-                  {plan.operatorList[0].operatorName}
-                </Text>
-                {plan.operatorList[0].networkType && (
-                  <Badge colorScheme="blue" fontSize="xs" px={1.5} py={0.5}>
-                    {plan.operatorList[0].networkType}
-                  </Badge>
-                )}
-                {plan.operatorList.length > 1 && (
-                  <Badge colorScheme="blue" variant="solid" fontSize="xs" px={1.5} py={0.5}>
-                    +{plan.operatorList.length - 1}
-                  </Badge>
-                )}
-              </HStack>
-            </Box>
-          )}
-
-          <Box
-            pt={3}
-            borderTop="2px dashed"
-            borderColor="gray.200"
-          >
-            <HStack justify="space-between" align="center">
-              <VStack align="flex-start" spacing={0.5}>
-                <Text fontSize="xs" color="gray.500" fontWeight="600">
-                  {t('plans.card.price') || 'Цена'}
-                </Text>
-                <HStack spacing={1.5} align="baseline">
-                  <Heading
-                    fontSize="2xl"
-                    fontWeight="700"
-                    color="gray.800"
-                  >
-                    {plan.price}
-                  </Heading>
-                  <Text fontSize="md" color="gray.600" fontWeight="700">
-                    UZS
-                  </Text>
-                </HStack>
-              </VStack>
-
-              <Button
-                size="sm"
-                bg={isHovered ? 'purple.600' : 'gray.100'}
-                color={isHovered ? 'white' : 'gray.700'}
-                _hover={{
-                  bg: 'purple.700',
-                  color: 'white',
-                }}
-                transition="all 0.3s"
-                borderRadius="lg"
-                fontWeight="700"
-                px={3}
-                pointerEvents="none"
-              >
-                <HStack spacing={1}>
-                  <Text>{t('plans.card.buy') || 'Купить'}</Text>
-                  <ArrowRight size={14} />
-                </HStack>
-              </Button>
-            </HStack>
-          </Box>
-        </VStack>
-      </Box>
-    </Box>
-  );
-};
-
-// Loading Skeleton
+// Loading Skeleton matching new DataPlanCard design
 const PlanCardSkeleton = () => {
   return (
     <Box
-      borderRadius="2xl"
+      borderRadius="32px"
       overflow="hidden"
-      border="2px solid"
-      borderColor="gray.100"
       bg="white"
+      boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+      p={6}
+      minWidth={{ base: '280px', md: '320px' }}
+      width="100%"
     >
-      <Box p={6}>
-        <VStack align="stretch" spacing={4}>
-          {[20, 60, 40, 50, 60].map((height, i) => (
-            <Box
-              key={i}
-              height={`${height}px`}
-              bg="gray.200"
-              borderRadius="lg"
-              sx={{
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%': { opacity: 0.5 },
-                },
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
-            />
-          ))}
-        </VStack>
-      </Box>
+      <VStack align="stretch" spacing={5}>
+        {/* Header skeleton */}
+        <HStack justify="space-between">
+          <Box
+            width="120px"
+            height="48px"
+            bg="gray.200"
+            borderRadius="lg"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+          <Box
+            width="80px"
+            height="40px"
+            bg="gray.200"
+            borderRadius="lg"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+        </HStack>
+
+        {/* Badges skeleton */}
+        <HStack spacing={3}>
+          <Box
+            width="80px"
+            height="44px"
+            bg="gray.200"
+            borderRadius="12px"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+          <Box
+            flex={1}
+            height="44px"
+            bg="gray.200"
+            borderRadius="12px"
+            sx={{
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+        </HStack>
+
+        {/* Footer skeleton */}
+        <Box
+          height="76px"
+          bg="gray.100"
+          borderRadius="20px"
+          sx={{
+            '@keyframes pulse': {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.5 },
+            },
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}
+        />
+      </VStack>
     </Box>
   );
 };
@@ -551,31 +436,37 @@ const CountryPage = () => {
 
       {/* Filters */}
       <Box
-        bg="white"
+        bg="#E8E9EE"
         py={6}
         borderBottom="1px solid"
         borderColor="gray.200"
-        boxShadow="0 6px 20px rgba(100, 100, 100, 0.12)"
       >
         <Container maxW="8xl">
-          <HStack spacing={4} flexWrap="wrap">
-            <Text fontWeight="600" color="gray.700">
+          <HStack spacing={4} flexWrap="wrap" align="center">
+            <Text fontWeight="700" color="#151618" fontSize="md" fontFamily="'Manrope', sans-serif">
               {t('countryPage.filters')}
             </Text>
 
             <Box minW="180px">
-              <select
+              <Select
                 value={selectedData}
                 onChange={(e) => setSelectedData(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
+                bg="white"
+                borderRadius="12px"
+                border="1px solid"
+                borderColor="#E8E9EE"
+                fontSize="14px"
+                fontWeight="600"
+                fontFamily="'Manrope', sans-serif"
+                color="#151618"
+                cursor={loading ? 'not-allowed' : 'pointer'}
+                opacity={loading ? 0.6 : 1}
+                _hover={{
+                  borderColor: '#FE4F18',
+                }}
+                _focus={{
+                  borderColor: '#FE4F18',
+                  boxShadow: '0 0 0 1px #FE4F18',
                 }}
               >
                 <option value="all">{t('countryPage.allDataOptions')}</option>
@@ -584,22 +475,29 @@ const CountryPage = () => {
                     {gb}GB
                   </option>
                 ))}
-              </select>
+              </Select>
             </Box>
 
             <Box minW="180px">
-              <select
+              <Select
                 value={selectedDuration}
                 onChange={(e) => setSelectedDuration(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
+                bg="white"
+                borderRadius="12px"
+                border="1px solid"
+                borderColor="#E8E9EE"
+                fontSize="14px"
+                fontWeight="600"
+                fontFamily="'Manrope', sans-serif"
+                color="#151618"
+                cursor={loading ? 'not-allowed' : 'pointer'}
+                opacity={loading ? 0.6 : 1}
+                _hover={{
+                  borderColor: '#FE4F18',
+                }}
+                _focus={{
+                  borderColor: '#FE4F18',
+                  boxShadow: '0 0 0 1px #FE4F18',
                 }}
               >
                 <option value="all">{t('countryPage.allDurationOptions')}</option>
@@ -608,11 +506,11 @@ const CountryPage = () => {
                     {days} {t('countryPage.banner.days')}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Box>
 
             {!loading && (
-              <Text color="gray.500" fontSize="sm" ml="auto">
+              <Text color="#6B7280" fontSize="sm" ml="auto" fontFamily="'Manrope', sans-serif" fontWeight="500">
                 {t('countryPage.showing')} {paginatedPlans.length} {t('countryPage.of')} {filteredPlans.length}
               </Text>
             )}
@@ -621,7 +519,7 @@ const CountryPage = () => {
       </Box>
 
       {/* Plans Grid */}
-      <Box py={12} bg="white">
+      <Box py={12} bg="#E8E9EE">
         <Container maxW="8xl">
           {error && (
             <Box p={4} bg="red.50" borderRadius="lg" border="1px solid" borderColor="red.200" mb={6}>
@@ -648,16 +546,21 @@ const CountryPage = () => {
           ) : paginatedPlans.length > 0 ? (
             <>
               <Grid
-                templateColumns={{ 
-                  base: '1fr', 
-                  md: 'repeat(2, 1fr)', 
+                templateColumns={{
+                  base: '1fr',
+                  md: 'repeat(2, 1fr)',
                   lg: 'repeat(3, 1fr)',
-                  xl: 'repeat(4, 1fr)' 
+                  xl: 'repeat(4, 1fr)'
                 }}
-                gap={4}
+                gap={6}
               >
                 {paginatedPlans.map((plan) => (
-                  <CountryPlanCard key={plan.id} plan={plan} lang={currentLanguage} countryCode={countryCode} />
+                  <DataPlanCard
+                    key={plan.id}
+                    plan={plan}
+                    lang={currentLanguage}
+                    onClick={() => navigate(`/package/${plan.id}`, { state: { plan, countryCode } })}
+                  />
                 ))}
               </Grid>
 

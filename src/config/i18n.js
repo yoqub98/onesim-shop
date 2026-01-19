@@ -345,6 +345,9 @@ export const TRANSLATIONS = {
         description: 'Выберите идеальный тарифный план для вашего путешествия. Быстрая активация, доступные цены.',
         days: 'дней',
       },
+      card: {
+        period: 'Период',
+      },
       filterLabel: 'Фильтры',
       dataLabel: 'Объем данных',
       durationLabel: 'Период',
@@ -772,6 +775,9 @@ export const TRANSLATIONS = {
         title: 'Eng yaxshi eSIM ni toping',
         description: 'Sayohatingiz uchun ideal tarif rejasini tanlang. Tez faollashtirish, qulay narxlar.',
         days: 'kun',
+      },
+      card: {
+        period: 'Davr',
       },
       filterLabel: 'Filtrlar',
       dataLabel: 'Ma\'lumot hajmi',
