@@ -35,8 +35,8 @@ const PlanCardSkeleton = () => {
       bg="white"
       boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
       p={6}
-      minWidth={{ base: '280px', md: '320px' }}
-      width="100%"
+      minWidth={{ base: '280px', md: '370px' }}
+      width={{ base: '100%', md: '370px' }}
     >
       <VStack align="stretch" spacing={5}>
         {/* Header skeleton */}
@@ -586,45 +586,50 @@ const CountryPage = () => {
               </Select>
             </Box>
 
-            {/* Sort by Price Buttons */}
-            <HStack spacing={2}>
-              <IconButton
-                onClick={() => setSortOrder(sortOrder === 'asc' ? null : 'asc')}
-                bg={sortOrder === 'asc' ? '#FE4F18' : 'white'}
-                color={sortOrder === 'asc' ? 'white' : '#151618'}
-                borderRadius="full"
-                size="md"
-                h="46px"
-                w="46px"
-                aria-label="Sort price ascending"
-                _hover={{
-                  bg: sortOrder === 'asc' ? '#E5461A' : '#FFF4F0',
-                  transform: 'scale(1.05)',
-                }}
-                transition="all 0.2s"
-                title="Sort by price: Low to High"
-              >
-                <ArrowUp size={20} />
-              </IconButton>
+            {/* Sort by Price */}
+            <HStack spacing={3} align="center">
+              <Text fontWeight="600" color="#151618" fontSize="sm" fontFamily="'Manrope', sans-serif">
+                {t('countryPage.sortByPrice')}:
+              </Text>
+              <HStack spacing={2}>
+                <IconButton
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? null : 'asc')}
+                  bg={sortOrder === 'asc' ? '#FE4F18' : 'white'}
+                  color={sortOrder === 'asc' ? 'white' : '#151618'}
+                  borderRadius="full"
+                  size="md"
+                  h="46px"
+                  w="46px"
+                  aria-label="Sort price ascending"
+                  _hover={{
+                    bg: sortOrder === 'asc' ? '#E5461A' : '#FFF4F0',
+                    transform: 'scale(1.05)',
+                  }}
+                  transition="all 0.2s"
+                  title="Low to High"
+                >
+                  <ArrowUp size={20} />
+                </IconButton>
 
-              <IconButton
-                onClick={() => setSortOrder(sortOrder === 'desc' ? null : 'desc')}
-                bg={sortOrder === 'desc' ? '#FE4F18' : 'white'}
-                color={sortOrder === 'desc' ? 'white' : '#151618'}
-                borderRadius="full"
-                size="md"
-                h="46px"
-                w="46px"
-                aria-label="Sort price descending"
-                _hover={{
-                  bg: sortOrder === 'desc' ? '#E5461A' : '#FFF4F0',
-                  transform: 'scale(1.05)',
-                }}
-                transition="all 0.2s"
-                title="Sort by price: High to Low"
-              >
-                <ArrowDown size={20} />
-              </IconButton>
+                <IconButton
+                  onClick={() => setSortOrder(sortOrder === 'desc' ? null : 'desc')}
+                  bg={sortOrder === 'desc' ? '#FE4F18' : 'white'}
+                  color={sortOrder === 'desc' ? 'white' : '#151618'}
+                  borderRadius="full"
+                  size="md"
+                  h="46px"
+                  w="46px"
+                  aria-label="Sort price descending"
+                  _hover={{
+                    bg: sortOrder === 'desc' ? '#E5461A' : '#FFF4F0',
+                    transform: 'scale(1.05)',
+                  }}
+                  transition="all 0.2s"
+                  title="High to Low"
+                >
+                  <ArrowDown size={20} />
+                </IconButton>
+              </HStack>
             </HStack>
 
             {!loading && (

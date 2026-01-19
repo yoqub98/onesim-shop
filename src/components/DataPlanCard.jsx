@@ -95,43 +95,53 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
   return (
     <Box
       position="relative"
-      cursor="pointer"
-      bg="white"
-      borderRadius="32px"
-      overflow="visible"
-      transition="all 0.2s ease-out"
-      transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
-      boxShadow={
-        isHovered
-          ? '0 24px 48px -12px rgba(254, 79, 24, 0.2), 0 0 60px rgba(254, 79, 24, 0.15)'
-          : '0 4px 12px rgba(0, 0, 0, 0.06)'
-      }
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
-      p={6}
+      minWidth={{ base: '280px', md: '370px' }}
+      width={{ base: '100%', md: '370px' }}
       fontFamily="'Manrope', sans-serif"
-      minWidth={{ base: '280px', md: '320px' }}
-      width="100%"
-      _before={
-        isHovered
-          ? {
-              content: '""',
-              position: 'absolute',
-              top: '-10px',
-              left: '-10px',
-              right: '-10px',
-              bottom: '-10px',
-              bg: 'radial-gradient(circle at center, rgba(254, 79, 24, 0.1) 0%, transparent 70%)',
-              borderRadius: '40px',
-              filter: 'blur(20px)',
-              zIndex: -1,
-              opacity: 1,
-              transition: 'opacity 0.2s ease-out',
-            }
-          : {}
-      }
     >
+      {/* Lighting effect background - only visible on hover */}
+      {isHovered && (
+        <Box
+          position="absolute"
+          top="-20px"
+          left="-20px"
+          right="-20px"
+          bottom="-20px"
+          bg="radial-gradient(circle at center, rgba(254, 79, 24, 0.15) 0%, rgba(254, 79, 24, 0.05) 40%, transparent 70%)"
+          borderRadius="50px"
+          filter="blur(25px)"
+          zIndex={-1}
+          pointerEvents="none"
+          animation="pulse 2s ease-in-out infinite"
+          sx={{
+            '@keyframes pulse': {
+              '0%, 100%': { opacity: 0.6 },
+              '50%': { opacity: 1 },
+            },
+          }}
+        />
+      )}
+
+      {/* Card itself - stays white */}
+      <Box
+        cursor="pointer"
+        bg="white"
+        borderRadius="32px"
+        overflow="visible"
+        transition="all 0.3s ease-out"
+        transform={isHovered ? 'translateY(-6px)' : 'translateY(0)'}
+        boxShadow={
+          isHovered
+            ? '0 24px 48px -12px rgba(254, 79, 24, 0.25), 0 0 0 1px rgba(254, 79, 24, 0.1)'
+            : '0 4px 12px rgba(0, 0, 0, 0.06)'
+        }
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={onClick}
+        p={6}
+        position="relative"
+        zIndex={1}
+      >
       <VStack align="stretch" spacing={5}>
         {/* Header Section: Data & Duration */}
         <HStack justify="space-between" align="flex-start">
@@ -273,6 +283,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
           </HStack>
         </Box>
       </VStack>
+      </Box>
     </Box>
   );
 };
