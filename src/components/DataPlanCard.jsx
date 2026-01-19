@@ -67,8 +67,24 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
 
-  // Parse data value (remove "GB" suffix if present)
-  const dataValue = plan.data ? plan.data.replace(/\s?(GB|ГБ)/i, '').trim() : plan.dataGB || '0';
+  // Parse data value and unit (handle both GB and MB)
+  const parseDataValue = (data) => {
+    if (!data) return { value: plan.dataGB || '0', unit: 'GB' };
+
+    const dataStr = String(data).trim();
+
+    // Check if it contains MB
+    if (/MB|МБ/i.test(dataStr)) {
+      const value = dataStr.replace(/\s?(MB|МБ)/i, '').trim();
+      return { value, unit: 'MB' };
+    }
+
+    // Otherwise assume GB
+    const value = dataStr.replace(/\s?(GB|ГБ)/i, '').trim();
+    return { value, unit: 'GB' };
+  };
+
+  const { value: dataValue, unit: dataUnit } = parseDataValue(plan.data);
 
   // Get highest network speed
   const networkType = parseHighestSpeed(plan.speed);
@@ -78,13 +94,18 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
 
   return (
     <Box
+      position="relative"
       cursor="pointer"
       bg="white"
       borderRadius="32px"
       overflow="visible"
       transition="all 0.2s ease-out"
       transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
-      boxShadow={isHovered ? '0 24px 48px -12px rgba(0, 0, 0, 0.15)' : '0 4px 12px rgba(0, 0, 0, 0.06)'}
+      boxShadow={
+        isHovered
+          ? '0 24px 48px -12px rgba(254, 79, 24, 0.2), 0 0 60px rgba(254, 79, 24, 0.15)'
+          : '0 4px 12px rgba(0, 0, 0, 0.06)'
+      }
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
@@ -92,6 +113,24 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
       fontFamily="'Manrope', sans-serif"
       minWidth={{ base: '280px', md: '320px' }}
       width="100%"
+      _before={
+        isHovered
+          ? {
+              content: '""',
+              position: 'absolute',
+              top: '-10px',
+              left: '-10px',
+              right: '-10px',
+              bottom: '-10px',
+              bg: 'radial-gradient(circle at center, rgba(254, 79, 24, 0.1) 0%, transparent 70%)',
+              borderRadius: '40px',
+              filter: 'blur(20px)',
+              zIndex: -1,
+              opacity: 1,
+              transition: 'opacity 0.2s ease-out',
+            }
+          : {}
+      }
     >
       <VStack align="stretch" spacing={5}>
         {/* Header Section: Data & Duration */}
@@ -113,12 +152,12 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
               color="#000"
               ml={1}
             >
-              GB
+              {dataUnit}
             </Text>
           </HStack>
 
           {/* Duration Block */}
-          <VStack align="flex-end" spacing={1}>
+          <VStack align="flex-end" spacing={0}>
             <Text
               fontSize="13px"
               color="#8E8E93"
@@ -150,7 +189,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
             minW="fit-content"
           >
             <Box as={WifiIcon} w="20px" h="20px" color="#FE4F18" />
-            <Text fontSize="15px" fontWeight="500" color="#000" whiteSpace="nowrap">
+            <Text fontSize="15px" fontWeight="600" color="#000" whiteSpace="nowrap">
               {networkType}
             </Text>
           </HStack>
@@ -188,13 +227,13 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
           <HStack justify="space-between" align="center">
             {/* Price Information */}
             <VStack align="flex-start" spacing={0.5}>
-              <Text fontSize="14px" color="#8E8E93" fontWeight="500">
+              <Text fontSize="18px" color="#494951" fontWeight="500">
                 {plan.priceUSD}$
               </Text>
               <HStack align="baseline" spacing={1}>
                 <Text
-                  fontSize="20px"
-                  fontWeight="700"
+                  fontSize="25px"
+                  fontWeight="800"
                   color="#000"
                   letterSpacing="tight"
                 >
@@ -206,26 +245,27 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
               </HStack>
             </VStack>
 
-            {/* Buy Button */}
+            {/* Buy Button - matching PlansSection style */}
             <Button
               size="md"
               variant="outline"
               borderColor="#FE4F18"
               color="#FE4F18"
-              bg="transparent"
+              bg="rgba(255, 255, 255, 0.6)"
               borderWidth="2px"
               _hover={{
                 bg: '#FE4F18',
                 color: 'white',
                 transform: 'translateY(-2px)',
+                shadow: '0 10px 30px rgba(254, 79, 24, 0.4)',
               }}
-              transition="all 0.2s ease"
+              transition="all 0.3s ease-in-out"
               borderRadius="full"
-              fontWeight="500"
-              fontSize="16px"
-              px={6}
+              fontWeight="700"
+              fontSize="md"
+              px={8}
+              py={4}
               h="auto"
-              py={2.5}
               whiteSpace="nowrap"
             >
               {t('plans.card.buy')}

@@ -14,7 +14,7 @@ import {
   Spinner,
   Select,
 } from '@chakra-ui/react';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import DataPlanCard from '../components/DataPlanCard';
@@ -117,65 +117,118 @@ const PlanCardSkeleton = () => {
   );
 };
 
-// Pagination Component
+// Pagination Component - Design System Style
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
   const pages = [];
   const maxVisible = 5;
-  
+
   let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
   let end = Math.min(totalPages, start + maxVisible - 1);
-  
+
   if (end - start + 1 < maxVisible) {
     start = Math.max(1, end - maxVisible + 1);
   }
-  
+
   for (let i = start; i <= end; i++) {
     pages.push(i);
   }
 
   return (
-    <HStack spacing={2} justify="center" mt={8}>
+    <HStack spacing={3} justify="center" mt={8} fontFamily="'Manrope', sans-serif">
       <IconButton
         onClick={() => onPageChange(currentPage - 1)}
         isDisabled={currentPage === 1}
-        variant="ghost"
-        size="sm"
+        bg="white"
+        borderRadius="12px"
+        size="md"
         aria-label="Previous"
+        _hover={{
+          bg: '#FFF4F0',
+          transform: 'scale(1.05)',
+        }}
+        _disabled={{
+          opacity: 0.4,
+          cursor: 'not-allowed',
+          _hover: {
+            bg: 'white',
+            transform: 'none',
+          },
+        }}
+        transition="all 0.2s"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={20} color="#151618" />
       </IconButton>
-      
+
       {start > 1 && (
         <>
-          <Button size="sm" onClick={() => onPageChange(1)} variant="ghost">
+          <Button
+            size="md"
+            onClick={() => onPageChange(1)}
+            bg="white"
+            color="#6B7280"
+            borderRadius="12px"
+            fontWeight="600"
+            minW="40px"
+            _hover={{
+              bg: '#FFF4F0',
+              color: '#FE4F18',
+            }}
+            transition="all 0.2s"
+          >
             1
           </Button>
-          {start > 2 && <Text fontSize="sm" color="gray.400">...</Text>}
+          {start > 2 && (
+            <Text fontSize="md" color="#6B7280" fontWeight="600">
+              ...
+            </Text>
+          )}
         </>
       )}
-      
+
       {pages.map((page) => (
         <Button
           key={page}
-          size="sm"
+          size="md"
           onClick={() => onPageChange(page)}
-          bg={currentPage === page ? 'purple.600' : 'transparent'}
-          color={currentPage === page ? 'white' : 'gray.700'}
+          bg={currentPage === page ? '#151618' : 'white'}
+          color={currentPage === page ? 'white' : '#6B7280'}
+          borderRadius="12px"
+          fontWeight="700"
+          minW="40px"
           _hover={{
-            bg: currentPage === page ? 'purple.700' : 'gray.100',
+            bg: currentPage === page ? '#2C2C2E' : '#FFF4F0',
+            color: currentPage === page ? 'white' : '#FE4F18',
+            transform: 'scale(1.05)',
           }}
-          minW="32px"
+          transition="all 0.2s"
         >
           {page}
         </Button>
       ))}
-      
+
       {end < totalPages && (
         <>
-          {end < totalPages - 1 && <Text fontSize="sm" color="gray.400">...</Text>}
-          <Button size="sm" onClick={() => onPageChange(totalPages)} variant="ghost">
+          {end < totalPages - 1 && (
+            <Text fontSize="md" color="#6B7280" fontWeight="600">
+              ...
+            </Text>
+          )}
+          <Button
+            size="md"
+            onClick={() => onPageChange(totalPages)}
+            bg="white"
+            color="#6B7280"
+            borderRadius="12px"
+            fontWeight="600"
+            minW="40px"
+            _hover={{
+              bg: '#FFF4F0',
+              color: '#FE4F18',
+            }}
+            transition="all 0.2s"
+          >
             {totalPages}
           </Button>
         </>
@@ -184,11 +237,25 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <IconButton
         onClick={() => onPageChange(currentPage + 1)}
         isDisabled={currentPage === totalPages}
-        variant="ghost"
-        size="sm"
+        bg="white"
+        borderRadius="12px"
+        size="md"
         aria-label="Next"
+        _hover={{
+          bg: '#FFF4F0',
+          transform: 'scale(1.05)',
+        }}
+        _disabled={{
+          opacity: 0.4,
+          cursor: 'not-allowed',
+          _hover: {
+            bg: 'white',
+            transform: 'none',
+          },
+        }}
+        transition="all 0.2s"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={20} color="#151618" />
       </IconButton>
     </HStack>
   );
@@ -209,6 +276,7 @@ const CountryPage = () => {
   const [selectedData, setSelectedData] = useState('all');
   const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER.toString());
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState(null); // null | 'asc' | 'desc'
   
   const countryName = getCountryName(countryCode, currentLanguage);
 
@@ -267,20 +335,27 @@ const CountryPage = () => {
     return [...new Set(allPlans.map(p => p.days))].sort((a, b) => a - b);
   }, [allPlans]);
 
-  // Apply filters
+  // Apply filters and sorting
   const filteredPlans = useMemo(() => {
     let filtered = [...allPlans];
-    
+
     if (selectedData !== 'all') {
       filtered = filtered.filter(plan => plan.dataGB === parseInt(selectedData));
     }
-    
+
     if (selectedDuration !== 'all') {
       filtered = filtered.filter(plan => plan.days === parseInt(selectedDuration));
     }
-    
+
+    // Apply sorting by price
+    if (sortOrder === 'asc') {
+      filtered.sort((a, b) => (a.priceUSD || 0) - (b.priceUSD || 0));
+    } else if (sortOrder === 'desc') {
+      filtered.sort((a, b) => (b.priceUSD || 0) - (a.priceUSD || 0));
+    }
+
     return filtered;
-  }, [allPlans, selectedData, selectedDuration]);
+  }, [allPlans, selectedData, selectedDuration, sortOrder]);
 
   // Paginate
   const paginatedPlans = useMemo(() => {
@@ -452,13 +527,14 @@ const CountryPage = () => {
                 value={selectedData}
                 onChange={(e) => setSelectedData(e.target.value)}
                 bg="white"
-                borderRadius="12px"
+                borderRadius="full"
                 border="1px solid"
                 borderColor="#E8E9EE"
                 fontSize="14px"
                 fontWeight="600"
                 fontFamily="'Manrope', sans-serif"
                 color="#151618"
+                h="46px"
                 cursor={loading ? 'not-allowed' : 'pointer'}
                 opacity={loading ? 0.6 : 1}
                 _hover={{
@@ -483,13 +559,14 @@ const CountryPage = () => {
                 value={selectedDuration}
                 onChange={(e) => setSelectedDuration(e.target.value)}
                 bg="white"
-                borderRadius="12px"
+                borderRadius="full"
                 border="1px solid"
                 borderColor="#E8E9EE"
                 fontSize="14px"
                 fontWeight="600"
                 fontFamily="'Manrope', sans-serif"
                 color="#151618"
+                h="46px"
                 cursor={loading ? 'not-allowed' : 'pointer'}
                 opacity={loading ? 0.6 : 1}
                 _hover={{
@@ -508,6 +585,47 @@ const CountryPage = () => {
                 ))}
               </Select>
             </Box>
+
+            {/* Sort by Price Buttons */}
+            <HStack spacing={2}>
+              <IconButton
+                onClick={() => setSortOrder(sortOrder === 'asc' ? null : 'asc')}
+                bg={sortOrder === 'asc' ? '#FE4F18' : 'white'}
+                color={sortOrder === 'asc' ? 'white' : '#151618'}
+                borderRadius="full"
+                size="md"
+                h="46px"
+                w="46px"
+                aria-label="Sort price ascending"
+                _hover={{
+                  bg: sortOrder === 'asc' ? '#E5461A' : '#FFF4F0',
+                  transform: 'scale(1.05)',
+                }}
+                transition="all 0.2s"
+                title="Sort by price: Low to High"
+              >
+                <ArrowUp size={20} />
+              </IconButton>
+
+              <IconButton
+                onClick={() => setSortOrder(sortOrder === 'desc' ? null : 'desc')}
+                bg={sortOrder === 'desc' ? '#FE4F18' : 'white'}
+                color={sortOrder === 'desc' ? 'white' : '#151618'}
+                borderRadius="full"
+                size="md"
+                h="46px"
+                w="46px"
+                aria-label="Sort price descending"
+                _hover={{
+                  bg: sortOrder === 'desc' ? '#E5461A' : '#FFF4F0',
+                  transform: 'scale(1.05)',
+                }}
+                transition="all 0.2s"
+                title="Sort by price: High to Low"
+              >
+                <ArrowDown size={20} />
+              </IconButton>
+            </HStack>
 
             {!loading && (
               <Text color="#6B7280" fontSize="sm" ml="auto" fontFamily="'Manrope', sans-serif" fontWeight="500">
