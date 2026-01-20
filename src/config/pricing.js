@@ -8,10 +8,10 @@ export const PRICING_CONFIG = {
 };
 
 // API configuration
+// NOTE: API keys are now ONLY in backend (api/* files), never exposed to frontend
 export const API_CONFIG = {
   BASE_URL: process.env.REACT_APP_ESIMACCESS_API_URL || 'https://api.esimaccess.com/api/v1/open',
-  ACCESS_CODE: process.env.REACT_APP_ESIMACCESS_API_KEY,
-  SECRET_KEY: process.env.REACT_APP_ESIMACCESS_SECRET_KEY,
+  // ACCESS_CODE and SECRET_KEY removed for security - only backend should have these
 };
 
 // ============================================

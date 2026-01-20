@@ -19,7 +19,14 @@
       "Bash(git rev-parse:*)",
       "WebFetch(domain:www.figma.com)",
       "Bash(npm ls:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(if [ -d \"build\" ])",
+      "Bash(then du -sh build)",
+      "Bash(du:*)",
+      "Bash(else echo \"Build directory not found - need to build first\")",
+      "Bash(fi)",
+      "Bash(ls:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
