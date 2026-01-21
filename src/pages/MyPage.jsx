@@ -24,6 +24,7 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Grid,
 } from '@chakra-ui/react';
 import {
   User,
