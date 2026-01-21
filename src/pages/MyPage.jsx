@@ -37,8 +37,11 @@ import {
   ExternalLink,
   Shield,
   Info,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { getTranslation } from '../config/i18n.js';
 import { getUserOrders, checkOrderStatus, cancelOrder } from '../services/orderService';
 import MyProfile from './MyProfile.jsx';
 import MyEsims from './MyEsims.jsx';
@@ -46,6 +49,7 @@ import MyEsims from './MyEsims.jsx';
 const MyPage = () => {
   console.log('🔵 MyPage component rendering...');
   const { user, profile } = useAuth();
+  const { currentLanguage } = useLanguage();
   console.log('👤 User:', user?.id, 'Profile:', profile?.first_name);
 
   const [orders, setOrders] = useState([]);
@@ -348,21 +352,47 @@ const MyPage = () => {
 
                 {/* QR Code */}
                 {selectedOrder.qr_code_url ? (
-                  <Box
-                    bg="white"
-                    p={4}
-                    borderRadius="xl"
-                    border="2px solid"
-                    borderColor="purple.100"
-                    w="full"
-                  >
-                    <Image
-                      src={selectedOrder.qr_code_url}
-                      alt="QR Code"
-                      maxW="250px"
-                      mx="auto"
-                    />
-                  </Box>
+                  <>
+                    <Box
+                      bg="white"
+                      p={4}
+                      borderRadius="xl"
+                      border="2px solid"
+                      borderColor="purple.100"
+                      w="full"
+                    >
+                      <Image
+                        src={selectedOrder.qr_code_url}
+                        alt="QR Code"
+                        maxW="250px"
+                        mx="auto"
+                      />
+                    </Box>
+
+                    {/* Quick Install Button */}
+                    {(selectedOrder.short_url || selectedOrder.qr_code_data) && (
+                      <Button
+                        as="a"
+                        href={selectedOrder.short_url || `https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.qr_code_data)}`}
+                        w="full"
+                        size="lg"
+                        bg="linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                        color="white"
+                        _hover={{
+                          opacity: 0.9,
+                          transform: 'translateY(-2px)',
+                          boxShadow: 'lg'
+                        }}
+                        _active={{ transform: 'translateY(0)' }}
+                        leftIcon={<Zap size={20} />}
+                        boxShadow="md"
+                        transition="all 0.2s"
+                        fontWeight="600"
+                      >
+                        {getTranslation(currentLanguage, 'myPage.qrModal.quickInstall')}
+                      </Button>
+                    )}
+                  </>
                 ) : selectedOrder.activation_code ? (
                   <Box
                     bg="gray.50"
