@@ -185,6 +185,8 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
       boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04)"
       border="1px solid"
       borderColor="gray.100"
+      maxW="700px"     // Add this - maximum width
+    w="full"    
       transition="all 0.2s"
       _hover={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06)' }}
       opacity={isCancelled ? 0.6 : 1}
