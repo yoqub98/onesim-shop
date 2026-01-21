@@ -28,18 +28,13 @@ import {
 import {
   User,
   Package,
-  QrCode,
-  Copy,
-  CheckCircle,
   XCircle,
   AlertTriangle,
-  Share2,
-  ExternalLink,
-  Shield,
-  Info,
+  CheckCircle,
   Apple,
   Smartphone,
 } from 'lucide-react';
+import CountryFlag from '../components/CountryFlag';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getTranslation } from '../config/i18n.js';
@@ -91,7 +86,7 @@ const MyPage = () => {
           smdp_status: order.smdp_status,
           has_qr_code: !!order.qr_code_url,
           has_short_url: !!order.short_url,
-          iccid: order.iccid || 'NOT SET'
+          iccid: order.iccid || 'NOT SET',
         });
       });
 
@@ -112,14 +107,18 @@ const MyPage = () => {
   useEffect(() => {
     if (!orders || orders.length === 0) return;
 
-    const pendingOrders = orders.filter(o => o.order_status === 'PENDING');
+    const pendingOrders = orders.filter((o) => o.order_status === 'PENDING');
 
     if (pendingOrders.length === 0) {
       console.log('⏭️ [AUTO-CHECK] No pending orders to check');
       return;
     }
 
-    console.log('🔄 [AUTO-CHECK] Found', pendingOrders.length, 'pending order(s). Setting up auto-check...');
+    console.log(
+      '🔄 [AUTO-CHECK] Found',
+      pendingOrders.length,
+      'pending order(s). Setting up auto-check...'
+    );
 
     const checkPendingOrders = async () => {
       console.log('🔄 [AUTO-CHECK] Checking status of pending orders...');
@@ -160,18 +159,6 @@ const MyPage = () => {
     onQrModalOpen();
   };
 
-  // Copy activation code to clipboard
-  const [copied, setCopied] = useState(false);
-  const handleCopyCode = async (code) => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-
   // Open cancel confirmation modal
   const handleCancelClick = (order) => {
     setOrderToCancel(order);
@@ -189,9 +176,9 @@ const MyPage = () => {
       const result = await cancelOrder(orderToCancel.id, user.id);
       if (result.success) {
         // Update the order in local state
-        setOrders(prev => prev.map(o =>
-          o.id === orderToCancel.id ? { ...o, order_status: 'CANCELLED' } : o
-        ));
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderToCancel.id ? { ...o, order_status: 'CANCELLED' } : o))
+        );
         onCancelSuccessOpen();
       }
     } catch (err) {
@@ -210,59 +197,12 @@ const MyPage = () => {
       const result = await checkOrderStatus(orderId);
       if (result.data) {
         // Update the order in local state
-        setOrders(prev => prev.map(o =>
-          o.id === orderId ? result.data : o
-        ));
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? result.data : o)));
       }
     } catch (err) {
       console.error('Failed to check status:', err);
     } finally {
       setCheckingStatus(null);
-    }
-  };
-
-
-  // Share or download QR code
-  const handleShareQr = async () => {
-    if (!selectedOrder?.qr_code_url) return;
-
-    const qrCodeUrl = selectedOrder.qr_code_url;
-
-    try {
-      // Try to fetch the image as a blob
-      const response = await fetch(qrCodeUrl);
-      const blob = await response.blob();
-      const file = new File([blob], `onesim-qr-${selectedOrder.iccid}.png`, { type: 'image/png' });
-
-      // Check if Web Share API is available and can share files
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'OneSIM QR-код',
-          text: `QR-код для активации eSIM (${selectedOrder.package_name})`,
-          files: [file],
-        });
-      } else {
-        // Fallback: Download the image
-        const link = document.createElement('a');
-        link.href = qrCodeUrl;
-        link.download = `onesim-qr-${selectedOrder.iccid}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      console.error('Failed to share QR code:', err);
-      // If sharing fails, try to just download
-      try {
-        const link = document.createElement('a');
-        link.href = qrCodeUrl;
-        link.download = `onesim-qr-${selectedOrder.iccid}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (downloadErr) {
-        console.error('Failed to download QR code:', downloadErr);
-      }
     }
   };
 
@@ -314,211 +254,190 @@ const MyPage = () => {
         </Tabs>
       </Container>
 
-      {/* QR Code Modal */}
-      <Modal isOpen={isQrModalOpen} onClose={onQrModalClose} isCentered size="md">
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent mx={4} borderRadius="2xl">
-          <ModalHeader>
-            <HStack spacing={3}>
-              <Box bg="purple.100" p={2} borderRadius="lg">
-                <QrCode size={24} color="#7c3aed" />
-              </Box>
-              <Text>QR-код для активации</Text>
-            </HStack>
+      {/* QR Code Modal - New Design */}
+      <Modal isOpen={isQrModalOpen} onClose={onQrModalClose} isCentered size="lg">
+        <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="3xl" maxW="500px">
+          <ModalHeader textAlign="center" pt={8} pb={4}>
+            <Text fontSize="2xl" fontWeight="700" color="gray.800">
+              {getTranslation(currentLanguage, 'myPage.qrModal.title')}
+            </Text>
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody pb={6}>
+          <ModalBody pb={8} px={8}>
             {selectedOrder && (
-              <VStack spacing={4}>
-                {/* Security Warning */}
-                <Alert
-                  status="warning"
-                  borderRadius="xl"
-                  bg="orange.50"
-                  borderWidth="1px"
-                  borderColor="orange.200"
-                >
-                  <Shield size={20} color="#f97316" style={{ marginRight: '12px', flexShrink: 0 }} />
-                  <VStack align="start" spacing={1} w="full">
-                    <Text fontSize="sm" fontWeight="600" color="orange.800">
-                      Важная информация
-                    </Text>
-                    <Text fontSize="xs" color="orange.700">
-                      • Не делитесь этим QR-кодом с другими людьми - они смогут легко установить ваш eSIM
-                      <br />
-                      • После активации eSIM его невозможно отменить или вернуть
-                    </Text>
-                  </VStack>
-                </Alert>
-
-                {/* QR Code */}
-                {selectedOrder.qr_code_url ? (
-                  <>
+              <VStack spacing={5}>
+                {/* Country Flag + Plan Name */}
+                <HStack spacing={3} justify="center">
+                  {selectedOrder.country_code && (
                     <Box
-                      bg="white"
-                      p={4}
-                      borderRadius="xl"
-                      border="2px solid"
-                      borderColor="purple.100"
-                      w="full"
+                      borderRadius="lg"
+                      overflow="hidden"
+                      width="32px"
+                      height="24px"
+                      border="1px solid"
+                      borderColor="gray.200"
+                      flexShrink={0}
                     >
-                      <Image
-                        src={selectedOrder.qr_code_url}
-                        alt="QR Code"
-                        maxW="250px"
-                        mx="auto"
+                      <CountryFlag
+                        code={selectedOrder.country_code}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </Box>
+                  )}
+                  <Text fontSize="lg" fontWeight="600" color="gray.700">
+                    {selectedOrder.package_name}
+                  </Text>
+                </HStack>
 
-                    {/* Quick Install Buttons */}
-                    {selectedOrder.activation_code && (
-                      <VStack spacing={3} w="full">
-                        {/* iOS Quick Install Button */}
-                        <Box w="full">
-                          <Button
-                            as="a"
-                            href={`https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.activation_code)}`}
-                            w="full"
-                            size="lg"
-                            bg="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-                            color="white"
-                            _hover={{
-                              opacity: 0.9,
-                              transform: 'translateY(-2px)',
-                              boxShadow: 'lg'
-                            }}
-                            _active={{ transform: 'translateY(0)' }}
-                            leftIcon={<Apple size={20} />}
-                            boxShadow="md"
-                            transition="all 0.2s"
-                            fontWeight="600"
-                          >
-                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
-                          </Button>
-                          <Text fontSize="xs" color="gray.500" mt={1} textAlign="center">
-                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
-                          </Text>
-                        </Box>
-
-                        {/* Android Quick Install Button */}
-                        <Box w="full">
-                          <Button
-                            as="a"
-                            href={`https://esimsetup.android.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.activation_code)}`}
-                            w="full"
-                            size="lg"
-                            bg="linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                            color="white"
-                            _hover={{
-                              opacity: 0.9,
-                              transform: 'translateY(-2px)',
-                              boxShadow: 'lg'
-                            }}
-                            _active={{ transform: 'translateY(0)' }}
-                            leftIcon={<Smartphone size={20} />}
-                            boxShadow="md"
-                            transition="all 0.2s"
-                            fontWeight="600"
-                          >
-                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
-                          </Button>
-                          <Text fontSize="xs" color="gray.500" mt={1} textAlign="center">
-                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
-                          </Text>
-                        </Box>
-                      </VStack>
-                    )}
-                  </>
-                ) : selectedOrder.activation_code ? (
+                {/* QR Code */}
+                {selectedOrder.qr_code_url && (
                   <Box
-                    bg="gray.50"
-                    p={4}
-                    borderRadius="xl"
+                    bg="gray.100"
+                    p={8}
+                    borderRadius="2xl"
                     w="full"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
                   >
-                    <Text fontSize="xs" color="gray.500" mb={2}>Код активации:</Text>
-                    <HStack justify="space-between">
-                      <Text
-                        fontFamily="mono"
-                        fontSize="sm"
-                        fontWeight="600"
-                        wordBreak="break-all"
-                      >
-                        {selectedOrder.activation_code}
-                      </Text>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        colorScheme="purple"
-                        onClick={() => handleCopyCode(selectedOrder.activation_code)}
-                      >
-                        {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
-                      </Button>
-                    </HStack>
-                  </Box>
-                ) : null}
-
-                {/* Activation Link Button */}
-                {selectedOrder.short_url && (
-                  <Button
-                    as="a"
-                    href={selectedOrder.short_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    w="full"
-                    size="lg"
-                    bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                    color="white"
-                    _hover={{ opacity: 0.9, transform: 'translateY(-1px)' }}
-                    _active={{ transform: 'translateY(0)' }}
-                    rightIcon={<ExternalLink size={18} />}
-                    boxShadow="md"
-                    transition="all 0.2s"
-                  >
-                    Открыть ссылку активации
-                  </Button>
-                )}
-
-                {/* SM-DP+ Address */}
-                {selectedOrder.smdp_address && (
-                  <Box bg="blue.50" p={4} borderRadius="xl" w="full">
-                    <Text fontSize="xs" color="blue.600" mb={1}>SM-DP+ адрес:</Text>
-                    <Text fontSize="sm" fontWeight="600" fontFamily="mono">
-                      {selectedOrder.smdp_address}
-                    </Text>
+                    <Image
+                      src={selectedOrder.qr_code_url}
+                      alt="QR Code"
+                      maxW="200px"
+                      mx="auto"
+                    />
                   </Box>
                 )}
 
                 {/* Instructions */}
-                <Alert status="info" borderRadius="lg">
-                  <Info size={20} style={{ marginRight: '12px', flexShrink: 0 }} />
-                  <Text fontSize="sm">
-                    Откройте настройки телефона, перейдите в раздел "Сотовая связь" и отсканируйте QR-код или используйте ссылку активации выше для установки eSIM.
+                <Text fontSize="sm" color="gray.600" textAlign="center" lineHeight="1.6">
+                  {getTranslation(currentLanguage, 'myPage.qrModal.instructions')}
+                </Text>
+
+                {/* Quick Install Buttons - Side by Side */}
+                {selectedOrder.activation_code && (
+                  <Grid templateColumns="repeat(2, 1fr)" gap={3} w="full">
+                    {/* iOS Quick Install Button */}
+                    <Button
+                      as="a"
+                      href={`https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(
+                        selectedOrder.activation_code
+                      )}`}
+                      size="lg"
+                      variant="outline"
+                      borderWidth="2px"
+                      borderColor="gray.300"
+                      color="gray.700"
+                      borderRadius="xl"
+                      _hover={{
+                        borderColor: 'gray.400',
+                        bg: 'gray.50',
+                      }}
+                      py={6}
+                      h="auto"
+                      flexDirection="column"
+                      gap={2}
+                    >
+                      <Apple size={24} />
+                      <VStack spacing={0}>
+                        <Text fontSize="sm" fontWeight="600">
+                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500" fontWeight="400">
+                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
+                        </Text>
+                      </VStack>
+                    </Button>
+
+                    {/* Android Quick Install Button */}
+                    <Button
+                      as="a"
+                      href={`https://esimsetup.android.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(
+                        selectedOrder.activation_code
+                      )}`}
+                      size="lg"
+                      variant="outline"
+                      borderWidth="2px"
+                      borderColor="gray.300"
+                      color="gray.700"
+                      borderRadius="xl"
+                      _hover={{
+                        borderColor: 'gray.400',
+                        bg: 'gray.50',
+                      }}
+                      py={6}
+                      h="auto"
+                      flexDirection="column"
+                      gap={2}
+                    >
+                      <Smartphone size={24} />
+                      <VStack spacing={0}>
+                        <Text fontSize="sm" fontWeight="600">
+                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
+                        </Text>
+                        <Text fontSize="xs" color="gray.500" fontWeight="400">
+                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
+                        </Text>
+                      </VStack>
+                    </Button>
+                  </Grid>
+                )}
+
+                {/* Expiration Date */}
+                {selectedOrder.expiry_date && (
+                  <Text fontSize="sm" color="gray.600" fontWeight="500">
+                    {getTranslation(currentLanguage, 'myPage.qrModal.installBefore')}{' '}
+                    {new Date(selectedOrder.expiry_date).toLocaleString(
+                      currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
+                      {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      }
+                    )}
                   </Text>
-                </Alert>
+                )}
+
+                {/* Troubleshooting Link */}
+                <VStack spacing={1}>
+                  <Text fontSize="sm" color="gray.600">
+                    {getTranslation(currentLanguage, 'myPage.qrModal.troubleShooting')}
+                  </Text>
+                  <Text fontSize="sm" color="gray.600">
+                    {getTranslation(currentLanguage, 'myPage.qrModal.checkInstructions')}{' '}
+                    <Text
+                      as="a"
+                      href="/how-to-install"
+                      color="gray.800"
+                      fontWeight="600"
+                      textDecoration="underline"
+                      _hover={{ color: 'purple.600' }}
+                    >
+                      {getTranslation(currentLanguage, 'myPage.qrModal.instructionsLink')}
+                    </Text>
+                  </Text>
+                </VStack>
+
+                {/* Close Button */}
+                <Button
+                  onClick={onQrModalClose}
+                  w="full"
+                  size="lg"
+                  bg="gray.200"
+                  color="gray.700"
+                  borderRadius="xl"
+                  _hover={{ bg: 'gray.300' }}
+                  fontWeight="600"
+                >
+                  {getTranslation(currentLanguage, 'myPage.qrModal.close')}
+                </Button>
               </VStack>
             )}
           </ModalBody>
-          <ModalFooter gap={3}>
-            <Button
-              variant="outline"
-              colorScheme="purple"
-              leftIcon={<Share2 size={18} />}
-              onClick={handleShareQr}
-              flex={1}
-            >
-              Поделиться
-            </Button>
-            <Button
-              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-              color="white"
-              _hover={{ opacity: 0.9 }}
-              onClick={onQrModalClose}
-              flex={1}
-            >
-              Закрыть
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
 
