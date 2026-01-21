@@ -9,7 +9,6 @@ import {
   Button,
   Progress,
   Alert,
-  AlertIcon,
   Grid,
   Spinner,
 } from '@chakra-ui/react';
@@ -30,7 +29,6 @@ import {
   getEsimStatusColor,
   queryEsimProfile,
   shouldShowUsage,
-  canCancelEsim,
 } from '../services/orderService';
 
 const OrderCard = ({ order, onActivate, onViewDetails }) => {
@@ -40,7 +38,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
   // State for LIVE data from API
   const [liveData, setLiveData] = useState(null);
   const [loadingLiveData, setLoadingLiveData] = useState(false);
-  const [liveDataError, setLiveDataError] = useState(null);
 
   // Fetch LIVE data for ALLOCATED orders
   useEffect(() => {
@@ -57,7 +54,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
       console.log('🔄 [OrderCard LIVE] Fetching live data for Order No:', order.order_no);
       setLoadingLiveData(true);
-      setLiveDataError(null);
 
       try {
         // Query the eSIM profile to get CURRENT status
@@ -91,7 +87,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
         }
       } catch (err) {
         console.error('❌ [OrderCard LIVE] Failed to fetch live data:', err.message);
-        setLiveDataError(err.message);
       } finally {
         setLoadingLiveData(false);
       }
@@ -106,7 +101,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
   // Determine what to show based on LIVE status
   const showUsage = shouldShowUsage(esimStatus, smdpStatus);
-  const isCancellable = canCancelEsim(esimStatus, smdpStatus);
 
   // Usage data from live response
   const totalVolume = liveData?.totalVolume || 0;
