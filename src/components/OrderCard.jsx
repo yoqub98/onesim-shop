@@ -15,7 +15,7 @@ import {
   CalendarIcon,
   SignalIcon,
   ClockIcon,
-  InformationCircleIcon,
+
 } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
