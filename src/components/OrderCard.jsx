@@ -7,18 +7,16 @@ import {
   HStack,
   Badge,
   Button,
-  Progress,
-  Alert,
   Grid,
   Spinner,
 } from '@chakra-ui/react';
 import {
-  Database,
-  Calendar,
-  Signal,
-  Clock,
-  Info,
-} from 'lucide-react';
+  CircleStackIcon,
+  CalendarIcon,
+  SignalIcon,
+  ClockIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getCountryName, getTranslation } from '../config/i18n';
@@ -42,7 +40,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
   // Fetch LIVE data for ALLOCATED orders
   useEffect(() => {
     const fetchLiveData = async () => {
-      // Only fetch for ALLOCATED orders that have an order_no
       if (order.order_status !== 'ALLOCATED' || !order.order_no) {
         console.log('⏭️ [OrderCard LIVE] Skipping - not ALLOCATED or no order_no:', {
           orderId: order.id,
@@ -56,7 +53,6 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
       setLoadingLiveData(true);
 
       try {
-        // Query the eSIM profile to get CURRENT status
         const response = await queryEsimProfile(order.order_no);
 
         console.log('✅ [OrderCard LIVE] Response received:', response);
@@ -130,7 +126,7 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
     const locale = currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU';
     return date.toLocaleDateString(locale, {
       day: 'numeric',
-      month: 'long',
+      month: 'short',
       year: 'numeric',
     });
   };
@@ -163,31 +159,49 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
     (esimStatus === 'GOT_RESOURCE' || smdpStatus === 'RELEASED') &&
     showQrButton;
 
+  // Get badge styles based on status
+  const getBadgeStyles = () => {
+    const colorMap = {
+      green: { bg: '#D1FAE5', color: '#065F46' },
+      teal: { bg: '#CCFBF1', color: '#115E59' },
+      blue: { bg: '#DBEAFE', color: '#1E40AF' },
+      yellow: { bg: '#FEF3C7', color: '#92400E' },
+      orange: { bg: '#FFEDD5', color: '#9A3412' },
+      red: { bg: '#FEE2E2', color: '#991B1B' },
+      gray: { bg: '#F3F4F6', color: '#374151' },
+      purple: { bg: '#EDE9FE', color: '#5B21B6' },
+    };
+
+    return colorMap[statusColor] || colorMap.gray;
+  };
+
+  const badgeStyles = getBadgeStyles();
+
   return (
     <Box
       bg="white"
-      borderRadius="24px"
+      borderRadius="28px"
       p={6}
-      shadow="sm"
+      boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04)"
       border="1px solid"
       borderColor="gray.100"
       transition="all 0.2s"
-      _hover={{ shadow: 'md', borderColor: 'purple.200' }}
+      _hover={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06)' }}
       opacity={isCancelled ? 0.6 : 1}
+      fontFamily="'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     >
-      <VStack align="stretch" spacing={4}>
+      <VStack align="stretch" spacing={6}>
         {/* Header */}
-        <HStack justify="space-between" align="start" flexWrap="wrap" gap={2}>
+        <HStack justify="space-between" align="start">
           <HStack spacing={3} flex="1">
             {order.country_code && (
               <Box
-                borderRadius="lg"
+                borderRadius="14px"
                 overflow="hidden"
                 width="48px"
-                height="36px"
-                border="1px solid"
-                borderColor="gray.200"
+                height="48px"
                 flexShrink={0}
+                boxShadow="sm"
               >
                 <CountryFlag
                   code={order.country_code}
@@ -196,16 +210,16 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
               </Box>
             )}
             <VStack align="flex-start" spacing={0.5}>
-              <Text fontWeight="700" fontSize="lg" color="gray.800">
-                {order.package_name || `eSIM ${countryName}`}
+              <Text fontWeight="800" fontSize="lg" color="gray.900">
+                {order.package_name || `${countryName} ${order.data_amount}`}
               </Text>
-              <Text fontSize="xs" color="gray.500">
+              <Text fontSize="sm" color="gray.500">
                 {t('myPage.orders.orderNumber')} : {order.order_no || order.id.slice(0, 8)}
               </Text>
             </VStack>
           </HStack>
 
-          {/* Status Badge - show loading indicator if fetching */}
+          {/* Status Badge */}
           {loadingLiveData ? (
             <HStack spacing={2}>
               <Spinner size="xs" color="purple.500" />
@@ -215,10 +229,11 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
             </HStack>
           ) : (
             <Badge
-              colorScheme={statusColor}
+              bg={badgeStyles.bg}
+              color={badgeStyles.color}
               fontSize="sm"
               px={4}
-              py={1.5}
+              py={2}
               borderRadius="full"
               fontWeight="600"
             >
@@ -227,87 +242,83 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
           )}
         </HStack>
 
-        {/* Details Grid - 4 columns */}
-        <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={4}>
+        {/* Stats Grid - 4 columns */}
+        <Grid templateColumns="repeat(4, 1fr)" gap={4}>
           {/* Data Volume */}
-          <VStack align="flex-start" spacing={0.5}>
+          <VStack align="flex-start" spacing={1}>
+            <Text fontSize="xs" color="gray.500">
+              {t('myPage.orders.dataVolume')}
+            </Text>
             <HStack spacing={1.5}>
-              <Database size={14} color="#9ca3af" />
-              <Text fontSize="xs" color="gray.500">
-                {t('myPage.orders.dataVolume')}
+              <CircleStackIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
+              <Text fontSize="sm" fontWeight="800" color="gray.900">
+                {order.data_amount || '-'}
               </Text>
             </HStack>
-            <Text fontSize="sm" fontWeight="700" color="gray.800">
-              {order.data_amount || '-'}
-            </Text>
           </VStack>
 
           {/* Coverage */}
-          <VStack align="flex-start" spacing={0.5}>
+          <VStack align="flex-start" spacing={1}>
+            <Text fontSize="xs" color="gray.500">
+              {t('myPage.orders.coverage')}
+            </Text>
             <HStack spacing={1.5}>
-              <Signal size={14} color="#9ca3af" />
-              <Text fontSize="xs" color="gray.500">
-                {t('myPage.orders.coverage')}
+              <SignalIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
+              <Text fontSize="sm" fontWeight="800" color="gray.900">
+                5G
               </Text>
             </HStack>
-            <Text fontSize="sm" fontWeight="700" color="gray.800">
-              5G
-            </Text>
           </VStack>
 
           {/* Activation Date */}
-          <VStack align="flex-start" spacing={0.5}>
+          <VStack align="flex-start" spacing={1}>
+            <Text fontSize="xs" color="gray.500">
+              {t('myPage.orders.activationDate')}
+            </Text>
             <HStack spacing={1.5}>
-              <Calendar size={14} color="#9ca3af" />
-              <Text fontSize="xs" color="gray.500">
-                {t('myPage.orders.activationDate')}
+              <CalendarIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
+              <Text fontSize="sm" fontWeight="800" color="gray.900">
+                {expiryDate || '-'}
               </Text>
             </HStack>
-            <Text fontSize="sm" fontWeight="700" color="gray.800">
-              {expiryDate ? expiryDate : t('myPage.orders.notActivated')}
-            </Text>
           </VStack>
 
           {/* Duration */}
-          <VStack align="flex-start" spacing={0.5}>
+          <VStack align="flex-start" spacing={1}>
+            <Text fontSize="xs" color="gray.500">
+              {t('myPage.orders.duration')}
+            </Text>
             <HStack spacing={1.5}>
-              <Clock size={14} color="#9ca3af" />
-              <Text fontSize="xs" color="gray.500">
-                {t('myPage.orders.duration')}
+              <ClockIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
+              <Text fontSize="sm" fontWeight="800" color="gray.900">
+                {order.validity_days ? `${order.validity_days} ${t('myPage.orders.days')}` : '-'}
               </Text>
             </HStack>
-            <Text fontSize="sm" fontWeight="700" color="gray.800">
-              {order.validity_days ? `${order.validity_days} ${t('myPage.orders.days')}` : '-'}
-            </Text>
           </VStack>
         </Grid>
 
         {/* Data Usage Progress Bar - show for active eSIMs */}
         {!loadingLiveData && showUsage && totalVolume > 0 && (
-          <Box width="full" bg="gray.50" p={3} borderRadius="lg">
+          <Box width="full" mb={4}>
             <VStack spacing={2} align="stretch">
-              <HStack justify="space-between" fontSize="xs" color="gray.600">
-                <Text fontWeight="600">{t('myPage.orders.dataUsed')}: {usagePercentage.toFixed(1)}%</Text>
-                <Text fontWeight="600">
+              <HStack justify="space-between" fontSize="sm" color="gray.600">
+                <Text>
+                  {t('myPage.orders.dataUsed')}: {usagePercentage.toFixed(1)}%
+                </Text>
+                <Text fontWeight="700">
                   {formatDataSize(orderUsage)} / {formatDataSize(totalVolume)}
                 </Text>
               </HStack>
-              <Progress
-                value={usagePercentage}
-                size="sm"
-                colorScheme={
-                  usagePercentage >= 100
-                    ? 'red'
-                    : usagePercentage > 80
-                    ? 'orange'
-                    : usagePercentage > 50
-                    ? 'yellow'
-                    : 'purple'
-                }
-                borderRadius="full"
-                bg="gray.200"
-              />
-              <Text fontSize="xs" color="gray.500" textAlign="right">
+              <Box width="full" bg="gray.100" borderRadius="full" h="8px" overflow="hidden">
+                <Box
+                  h="full"
+                  bg="linear-gradient(to right, #1f2937, #374151)"
+                  borderRadius="full"
+                  width={`${usagePercentage}%`}
+                  transition="width 0.3s"
+                />
+              </Box>
+              <Text fontSize="sm" color="gray.500">
                 {formatDataSize(remainingData)} {t('myPage.orders.dataRemaining')}
               </Text>
             </VStack>
@@ -316,68 +327,93 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
         {/* Warning Info Box - for ready to activate */}
         {isReadyToActivate && (
-          <Alert
-            status="info"
-            borderRadius="xl"
-            bg="blue.50"
-            borderWidth="1px"
-            borderColor="blue.200"
-            py={3}
+          <Box
+            bg="#F6F8FA"
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="18px"
+            p={4}
+            mb={4}
           >
-            <Info size={18} color="#3b82f6" style={{ marginRight: '10px', flexShrink: 0 }} />
-            <VStack align="start" spacing={0} w="full">
-              <Text fontSize="sm" fontWeight="600" color="blue.800">
-                {t('myPage.orders.readyToActivateWarning')}
-              </Text>
-              <Text fontSize="xs" color="blue.700" mt={1}>
-                {t('myPage.orders.readyToActivateMessage')}
-              </Text>
-            </VStack>
-          </Alert>
+            <HStack align="start" spacing={3}>
+              <Box flexShrink={0} mt={0.5}>
+                <Box
+                  width="20px"
+                  height="20px"
+                  borderRadius="full"
+                  border="2px solid"
+                  borderColor="#F97316"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Text fontSize="xs" fontWeight="800" color="#F97316">
+                    i
+                  </Text>
+                </Box>
+              </Box>
+              <VStack align="start" spacing={1} flex="1">
+                <Text fontSize="sm" fontWeight="600" color="gray.900">
+                  {t('myPage.orders.readyToActivateWarning')}
+                </Text>
+                <Text fontSize="sm" color="gray.600" lineHeight="1.6">
+                  {t('myPage.orders.readyToActivateMessage')}
+                </Text>
+              </VStack>
+            </HStack>
+          </Box>
         )}
 
-        {/* Price Section */}
-        <HStack justify="space-between" pt={2}>
-          <Text fontSize="sm" color="gray.500" fontWeight="600">
-            {t('myPage.orders.price')}
-          </Text>
-          <Text fontSize="xl" fontWeight="700" color="gray.800">
-            {order.price_uzs ? `${Number(order.price_uzs).toLocaleString('ru-RU')} UZS` : '-'}
-          </Text>
-        </HStack>
+        {/* Footer - Price & Buttons */}
+        <HStack justify="space-between" align="center">
+          <VStack align="start" spacing={1}>
+            <Text fontSize="xs" color="#F97316" fontWeight="600">
+              {t('myPage.orders.price')}
+            </Text>
+            <Text fontSize="2xl" fontWeight="800" color="gray.900">
+              {order.price_uzs ? Number(order.price_uzs).toLocaleString('ru-RU') : '-'}{' '}
+              <Text as="span" fontSize="lg">
+                UZS
+              </Text>
+            </Text>
+          </VStack>
 
-        {/* Action Buttons */}
-        <HStack spacing={3} width="full">
-          {/* Details Button - always show */}
-          <Button
-            size="md"
-            flex={isReadyToActivate ? '1' : 'auto'}
-            variant="outline"
-            colorScheme="gray"
-            borderRadius="full"
-            onClick={() => onViewDetails && onViewDetails(order)}
-            fontWeight="600"
-          >
-            {t('myPage.orders.details')}
-          </Button>
-
-          {/* Activate Button - only for ready to activate */}
-          {isReadyToActivate && (
+          {/* Action Buttons */}
+          <HStack spacing={3}>
             <Button
               size="md"
-              flex="1"
-              bg="linear-gradient(135deg, #f97316 0%, #ea580c 100%)"
-              color="white"
+              px={6}
+              py={3}
+              variant="outline"
+              borderWidth="2px"
+              borderColor="gray.200"
+              color="gray.700"
               borderRadius="full"
-              _hover={{ opacity: 0.9, transform: 'translateY(-2px)' }}
-              _active={{ transform: 'translateY(0)' }}
-              onClick={() => onActivate && onActivate(order)}
+              onClick={() => onViewDetails && onViewDetails(order)}
               fontWeight="600"
-              boxShadow="md"
+              _hover={{ bg: 'gray.50' }}
+              transition="all 0.2s"
             >
-              {t('myPage.orders.activate')}
+              {t('myPage.orders.details')}
             </Button>
-          )}
+
+            {isReadyToActivate && (
+              <Button
+                size="md"
+                px={6}
+                py={3}
+                bg="#FE4F18"
+                color="white"
+                borderRadius="full"
+                onClick={() => onActivate && onActivate(order)}
+                fontWeight="600"
+                _hover={{ opacity: 0.9 }}
+                transition="all 0.2s"
+              >
+                {t('myPage.orders.activate')}
+              </Button>
+            )}
+          </HStack>
         </HStack>
       </VStack>
     </Box>
