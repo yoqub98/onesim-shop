@@ -37,7 +37,8 @@ import {
   ExternalLink,
   Shield,
   Info,
-  Zap,
+  Apple,
+  Smartphone,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
@@ -369,28 +370,63 @@ const MyPage = () => {
                       />
                     </Box>
 
-                    {/* Quick Install Button */}
-                    {(selectedOrder.short_url || selectedOrder.qr_code_data) && (
-                      <Button
-                        as="a"
-                        href={selectedOrder.short_url || `https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.qr_code_data)}`}
-                        w="full"
-                        size="lg"
-                        bg="linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                        color="white"
-                        _hover={{
-                          opacity: 0.9,
-                          transform: 'translateY(-2px)',
-                          boxShadow: 'lg'
-                        }}
-                        _active={{ transform: 'translateY(0)' }}
-                        leftIcon={<Zap size={20} />}
-                        boxShadow="md"
-                        transition="all 0.2s"
-                        fontWeight="600"
-                      >
-                        {getTranslation(currentLanguage, 'myPage.qrModal.quickInstall')}
-                      </Button>
+                    {/* Quick Install Buttons */}
+                    {selectedOrder.activation_code && (
+                      <VStack spacing={3} w="full">
+                        {/* iOS Quick Install Button */}
+                        <Box w="full">
+                          <Button
+                            as="a"
+                            href={`https://esimsetup.apple.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.activation_code)}`}
+                            w="full"
+                            size="lg"
+                            bg="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                            color="white"
+                            _hover={{
+                              opacity: 0.9,
+                              transform: 'translateY(-2px)',
+                              boxShadow: 'lg'
+                            }}
+                            _active={{ transform: 'translateY(0)' }}
+                            leftIcon={<Apple size={20} />}
+                            boxShadow="md"
+                            transition="all 0.2s"
+                            fontWeight="600"
+                          >
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
+                          </Button>
+                          <Text fontSize="xs" color="gray.500" mt={1} textAlign="center">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
+                          </Text>
+                        </Box>
+
+                        {/* Android Quick Install Button */}
+                        <Box w="full">
+                          <Button
+                            as="a"
+                            href={`https://esimsetup.android.com/esim_qrcode_provisioning?carddata=${encodeURIComponent(selectedOrder.activation_code)}`}
+                            w="full"
+                            size="lg"
+                            bg="linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                            color="white"
+                            _hover={{
+                              opacity: 0.9,
+                              transform: 'translateY(-2px)',
+                              boxShadow: 'lg'
+                            }}
+                            _active={{ transform: 'translateY(0)' }}
+                            leftIcon={<Smartphone size={20} />}
+                            boxShadow="md"
+                            transition="all 0.2s"
+                            fontWeight="600"
+                          >
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
+                          </Button>
+                          <Text fontSize="xs" color="gray.500" mt={1} textAlign="center">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
+                          </Text>
+                        </Box>
+                      </VStack>
                     )}
                   </>
                 ) : selectedOrder.activation_code ? (
