@@ -30,13 +30,13 @@ const MyEsims = ({
   const t = (key) => getTranslation(currentLanguage, key);
 
   return (
-    <VStack align="stretch" spacing={4}>
+    <VStack align="stretch" spacing={{ base: 3, md: 4 }}>
       {/* Header */}
       <HStack justify="space-between" flexWrap="wrap" gap={2}>
-        <Heading size="md" color="gray.800">{t('myPage.orders.title')}</Heading>
+        <Heading size={{ base: 'sm', md: 'md' }} color="gray.800">{t('myPage.orders.title')}</Heading>
         <Button
-          px={6}
-          py={4}
+          px={{ base: 4, md: 6 }}
+          py={{ base: 3, md: 4 }}
           h="auto"
           variant="outline"
           borderWidth="2px"
@@ -44,11 +44,11 @@ const MyEsims = ({
           color="#4B5563"
           bg="white"
           borderRadius="full"
-          leftIcon={<RefreshCw size={16} />}
+          leftIcon={<RefreshCw size={{ base: 14, md: 16 }} />}
           onClick={fetchOrders}
           isLoading={isLoading}
           fontWeight="700"
-          fontSize="md"
+          fontSize={{ base: 'sm', md: 'md' }}
           _hover={{
             bg: '#1F2937',
             color: 'white',
@@ -57,21 +57,24 @@ const MyEsims = ({
           }}
           transition="all 0.2s ease-in-out"
         >
-          {t('myPage.orders.refresh')}
+          <Text display={{ base: 'none', sm: 'inline' }}>{t('myPage.orders.refresh')}</Text>
+          <Text display={{ base: 'inline', sm: 'none' }}>
+            {currentLanguage === 'uz' ? 'Yangilash' : 'Обновить'}
+          </Text>
         </Button>
       </HStack>
 
       {/* Loading State */}
       {isLoading && (
-        <Box textAlign="center" py={12}>
-          <Spinner size="xl" color="purple.500" />
-          <Text mt={4} color="gray.600">{t('myPage.orders.loading')}</Text>
+        <Box textAlign="center" py={{ base: 8, md: 12 }}>
+          <Spinner size={{ base: 'lg', md: 'xl' }} color="purple.500" />
+          <Text mt={4} color="gray.600" fontSize={{ base: 'sm', md: 'md' }}>{t('myPage.orders.loading')}</Text>
         </Box>
       )}
 
       {/* Error State */}
       {error && !isLoading && (
-        <Alert status="error" borderRadius="lg">
+        <Alert status="error" borderRadius={{ base: 'lg', md: 'xl' }} fontSize={{ base: 'sm', md: 'md' }}>
           <AlertIcon />
           {error}
         </Alert>
@@ -81,18 +84,18 @@ const MyEsims = ({
       {!isLoading && !error && orders.length === 0 && (
         <Box
           bg="white"
-          borderRadius="2xl"
-          p={12}
+          borderRadius={{ base: 'xl', md: '2xl' }}
+          p={{ base: 8, md: 12 }}
           textAlign="center"
           shadow="sm"
         >
-          <Box bg="gray.100" p={4} borderRadius="full" display="inline-flex" mb={4}>
-            <Package size={40} color="#9ca3af" />
+          <Box bg="gray.100" p={{ base: 3, md: 4 }} borderRadius="full" display="inline-flex" mb={4}>
+            <Package size={{ base: 32, md: 40 }} color="#9ca3af" />
           </Box>
-          <Heading size="md" color="gray.700" mb={2}>
+          <Heading size={{ base: 'sm', md: 'md' }} color="gray.700" mb={2}>
             {t('myPage.empty.title')}
           </Heading>
-          <Text color="gray.500" mb={6}>
+          <Text color="gray.500" mb={6} fontSize={{ base: 'sm', md: 'md' }}>
             {t('myPage.empty.description')}
           </Text>
           <Button
@@ -101,6 +104,7 @@ const MyEsims = ({
             bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             color="white"
             _hover={{ opacity: 0.9 }}
+            size={{ base: 'md', md: 'lg' }}
           >
             {t('myPage.empty.button')}
           </Button>
@@ -109,7 +113,7 @@ const MyEsims = ({
 
       {/* Orders List */}
       {!isLoading && !error && orders.length > 0 && (
-        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
+        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={{ base: 3, md: 6 }}>
           {orders.map((order) => (
             <OrderCard
               key={order.id}

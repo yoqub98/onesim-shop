@@ -210,15 +210,16 @@ const MyPage = () => {
   console.log('🎨 About to render MyPage JSX, orders count:', orders.length);
 
   return (
-    <Box minH="calc(100vh - 80px)" bg="gray.50" py={10}>
-      <Container maxW="6xl">
+    <Box minH="calc(100vh - 80px)" bg="gray.50" py={{ base: 4, md: 10 }}>
+      <Container maxW="6xl" px={{ base: 3, md: 6 }}>
         <Tabs>
-          <TabList mb={6} bg="white" p={2} borderRadius="2xl" shadow="sm" border="1px solid" borderColor="gray.100">
+          <TabList mb={{ base: 4, md: 6 }} bg="white" p={{ base: 1.5, md: 2 }} borderRadius={{ base: 'xl', md: '2xl' }} shadow="sm" border="1px solid" borderColor="gray.100">
             <Tab
               fontWeight="700"
-              fontSize="md"
-              borderRadius="xl"
+              fontSize={{ base: 'sm', md: 'md' }}
+              borderRadius={{ base: 'lg', md: 'xl' }}
               color="gray.600"
+              px={{ base: 3, md: 4 }}
               _selected={{
                 bg: '#FE4F18',
                 color: 'white',
@@ -228,16 +229,18 @@ const MyPage = () => {
               }}
               transition="all 0.2s"
             >
-              <HStack spacing={2}>
-                <User size={18} />
-                <Text>Профиль</Text>
+              <HStack spacing={{ base: 1.5, md: 2 }}>
+                <User size={{ base: 16, md: 18 }} />
+                <Text display={{ base: 'none', sm: 'block' }}>Профиль</Text>
+                <Text display={{ base: 'block', sm: 'none' }}>Я</Text>
               </HStack>
             </Tab>
             <Tab
               fontWeight="700"
-              fontSize="md"
-              borderRadius="xl"
+              fontSize={{ base: 'sm', md: 'md' }}
+              borderRadius={{ base: 'lg', md: 'xl' }}
               color="gray.600"
+              px={{ base: 3, md: 4 }}
               _selected={{
                 bg: '#FE4F18',
                 color: 'white',
@@ -247,9 +250,9 @@ const MyPage = () => {
               }}
               transition="all 0.2s"
             >
-              <HStack spacing={2}>
-                <Package size={18} />
-                <Text>Мои eSIM</Text>
+              <HStack spacing={{ base: 1.5, md: 2 }}>
+                <Package size={{ base: 16, md: 18 }} />
+                <Text>eSIM</Text>
                 {orders.length > 0 && (
                   <Badge
                     bg="#FEF3C7"
@@ -257,6 +260,7 @@ const MyPage = () => {
                     borderRadius="full"
                     fontSize="xs"
                     fontWeight="700"
+                    px={{ base: 1.5, md: 2 }}
                   >
                     {orders.length}
                   </Badge>
@@ -290,26 +294,32 @@ const MyPage = () => {
       </Container>
 
       {/* QR Code Modal - New Design */}
-      <Modal isOpen={isQrModalOpen} onClose={onQrModalClose} isCentered size="lg">
+      <Modal isOpen={isQrModalOpen} onClose={onQrModalClose} isCentered size={{ base: 'full', md: 'lg' }}>
         <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
-        <ModalContent mx={4} borderRadius="3xl" maxW="500px">
-          <ModalHeader textAlign="center" pt={8} pb={4}>
-            <Text fontSize="2xl" fontWeight="700" color="gray.800">
+        <ModalContent
+          mx={{ base: 0, md: 4 }}
+          borderRadius={{ base: '0', md: '3xl' }}
+          maxW={{ base: '100%', md: '500px' }}
+          maxH={{ base: '100vh', md: 'auto' }}
+          my={{ base: 0, md: 'auto' }}
+        >
+          <ModalHeader textAlign="center" pt={{ base: 6, md: 8 }} pb={4}>
+            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="700" color="gray.800">
               {getTranslation(currentLanguage, 'myPage.qrModal.title')}
             </Text>
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={8} px={8}>
+          <ModalCloseButton top={{ base: 4, md: 3 }} right={{ base: 4, md: 3 }} />
+          <ModalBody pb={{ base: 6, md: 8 }} px={{ base: 5, md: 8 }} overflowY="auto">
             {selectedOrder && (
-              <VStack spacing={5}>
+              <VStack spacing={{ base: 4, md: 5 }}>
                 {/* Country Flag + Plan Name */}
                 <HStack spacing={3} justify="center">
                   {selectedOrder.country_code && (
                     <Box
                       borderRadius="lg"
                       overflow="hidden"
-                      width="32px"
-                      height="24px"
+                      width={{ base: '28px', md: '32px' }}
+                      height={{ base: '20px', md: '24px' }}
                       border="1px solid"
                       borderColor="gray.200"
                       flexShrink={0}
@@ -320,7 +330,7 @@ const MyPage = () => {
                       />
                     </Box>
                   )}
-                  <Text fontSize="lg" fontWeight="600" color="gray.700">
+                  <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="600" color="gray.700">
                     {selectedOrder.package_name}
                   </Text>
                 </HStack>
@@ -329,7 +339,7 @@ const MyPage = () => {
                 {selectedOrder.qr_code_url && (
                   <Box
                     bg="gray.100"
-                    p={8}
+                    p={{ base: 6, md: 8 }}
                     borderRadius="2xl"
                     w="full"
                     display="flex"
@@ -339,7 +349,7 @@ const MyPage = () => {
                     <Image
                       src={selectedOrder.qr_code_url}
                       alt="QR Code"
-                      maxW="200px"
+                      maxW={{ base: '180px', md: '200px' }}
                       mx="auto"
                     />
                   </Box>
@@ -347,11 +357,11 @@ const MyPage = () => {
 
                 {/* Instructions */}
                 <VStack spacing={2}>
-                  <Text fontSize="sm" color="gray.600" textAlign="center" lineHeight="1.6">
+                  <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600" textAlign="center" lineHeight="1.6">
                     {getTranslation(currentLanguage, 'myPage.qrModal.instructions')}
                   </Text>
                   {selectedOrder.expiry_date && (
-                    <Text fontSize="sm" color="gray.700" textAlign="center" fontWeight="600">
+                    <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.700" textAlign="center" fontWeight="600">
                       {getTranslation(currentLanguage, 'myPage.qrModal.installBefore')}{' '}
                       {new Date(selectedOrder.expiry_date).toLocaleString(
                         currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
@@ -370,7 +380,7 @@ const MyPage = () => {
 
                 {/* Quick Install Buttons - Side by Side */}
                 {selectedOrder.activation_code && (
-                  <VStack spacing={3} w="full">
+                  <VStack spacing={{ base: 2, md: 3 }} w="full">
                     {/* iOS Quick Install Button */}
                     <Button
                       as="a"
@@ -388,26 +398,26 @@ const MyPage = () => {
                         borderColor: '#FE4F18',
                         bg: 'gray.50',
                       }}
-                      px={6}
-                      py={4}
+                      px={{ base: 4, md: 6 }}
+                      py={{ base: 3, md: 4 }}
                       h="auto"
                       w="full"
                       justifyContent="space-between"
                     >
-                      <HStack spacing={4}>
+                      <HStack spacing={{ base: 3, md: 4 }}>
                         <Box flexShrink={0}>
-                          <AppleIcon style={{ width: '40px', height: '40px' }} />
+                          <AppleIcon style={{ width: '32px', height: '32px' }} />
                         </Box>
                         <VStack align="flex-start" spacing={0}>
-                          <Text fontSize="md" fontWeight="700" color="gray.900">
+                          <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight="700" color="gray.900">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
                           </Text>
-                          <Text fontSize="sm" color="gray.500" fontWeight="400">
+                          <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.500" fontWeight="400">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
                           </Text>
                         </VStack>
                       </HStack>
-                      <ChevronRight size={20} color="#9CA3AF" />
+                      <ChevronRight size={18} color="#9CA3AF" />
                     </Button>
 
                     {/* Android Quick Install Button */}
@@ -427,36 +437,36 @@ const MyPage = () => {
                         borderColor: '#FE4F18',
                         bg: 'gray.50',
                       }}
-                      px={6}
-                      py={4}
+                      px={{ base: 4, md: 6 }}
+                      py={{ base: 3, md: 4 }}
                       h="auto"
                       w="full"
                       justifyContent="space-between"
                     >
-                      <HStack spacing={4}>
+                      <HStack spacing={{ base: 3, md: 4 }}>
                         <Box flexShrink={0}>
-                          <AndroidIcon style={{ width: '40px', height: '40px' }} />
+                          <AndroidIcon style={{ width: '32px', height: '32px' }} />
                         </Box>
                         <VStack align="flex-start" spacing={0}>
-                          <Text fontSize="md" fontWeight="700" color="gray.900">
+                          <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight="700" color="gray.900">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
                           </Text>
-                          <Text fontSize="sm" color="gray.500" fontWeight="400">
+                          <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.500" fontWeight="400">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
                           </Text>
                         </VStack>
                       </HStack>
-                      <ChevronRight size={20} color="#9CA3AF" />
+                      <ChevronRight size={18} color="#9CA3AF" />
                     </Button>
                   </VStack>
                 )}
 
                 {/* Troubleshooting Link */}
                 <VStack spacing={1}>
-                  <Text fontSize="sm" color="gray.600">
+                  <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600">
                     {getTranslation(currentLanguage, 'myPage.qrModal.troubleShooting')}
                   </Text>
-                  <Text fontSize="sm" color="gray.600">
+                  <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.600" textAlign="center">
                     {getTranslation(currentLanguage, 'myPage.qrModal.checkInstructions')}{' '}
                     <Text
                       as="a"
@@ -472,7 +482,7 @@ const MyPage = () => {
                 </VStack>
 
                 {/* Terms and Conditions Agreement */}
-                <Text fontSize="xs" color="gray.500" textAlign="center" lineHeight="1.5">
+                <Text fontSize={{ base: '2xs', md: 'xs' }} color="gray.500" textAlign="center" lineHeight="1.5">
                   {currentLanguage === 'uz'
                     ? "eSIM-ni faollashtirish orqali siz bizning "
                     : "Активируя eSIM, вы соглашаетесь с нашими "}
@@ -500,8 +510,9 @@ const MyPage = () => {
                   borderRadius="full"
                   _hover={{ bg: 'gray.300' }}
                   fontWeight="600"
-                  py={6}
+                  py={{ base: 4, md: 6 }}
                   h="auto"
+                  fontSize={{ base: 'md', md: 'lg' }}
                 >
                   {getTranslation(currentLanguage, 'myPage.qrModal.close')}
                 </Button>
