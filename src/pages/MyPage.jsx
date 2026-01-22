@@ -24,7 +24,6 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Grid,
 } from '@chakra-ui/react';
 import {
   User,
@@ -32,9 +31,9 @@ import {
   XCircle,
   AlertTriangle,
   CheckCircle,
-  Apple,
-  Smartphone,
 } from 'lucide-react';
+import { ReactComponent as AppleIcon } from '../assets/icons/appleIcon.svg';
+import { ReactComponent as AndroidIcon } from '../assets/icons/androidIcon.svg';
 import CountryFlag from '../components/CountryFlag';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
@@ -352,7 +351,7 @@ const MyPage = () => {
 
                 {/* Quick Install Buttons - Side by Side */}
                 {selectedOrder.activation_code && (
-                  <Grid templateColumns="repeat(2, 1fr)" gap={3} w="full">
+                  <VStack spacing={3} w="full">
                     {/* iOS Quick Install Button */}
                     <Button
                       as="a"
@@ -362,27 +361,33 @@ const MyPage = () => {
                       size="lg"
                       variant="outline"
                       borderWidth="2px"
-                      borderColor="gray.300"
-                      color="gray.700"
-                      borderRadius="xl"
+                      borderColor="#FE4F18"
+                      bg="white"
+                      color="gray.800"
+                      borderRadius="full"
                       _hover={{
-                        borderColor: 'gray.400',
+                        borderColor: '#FE4F18',
                         bg: 'gray.50',
                       }}
-                      py={6}
+                      px={6}
+                      py={4}
                       h="auto"
-                      flexDirection="column"
-                      gap={2}
+                      w="full"
+                      justifyContent="flex-start"
                     >
-                      <Apple size={24} />
-                      <VStack spacing={0}>
-                        <Text fontSize="sm" fontWeight="600">
-                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500" fontWeight="400">
-                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
-                        </Text>
-                      </VStack>
+                      <HStack spacing={4} w="full">
+                        <Box flexShrink={0}>
+                          <AppleIcon style={{ width: '40px', height: '40px' }} />
+                        </Box>
+                        <VStack align="flex-start" spacing={0} flex="1">
+                          <Text fontSize="md" fontWeight="700" color="gray.900">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
+                          </Text>
+                          <Text fontSize="sm" color="gray.500" fontWeight="400">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOSHelper')}
+                          </Text>
+                        </VStack>
+                      </HStack>
                     </Button>
 
                     {/* Android Quick Install Button */}
@@ -394,29 +399,35 @@ const MyPage = () => {
                       size="lg"
                       variant="outline"
                       borderWidth="2px"
-                      borderColor="gray.300"
-                      color="gray.700"
-                      borderRadius="xl"
+                      borderColor="#FE4F18"
+                      bg="white"
+                      color="gray.800"
+                      borderRadius="full"
                       _hover={{
-                        borderColor: 'gray.400',
+                        borderColor: '#FE4F18',
                         bg: 'gray.50',
                       }}
-                      py={6}
+                      px={6}
+                      py={4}
                       h="auto"
-                      flexDirection="column"
-                      gap={2}
+                      w="full"
+                      justifyContent="flex-start"
                     >
-                      <Smartphone size={24} />
-                      <VStack spacing={0}>
-                        <Text fontSize="sm" fontWeight="600">
-                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500" fontWeight="400">
-                          {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
-                        </Text>
-                      </VStack>
+                      <HStack spacing={4} w="full">
+                        <Box flexShrink={0}>
+                          <AndroidIcon style={{ width: '40px', height: '40px' }} />
+                        </Box>
+                        <VStack align="flex-start" spacing={0} flex="1">
+                          <Text fontSize="md" fontWeight="700" color="gray.900">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
+                          </Text>
+                          <Text fontSize="sm" color="gray.500" fontWeight="400">
+                            {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroidHelper')}
+                          </Text>
+                        </VStack>
+                      </HStack>
                     </Button>
-                  </Grid>
+                  </VStack>
                 )}
 
                 {/* Expiration Date */}

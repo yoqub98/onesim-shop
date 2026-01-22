@@ -32,7 +32,8 @@
       "Bash(taskkill:*)",
       "Bash(cmd /c taskkill /PID 5192 /F)",
       "Bash(timeout 8 bash:*)",
-      "Bash(powershell -Command \"Stop-Process -Id 5192 -Force\")"
+      "Bash(powershell -Command \"Stop-Process -Id 5192 -Force\")",
+      "Bash(timeout 5 bash:*)"
     ],
     "deny": [],
     "ask": []
