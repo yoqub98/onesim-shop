@@ -44,7 +44,7 @@ const MyEsims = ({
           color="#4B5563"
           bg="white"
           borderRadius="full"
-          leftIcon={<RefreshCw size={{ base: 14, md: 16 }} />}
+          leftIcon={<RefreshCw size={16} />}
           onClick={fetchOrders}
           isLoading={isLoading}
           fontWeight="700"

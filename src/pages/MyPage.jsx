@@ -230,7 +230,7 @@ const MyPage = () => {
               transition="all 0.2s"
             >
               <HStack spacing={{ base: 1.5, md: 2 }}>
-                <User size={{ base: 16, md: 18 }} />
+                <User size={18} />
                 <Text display={{ base: 'none', sm: 'block' }}>Профиль</Text>
                 <Text display={{ base: 'block', sm: 'none' }}>Я</Text>
               </HStack>
@@ -251,7 +251,7 @@ const MyPage = () => {
               transition="all 0.2s"
             >
               <HStack spacing={{ base: 1.5, md: 2 }}>
-                <Package size={{ base: 16, md: 18 }} />
+                <Package size={18} />
                 <Text>eSIM</Text>
                 {orders.length > 0 && (
                   <Badge
