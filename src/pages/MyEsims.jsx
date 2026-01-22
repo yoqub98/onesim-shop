@@ -35,12 +35,27 @@ const MyEsims = ({
       <HStack justify="space-between" flexWrap="wrap" gap={2}>
         <Heading size="md" color="gray.800">{t('myPage.orders.title')}</Heading>
         <Button
-          size="sm"
+          px={6}
+          py={4}
+          h="auto"
           variant="outline"
-          colorScheme="purple"
+          borderWidth="2px"
+          borderColor="#FE4F18"
+          color="#FE4F18"
+          bg="white"
+          borderRadius="full"
           leftIcon={<RefreshCw size={16} />}
           onClick={fetchOrders}
           isLoading={isLoading}
+          fontWeight="700"
+          fontSize="md"
+          _hover={{
+            bg: '#FE4F18',
+            color: 'white',
+            transform: 'translateY(-2px)',
+            shadow: '0 10px 30px rgba(254, 79, 24, 0.4)',
+          }}
+          transition="all 0.3s ease-in-out"
         >
           {t('myPage.orders.refresh')}
         </Button>
@@ -94,7 +109,7 @@ const MyEsims = ({
 
       {/* Orders List */}
       {!isLoading && !error && orders.length > 0 && (
-        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
+        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={6}>
           {orders.map((order) => (
             <OrderCard
               key={order.id}

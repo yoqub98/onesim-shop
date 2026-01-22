@@ -185,14 +185,17 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
       boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04)"
       border="1px solid"
       borderColor="gray.100"
-      maxW="700px"     // Add this - maximum width
-    w="full"    
+      maxW="920px"
+      w="full"
       transition="all 0.2s"
       _hover={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06)' }}
       opacity={isCancelled ? 0.6 : 1}
       fontFamily="'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      display="flex"
+      flexDirection="column"
+      minHeight="360px"
     >
-      <VStack align="stretch" spacing={6}>
+      <VStack align="stretch" spacing={6} flex="1" justify="space-between">
         {/* Header */}
         <HStack justify="space-between" align="start">
           <HStack spacing={3} flex="1">
@@ -237,7 +240,7 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
               px={4}
               py={2}
               borderRadius="full"
-              fontWeight="600"
+              fontWeight="700"
             >
               {statusText}
             </Badge>
@@ -248,12 +251,12 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
         <Grid templateColumns="repeat(4, 1fr)" gap={4}>
           {/* Data Volume */}
           <VStack align="flex-start" spacing={1}>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="13px" color="gray.500">
               {t('myPage.orders.dataVolume')}
             </Text>
             <HStack spacing={1.5}>
               <CircleStackIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
-              <Text fontSize="sm" fontWeight="800" color="gray.900">
+              <Text fontSize="18px" fontWeight="800" color="gray.900">
                 {order.data_amount || '-'}
               </Text>
             </HStack>
@@ -261,12 +264,12 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
           {/* Coverage */}
           <VStack align="flex-start" spacing={1}>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="13px" color="gray.500">
               {t('myPage.orders.coverage')}
             </Text>
             <HStack spacing={1.5}>
               <SignalIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
-              <Text fontSize="sm" fontWeight="800" color="gray.900">
+              <Text fontSize="18px" fontWeight="800" color="gray.900">
                 5G
               </Text>
             </HStack>
@@ -274,12 +277,12 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
           {/* Activation Date */}
           <VStack align="flex-start" spacing={1}>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="13px" color="gray.500">
               {t('myPage.orders.activationDate')}
             </Text>
             <HStack spacing={1.5}>
               <CalendarIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
-              <Text fontSize="sm" fontWeight="800" color="gray.900">
+              <Text fontSize="18px" fontWeight="800" color="gray.900">
                 {expiryDate || '-'}
               </Text>
             </HStack>
@@ -287,12 +290,12 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
           {/* Duration */}
           <VStack align="flex-start" spacing={1}>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="13px" color="gray.500">
               {t('myPage.orders.duration')}
             </Text>
             <HStack spacing={1.5}>
               <ClockIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
-              <Text fontSize="sm" fontWeight="800" color="gray.900">
+              <Text fontSize="18px" fontWeight="800" color="gray.900">
                 {order.validity_days ? `${order.validity_days} ${t('myPage.orders.days')}` : '-'}
               </Text>
             </HStack>
@@ -366,7 +369,9 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
           </Box>
         )}
 
-        {/* Footer - Price & Buttons */}
+        {/* Footer - Price & Buttons
+            💡 TIP: To move this section up/down, adjust the VStack spacing value above (currently spacing={6})
+            or add marginTop to this HStack. Example: mt={4} to move down, mt={-2} to move up */}
         <HStack justify="space-between" align="center">
           <VStack align="start" spacing={1}>
             <Text fontSize="xs" color="#F97316" fontWeight="600">
@@ -383,17 +388,18 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
           {/* Action Buttons */}
           <HStack spacing={3}>
             <Button
-              size="md"
-              px={6}
-              py={3}
+              px={8}
+              py={5}
+              h="auto"
               variant="outline"
               borderWidth="2px"
               borderColor="gray.200"
               color="gray.700"
               borderRadius="full"
               onClick={() => onViewDetails && onViewDetails(order)}
-              fontWeight="600"
-              _hover={{ bg: 'gray.50' }}
+              fontWeight="700"
+              fontSize="md"
+              _hover={{ bg: 'gray.50', borderColor: 'gray.300' }}
               transition="all 0.2s"
             >
               {t('myPage.orders.details')}
@@ -401,14 +407,15 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
             {isReadyToActivate && (
               <Button
-                size="md"
-                px={6}
-                py={3}
+                px={8}
+                py={5}
+                h="auto"
                 bg="#FE4F18"
                 color="white"
                 borderRadius="full"
                 onClick={() => onActivate && onActivate(order)}
-                fontWeight="600"
+                fontWeight="700"
+                fontSize="md"
                 _hover={{ opacity: 0.9 }}
                 transition="all 0.2s"
               >

@@ -212,20 +212,54 @@ const MyPage = () => {
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={10}>
       <Container maxW="6xl">
-        <Tabs colorScheme="purple" variant="soft-rounded">
-          <TabList mb={6} bg="white" p={2} borderRadius="xl" shadow="sm">
-            <Tab fontWeight="600">
+        <Tabs>
+          <TabList mb={6} bg="white" p={2} borderRadius="2xl" shadow="sm" border="1px solid" borderColor="gray.100">
+            <Tab
+              fontWeight="700"
+              fontSize="md"
+              borderRadius="xl"
+              color="gray.600"
+              _selected={{
+                bg: '#FE4F18',
+                color: 'white',
+              }}
+              _hover={{
+                color: '#FE4F18',
+              }}
+              transition="all 0.2s"
+            >
               <HStack spacing={2}>
                 <User size={18} />
                 <Text>Профиль</Text>
               </HStack>
             </Tab>
-            <Tab fontWeight="600">
+            <Tab
+              fontWeight="700"
+              fontSize="md"
+              borderRadius="xl"
+              color="gray.600"
+              _selected={{
+                bg: '#FE4F18',
+                color: 'white',
+              }}
+              _hover={{
+                color: '#FE4F18',
+              }}
+              transition="all 0.2s"
+            >
               <HStack spacing={2}>
                 <Package size={18} />
                 <Text>Мои eSIM</Text>
                 {orders.length > 0 && (
-                  <Badge colorScheme="purple" borderRadius="full">{orders.length}</Badge>
+                  <Badge
+                    bg="#FEF3C7"
+                    color="#92400E"
+                    borderRadius="full"
+                    fontSize="xs"
+                    fontWeight="700"
+                  >
+                    {orders.length}
+                  </Badge>
                 )}
               </HStack>
             </Tab>
