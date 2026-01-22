@@ -25,6 +25,7 @@ const MyEsims = ({
   error,
   fetchOrders,
   handleViewQr,
+  handleViewDetails,
 }) => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
@@ -119,7 +120,7 @@ const MyEsims = ({
               key={order.id}
               order={order}
               onActivate={handleViewQr}
-              onViewDetails={handleViewQr}
+              onViewDetails={handleViewDetails}
             />
           ))}
         </Grid>

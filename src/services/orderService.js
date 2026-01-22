@@ -408,7 +408,7 @@ export const getEsimStatusColor = (esimStatus, smdpStatus) => {
 export const queryEsimUsage = async (orderNo) => {
   try {
     console.log('📊 [SERVICE] Querying usage for orderNo:', orderNo);
-    
+
     const response = await fetch(`${API_URL}/esim/usage`, {
       method: 'POST',
       headers: {
@@ -418,7 +418,7 @@ export const queryEsimUsage = async (orderNo) => {
     });
 
     const data = await response.json();
-    
+
     console.log('📊 [SERVICE] Usage response:', {
       success: data.success,
       hasEsimList: !!data.obj?.esimList,
@@ -438,6 +438,87 @@ export const queryEsimUsage = async (orderNo) => {
     return data;
   } catch (error) {
     console.error('📊 [SERVICE] eSIM usage query failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Suspend/pause an eSIM profile
+ * This operation pauses the data service for an active eSIM.
+ *
+ * @param {string} iccid - ICCID of the eSIM to suspend
+ * @returns {Promise<Object>} Suspend response
+ */
+export const suspendEsim = async (iccid) => {
+  try {
+    console.log('⏸️ [SERVICE] Suspending eSIM:', iccid);
+
+    const response = await fetch(`${API_URL}/esim/suspend`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ iccid }),
+    });
+
+    const data = await response.json();
+
+    console.log('⏸️ [SERVICE] Suspend response:', data);
+
+    if (!response.ok) {
+      console.error('⏸️ [SERVICE] HTTP error:', response.status);
+      throw new Error(data.error || 'Failed to suspend eSIM');
+    }
+
+    if (!data.success) {
+      console.error('⏸️ [SERVICE] API error:', data.errorMsg);
+      throw new Error(data.errorMsg || 'Failed to suspend eSIM');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('⏸️ [SERVICE] eSIM suspend failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Cancel an eSIM profile
+ * This operation cancels an unused eSIM profile.
+ * Only available when esimStatus is GOT_RESOURCE and smdpStatus is RELEASED.
+ *
+ * @param {string} esimTranNo - eSIM transaction number
+ * @returns {Promise<Object>} Cancel response
+ */
+export const cancelEsimProfile = async (esimTranNo) => {
+  try {
+    console.log('🚫 [SERVICE] Cancelling eSIM profile:', esimTranNo);
+
+    const response = await fetch(`${API_URL}/esim/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ esimTranNo }),
+    });
+
+    const data = await response.json();
+
+    console.log('🚫 [SERVICE] Cancel response:', data);
+
+    if (!response.ok) {
+      console.error('🚫 [SERVICE] HTTP error:', response.status);
+      throw new Error(data.error || 'Failed to cancel eSIM profile');
+    }
+
+    if (!data.success) {
+      console.error('🚫 [SERVICE] API error:', data.errorMsg);
+      throw new Error(data.errorMsg || 'Failed to cancel eSIM profile');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('🚫 [SERVICE] eSIM profile cancel failed:', error);
     throw error;
   }
 };

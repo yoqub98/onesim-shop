@@ -32,6 +32,13 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronRight,
+  Pause,
+  Calendar,
+  Clock,
+  Hash,
+  Wifi,
+  MapPin,
+  Info,
 } from 'lucide-react';
 import { ReactComponent as AppleIcon } from '../assets/icons/appleIcon.svg';
 import { ReactComponent as AndroidIcon } from '../assets/icons/androidIcon.svg';
@@ -39,7 +46,14 @@ import CountryFlag from '../components/CountryFlag';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getTranslation } from '../config/i18n.js';
-import { getUserOrders, checkOrderStatus, cancelOrder } from '../services/orderService';
+import {
+  getUserOrders,
+  checkOrderStatus,
+  cancelOrder,
+  suspendEsim,
+  cancelEsimProfile,
+  canCancelEsim,
+} from '../services/orderService';
 import MyProfile from './MyProfile.jsx';
 import MyEsims from './MyEsims.jsx';
 
@@ -58,6 +72,7 @@ const MyPage = () => {
   const [orderToCancel, setOrderToCancel] = useState(null); // order for confirmation modal
 
   const { isOpen: isQrModalOpen, onOpen: onQrModalOpen, onClose: onQrModalClose } = useDisclosure();
+  const { isOpen: isDetailsModalOpen, onOpen: onDetailsModalOpen, onClose: onDetailsModalClose } = useDisclosure();
   const { isOpen: isCancelModalOpen, onOpen: onCancelModalOpen, onClose: onCancelModalClose } = useDisclosure();
   const { isOpen: isCancelSuccessOpen, onOpen: onCancelSuccessOpen, onClose: onCancelSuccessClose } = useDisclosure();
 
@@ -160,6 +175,12 @@ const MyPage = () => {
     onQrModalOpen();
   };
 
+  // Handle details modal
+  const handleViewDetails = (order) => {
+    setSelectedOrder(order);
+    onDetailsModalOpen();
+  };
+
   // Open cancel confirmation modal
   const handleCancelClick = (order) => {
     setOrderToCancel(order);
@@ -211,7 +232,7 @@ const MyPage = () => {
 
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={{ base: 4, md: 10 }}>
-      <Container maxW={{ base: '100%', md: '1800px' }} px={{ base: 3, md: 6 }}>
+      <Container maxW={{ base: '100%', md: '1700px' }} px={{ base: 3, md: 6 }}>
         <Tabs>
           <TabList mb={{ base: 4, md: 6 }} bg="white" p={{ base: 1.5, md: 2 }} borderRadius={{ base: 'xl', md: '2xl' }} shadow="sm" border="1px solid" borderColor="gray.100">
             <Tab
@@ -285,6 +306,7 @@ const MyPage = () => {
                 cancellingOrder={cancellingOrder}
                 fetchOrders={fetchOrders}
                 handleViewQr={handleViewQr}
+                handleViewDetails={handleViewDetails}
                 handleCancelClick={handleCancelClick}
                 handleCheckStatus={handleCheckStatus}
               />
@@ -516,6 +538,254 @@ const MyPage = () => {
                 >
                   {getTranslation(currentLanguage, 'myPage.qrModal.close')}
                 </Button>
+              </VStack>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* eSIM Details Modal */}
+      <Modal isOpen={isDetailsModalOpen} onClose={onDetailsModalClose} isCentered size={{ base: 'full', md: 'xl' }}>
+        <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
+        <ModalContent
+          mx={{ base: 0, md: 4 }}
+          borderRadius={{ base: '0', md: '3xl' }}
+          maxW={{ base: '100%', md: '600px' }}
+          maxH={{ base: '100vh', md: 'auto' }}
+          my={{ base: 0, md: 'auto' }}
+        >
+          <ModalHeader textAlign="center" pt={{ base: 6, md: 8 }} pb={4} borderBottom="1px solid" borderColor="gray.100">
+            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight="700" color="gray.800">
+              {currentLanguage === 'uz' ? "eSIM tafsilotlari" : "Подробная информация"}
+            </Text>
+          </ModalHeader>
+          <ModalCloseButton top={{ base: 4, md: 3 }} right={{ base: 4, md: 3 }} />
+          <ModalBody pb={{ base: 6, md: 8 }} px={{ base: 5, md: 8 }} overflowY="auto">
+            {selectedOrder && (
+              <VStack spacing={{ base: 4, md: 5 }} align="stretch">
+                {/* Package Name */}
+                <Box>
+                  <HStack spacing={2} mb={2}>
+                    <Package size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.500">
+                      {currentLanguage === 'uz' ? "Paket nomi" : "Название пакета"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="lg" fontWeight="700" color="gray.900">
+                    {selectedOrder.package_name || '-'}
+                  </Text>
+                </Box>
+
+                {/* Order No */}
+                <Box>
+                  <HStack spacing={2} mb={2}>
+                    <Hash size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.500">
+                      {currentLanguage === 'uz' ? "Buyurtma raqami" : "Номер заказа"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="md" fontWeight="600" color="gray.900" fontFamily="monospace">
+                    {selectedOrder.order_no || '-'}
+                  </Text>
+                </Box>
+
+                {/* ICCID - Only show if activated */}
+                {selectedOrder.iccid && (
+                  <Box>
+                    <HStack spacing={2} mb={2}>
+                      <Info size={18} color="#F97316" />
+                      <Text fontSize="sm" fontWeight="600" color="gray.500">
+                        ICCID
+                      </Text>
+                    </HStack>
+                    <Text fontSize="md" fontWeight="600" color="gray.900" fontFamily="monospace">
+                      {selectedOrder.iccid}
+                    </Text>
+                  </Box>
+                )}
+
+                <Box height="1px" bg="gray.200" my={2} />
+
+                {/* Total Data */}
+                <HStack justify="space-between">
+                  <HStack spacing={2}>
+                    <Wifi size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.600">
+                      {currentLanguage === 'uz' ? "Jami internet" : "Всего данных"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="md" fontWeight="700" color="gray.900">
+                    {selectedOrder.data_amount || '-'}
+                  </Text>
+                </HStack>
+
+                {/* Region */}
+                <HStack justify="space-between">
+                  <HStack spacing={2}>
+                    <MapPin size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.600">
+                      {currentLanguage === 'uz' ? "Hudud" : "Регион"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="md" fontWeight="700" color="gray.900">
+                    {selectedOrder.country_code || '-'}
+                  </Text>
+                </HStack>
+
+                {/* Duration */}
+                <HStack justify="space-between">
+                  <HStack spacing={2}>
+                    <Clock size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.600">
+                      {currentLanguage === 'uz' ? "Muddati" : "Срок действия"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="md" fontWeight="700" color="gray.900">
+                    {selectedOrder.validity_days ? `${selectedOrder.validity_days} ${currentLanguage === 'uz' ? 'kun' : 'дней'}` : '-'}
+                  </Text>
+                </HStack>
+
+                {/* Package Code */}
+                <HStack justify="space-between">
+                  <Text fontSize="sm" fontWeight="600" color="gray.600">
+                    {currentLanguage === 'uz' ? "Paket kodi" : "Код пакета"}
+                  </Text>
+                  <Text fontSize="sm" fontWeight="600" color="gray.900" fontFamily="monospace">
+                    {selectedOrder.package_code || '-'}
+                  </Text>
+                </HStack>
+
+                <Box height="1px" bg="gray.200" my={2} />
+
+                {/* Ordered At */}
+                <HStack justify="space-between">
+                  <HStack spacing={2}>
+                    <Calendar size={18} color="#F97316" />
+                    <Text fontSize="sm" fontWeight="600" color="gray.600">
+                      {currentLanguage === 'uz' ? "Buyurtma sanasi" : "Дата заказа"}
+                    </Text>
+                  </HStack>
+                  <Text fontSize="sm" fontWeight="600" color="gray.900">
+                    {selectedOrder.created_at
+                      ? new Date(selectedOrder.created_at).toLocaleString(
+                          currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
+                          {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZoneName: 'short',
+                          }
+                        )
+                      : '-'}
+                  </Text>
+                </HStack>
+
+                {/* Activation Date - Only if activated */}
+                {selectedOrder.activation_date && (
+                  <HStack justify="space-between">
+                    <HStack spacing={2}>
+                      <CheckCircle size={18} color="#10B981" />
+                      <Text fontSize="sm" fontWeight="600" color="gray.600">
+                        {currentLanguage === 'uz' ? "Faollashtirilgan" : "Дата активации"}
+                      </Text>
+                    </HStack>
+                    <Text fontSize="sm" fontWeight="600" color="gray.900">
+                      {new Date(selectedOrder.activation_date).toLocaleString(
+                        currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
+                        {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          timeZoneName: 'short',
+                        }
+                      )}
+                    </Text>
+                  </HStack>
+                )}
+
+                {/* Action Buttons */}
+                <VStack spacing={3} mt={4}>
+                  {/* Suspend Button - Only for IN_USE status */}
+                  {selectedOrder.esim_status === 'IN_USE' && selectedOrder.iccid && (
+                    <Button
+                      w="full"
+                      py={4}
+                      h="auto"
+                      variant="outline"
+                      borderWidth="2px"
+                      borderColor="orange.400"
+                      color="orange.600"
+                      borderRadius="full"
+                      leftIcon={<Pause size={20} />}
+                      onClick={async () => {
+                        try {
+                          await suspendEsim(selectedOrder.iccid);
+                          // Refresh orders after suspend
+                          fetchOrders();
+                          onDetailsModalClose();
+                        } catch (error) {
+                          console.error('Failed to suspend:', error);
+                        }
+                      }}
+                      fontWeight="700"
+                      fontSize="md"
+                      _hover={{ bg: 'orange.50' }}
+                    >
+                      {currentLanguage === 'uz' ? "To'xtatish" : "Приостановить"}
+                    </Button>
+                  )}
+
+                  {/* Cancel Button - Only for GOT_RESOURCE + RELEASED */}
+                  {canCancelEsim(selectedOrder.esim_status, selectedOrder.smdp_status) &&
+                    selectedOrder.esim_tran_no && (
+                      <Button
+                        w="full"
+                        py={4}
+                        h="auto"
+                        variant="outline"
+                        borderWidth="2px"
+                        borderColor="red.400"
+                        color="red.600"
+                        borderRadius="full"
+                        leftIcon={<XCircle size={20} />}
+                        onClick={async () => {
+                          try {
+                            await cancelEsimProfile(selectedOrder.esim_tran_no);
+                            // Refresh orders after cancel
+                            fetchOrders();
+                            onDetailsModalClose();
+                          } catch (error) {
+                            console.error('Failed to cancel:', error);
+                          }
+                        }}
+                        fontWeight="700"
+                        fontSize="md"
+                        _hover={{ bg: 'red.50' }}
+                      >
+                        {currentLanguage === 'uz' ? "Bekor qilish" : "Отменить eSIM"}
+                      </Button>
+                    )}
+
+                  {/* Close Button */}
+                  <Button
+                    w="full"
+                    py={4}
+                    h="auto"
+                    bg="gray.200"
+                    color="gray.700"
+                    borderRadius="full"
+                    onClick={onDetailsModalClose}
+                    fontWeight="700"
+                    fontSize="md"
+                    _hover={{ bg: 'gray.300' }}
+                  >
+                    {currentLanguage === 'uz' ? "Yopish" : "Закрыть"}
+                  </Button>
+                </VStack>
               </VStack>
             )}
           </ModalBody>
