@@ -671,6 +671,28 @@ export const TRANSLATIONS = {
         step5: 'Подтвердите активацию eSIM',
       },
     },
+    features: {
+      badge: 'Преимущества',
+      title: 'Почему выбирают',
+      titleHighlight: 'eSIM?',
+      description: 'Узнайте, что делает наши eSIM идеальным выбором для путешественников',
+      instantActivation: {
+        title: 'Мгновенная активация',
+        description: 'Простая настройка - подключение к интернету за несколько минут',
+      },
+      globalCoverage: {
+        title: 'Широкое покрытие',
+        description: 'Локальное, региональное и глобальное покрытие в более чем 200 локациях',
+      },
+      hotspotSupport: {
+        title: 'Поддержка точки доступа',
+        description: 'Возможность раздачи интернета на другие устройства',
+      },
+      support247: {
+        title: 'Поддержка 24/7',
+        description: 'Круглосуточная помощь в любое время',
+      },
+    },
     footer: {
       description: 'Ваш надежный партнер в мире мобильной связи. Путешествуйте без границ с нашими eSIM решениями.',
       quickLinks: 'Быстрые ссылки',
@@ -1137,6 +1159,28 @@ export const TRANSLATIONS = {
         step3: 'QR-kod orqali o\'rnatishni tanlang',
         step4: 'Operatoringiz bergan QR-kodni skanerlang',
         step5: 'eSIM faollashtirishni tasdiqlang',
+      },
+    },
+    features: {
+      badge: 'Afzalliklar',
+      title: 'Nima uchun',
+      titleHighlight: 'eSIM?',
+      description: 'Bizning eSIM sayohatchilar uchun ideal tanlov ekanligini bilib oling',
+      instantActivation: {
+        title: 'Darhol faollashtirish',
+        description: 'Oson sozlash - bir necha daqiqada internetga ulanib foydalanishni boshlaysiz',
+      },
+      globalCoverage: {
+        title: 'Keng qamrov',
+        description: '200 dan ortiq joylarda mahalliy, mintaqaviy va global qamrov',
+      },
+      hotspotSupport: {
+        title: 'Hotspot qo\'llab-quvvatlanadi',
+        description: 'Internetni boshqa qurilmalar bilan ulashish imkoniyati mavjud',
+      },
+      support247: {
+        title: '24/7 qo\'llab-quvvatlash',
+        description: 'Istalgan vaqtda yordam berishga tayyor doimiy texnik yordam',
       },
     },
     footer: {

@@ -41,6 +41,7 @@ import Flag from 'react-world-flags';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
+import FeaturesSection from './components/FeaturesSection';
 import CountryPage from './pages/CountryPage.jsx';
 import PackagePage from './pages/PackagePage.jsx';
 import PlansPage from './pages/PlansPage.jsx';
@@ -755,6 +756,7 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
+      <FeaturesSection />
       <FAQSection />
       <PlansSection />
       <PopularDestinations />
