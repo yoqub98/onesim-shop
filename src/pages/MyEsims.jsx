@@ -40,8 +40,8 @@ const MyEsims = ({
           h="auto"
           variant="outline"
           borderWidth="2px"
-          borderColor="#FE4F18"
-          color="#FE4F18"
+          borderColor="#D1D5DB"
+          color="#4B5563"
           bg="white"
           borderRadius="full"
           leftIcon={<RefreshCw size={16} />}
@@ -50,12 +50,12 @@ const MyEsims = ({
           fontWeight="700"
           fontSize="md"
           _hover={{
-            bg: '#FE4F18',
+            bg: '#1F2937',
             color: 'white',
-            transform: 'translateY(-2px)',
-            shadow: '0 10px 30px rgba(254, 79, 24, 0.4)',
+            borderColor: '#1F2937',
+            transform: 'translateY(-1px)',
           }}
-          transition="all 0.3s ease-in-out"
+          transition="all 0.2s ease-in-out"
         >
           {t('myPage.orders.refresh')}
         </Button>

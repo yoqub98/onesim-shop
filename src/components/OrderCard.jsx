@@ -133,6 +133,14 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
   const expiryDate = formatExpiryDate(liveData?.expiredTime || order.expiry_date);
 
+  // Debug log for activation date
+  console.log('📅 [OrderCard] Activation Date Debug:', {
+    orderId: order.id,
+    liveExpiredTime: liveData?.expiredTime,
+    dbExpiryDate: order.expiry_date,
+    formattedDate: expiryDate,
+  });
+
   // Format bytes to MB/GB
   const formatDataSize = (bytes) => {
     if (!bytes || bytes <= 0) return '0 MB';
@@ -154,9 +162,11 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
     order.order_status === 'CANCELLED' || esimStatus === 'CANCEL' || smdpStatus === 'DELETED';
 
   // Check if this is ready to activate (show activate button)
+  // ONLY show for: GOT_RESOURCE + RELEASED = Not yet installed
   const isReadyToActivate =
     order.order_status === 'ALLOCATED' &&
-    (esimStatus === 'GOT_RESOURCE' || smdpStatus === 'RELEASED') &&
+    esimStatus === 'GOT_RESOURCE' &&
+    smdpStatus === 'RELEASED' &&
     showQrButton;
 
   // Get badge styles based on status
@@ -185,7 +195,7 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
       boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04)"
       border="1px solid"
       borderColor="gray.100"
-      maxW="920px"
+      maxW="980px" // 💡 CARD WIDTH CONTROL: Change this value to adjust card width
       w="full"
       transition="all 0.2s"
       _hover={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06)' }}
