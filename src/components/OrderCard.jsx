@@ -100,7 +100,10 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
   // Usage data from live response
   const totalVolume = liveData?.totalVolume || 0;
-  const orderUsage = liveData?.orderUsage || 0;
+  const rawOrderUsage = liveData?.orderUsage || 0;
+
+  // Cap orderUsage at totalVolume to prevent showing more than 100%
+  const orderUsage = Math.min(rawOrderUsage, totalVolume);
 
   // Calculate usage percentage (cap at 100%)
   const usagePercentage = totalVolume > 0 ? Math.min((orderUsage / totalVolume) * 100, 100) : 0;
@@ -195,7 +198,7 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
       boxShadow="0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04)"
       border="1px solid"
       borderColor="gray.100"
-      maxW="980px" // 💡 CARD WIDTH CONTROL: Change this value to adjust card width
+      maxW="1100px" // 💡 CARD WIDTH CONTROL: Increased to prevent text wrapping
       w="full"
       transition="all 0.2s"
       _hover={{ boxShadow: '0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.06)' }}

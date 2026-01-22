@@ -31,6 +31,7 @@ import {
   XCircle,
   AlertTriangle,
   CheckCircle,
+  ChevronRight,
 } from 'lucide-react';
 import { ReactComponent as AppleIcon } from '../assets/icons/appleIcon.svg';
 import { ReactComponent as AndroidIcon } from '../assets/icons/androidIcon.svg';
@@ -345,9 +346,27 @@ const MyPage = () => {
                 )}
 
                 {/* Instructions */}
-                <Text fontSize="sm" color="gray.600" textAlign="center" lineHeight="1.6">
-                  {getTranslation(currentLanguage, 'myPage.qrModal.instructions')}
-                </Text>
+                <VStack spacing={2}>
+                  <Text fontSize="sm" color="gray.600" textAlign="center" lineHeight="1.6">
+                    {getTranslation(currentLanguage, 'myPage.qrModal.instructions')}
+                  </Text>
+                  {selectedOrder.expiry_date && (
+                    <Text fontSize="sm" color="gray.700" textAlign="center" fontWeight="600">
+                      {getTranslation(currentLanguage, 'myPage.qrModal.installBefore')}{' '}
+                      {new Date(selectedOrder.expiry_date).toLocaleString(
+                        currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
+                        {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                        }
+                      )}
+                    </Text>
+                  )}
+                </VStack>
 
                 {/* Quick Install Buttons - Side by Side */}
                 {selectedOrder.activation_code && (
@@ -373,13 +392,13 @@ const MyPage = () => {
                       py={4}
                       h="auto"
                       w="full"
-                      justifyContent="flex-start"
+                      justifyContent="space-between"
                     >
-                      <HStack spacing={4} w="full">
+                      <HStack spacing={4}>
                         <Box flexShrink={0}>
                           <AppleIcon style={{ width: '40px', height: '40px' }} />
                         </Box>
-                        <VStack align="flex-start" spacing={0} flex="1">
+                        <VStack align="flex-start" spacing={0}>
                           <Text fontSize="md" fontWeight="700" color="gray.900">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallIOS')}
                           </Text>
@@ -388,6 +407,7 @@ const MyPage = () => {
                           </Text>
                         </VStack>
                       </HStack>
+                      <ChevronRight size={20} color="#9CA3AF" />
                     </Button>
 
                     {/* Android Quick Install Button */}
@@ -411,13 +431,13 @@ const MyPage = () => {
                       py={4}
                       h="auto"
                       w="full"
-                      justifyContent="flex-start"
+                      justifyContent="space-between"
                     >
-                      <HStack spacing={4} w="full">
+                      <HStack spacing={4}>
                         <Box flexShrink={0}>
                           <AndroidIcon style={{ width: '40px', height: '40px' }} />
                         </Box>
-                        <VStack align="flex-start" spacing={0} flex="1">
+                        <VStack align="flex-start" spacing={0}>
                           <Text fontSize="md" fontWeight="700" color="gray.900">
                             {getTranslation(currentLanguage, 'myPage.qrModal.quickInstallAndroid')}
                           </Text>
@@ -426,26 +446,9 @@ const MyPage = () => {
                           </Text>
                         </VStack>
                       </HStack>
+                      <ChevronRight size={20} color="#9CA3AF" />
                     </Button>
                   </VStack>
-                )}
-
-                {/* Expiration Date */}
-                {selectedOrder.expiry_date && (
-                  <Text fontSize="sm" color="gray.600" fontWeight="500">
-                    {getTranslation(currentLanguage, 'myPage.qrModal.installBefore')}{' '}
-                    {new Date(selectedOrder.expiry_date).toLocaleString(
-                      currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU',
-                      {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      }
-                    )}
-                  </Text>
                 )}
 
                 {/* Troubleshooting Link */}
@@ -468,6 +471,25 @@ const MyPage = () => {
                   </Text>
                 </VStack>
 
+                {/* Terms and Conditions Agreement */}
+                <Text fontSize="xs" color="gray.500" textAlign="center" lineHeight="1.5">
+                  {currentLanguage === 'uz'
+                    ? "eSIM-ni faollashtirish orqali siz bizning "
+                    : "Активируя eSIM, вы соглашаетесь с нашими "}
+                  <Text
+                    as="a"
+                    href="/terms"
+                    color="gray.600"
+                    textDecoration="underline"
+                    fontWeight="500"
+                    _hover={{ color: 'gray.800' }}
+                  >
+                    {currentLanguage === 'uz'
+                      ? "Shartlar va shartlar"
+                      : "Условиями использования"}
+                  </Text>
+                </Text>
+
                 {/* Close Button */}
                 <Button
                   onClick={onQrModalClose}
@@ -475,9 +497,11 @@ const MyPage = () => {
                   size="lg"
                   bg="gray.200"
                   color="gray.700"
-                  borderRadius="xl"
+                  borderRadius="full"
                   _hover={{ bg: 'gray.300' }}
                   fontWeight="600"
+                  py={6}
+                  h="auto"
                 >
                   {getTranslation(currentLanguage, 'myPage.qrModal.close')}
                 </Button>
