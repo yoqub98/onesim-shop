@@ -211,7 +211,7 @@ const MyPage = () => {
 
   return (
     <Box minH="calc(100vh - 80px)" bg="gray.50" py={{ base: 4, md: 10 }}>
-      <Container maxW="6xl" px={{ base: 3, md: 6 }}>
+      <Container maxW={{ base: '100%', md: '1800px' }} px={{ base: 3, md: 6 }}>
         <Tabs>
           <TabList mb={{ base: 4, md: 6 }} bg="white" p={{ base: 1.5, md: 2 }} borderRadius={{ base: 'xl', md: '2xl' }} shadow="sm" border="1px solid" borderColor="gray.100">
             <Tab
