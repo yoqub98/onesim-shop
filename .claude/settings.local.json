@@ -26,7 +26,13 @@
       "Bash(else echo \"Build directory not found - need to build first\")",
       "Bash(fi)",
       "Bash(ls:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c taskkill /PID 5192 /F)",
+      "Bash(timeout 8 bash:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 5192 -Force\")"
     ],
     "deny": [],
     "ask": []
