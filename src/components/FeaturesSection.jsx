@@ -8,19 +8,19 @@ import {
   Badge,
   VStack,
   Grid,
+  Image,
 } from '@chakra-ui/react';
-import {
-  BoltIcon,
-  GlobeAltIcon,
-  WifiIcon,
-  ChatBubbleLeftRightIcon,
-} from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+// Import icons
+import rocketIcon from '../assets/icons/rocket.svg';
+import globeIcon from '../assets/icons/globe.svg';
+import hotspotIcon from '../assets/icons/hotspot.svg';
+import supportIcon from '../assets/icons/support.svg';
 
 // Feature Card Component
-const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
+const FeatureCard = ({ iconSrc, title, description, delay = 0 }) => {
   const [cardRef, isVisible] = useScrollAnimation(0.1);
 
   return (
@@ -52,7 +52,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay = 0 }) => {
           alignItems="center"
           justifyContent="center"
         >
-          <Icon className="w-8 h-8" style={{ color: '#FE4F18' }} />
+          <Image src={iconSrc} alt={title} w="32px" h="32px" />
         </Box>
 
         {/* Title */}
@@ -87,22 +87,22 @@ const FeaturesSection = () => {
 
   const features = [
     {
-      icon: BoltIcon,
+      iconSrc: rocketIcon,
       title: t('features.instantActivation.title'),
       description: t('features.instantActivation.description'),
     },
     {
-      icon: GlobeAltIcon,
+      iconSrc: globeIcon,
       title: t('features.globalCoverage.title'),
       description: t('features.globalCoverage.description'),
     },
     {
-      icon: WifiIcon,
+      iconSrc: hotspotIcon,
       title: t('features.hotspotSupport.title'),
       description: t('features.hotspotSupport.description'),
     },
     {
-      icon: ChatBubbleLeftRightIcon,
+      iconSrc: supportIcon,
       title: t('features.support247.title'),
       description: t('features.support247.description'),
     },
@@ -189,7 +189,7 @@ const FeaturesSection = () => {
             {features.map((feature, index) => (
               <FeatureCard
                 key={index}
-                icon={feature.icon}
+                iconSrc={feature.iconSrc}
                 title={feature.title}
                 description={feature.description}
                 delay={index * 100}
