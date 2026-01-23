@@ -27,12 +27,12 @@ const FeatureCard = ({ iconSrc, title, description, delay = 0 }) => {
     <Box
       ref={cardRef}
       bg="white"
-      borderRadius="2xl"
+      borderRadius="3xl"
       p={8}
       shadow="0 4px 12px rgba(0, 0, 0, 0.06)"
       transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       _hover={{
-        transform: 'translateY(-8px)',
+        transform: 'translateY(-8px) scale(1.02)',
         shadow: '0 20px 40px rgba(254, 79, 24, 0.15)',
       }}
       opacity={isVisible ? 1 : 0}
@@ -47,12 +47,14 @@ const FeatureCard = ({ iconSrc, title, description, delay = 0 }) => {
         <Box
           bg="#FFF4F0"
           borderRadius="xl"
-          p={4}
+          p={3}
           display="inline-flex"
           alignItems="center"
           justifyContent="center"
+          w="72px"
+          h="72px"
         >
-          <Image src={iconSrc} alt={title} w="32px" h="32px" />
+          <Image src={iconSrc} alt={title} w="48px" h="48px" />
         </Box>
 
         {/* Title */}
