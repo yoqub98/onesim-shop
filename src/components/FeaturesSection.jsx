@@ -19,65 +19,138 @@ import globeIcon from '../assets/icons/globe.svg';
 import hotspotIcon from '../assets/icons/hotspot.svg';
 import supportIcon from '../assets/icons/support.svg';
 
+// Icon Background Shape Component (same for all cards)
+const IconBackgroundShape = ({ gradientId }) => (
+  <svg
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%'
+    }}
+    viewBox="0 0 217 179"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M0 51.0546C0 22.8579 22.8579 0 51.0546 0H216.982V85.0909C216.982 136.785 175.076 178.691 123.382 178.691H0V51.0546Z"
+      fill={`url(#${gradientId})`}
+    />
+    <defs>
+      <linearGradient
+        id={gradientId}
+        x1="108.491"
+        y1="0"
+        x2="108.491"
+        y2="178.691"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="white"/>
+        <stop offset="1" stopColor="#FBE1DB"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 // Feature Card Component
-const FeatureCard = ({ iconSrc, title, description, delay = 0 }) => {
+const FeatureCard = ({ iconSrc, title, description, delay = 0, index }) => {
   const [cardRef, isVisible] = useScrollAnimation(0.1);
 
   return (
     <Box
       ref={cardRef}
+      position="relative"
       bg="white"
-      borderRadius="3xl"
-      p={8}
-      shadow="0 4px 12px rgba(0, 0, 0, 0.06)"
-      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+      borderRadius="32px"
+      p="40px 32px"
+      cursor="pointer"
+      minH="380px"
+      maxH="380px"
+      boxShadow="0 10px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05)"
+      transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+      overflow="hidden"
       _hover={{
-        transform: 'translateY(-8px) scale(1.02)',
-        shadow: '0 20px 40px rgba(254, 79, 24, 0.15)',
+        transform: 'translateY(-8px)',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.12), 0 15px 40px rgba(254, 79, 24, 0.25), 0 8px 25px rgba(225, 72, 26, 0.2)',
+        '& .watermark-icon': {
+          transform: 'scale(1.15)',
+          opacity: 0.08,
+        }
       }}
       opacity={isVisible ? 1 : 0}
       style={{
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      height="100%"
     >
-      <VStack align="flex-start" spacing={5} height="100%">
-        {/* Icon */}
+      {/* Icon Background Section */}
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        width="140px"
+        height="115px"
+        zIndex="2"
+      >
+        {/* Background Shape */}
+        <IconBackgroundShape gradientId={`paint0_linear_bg${index}`} />
+
+        {/* Icon Wrapper */}
         <Box
-          bg="#FFF4F0"
-          borderRadius="xl"
-          p={3}
-          display="inline-flex"
+          position="absolute"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          display="flex"
           alignItems="center"
           justifyContent="center"
-          w="72px"
-          h="72px"
         >
-          <Image src={iconSrc} alt={title} w="48px" h="48px" />
+          <Image src={iconSrc} alt={title} w="60px" h="60px" />
         </Box>
+      </Box>
 
-        {/* Title */}
-        <Heading
-          as="h3"
-          fontSize="xl"
-          fontWeight="700"
-          color="gray.900"
-          letterSpacing="tight"
-        >
-          {title}
-        </Heading>
+      {/* Text Content */}
+      <Heading
+        as="h2"
+        fontSize="28px"
+        fontWeight="700"
+        color="#1a1a1a"
+        mt="140px"
+        mb="20px"
+        lineHeight="1.3"
+        position="relative"
+        zIndex="2"
+      >
+        {title}
+      </Heading>
 
-        {/* Description */}
-        <Text
-          fontSize="md"
-          color="gray.600"
-          lineHeight="1.7"
-          fontWeight="500"
-        >
-          {description}
-        </Text>
-      </VStack>
+      <Text
+        fontSize="17px"
+        fontWeight="500"
+        color="#666666"
+        lineHeight="1.6"
+        position="relative"
+        zIndex="2"
+      >
+        {description}
+      </Text>
+
+      {/* Watermark Icon - Same as main icon, just larger and semi-transparent */}
+      <Image
+        className="watermark-icon"
+        src={iconSrc}
+        alt=""
+        position="absolute"
+        bottom="-40px"
+        right="-40px"
+        w="200px"
+        h="200px"
+        opacity="0.06"
+        zIndex="1"
+        transition="all 0.5s cubic-bezier(0.4, 0, 0.2, 1)"
+      />
     </Box>
   );
 };
@@ -195,6 +268,7 @@ const FeaturesSection = () => {
                 title={feature.title}
                 description={feature.description}
                 delay={index * 100}
+                index={index + 1}
               />
             ))}
           </Grid>
