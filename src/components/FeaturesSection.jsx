@@ -122,6 +122,14 @@ const FeatureCard = ({ iconSrc, title, description, delay = 0, index }) => {
         lineHeight="1.3"
         position="relative"
         zIndex="2"
+        minH="73px"
+        maxH="73px"
+        overflow="hidden"
+        display="-webkit-box"
+        sx={{
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+        }}
       >
         {title}
       </Heading>
@@ -230,7 +238,7 @@ const FeaturesSection = () => {
             <Heading
               as="h2"
               fontSize={{ base: '4xl', md: '5xl' }}
-              fontWeight="700"
+              fontWeight="800"
               color="gray.900"
               letterSpacing="tight"
             >

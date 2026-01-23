@@ -684,7 +684,7 @@ const FAQSection = () => {
           <VStack spacing={4} textAlign="center">
             <Heading
               fontSize={{ base: '3xl', md: '4xl', lg: '5xl' }}
-              fontWeight="700"
+              fontWeight="800"
               color="gray.900"
               className="animate__animated animate__fadeInUp"
             >

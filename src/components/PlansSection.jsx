@@ -393,7 +393,7 @@ const PlansSection = () => {
             <Heading
               as="h2"
               fontSize={{ base: '4xl', md: '5xl' }}
-              fontWeight="700"
+              fontWeight="800"
               color="gray.900"
               letterSpacing="tight"
             >
