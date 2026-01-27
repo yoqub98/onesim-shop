@@ -72,6 +72,16 @@ export const calculateFinalPriceWithRate = (usdPrice, exchangeRate) => {
 };
 
 /**
+ * Calculate USD price with margin applied
+ * @param {number} usdPrice - Original price in USD (from API)
+ * @returns {number} USD price with margin applied, rounded to 2 decimal places
+ */
+export const calculateFinalPriceUSD = (usdPrice) => {
+  const margin = (usdPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
+  return Math.round((usdPrice + margin) * 100) / 100; // Round to 2 decimal places
+};
+
+/**
  * Format price for display
  * @param {number} price - Price in UZS
  * @returns {string} Formatted price string

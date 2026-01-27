@@ -19,7 +19,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import DataPlanCard from '../components/DataPlanCard';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
-import { calculateFinalPrice, formatPrice } from '../config/pricing';
+import { calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -301,6 +301,7 @@ const CountryPage = () => {
 
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
+          priceUSD: calculateFinalPriceUSD(pkg.priceUSD), // USD price with margin
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
 

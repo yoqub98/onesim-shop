@@ -15,7 +15,7 @@ import { CalendarIcon, MapPinIcon, WifiIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from './CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
@@ -314,20 +314,22 @@ const PlansSection = () => {
 
         console.log('💰 PRICING CALCULATION:');
         
-        // Transform packages with pricing
+        // Transform packages with pricing (apply margin to both USD and UZS)
         const transformedPackages = packages.map(pkg => {
           const finalPriceUZS = calculateFinalPrice(pkg.priceUSD);
+          const finalPriceUSD = calculateFinalPriceUSD(pkg.priceUSD);
           const formattedPrice = formatPrice(finalPriceUZS);
 
           console.log(`💵 ${pkg.country}:`, {
-            priceUSD: pkg.priceUSD,
+            originalPriceUSD: pkg.priceUSD,
+            finalPriceUSD: finalPriceUSD,
             finalPriceUZS: finalPriceUZS,
             formattedPrice: formattedPrice,
           });
 
           return {
             ...pkg,
-            priceUSD: pkg.priceUSD,
+            priceUSD: finalPriceUSD, // USD price with margin
             price: formattedPrice,
           };
         });
