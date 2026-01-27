@@ -40,7 +40,7 @@ import { Search, RotateCcw, Package, Globe, Calendar, ChevronDown } from 'lucide
 import { useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { HANDPICKED_PLAN_SLUGS, POPULAR_DESTINATIONS, calculateFinalPrice, formatPrice } from '../config/pricing';
+import { HANDPICKED_PLAN_SLUGS, POPULAR_DESTINATIONS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -139,7 +139,8 @@ const PlansPage = () => {
       }
 
       const fetchedPackages = data.obj.packageList.map(pkg => {
-        const priceUSD = pkg.price / 10000; // Price from API is in cents * 100
+        const rawPriceUSD = pkg.price / 10000; // Price from API is in cents * 100
+        const finalPriceUSD = calculateFinalPriceUSD(rawPriceUSD); // Apply margin
         const volumeInGB = pkg.volume / (1024 * 1024 * 1024);
 
         return {
@@ -152,9 +153,9 @@ const PlansPage = () => {
           dataGB: volumeInGB, // in GB (for filtering)
           days: pkg.duration, // Match popular packages structure
           duration: pkg.duration, // Keep for compatibility
-          priceUSD: priceUSD, // Match popular packages structure (capital USD)
-          priceUsd: priceUSD, // Keep lowercase for compatibility
-          priceUzs: calculateFinalPrice(priceUSD),
+          priceUSD: finalPriceUSD, // USD with margin applied
+          priceUsd: finalPriceUSD, // Keep lowercase for compatibility
+          priceUzs: calculateFinalPrice(rawPriceUSD),
           network: pkg.networkType,
         };
       });
@@ -566,9 +567,14 @@ const PlansPage = () => {
                           </Badge>
                         </Td>
                         <Td isNumeric>
-                          <Text fontWeight="bold" color="purple.600" fontSize="lg">
-                            {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
-                          </Text>
+                          <VStack align="flex-end" spacing={0}>
+                            <Text fontSize="sm" color="gray.500">
+                              {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
+                            </Text>
+                            <Text fontWeight="bold" color="purple.600" fontSize="lg">
+                              {getPriceUSD(pkg)}$
+                            </Text>
+                          </VStack>
                         </Td>
                         <Td>
                           <Button

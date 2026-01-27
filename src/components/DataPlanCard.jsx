@@ -237,9 +237,14 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
           <HStack justify="space-between" align="center">
             {/* Price Information */}
             <VStack align="flex-start" spacing={0.5}>
-              <Text fontSize="18px" color="#494951" fontWeight="500">
-                {plan.priceUSD}$
-              </Text>
+              <HStack align="baseline" spacing={1}>
+                <Text fontSize="18px" color="#494951" fontWeight="500">
+                  {plan.price}
+                </Text>
+                <Text fontSize="14px" color="#494951" fontWeight="400" textTransform="uppercase">
+                  {t('plans.card.currency')}
+                </Text>
+              </HStack>
               <HStack align="baseline" spacing={1}>
                 <Text
                   fontSize="25px"
@@ -247,10 +252,10 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
                   color="#000"
                   letterSpacing="tight"
                 >
-                  {plan.price}
+                  {plan.priceUSD}
                 </Text>
-                <Text fontSize="14px" fontWeight="400" color="#000" textTransform="uppercase">
-                  {t('plans.card.currency')}
+                <Text fontSize="18px" fontWeight="600" color="#000">
+                  $
                 </Text>
               </HStack>
             </VStack>

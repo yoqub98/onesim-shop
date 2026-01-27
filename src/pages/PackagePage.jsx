@@ -352,12 +352,20 @@ const PackagePage = () => {
                   <Text fontSize="sm" color="gray.500" fontWeight="600" mb={1}>
                     Стоимость пакета
                   </Text>
+                  <HStack justify="center" spacing={1}>
+                    <Text fontSize="lg" color="gray.500" fontWeight="500">
+                      {plan.price}
+                    </Text>
+                    <Text fontSize="md" color="gray.500" fontWeight="500">
+                      UZS
+                    </Text>
+                  </HStack>
                   <HStack justify="center" spacing={2}>
                     <Heading fontSize="4xl" fontWeight="700" color="gray.800">
-                      {plan.price}
+                      {plan.priceUSD}
                     </Heading>
                     <Text fontSize="xl" color="gray.600" fontWeight="700">
-                      UZS
+                      $
                     </Text>
                   </HStack>
                 </Box>

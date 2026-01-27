@@ -166,9 +166,14 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
           <HStack justify="space-between" align="center" spacing={2}>
             {/* Price Information */}
             <VStack align="flex-start" spacing={0}>
-              <Text fontSize="lg" fontWeight="600" color="#6B7280" whiteSpace="nowrap">
-                {plan.priceUSD}$
-              </Text>
+              <HStack align="baseline" spacing={1}>
+                <Text fontSize="lg" fontWeight="600" color="#6B7280" whiteSpace="nowrap">
+                  {plan.price}
+                </Text>
+                <Text fontSize="sm" fontWeight="500" color="#6B7280" whiteSpace="nowrap">
+                  {t('plans.card.currency')}
+                </Text>
+              </HStack>
               <HStack align="baseline" spacing={1}>
                 <Text
                   fontSize="2xl"
@@ -177,10 +182,10 @@ const PlanCard = ({ plan, delay = 0, lang }) => {
                   letterSpacing="tight"
                   whiteSpace="nowrap"
                 >
-                  {plan.price}
+                  {plan.priceUSD}
                 </Text>
-                <Text fontSize="md" fontWeight="500" color="#6B7280" whiteSpace="nowrap">
-                  {t('plans.card.currency')}
+                <Text fontSize="lg" fontWeight="600" color="#151618" whiteSpace="nowrap">
+                  $
                 </Text>
               </HStack>
             </VStack>
