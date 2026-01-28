@@ -392,7 +392,7 @@ export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        locationCode: '',
+        locationCode: '!RG',  // Request regional packages from API
         type: '',
         slug: '',
         packageCode: '',
@@ -407,14 +407,9 @@ export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
     const data = await response.json();
 
     if (data.success && data.obj && data.obj.packageList) {
-      console.log(`✅ Received ${data.obj.packageList.length} total packages`);
+      console.log(`✅ Received ${data.obj.packageList.length} regional packages from API`);
 
-      // Filter packages where locationCode starts with !RG (Regional)
-      const regionalPackages = data.obj.packageList.filter(pkg =>
-        pkg.locationCode && pkg.locationCode.startsWith('!RG')
-      );
-
-      console.log(`🌍 Filtered ${regionalPackages.length} regional packages`);
+      const regionalPackages = data.obj.packageList;
 
       // Group by thematic regions (Europe, Asia, Middle East, etc.)
       const regionGroups = groupPackagesByRegion(regionalPackages);
@@ -461,7 +456,7 @@ export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        locationCode: '',
+        locationCode: '!GL',  // Request global packages from API
         type: '',
         slug: '',
         packageCode: '',
@@ -476,14 +471,9 @@ export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
     const data = await response.json();
 
     if (data.success && data.obj && data.obj.packageList) {
-      console.log(`✅ Received ${data.obj.packageList.length} total packages`);
+      console.log(`✅ Received ${data.obj.packageList.length} global packages from API`);
 
-      // Filter packages where locationCode starts with !GL (Global)
-      const globalPackages = data.obj.packageList.filter(pkg =>
-        pkg.locationCode && pkg.locationCode.startsWith('!GL')
-      );
-
-      console.log(`🌐 Filtered ${globalPackages.length} global packages`);
+      const globalPackages = data.obj.packageList;
 
       // Save to cache asynchronously (don't wait)
       saveGlobalPackagesToCache(globalPackages).catch(err =>
