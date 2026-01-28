@@ -33,7 +33,18 @@
       "Bash(cmd /c taskkill /PID 5192 /F)",
       "Bash(timeout 8 bash:*)",
       "Bash(powershell -Command \"Stop-Process -Id 5192 -Force\")",
-      "Bash(timeout 5 bash:*)"
+      "Bash(timeout 5 bash:*)",
+      "Bash(claude mcp list:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp --help:*)",
+      "Bash(claude mcp get:*)",
+      "Bash(claude mcp remove:*)",
+      "Bash(claude mcp add-json:*)",
+      "mcp__clickup__clickup_get_workspace_hierarchy",
+      "mcp__clickup__clickup_get_workspace_members",
+      "mcp__clickup__clickup_search",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

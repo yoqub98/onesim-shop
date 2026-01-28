@@ -359,3 +359,109 @@ export const fetchAllPackagesForCountry = async (
     throw error;
   }
 };
+
+// ============================================
+// FETCH: Regional Packages (locationCode starts with !RG)
+// ============================================
+export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
+  console.log('🌍 Fetching regional packages...');
+
+  try {
+    const response = await fetch(`${API_URL}/packages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        locationCode: '',
+        type: '',
+        slug: '',
+        packageCode: '',
+        iccid: '',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.obj && data.obj.packageList) {
+      console.log(`✅ Received ${data.obj.packageList.length} total packages`);
+
+      // Filter packages where locationCode starts with !RG (Regional)
+      const regionalPackages = data.obj.packageList.filter(pkg =>
+        pkg.locationCode && pkg.locationCode.startsWith('!RG')
+      );
+
+      console.log(`🌍 Filtered ${regionalPackages.length} regional packages`);
+
+      // Group by region (locationCode)
+      const regionGroups = {};
+      regionalPackages.forEach(pkg => {
+        const regionCode = pkg.locationCode;
+        if (!regionGroups[regionCode]) {
+          regionGroups[regionCode] = [];
+        }
+        regionGroups[regionCode].push(pkg);
+      });
+
+      console.log(`📦 Found ${Object.keys(regionGroups).length} unique regions:`, Object.keys(regionGroups));
+
+      return regionGroups;
+    } else {
+      throw new Error(data.errorMsg || 'Invalid API response');
+    }
+  } catch (error) {
+    console.error('❌ Error fetching regional packages:', error.message);
+    throw error;
+  }
+};
+
+// ============================================
+// FETCH: Global Packages (locationCode starts with !GL)
+// ============================================
+export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
+  console.log('🌐 Fetching global packages...');
+
+  try {
+    const response = await fetch(`${API_URL}/packages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        locationCode: '',
+        type: '',
+        slug: '',
+        packageCode: '',
+        iccid: '',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.obj && data.obj.packageList) {
+      console.log(`✅ Received ${data.obj.packageList.length} total packages`);
+
+      // Filter packages where locationCode starts with !GL (Global)
+      const globalPackages = data.obj.packageList.filter(pkg =>
+        pkg.locationCode && pkg.locationCode.startsWith('!GL')
+      );
+
+      console.log(`🌐 Filtered ${globalPackages.length} global packages`);
+
+      return globalPackages;
+    } else {
+      throw new Error(data.errorMsg || 'Invalid API response');
+    }
+  } catch (error) {
+    console.error('❌ Error fetching global packages:', error.message);
+    throw error;
+  }
+};

@@ -309,6 +309,23 @@ export const TRANSLATIONS = {
       search: 'Поиск',
       searchPlaceholder: 'Введите название страны...',
       notFound: 'Страна не найдена',
+      tabs: {
+        countries: 'Страны',
+        regional: 'Региональные',
+        global: 'Глобальные',
+      },
+      regional: {
+        packagesCount: 'региональных тарифов',
+        packagesCountSingle: 'региональный тариф',
+        packagesCountFew: 'региональных тарифа',
+        moreCountries: 'стран',
+        viewPlans: 'Смотреть тарифы',
+      },
+      global: {
+        coverage: 'Глобальное покрытие',
+        countries: 'стран',
+        viewPlans: 'Смотреть тарифы',
+      },
     },
     faq: {
       title: 'Часто задаваемые',
@@ -780,6 +797,23 @@ export const TRANSLATIONS = {
       search: 'Qidirish',
       searchPlaceholder: 'Mamlakat nomini kiriting...',
       notFound: 'Mamlakat topilmadi',
+      tabs: {
+        countries: 'Mamlakatlar',
+        regional: 'Mintaqaviy',
+        global: 'Global',
+      },
+      regional: {
+        packagesCount: 'mintaqaviy tariflar',
+        packagesCountSingle: 'mintaqaviy tarif',
+        packagesCountFew: 'mintaqaviy tarif',
+        moreCountries: 'mamlakat',
+        viewPlans: 'Tariflarni ko\'rish',
+      },
+      global: {
+        coverage: 'Global qamrov',
+        countries: 'mamlakat',
+        viewPlans: 'Tariflarni ko\'rish',
+      },
     },
     faq: {
       title: 'Tez-tez so\'raladigan',
