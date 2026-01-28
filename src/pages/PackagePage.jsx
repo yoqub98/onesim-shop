@@ -26,6 +26,8 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import {
   ArrowLeft,
   Wifi,
@@ -56,6 +58,7 @@ const PackagePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { currentLanguage } = useLanguage();
+  const { convertToUZS } = useCurrency();
 
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderError, setOrderError] = useState(null);
@@ -97,10 +100,41 @@ const PackagePage = () => {
     );
   }
 
-  const countryName = getCountryName(countryCode, currentLanguage);
+  // Determine if this is regional or global plan
+  const isGlobalPlan = countryCode === 'GLOBAL';
+  const isRegionalPlan = countryCode && countryCode.length > 2 && !isGlobalPlan;
+
+  // Get plan title based on type
+  let planTitle = '';
+  if (isGlobalPlan) {
+    planTitle = currentLanguage === 'uz' ? 'Global rejа' : 'Глобальный план';
+  } else if (isRegionalPlan) {
+    const regionName = getCountryName(countryCode, currentLanguage);
+    planTitle = currentLanguage === 'uz' ? `Mintaqaviy reja ${regionName}` : `Региональный план ${regionName}`;
+  } else {
+    const countryName = getCountryName(countryCode, currentLanguage);
+    planTitle = `eSIM для ${countryName}`;
+  }
+
   const operatorName = plan.operatorList?.[0]?.operatorName || 'Не указан';
   const networkType = plan.operatorList?.[0]?.networkType || '4G/LTE';
   const packageType = plan.smsSupported || plan.callsSupported ? 'Данные + Звонки/SMS' : 'Только данные';
+
+  // Extract covered countries for regional/global plans
+  const coveredCountries = new Set();
+  if (plan.operatorList && Array.isArray(plan.operatorList)) {
+    plan.operatorList.forEach(op => {
+      if (op.locationCode && !op.locationCode.startsWith('!')) {
+        coveredCountries.add(op.locationCode);
+      }
+    });
+  }
+  const countryList = Array.from(coveredCountries);
+
+  // Calculate prices with margin
+  const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD || 0);
+  const priceUZS = convertToUZS(priceUSDWithMargin);
+  const formattedPriceUZS = formatPrice(priceUZS);
 
   const installationSteps = [
     { icon: Mail, text: 'После покупки QR-код будет в разделе "Мои eSIM"' },
@@ -123,9 +157,6 @@ const PackagePage = () => {
     setOrderError(null);
 
     try {
-      // Extract price from formatted string (e.g., "150 000" -> 150000)
-      const priceUzs = parseFloat(plan.price.replace(/\s/g, '')) || 0;
-
       const orderData = {
         userId: user.id,
         userEmail: user.email,
@@ -134,8 +165,8 @@ const PackagePage = () => {
         countryCode: countryCode,
         dataAmount: plan.data,
         validityDays: plan.days,
-        priceUzs: priceUzs,
-        priceUsd: plan.priceUSD || 0,
+        priceUzs: priceUZS,
+        priceUsd: priceUSDWithMargin,
       };
 
       await createOrder(orderData);
@@ -178,23 +209,26 @@ const PackagePage = () => {
             {/* Package Header */}
             <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
               <HStack spacing={4} mb={6}>
-                <Box
-                  borderRadius="xl"
-                  overflow="hidden"
-                  width="60px"
-                  height="45px"
-                  border="2px solid"
-                  borderColor="gray.200"
-                  flexShrink={0}
-                >
-                  <CountryFlag
-                    code={countryCode}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </Box>
+                {/* Only show flag for single country plans */}
+                {!isRegionalPlan && !isGlobalPlan && (
+                  <Box
+                    borderRadius="xl"
+                    overflow="hidden"
+                    width="60px"
+                    height="45px"
+                    border="2px solid"
+                    borderColor="gray.200"
+                    flexShrink={0}
+                  >
+                    <CountryFlag
+                      code={countryCode}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </Box>
+                )}
                 <VStack align="flex-start" spacing={0}>
                   <Heading size="lg" color="gray.800">
-                    eSIM для {countryName}
+                    {planTitle}
                   </Heading>
                   <Text color="gray.500" fontSize="sm">
                     {plan.name || `${plan.data} / ${plan.days} дней`}
@@ -260,25 +294,45 @@ const PackagePage = () => {
 
             {/* Provider & Coverage Info */}
             <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
-              <Heading size="md" mb={4} color="gray.800">Информация о провайдере</Heading>
+              <Heading size="md" mb={4} color="gray.800">
+                {isRegionalPlan || isGlobalPlan
+                  ? (currentLanguage === 'uz' ? 'Qamrov haqida' : 'Информация о покрытии')
+                  : (currentLanguage === 'uz' ? 'Provayder haqida' : 'Информация о провайдере')}
+              </Heading>
 
               <VStack align="stretch" spacing={4}>
-                <HStack justify="space-between" py={2}>
-                  <HStack spacing={3}>
-                    <Radio size={18} color="#6b7280" />
-                    <Text color="gray.600">Оператор</Text>
-                  </HStack>
-                  <Text fontWeight="700" color="gray.800">{operatorName}</Text>
-                </HStack>
+                {/* For single country plans - show operator info */}
+                {!isRegionalPlan && !isGlobalPlan && (
+                  <>
+                    <HStack justify="space-between" py={2}>
+                      <HStack spacing={3}>
+                        <Radio size={18} color="#6b7280" />
+                        <Text color="gray.600">
+                          {currentLanguage === 'uz' ? 'Operator' : 'Оператор'}
+                        </Text>
+                      </HStack>
+                      <Text fontWeight="700" color="gray.800">{operatorName}</Text>
+                    </HStack>
 
-                <Divider />
+                    <Divider />
+                  </>
+                )}
 
+                {/* Coverage info */}
                 <HStack justify="space-between" py={2}>
                   <HStack spacing={3}>
                     <Globe size={18} color="#6b7280" />
-                    <Text color="gray.600">Покрытие</Text>
+                    <Text color="gray.600">
+                      {currentLanguage === 'uz' ? 'Qamrov' : 'Покрытие'}
+                    </Text>
                   </HStack>
-                  <Text fontWeight="700" color="gray.800">{countryName}</Text>
+                  <Text fontWeight="700" color="gray.800">
+                    {isGlobalPlan
+                      ? (currentLanguage === 'uz' ? `${countryList.length} mamlakat` : `${countryList.length} стран`)
+                      : isRegionalPlan
+                      ? (currentLanguage === 'uz' ? `${countryList.length} mamlakat` : `${countryList.length} стран`)
+                      : getCountryName(countryCode, currentLanguage)}
+                  </Text>
                 </HStack>
 
                 <Divider />
@@ -286,18 +340,67 @@ const PackagePage = () => {
                 <HStack justify="space-between" py={2}>
                   <HStack spacing={3}>
                     <Wifi size={18} color="#6b7280" />
-                    <Text color="gray.600">Скорость</Text>
+                    <Text color="gray.600">
+                      {currentLanguage === 'uz' ? 'Tezlik' : 'Скорость'}
+                    </Text>
                   </HStack>
                   <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
                     {plan.speed || '4G/LTE'}
                   </Badge>
                 </HStack>
 
-                {plan.operatorList && plan.operatorList.length > 1 && (
+                {/* For regional/global plans - show covered countries */}
+                {(isRegionalPlan || isGlobalPlan) && countryList.length > 0 && (
                   <>
                     <Divider />
                     <Box py={2}>
-                      <Text color="gray.600" mb={2}>Все операторы:</Text>
+                      <Text color="gray.600" mb={3} fontWeight="600">
+                        {currentLanguage === 'uz' ? 'Qamrov mamlakatlar:' : 'Охваченные страны:'}
+                      </Text>
+                      <Grid templateColumns="repeat(auto-fill, minmax(140px, 1fr))" gap={3}>
+                        {countryList.map((code) => (
+                          <HStack
+                            key={code}
+                            spacing={2}
+                            bg="gray.50"
+                            px={3}
+                            py={2}
+                            borderRadius="lg"
+                            border="1px solid"
+                            borderColor="gray.200"
+                          >
+                            <Box
+                              borderRadius="sm"
+                              overflow="hidden"
+                              width="24px"
+                              height="18px"
+                              flexShrink={0}
+                              border="1px solid"
+                              borderColor="gray.300"
+                            >
+                              <CountryFlag
+                                code={code}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            </Box>
+                            <Text fontSize="sm" fontWeight="500" color="gray.700">
+                              {getCountryName(code, currentLanguage)}
+                            </Text>
+                          </HStack>
+                        ))}
+                      </Grid>
+                    </Box>
+                  </>
+                )}
+
+                {/* For single country plans - show all operators if multiple */}
+                {!isRegionalPlan && !isGlobalPlan && plan.operatorList && plan.operatorList.length > 1 && (
+                  <>
+                    <Divider />
+                    <Box py={2}>
+                      <Text color="gray.600" mb={2}>
+                        {currentLanguage === 'uz' ? 'Barcha operatorlar:' : 'Все операторы:'}
+                      </Text>
                       <HStack flexWrap="wrap" spacing={2}>
                         {plan.operatorList.map((op, idx) => (
                           <Badge key={idx} colorScheme="blue" fontSize="xs" px={2} py={1}>
@@ -350,19 +453,19 @@ const PackagePage = () => {
               <VStack align="stretch" spacing={6}>
                 <Box textAlign="center">
                   <Text fontSize="sm" color="gray.500" fontWeight="600" mb={1}>
-                    Стоимость пакета
+                    {currentLanguage === 'uz' ? 'Paket narxi' : 'Стоимость пакета'}
                   </Text>
-                  <HStack justify="center" spacing={1}>
+                  <HStack justify="center" spacing={1} mb={2}>
                     <Text fontSize="lg" color="gray.500" fontWeight="500">
-                      {plan.price}
+                      {formattedPriceUZS}
                     </Text>
-                    <Text fontSize="md" color="gray.500" fontWeight="500">
+                    <Text fontSize="md" color="gray.500" fontWeight="500" textTransform="uppercase">
                       UZS
                     </Text>
                   </HStack>
                   <HStack justify="center" spacing={2}>
                     <Heading fontSize="4xl" fontWeight="700" color="gray.800">
-                      {plan.priceUSD}
+                      {priceUSDWithMargin.toFixed(2)}
                     </Heading>
                     <Text fontSize="xl" color="gray.600" fontWeight="700">
                       $
@@ -375,16 +478,30 @@ const PackagePage = () => {
                 {/* Quick Summary */}
                 <VStack align="stretch" spacing={3}>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">Данные</Text>
+                    <Text color="gray.500" fontSize="sm">
+                      {currentLanguage === 'uz' ? 'Ma\'lumot' : 'Данные'}
+                    </Text>
                     <Text fontWeight="700" color="gray.700">{plan.data}</Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">Срок</Text>
-                    <Text fontWeight="700" color="gray.700">{plan.days} дней</Text>
+                    <Text color="gray.500" fontSize="sm">
+                      {currentLanguage === 'uz' ? 'Muddat' : 'Срок'}
+                    </Text>
+                    <Text fontWeight="700" color="gray.700">
+                      {plan.days} {currentLanguage === 'uz' ? 'kun' : 'дней'}
+                    </Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">Регион</Text>
-                    <Text fontWeight="700" color="gray.700">{countryName}</Text>
+                    <Text color="gray.500" fontSize="sm">
+                      {currentLanguage === 'uz' ? 'Mintaqa' : 'Регион'}
+                    </Text>
+                    <Text fontWeight="700" color="gray.700">
+                      {isGlobalPlan
+                        ? (currentLanguage === 'uz' ? 'Global' : 'Глобальный')
+                        : isRegionalPlan
+                        ? getCountryName(countryCode, currentLanguage)
+                        : getCountryName(countryCode, currentLanguage)}
+                    </Text>
                   </HStack>
                 </VStack>
 

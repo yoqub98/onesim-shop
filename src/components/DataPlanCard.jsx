@@ -101,8 +101,10 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
   // Get highest network speed
   const networkType = parseHighestSpeed(plan.speed);
 
-  // Format operators
-  const operatorsText = formatOperatorsList(plan.operatorList);
+  // Format operators - only for single country plans
+  const isRegionalOrGlobal = plan.countryCode === 'GLOBAL' ||
+                              (plan.countryCode && plan.countryCode.length > 2);
+  const operatorsText = !isRegionalOrGlobal ? formatOperatorsList(plan.operatorList) : '';
 
   // Calculate prices with margin
   const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD);
