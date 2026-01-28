@@ -27,6 +27,7 @@ import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi';
+import { getRegionName } from '../services/packageCacheService';
 
 // Country Destination Card Component
 const DestinationCard = ({ countryCode, delay = 0, lang }) => {
@@ -151,14 +152,8 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const t = (key) => getTranslation(lang, key);
 
-  // Import getRegionName dynamically for localized region names
-  const [regionName, setRegionName] = useState(regionCode);
-
-  useEffect(() => {
-    import('../services/packageCacheService').then(({ getRegionName }) => {
-      setRegionName(getRegionName(regionCode, lang));
-    });
-  }, [regionCode, lang]);
+  // Get localized region name
+  const regionName = getRegionName(regionCode, lang);
 
   // Use provided coveredCountries or extract from packages as fallback
   let countryList = coveredCountries;

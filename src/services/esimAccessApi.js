@@ -1,6 +1,13 @@
 // src/services/esimAccessApi.js
 
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
+import {
+  getCachedRegionalPackages,
+  getCachedGlobalPackages,
+  saveRegionalPackagesToCache,
+  saveGlobalPackagesToCache,
+  groupPackagesByRegion
+} from './packageCacheService.js';
 
 // Smart API URL detection
 const getApiUrl = () => {
@@ -368,13 +375,6 @@ export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
   console.log('🌍 Fetching regional packages...');
 
   try {
-    // Import cache service dynamically to avoid circular dependencies
-    const {
-      getCachedRegionalPackages,
-      saveRegionalPackagesToCache,
-      groupPackagesByRegion
-    } = await import('./packageCacheService');
-
     // Try to get from cache first
     console.log('🔍 Checking Supabase cache...');
     const cachedData = await getCachedRegionalPackages();
@@ -444,12 +444,6 @@ export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
   console.log('🌐 Fetching global packages...');
 
   try {
-    // Import cache service dynamically to avoid circular dependencies
-    const {
-      getCachedGlobalPackages,
-      saveGlobalPackagesToCache
-    } = await import('./packageCacheService');
-
     // Try to get from cache first
     console.log('🔍 Checking Supabase cache...');
     const cachedData = await getCachedGlobalPackages();
