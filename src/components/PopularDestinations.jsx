@@ -150,6 +150,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
 const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCount = 0, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
+  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
   // Get localized region name
@@ -176,8 +177,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
   const actualPackageCount = packageCount || packages.length;
 
   const handleViewPlans = () => {
-    // TODO: Navigate to regional plans page
-    console.log('View plans for region:', regionCode);
+    navigate(`/regional/${regionCode}`);
   };
 
   return (
@@ -312,6 +312,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
 const GlobalCard = ({ pkg, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
+  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
   // Extract package details
@@ -333,8 +334,26 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
   const displayFlags = Array.from(coveredCountries).slice(0, 5);
 
   const handleViewPlan = () => {
-    // TODO: Navigate to package detail page
-    console.log('View plan:', pkg.packageCode);
+    // Transform package data to match expected format
+    const planData = {
+      id: `${pkg.packageCode}_${pkg.slug}`,
+      packageCode: pkg.packageCode,
+      slug: pkg.slug,
+      country: 'Global',
+      countryCode: 'GLOBAL',
+      data: dataGB >= 1 ? `${dataGB}GB` : `${Math.round(pkg.volume / 1048576)}MB`,
+      dataGB: dataGB,
+      days: days,
+      speed: pkg.speed || '4G/5G',
+      priceUSD: parseFloat(priceUSD),
+      originalPrice: pkg.price,
+      description: pkg.description || pkg.name,
+      name: pkg.name,
+      operatorList: pkg.locationNetworkList || [],
+      rawPackage: pkg
+    };
+
+    navigate(`/package/${pkg.slug}`, { state: planData });
   };
 
   return (

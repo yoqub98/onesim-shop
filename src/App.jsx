@@ -45,6 +45,7 @@ import FeaturesSection from './components/FeaturesSection';
 import CountryPage from './pages/CountryPage.jsx';
 import PackagePage from './pages/PackagePage.jsx';
 import PlansPage from './pages/PlansPage.jsx';
+import RegionalPackagesPage from './pages/RegionalPackagesPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage';
 import AuthCallback from './pages/AuthCallback.jsx';
@@ -781,6 +782,7 @@ function AppContent() {
         <Route path="/plans" element={<PlansPage />} />
         <Route path="/how-to-install" element={<HowToInstall />} />
         <Route path="/country/:countryCode" element={<CountryPage />} />
+        <Route path="/regional/:regionCode" element={<RegionalPackagesPage />} />
         <Route path="/package/:packageId" element={<PackagePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
