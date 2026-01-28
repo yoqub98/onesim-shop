@@ -10,6 +10,8 @@ import {
 } from '@chakra-ui/react';
 import { WifiIcon } from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 
 // Utility function to extract the highest network speed
 export const parseHighestSpeed = (speed) => {
@@ -36,7 +38,16 @@ export const parseHighestSpeed = (speed) => {
 const formatOperatorsList = (operatorList) => {
   if (!operatorList || operatorList.length === 0) return '';
 
-  const operators = operatorList.map(op => op.operatorName || op);
+  // Handle both array of objects and array of strings
+  const operators = operatorList.map(op => {
+    if (typeof op === 'string') return op;
+    if (typeof op === 'object' && op !== null) {
+      return op.operatorName || op.operator || op.name || String(op);
+    }
+    return String(op);
+  }).filter(Boolean); // Remove any null/undefined values
+
+  if (operators.length === 0) return '';
 
   if (operators.length === 1) {
     return operators[0];
@@ -44,7 +55,7 @@ const formatOperatorsList = (operatorList) => {
     return `${operators[0]}, ${operators[1]}`;
   } else {
     const remaining = operators.length - 2;
-    return `${operators[0]}, ${operators[1]}...+${remaining}`;
+    return `${operators[0]}, ${operators[1]} +${remaining}`;
   }
 };
 
@@ -66,6 +77,7 @@ const formatOperatorsList = (operatorList) => {
 const DataPlanCard = ({ plan, lang, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const t = (key) => getTranslation(lang, key);
+  const { convertToUZS } = useCurrency();
 
   // Parse data value and unit (handle both GB and MB)
   const parseDataValue = (data) => {
@@ -91,6 +103,11 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
 
   // Format operators
   const operatorsText = formatOperatorsList(plan.operatorList);
+
+  // Calculate prices with margin
+  const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD);
+  const priceUZS = convertToUZS(priceUSDWithMargin);
+  const formattedPriceUZS = formatPrice(priceUZS);
 
   return (
     <Box
@@ -239,7 +256,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
             <VStack align="flex-start" spacing={0.5}>
               <HStack align="baseline" spacing={1}>
                 <Text fontSize="18px" color="#494951" fontWeight="500">
-                  {plan.price}
+                  {formattedPriceUZS}
                 </Text>
                 <Text fontSize="14px" color="#494951" fontWeight="400" textTransform="uppercase">
                   {t('plans.card.currency')}
@@ -252,7 +269,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
                   color="#000"
                   letterSpacing="tight"
                 >
-                  {plan.priceUSD}
+                  {priceUSDWithMargin.toFixed(2)}
                 </Text>
                 <Text fontSize="18px" fontWeight="600" color="#000">
                   $

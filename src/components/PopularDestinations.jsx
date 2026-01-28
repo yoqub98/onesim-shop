@@ -353,7 +353,12 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
       rawPackage: pkg
     };
 
-    navigate(`/package/${pkg.slug}`, { state: planData });
+    navigate(`/package/${pkg.slug}`, {
+      state: {
+        plan: planData,
+        countryCode: 'GLOBAL'
+      }
+    });
   };
 
   return (

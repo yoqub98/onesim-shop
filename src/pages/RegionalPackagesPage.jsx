@@ -564,7 +564,12 @@ const RegionalPackagesPage = () => {
                   key={plan.id}
                   plan={plan}
                   lang={currentLanguage}
-                  onClick={() => navigate(`/package/${plan.slug}`, { state: plan })}
+                  onClick={() => navigate(`/package/${plan.slug}`, {
+                    state: {
+                      plan: plan,
+                      countryCode: plan.countryCode || regionCode
+                    }
+                  })}
                 />
               ))}
             </Grid>
