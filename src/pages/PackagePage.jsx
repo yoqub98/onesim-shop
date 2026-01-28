@@ -1,5 +1,5 @@
 // src/pages/PackagePage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -63,6 +63,8 @@ const PackagePage = () => {
 
   const [isOrdering, setIsOrdering] = useState(false);
   const [orderError, setOrderError] = useState(null);
+  const [priceUZS, setPriceUZS] = useState(0);
+  const [formattedPriceUZS, setFormattedPriceUZS] = useState('0');
 
   // Modal controls
   const {
@@ -85,6 +87,29 @@ const PackagePage = () => {
 
   const plan = location.state?.plan;
   const countryCode = location.state?.countryCode;
+
+  // Calculate prices with margin (before early return)
+  const priceUSDWithMargin = plan ? calculateFinalPriceUSD(plan.priceUSD || 0) : 0;
+
+  // Convert USD to UZS asynchronously (must be before early return)
+  useEffect(() => {
+    if (!plan) return;
+
+    const convertPrice = async () => {
+      try {
+        const convertedPrice = await convertToUZS(priceUSDWithMargin);
+        setPriceUZS(convertedPrice);
+        setFormattedPriceUZS(formatPrice(convertedPrice));
+        console.log('[PackagePage] Price converted:', priceUSDWithMargin, 'USD =', convertedPrice, 'UZS');
+      } catch (error) {
+        console.error('[PackagePage] Error converting price:', error);
+        setPriceUZS(0);
+        setFormattedPriceUZS('0');
+      }
+    };
+
+    convertPrice();
+  }, [plan, priceUSDWithMargin, convertToUZS]);
 
   // Redirect if no plan data
   if (!plan) {
@@ -142,11 +167,6 @@ const PackagePage = () => {
   const countryList = Array.from(coveredCountries);
   console.log('[PackagePage] Final country list:', countryList);
   console.log('[PackagePage] isRegionalPlan:', isRegionalPlan, 'isGlobalPlan:', isGlobalPlan);
-
-  // Calculate prices with margin
-  const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD || 0);
-  const priceUZS = convertToUZS(priceUSDWithMargin);
-  const formattedPriceUZS = formatPrice(priceUZS);
 
   const installationSteps = [
     { icon: Mail, text: 'После покупки QR-код будет в разделе "Мои eSIM"' },
@@ -366,41 +386,68 @@ const PackagePage = () => {
                   <>
                     <Divider />
                     <Box py={2}>
-                      <Text color="gray.600" mb={3} fontWeight="600">
-                        {currentLanguage === 'uz' ? 'Qamrov mamlakatlar:' : 'Охваченные страны:'}
-                      </Text>
-                      <Grid templateColumns="repeat(auto-fill, minmax(140px, 1fr))" gap={3}>
-                        {countryList.map((code) => (
-                          <HStack
-                            key={code}
-                            spacing={2}
-                            bg="gray.50"
-                            px={3}
-                            py={2}
-                            borderRadius="lg"
-                            border="1px solid"
-                            borderColor="gray.200"
-                          >
-                            <Box
-                              borderRadius="sm"
-                              overflow="hidden"
-                              width="24px"
-                              height="18px"
-                              flexShrink={0}
+                      <HStack justify="space-between" align="center" mb={3}>
+                        <Text color="gray.600" fontWeight="600">
+                          {currentLanguage === 'uz' ? 'Qamrov mamlakatlar:' : 'Охваченные страны:'}
+                        </Text>
+                        <Badge colorScheme="purple" fontSize="xs" px={2} py={1}>
+                          {countryList.length} {currentLanguage === 'uz' ? 'mamlakat' : 'стран'}
+                        </Badge>
+                      </HStack>
+                      <Box
+                        maxH="400px"
+                        overflowY="auto"
+                        pr={2}
+                        css={{
+                          '&::-webkit-scrollbar': {
+                            width: '6px',
+                          },
+                          '&::-webkit-scrollbar-track': {
+                            background: '#f1f1f1',
+                            borderRadius: '10px',
+                          },
+                          '&::-webkit-scrollbar-thumb': {
+                            background: '#cbd5e0',
+                            borderRadius: '10px',
+                          },
+                          '&::-webkit-scrollbar-thumb:hover': {
+                            background: '#a0aec0',
+                          },
+                        }}
+                      >
+                        <Grid templateColumns="repeat(auto-fill, minmax(140px, 1fr))" gap={3}>
+                          {countryList.map((code) => (
+                            <HStack
+                              key={code}
+                              spacing={2}
+                              bg="gray.50"
+                              px={3}
+                              py={2}
+                              borderRadius="lg"
                               border="1px solid"
-                              borderColor="gray.300"
+                              borderColor="gray.200"
                             >
-                              <CountryFlag
-                                code={code}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                            </Box>
-                            <Text fontSize="sm" fontWeight="500" color="gray.700">
-                              {getCountryName(code, currentLanguage)}
-                            </Text>
-                          </HStack>
-                        ))}
-                      </Grid>
+                              <Box
+                                borderRadius="sm"
+                                overflow="hidden"
+                                width="24px"
+                                height="18px"
+                                flexShrink={0}
+                                border="1px solid"
+                                borderColor="gray.300"
+                              >
+                                <CountryFlag
+                                  code={code}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                              </Box>
+                              <Text fontSize="sm" fontWeight="500" color="gray.700">
+                                {getCountryName(code, currentLanguage)}
+                              </Text>
+                            </HStack>
+                          ))}
+                        </Grid>
+                      </Box>
                     </Box>
                   </>
                 )}
