@@ -4,7 +4,7 @@
  * Cache Duration: 1 week (prices remain stable)
  */
 
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient.js';
 
 // Cache duration: 7 days
 const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000;

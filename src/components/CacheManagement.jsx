@@ -31,8 +31,8 @@ import {
 import {
   getCacheStats,
   invalidateCache,
-} from '../services/packageCacheService';
-import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi';
+} from '../services/packageCacheService.js';
+import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi.js';
 
 const CacheManagement = () => {
   const [stats, setStats] = useState(null);

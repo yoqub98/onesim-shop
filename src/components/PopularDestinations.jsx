@@ -26,8 +26,8 @@ import { POPULAR_DESTINATIONS } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi';
-import { getRegionName } from '../services/packageCacheService';
+import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi.js';
+import { getRegionName } from '../services/packageCacheService.js';
 
 // Country Destination Card Component
 const DestinationCard = ({ countryCode, delay = 0, lang }) => {
