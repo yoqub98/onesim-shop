@@ -146,30 +146,39 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
 };
 
 // Regional Package Card Component
-const RegionalCard = ({ regionCode, packages, delay = 0, lang }) => {
+const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCount = 0, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const t = (key) => getTranslation(lang, key);
 
-  // Extract region name from the first package
-  const regionName = packages[0]?.name?.split(' ')[0] || regionCode;
-  const packageCount = packages.length;
+  // Import getRegionName dynamically for localized region names
+  const [regionName, setRegionName] = useState(regionCode);
 
-  // Get list of covered countries from locationNetworkList
-  const coveredCountries = new Set();
-  packages.forEach(pkg => {
-    if (pkg.locationNetworkList && Array.isArray(pkg.locationNetworkList)) {
-      pkg.locationNetworkList.forEach(loc => {
-        if (loc.locationCode && !loc.locationCode.startsWith('!')) {
-          coveredCountries.add(loc.locationCode);
-        }
-      });
-    }
-  });
+  useEffect(() => {
+    import('../services/packageCacheService').then(({ getRegionName }) => {
+      setRegionName(getRegionName(regionCode, lang));
+    });
+  }, [regionCode, lang]);
 
-  const countryList = Array.from(coveredCountries);
+  // Use provided coveredCountries or extract from packages as fallback
+  let countryList = coveredCountries;
+  if (!coveredCountries || coveredCountries.length === 0) {
+    const countriesSet = new Set();
+    packages.forEach(pkg => {
+      if (pkg.locationNetworkList && Array.isArray(pkg.locationNetworkList)) {
+        pkg.locationNetworkList.forEach(loc => {
+          if (loc.locationCode && !loc.locationCode.startsWith('!')) {
+            countriesSet.add(loc.locationCode);
+          }
+        });
+      }
+    });
+    countryList = Array.from(countriesSet).map(code => ({ code }));
+  }
+
   const displayFlags = countryList.slice(0, 5);
   const remainingCount = countryList.length > 5 ? countryList.length - 5 : 0;
+  const actualPackageCount = packageCount || packages.length;
 
   const handleViewPlans = () => {
     // TODO: Navigate to regional plans page
@@ -225,34 +234,37 @@ const RegionalCard = ({ regionCode, packages, delay = 0, lang }) => {
 
           {/* Package Count */}
           <Text fontSize="md" color="gray.600" fontWeight="500">
-            {packageCount} {t('destinations.regional.packagesCount')}
+            {actualPackageCount} {t('destinations.regional.packagesCount')}
           </Text>
 
           {/* Country Flags and Arrow */}
           <HStack justify="space-between" align="center" mt="auto">
             {/* Flags */}
             <HStack spacing={-2}>
-              {displayFlags.map((countryCode, index) => (
-                <Box
-                  key={countryCode}
-                  borderRadius="full"
-                  overflow="hidden"
-                  width="36px"
-                  height="36px"
-                  border="2px solid white"
-                  shadow="md"
-                  zIndex={displayFlags.length - index}
-                >
-                  <CountryFlag
-                    code={countryCode}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                  />
-                </Box>
-              ))}
+              {displayFlags.map((country, index) => {
+                const countryCode = typeof country === 'string' ? country : country.code;
+                return (
+                  <Box
+                    key={countryCode}
+                    borderRadius="full"
+                    overflow="hidden"
+                    width="36px"
+                    height="36px"
+                    border="2px solid white"
+                    shadow="md"
+                    zIndex={displayFlags.length - index}
+                  >
+                    <CountryFlag
+                      code={countryCode}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  </Box>
+                );
+              })}
               {remainingCount > 0 && (
                 <Box
                   borderRadius="full"
@@ -726,15 +738,24 @@ const PopularDestinations = () => {
                   w="100%"
                   className="animate__animated animate__fadeIn"
                 >
-                  {Object.entries(regionalPackages).map(([regionCode, packages], index) => (
-                    <RegionalCard
-                      key={regionCode}
-                      regionCode={regionCode}
-                      packages={packages}
-                      delay={index * 100}
-                      lang={currentLanguage}
-                    />
-                  ))}
+                  {Object.entries(regionalPackages).map(([regionCode, regionData], index) => {
+                    // Handle both old format (packages array) and new format (object with metadata)
+                    const packages = Array.isArray(regionData) ? regionData : regionData.packages || [];
+                    const coveredCountries = regionData.coveredCountries || [];
+                    const packageCount = regionData.packageCount || packages.length;
+
+                    return (
+                      <RegionalCard
+                        key={regionCode}
+                        regionCode={regionCode}
+                        packages={packages}
+                        coveredCountries={coveredCountries}
+                        packageCount={packageCount}
+                        delay={index * 100}
+                        lang={currentLanguage}
+                      />
+                    );
+                  })}
                 </Grid>
               )}
             </>

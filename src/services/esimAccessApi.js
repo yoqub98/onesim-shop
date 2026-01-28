@@ -362,11 +362,30 @@ export const fetchAllPackagesForCountry = async (
 
 // ============================================
 // FETCH: Regional Packages (locationCode starts with !RG)
+// Uses Supabase cache with 1-week TTL
 // ============================================
 export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
   console.log('🌍 Fetching regional packages...');
 
   try {
+    // Import cache service dynamically to avoid circular dependencies
+    const {
+      getCachedRegionalPackages,
+      saveRegionalPackagesToCache,
+      groupPackagesByRegion
+    } = await import('./packageCacheService');
+
+    // Try to get from cache first
+    console.log('🔍 Checking Supabase cache...');
+    const cachedData = await getCachedRegionalPackages();
+
+    if (cachedData) {
+      console.log('✅ Using cached regional packages');
+      return cachedData;
+    }
+
+    // Cache miss - fetch from API
+    console.log('⚠️ Cache miss - fetching from API...');
     const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
@@ -397,17 +416,15 @@ export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
 
       console.log(`🌍 Filtered ${regionalPackages.length} regional packages`);
 
-      // Group by region (locationCode)
-      const regionGroups = {};
-      regionalPackages.forEach(pkg => {
-        const regionCode = pkg.locationCode;
-        if (!regionGroups[regionCode]) {
-          regionGroups[regionCode] = [];
-        }
-        regionGroups[regionCode].push(pkg);
-      });
+      // Group by thematic regions (Europe, Asia, Middle East, etc.)
+      const regionGroups = groupPackagesByRegion(regionalPackages);
 
-      console.log(`📦 Found ${Object.keys(regionGroups).length} unique regions:`, Object.keys(regionGroups));
+      console.log(`📦 Found ${Object.keys(regionGroups).length} thematic regions:`, Object.keys(regionGroups));
+
+      // Save to cache asynchronously (don't wait)
+      saveRegionalPackagesToCache(regionGroups).catch(err =>
+        console.error('⚠️ Failed to save regional cache:', err)
+      );
 
       return regionGroups;
     } else {
@@ -421,11 +438,29 @@ export const fetchRegionalPackages = async (lang = DEFAULT_LANGUAGE) => {
 
 // ============================================
 // FETCH: Global Packages (locationCode starts with !GL)
+// Uses Supabase cache with 1-week TTL
 // ============================================
 export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
   console.log('🌐 Fetching global packages...');
 
   try {
+    // Import cache service dynamically to avoid circular dependencies
+    const {
+      getCachedGlobalPackages,
+      saveGlobalPackagesToCache
+    } = await import('./packageCacheService');
+
+    // Try to get from cache first
+    console.log('🔍 Checking Supabase cache...');
+    const cachedData = await getCachedGlobalPackages();
+
+    if (cachedData) {
+      console.log('✅ Using cached global packages');
+      return cachedData;
+    }
+
+    // Cache miss - fetch from API
+    console.log('⚠️ Cache miss - fetching from API...');
     const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
@@ -455,6 +490,11 @@ export const fetchGlobalPackages = async (lang = DEFAULT_LANGUAGE) => {
       );
 
       console.log(`🌐 Filtered ${globalPackages.length} global packages`);
+
+      // Save to cache asynchronously (don't wait)
+      saveGlobalPackagesToCache(globalPackages).catch(err =>
+        console.error('⚠️ Failed to save global cache:', err)
+      );
 
       return globalPackages;
     } else {
