@@ -149,7 +149,6 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
 const RegionalCard = ({ regionCode, packages, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
-  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
   // Extract region name from the first package
@@ -306,7 +305,6 @@ const RegionalCard = ({ regionCode, packages, delay = 0, lang }) => {
 const GlobalCard = ({ pkg, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
-  const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
   // Extract package details
