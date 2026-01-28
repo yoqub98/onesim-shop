@@ -12,6 +12,7 @@ import { WifiIcon } from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
+import { REGION_DEFINITIONS } from '../services/packageCacheService.js';
 
 // Utility function to extract the highest network speed
 export const parseHighestSpeed = (speed) => {
@@ -103,7 +104,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
 
   // Format operators - only for single country plans
   const isRegionalOrGlobal = plan.countryCode === 'GLOBAL' ||
-                              (plan.countryCode && plan.countryCode.length > 2);
+                              (plan.countryCode && REGION_DEFINITIONS[plan.countryCode]);
   const operatorsText = !isRegionalOrGlobal ? formatOperatorsList(plan.operatorList) : '';
 
   // Calculate prices with margin

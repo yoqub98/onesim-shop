@@ -52,6 +52,7 @@ import { getCountryName } from '../config/i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { createOrder } from '../services/orderService';
+import { REGION_DEFINITIONS } from '../services/packageCacheService.js';
 
 const PackagePage = () => {
   const location = useLocation();
@@ -102,14 +103,15 @@ const PackagePage = () => {
 
   // Determine if this is regional or global plan
   const isGlobalPlan = countryCode === 'GLOBAL';
-  const isRegionalPlan = countryCode && countryCode.length > 2 && !isGlobalPlan;
+  const isRegionalPlan = countryCode && REGION_DEFINITIONS[countryCode] && !isGlobalPlan;
 
   // Get plan title based on type
   let planTitle = '';
   if (isGlobalPlan) {
-    planTitle = currentLanguage === 'uz' ? 'Global rejа' : 'Глобальный план';
+    planTitle = currentLanguage === 'uz' ? 'Global reja' : 'Глобальный план';
   } else if (isRegionalPlan) {
-    const regionName = getCountryName(countryCode, currentLanguage);
+    const region = REGION_DEFINITIONS[countryCode];
+    const regionName = currentLanguage === 'uz' ? region.nameUz : region.nameRu;
     planTitle = currentLanguage === 'uz' ? `Mintaqaviy reja ${regionName}` : `Региональный план ${regionName}`;
   } else {
     const countryName = getCountryName(countryCode, currentLanguage);
@@ -123,13 +125,23 @@ const PackagePage = () => {
   // Extract covered countries for regional/global plans
   const coveredCountries = new Set();
   if (plan.operatorList && Array.isArray(plan.operatorList)) {
+    console.log('[PackagePage] operatorList:', plan.operatorList);
     plan.operatorList.forEach(op => {
       if (op.locationCode && !op.locationCode.startsWith('!')) {
-        coveredCountries.add(op.locationCode);
+        // Remove region prefix if present (e.g., "EU-GB" -> "GB")
+        let countryCode = op.locationCode;
+        const hyphenIndex = countryCode.indexOf('-');
+        if (hyphenIndex > 0) {
+          countryCode = countryCode.substring(hyphenIndex + 1);
+        }
+        console.log('[PackagePage] Adding country:', countryCode, 'from', op.locationCode);
+        coveredCountries.add(countryCode);
       }
     });
   }
   const countryList = Array.from(coveredCountries);
+  console.log('[PackagePage] Final country list:', countryList);
+  console.log('[PackagePage] isRegionalPlan:', isRegionalPlan, 'isGlobalPlan:', isGlobalPlan);
 
   // Calculate prices with margin
   const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD || 0);
@@ -499,7 +511,7 @@ const PackagePage = () => {
                       {isGlobalPlan
                         ? (currentLanguage === 'uz' ? 'Global' : 'Глобальный')
                         : isRegionalPlan
-                        ? getCountryName(countryCode, currentLanguage)
+                        ? (currentLanguage === 'uz' ? REGION_DEFINITIONS[countryCode].nameUz : REGION_DEFINITIONS[countryCode].nameRu)
                         : getCountryName(countryCode, currentLanguage)}
                     </Text>
                   </HStack>
