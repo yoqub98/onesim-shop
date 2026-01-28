@@ -9,9 +9,7 @@ import {
   Grid,
   HStack,
   VStack,
-  Badge,
   IconButton,
-  Spinner,
   Select,
 } from '@chakra-ui/react';
 import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
@@ -19,7 +17,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DataPlanCard from '../components/DataPlanCard';
 import { fetchRegionalPackages } from '../services/esimAccessApi.js';
 import { getRegionName, REGION_DEFINITIONS } from '../services/packageCacheService.js';
-import { calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
+import { calculateFinalPriceUSD } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -244,7 +242,7 @@ const RegionalPackagesPage = () => {
         const regionData = regionalData[regionCode];
 
         if (!regionData || !regionData.packages || regionData.packages.length === 0) {
-          setError(t('country.noPlansAvailable'));
+          setError(getTranslation(currentLanguage, 'country.noPlansAvailable'));
           setAllPlans([]);
           return;
         }
@@ -274,7 +272,7 @@ const RegionalPackagesPage = () => {
       } catch (err) {
         console.error('Error loading regional packages:', err);
         if (isMounted) {
-          setError(t('country.errorLoading'));
+          setError(getTranslation(currentLanguage, 'country.errorLoading'));
         }
       } finally {
         if (isMounted) {
@@ -288,7 +286,7 @@ const RegionalPackagesPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [regionCode, currentLanguage, t, regionName]);
+  }, [regionCode, currentLanguage, regionName]);
 
   // Get unique data and duration options
   const { dataOptions, durationOptions } = useMemo(() => {
