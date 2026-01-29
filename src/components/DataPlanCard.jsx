@@ -8,7 +8,7 @@ import {
   HStack,
   VStack,
 } from '@chakra-ui/react';
-import { WifiIcon } from '@heroicons/react/24/outline';
+import { WifiIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
@@ -51,6 +51,26 @@ const smartRoundDollar = (value) => {
   } else {
     // Less than XX.5 - round down
     return Math.floor(value).toString();
+  }
+};
+
+// Smart rounding for UZS values (round to nearest thousand)
+// Examples: 626,854 → 627,000 | 539,356 → 539,000
+const smartRoundUZS = (value) => {
+  if (!value || value === 0) return value;
+
+  const thousands = value / 1000;
+  const remainder = value % 1000;
+
+  if (remainder === 500) {
+    // Exactly XX,500 - keep as is
+    return value;
+  } else if (remainder > 500) {
+    // Greater than XX,500 - round up to next thousand
+    return Math.ceil(thousands) * 1000;
+  } else {
+    // Less than XX,500 - round down
+    return Math.floor(thousands) * 1000;
   }
 };
 
@@ -140,7 +160,8 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
     const loadUZSPrice = async () => {
       try {
         const uzs = await convertToUZS(priceUSDWithMargin);
-        setPriceUZS(uzs);
+        const roundedUZS = smartRoundUZS(uzs);
+        setPriceUZS(roundedUZS);
       } catch (error) {
         console.error('[DataPlanCard] Error converting to UZS:', error);
         setPriceUZS(0);
@@ -288,14 +309,17 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
 
           {/* Country Coverage Badge - for regional/global plans */}
           {isRegionalOrGlobal && countryCoverage > 0 && (
-            <Box
+            <HStack
               flex={1}
+              spacing={2}
               px={3.5}
               py={2}
               borderRadius="12px"
               bg="#F2F2F7"
+              align="center"
               overflow="hidden"
             >
+              <Box as={GlobeAltIcon} w="20px" h="20px" color="#FE4F18" flexShrink={0} />
               <Text
                 fontSize="14px"
                 fontWeight="600"
@@ -304,7 +328,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
               >
                 {countryCoverage} {t('plans.card.countries')}
               </Text>
-            </Box>
+            </HStack>
           )}
         </HStack>
 
@@ -327,8 +351,8 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
               </HStack>
               <HStack align="baseline" spacing={0.5}>
                 <Text
-                  fontSize="28px"
-                  fontWeight="700"
+                  fontSize="25px"
+                  fontWeight="800"
                   color="#000"
                   letterSpacing="tight"
                 >
