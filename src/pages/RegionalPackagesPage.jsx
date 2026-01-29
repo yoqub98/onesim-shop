@@ -555,7 +555,8 @@ const RegionalPackagesPage = () => {
                 md: 'repeat(2, 1fr)',
                 lg: 'repeat(3, 1fr)',
               }}
-              gap={6}
+              gap={3}
+              columnGap={2}
               justifyItems="center"
               mb={8}
             >

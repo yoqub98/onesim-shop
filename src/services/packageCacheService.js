@@ -62,6 +62,13 @@ export const REGION_DEFINITIONS = {
     nameUz: 'Global',
     patterns: ['!GL', 'GLOBAL-'],
     icon: '🌐'
+  },
+  'OTHER': {
+    name: 'Other',
+    nameRu: 'Другие',
+    nameUz: 'Boshqalar',
+    patterns: [],
+    icon: '🌍'
   }
 };
 

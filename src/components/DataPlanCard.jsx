@@ -1,6 +1,6 @@
 // src/components/DataPlanCard.jsx
 // Design System Component - Data Plan Card
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Text,
@@ -33,6 +33,25 @@ export const parseHighestSpeed = (speed) => {
   }
 
   return networks[0] || speed;
+};
+
+// Smart rounding for dollar values
+// Higher than XX.5 → round up
+// Less than XX.5 → round down
+// Exactly XX.5 → display as is
+const smartRoundDollar = (value) => {
+  const decimalPart = value - Math.floor(value);
+
+  if (decimalPart === 0.5) {
+    // Exactly XX.5 - display as is with 2 decimals
+    return value.toFixed(2);
+  } else if (decimalPart > 0.5) {
+    // Higher than XX.5 - round up
+    return Math.ceil(value).toString();
+  } else {
+    // Less than XX.5 - round down
+    return Math.floor(value).toString();
+  }
 };
 
 // Format operators list to show first two and count the rest
@@ -77,6 +96,7 @@ const formatOperatorsList = (operatorList) => {
  */
 const DataPlanCard = ({ plan, lang, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [priceUZS, setPriceUZS] = useState(null);
   const t = (key) => getTranslation(lang, key);
   const { convertToUZS } = useCurrency();
 
@@ -107,10 +127,29 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
                               (plan.countryCode && REGION_DEFINITIONS[plan.countryCode]);
   const operatorsText = !isRegionalOrGlobal ? formatOperatorsList(plan.operatorList) : '';
 
+  // Calculate country coverage for regional/global plans
+  const countryCoverage = (isRegionalOrGlobal && plan.rawPackage?.locationNetworkList)
+    ? plan.rawPackage.locationNetworkList.length
+    : 0;
+
   // Calculate prices with margin
   const priceUSDWithMargin = calculateFinalPriceUSD(plan.priceUSD);
-  const priceUZS = convertToUZS(priceUSDWithMargin);
-  const formattedPriceUZS = formatPrice(priceUZS);
+
+  // Convert to UZS asynchronously
+  useEffect(() => {
+    const loadUZSPrice = async () => {
+      try {
+        const uzs = await convertToUZS(priceUSDWithMargin);
+        setPriceUZS(uzs);
+      } catch (error) {
+        console.error('[DataPlanCard] Error converting to UZS:', error);
+        setPriceUZS(0);
+      }
+    };
+    loadUZSPrice();
+  }, [priceUSDWithMargin, convertToUZS]);
+
+  const formattedPriceUZS = priceUZS !== null ? formatPrice(priceUZS) : '...';
 
   return (
     <Box
@@ -206,7 +245,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
           </VStack>
         </HStack>
 
-        {/* Middle Section: Network Type & Operators */}
+        {/* Middle Section: Network Type & Operators/Countries */}
         <HStack spacing={3} align="center">
           {/* Network Badge */}
           <HStack
@@ -224,7 +263,7 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
             </Text>
           </HStack>
 
-          {/* Operators Badge */}
+          {/* Operators Badge - for single country */}
           {operatorsText && (
             <Box
               flex={1}
@@ -243,6 +282,27 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
                 textOverflow="ellipsis"
               >
                 {operatorsText}
+              </Text>
+            </Box>
+          )}
+
+          {/* Country Coverage Badge - for regional/global plans */}
+          {isRegionalOrGlobal && countryCoverage > 0 && (
+            <Box
+              flex={1}
+              px={3.5}
+              py={2}
+              borderRadius="12px"
+              bg="#F2F2F7"
+              overflow="hidden"
+            >
+              <Text
+                fontSize="14px"
+                fontWeight="600"
+                color="#FE4F18"
+                whiteSpace="nowrap"
+              >
+                {countryCoverage} {t('plans.card.countries')}
               </Text>
             </Box>
           )}
@@ -265,17 +325,22 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
                   {t('plans.card.currency')}
                 </Text>
               </HStack>
-              <HStack align="baseline" spacing={1}>
+              <HStack align="baseline" spacing={0.5}>
+                <Text
+                  fontSize="28px"
+                  fontWeight="700"
+                  color="#000"
+                  letterSpacing="tight"
+                >
+                  $
+                </Text>
                 <Text
                   fontSize="25px"
                   fontWeight="800"
                   color="#000"
                   letterSpacing="tight"
                 >
-                  {priceUSDWithMargin.toFixed(2)}
-                </Text>
-                <Text fontSize="18px" fontWeight="600" color="#000">
-                  $
+                  {smartRoundDollar(priceUSDWithMargin)}
                 </Text>
               </HStack>
             </VStack>
