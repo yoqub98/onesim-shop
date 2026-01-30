@@ -400,6 +400,21 @@ export const TRANSLATIONS = {
       noPlansAvailable: 'Нет доступных тарифов',
       errorLoading: 'Ошибка загрузки тарифов',
     },
+    regional: {
+      title: 'Региональные тарифы',
+      plansAvailable: 'ПЛАНОВ ДОСТУПНО',
+      plansAvailableSingle: 'ПЛАН ДОСТУПЕН',
+      filters: 'Фильтры:',
+      allData: 'Все данные',
+      sortByPrice: 'Сортировать по цене',
+      showing: 'Показано',
+      of: 'из',
+      descriptions: {
+        EUROPE: 'Откройте для себя разнообразие европейских стран без границ и лишних забот. Один eSIM с региональным покрытием обеспечивает стабильный интернет, чтобы свободно путешествовать, оставаться на связи и делиться впечатлениями с каждым новым городом.',
+        ASIA: 'Погрузитесь в богатство азиатских культур с безупречной связью. Один региональный eSIM обеспечивает стабильный интернет по всей Азии, позволяя свободно путешествовать, делиться впечатлениями и оставаться на связи в каждом уголке континента.',
+        OTHER: 'Исследуйте новые горизонты с надежным региональным покрытием. Один eSIM обеспечивает стабильный интернет в разных странах, позволяя свободно путешествовать, делиться впечатлениями и оставаться на связи в каждом новом месте.',
+      },
+    },
     packagePage: {
       back: 'Назад',
       esimFor: 'eSIM для',
@@ -906,6 +921,21 @@ export const TRANSLATIONS = {
       backToHome: 'Bosh sahifaga qaytish',
       noPlansAvailable: 'Mavjud tariflar yo\'q',
       errorLoading: 'Tariflarni yuklashda xatolik',
+    },
+    regional: {
+      title: 'Mintaqaviy tariflar',
+      plansAvailable: 'TARIFLAR MAVJUD',
+      plansAvailableSingle: 'TARIF MAVJUD',
+      filters: 'Filtrlar:',
+      allData: 'Barcha ma\'lumotlar',
+      sortByPrice: 'Narx bo\'yicha saralash',
+      showing: 'Ko\'rsatilgan',
+      of: 'dan',
+      descriptions: {
+        EUROPE: 'Evropa mamlakatlarining xilma-xilligini chegara va ortiqcha tashvishsiz kashf eting. Bitta mintaqaviy qamrovli eSIM barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, aloqada bo\'lish va har bir yangi shahar bilan taassurotlar ulashish imkonini beradi.',
+        ASIA: 'Osiyo madaniyatlarining boyligiga benuqson aloqa bilan sho\'ng\'ing. Bitta mintaqaviy eSIM butun Osiyo bo\'ylab barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, taassurotlar ulashish va kontinentning har bir burchagida aloqada bo\'lish imkonini beradi.',
+        OTHER: 'Ishonchli mintaqaviy qamrov bilan yangi ufqlarni o\'rganing. Bitta eSIM turli mamlakatlarda barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, taassurotlar ulashish va har bir yangi joyda aloqada bo\'lish imkonini beradi.',
+      },
     },
     packagePage: {
       back: 'Ortga',

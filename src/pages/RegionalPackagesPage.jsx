@@ -14,9 +14,9 @@ import {
 } from '@chakra-ui/react';
 import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DataPlanCard from '../components/DataPlanCard';
+import RegionalPlanCard from '../components/RegionalPlanCard';
 import { fetchRegionalPackages } from '../services/esimAccessApi.js';
-import { getRegionName, REGION_DEFINITIONS } from '../services/packageCacheService.js';
+import { getRegionName } from '../services/packageCacheService.js';
 import { calculateFinalPriceUSD } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -223,7 +223,6 @@ const RegionalPackagesPage = () => {
   const [sortOrder, setSortOrder] = useState(null);
 
   const regionName = getRegionName(regionCode, currentLanguage);
-  const regionIcon = REGION_DEFINITIONS[regionCode]?.icon || '🌍';
 
   // Load regional packages
   useEffect(() => {
@@ -354,100 +353,187 @@ const RegionalPackagesPage = () => {
     }
   };
 
-  return (
-    <Box bg="#F9FAFB" minH="100vh" pt={32} pb={20}>
-      <Container maxW="1400px">
-        {/* Header */}
-        <VStack align="stretch" spacing={8} mb={12}>
-          <Button
-            leftIcon={<ArrowLeft size={20} />}
-            onClick={() => navigate('/')}
-            bg="white"
-            color="#2C2C2E"
-            borderRadius="full"
-            px={6}
-            py={3}
-            fontWeight="600"
-            fontSize="md"
-            width="fit-content"
-            boxShadow="0 2px 8px rgba(0, 0, 0, 0.06)"
-            _hover={{
-              bg: '#FFF4F0',
-              transform: 'translateY(-2px)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-            }}
-            transition="all 0.2s"
-          >
-            {t('country.back')}
-          </Button>
+  // Get background image based on region
+  const getBackgroundImage = (region) => {
+    const regionLower = region?.toLowerCase() || '';
+    if (regionLower.includes('europe') || regionLower === 'eu') {
+      return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/europe.webp';
+    } else if (regionLower.includes('asia')) {
+      return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/asia.webp';
+    } else {
+      return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/latin.webp';
+    }
+  };
 
-          <HStack spacing={4} align="center">
-            <Text fontSize="6xl">{regionIcon}</Text>
+  // Get description based on region
+  const getRegionDescription = (region) => {
+    const regionLower = region?.toLowerCase() || '';
+    if (regionLower.includes('europe') || regionLower === 'eu') {
+      return t('regional.descriptions.EUROPE');
+    } else if (regionLower.includes('asia')) {
+      return t('regional.descriptions.ASIA');
+    } else {
+      return t('regional.descriptions.OTHER');
+    }
+  };
+
+  return (
+    <Box bg="#F9FAFB" minH="100vh">
+      {/* Hero Banner Section */}
+      <Box
+        position="relative"
+        h="400px"
+        bgImage={`url('${getBackgroundImage(regionCode)}')`}
+        bgSize="cover"
+        bgPosition="center"
+        overflow="hidden"
+      >
+        {/* Gradient Overlay */}
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          background="linear-gradient(177deg, rgba(0, 0, 0, 0.74) 9.55%, rgba(38, 18, 10, 0.74) 60.58%, rgba(255, 118, 69, 0.74) 118.15%)"
+        />
+
+        {/* Content */}
+        <Container maxW="1400px" h="100%" position="relative" zIndex={1}>
+          <VStack align="stretch" justify="flex-end" h="100%" pb={12} spacing={4}>
+            {/* Back Button */}
+            <Button
+              leftIcon={<ArrowLeft size={20} />}
+              onClick={() => navigate('/')}
+              bg="transparent"
+              color="white"
+              borderRadius="full"
+              px={4}
+              py={2}
+              fontWeight="600"
+              fontSize="md"
+              width="fit-content"
+              border="1px solid rgba(255, 255, 255, 0.3)"
+              _hover={{
+                bg: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+              }}
+              transition="all 0.2s"
+            >
+              {t('country.back')}
+            </Button>
+
+            {/* Title and Region */}
             <VStack align="start" spacing={2}>
-              <Heading
-                fontSize={{ base: '3xl', md: '5xl' }}
-                fontWeight="800"
-                color="#2C2C2E"
+              <Text
+                fontSize="18px"
+                fontWeight="600"
+                color="white"
                 fontFamily="'Manrope', sans-serif"
+                textTransform="uppercase"
+                letterSpacing="wide"
+              >
+                {t('regional.title')}
+              </Text>
+              <Heading
+                fontSize={{ base: '48px', md: '64px' }}
+                fontWeight="800"
+                color="white"
+                fontFamily="'Manrope', sans-serif"
+                lineHeight="1.1"
               >
                 {regionName}
               </Heading>
-              <Text fontSize="lg" color="#6B7280" fontWeight="500">
-                {filteredAndSortedPlans.length} {t('country.plansAvailable')}
+              <Text
+                fontSize="16px"
+                fontWeight="400"
+                color="rgba(255, 255, 255, 0.9)"
+                fontFamily="'Manrope', sans-serif"
+                maxW="600px"
+                lineHeight="1.6"
+              >
+                {getRegionDescription(regionCode)}
               </Text>
-            </VStack>
-          </HStack>
-        </VStack>
 
-        {/* Filters */}
+              {/* Plans Available Badge */}
+              {!loading && !error && (
+                <Box
+                  bg="rgba(255, 255, 255, 0.2)"
+                  backdropFilter="blur(10px)"
+                  borderRadius="full"
+                  px={5}
+                  py={2}
+                  mt={2}
+                >
+                  <Text
+                    fontSize="14px"
+                    fontWeight="700"
+                    color="white"
+                    fontFamily="'Manrope', sans-serif"
+                    textTransform="uppercase"
+                    letterSpacing="wide"
+                  >
+                    {allPlans.length} {t('regional.plansAvailable')}
+                  </Text>
+                </Box>
+              )}
+            </VStack>
+          </VStack>
+        </Container>
+      </Box>
+
+      <Container maxW="1400px" pb={20}>
+
+        {/* Filters Bar */}
         {!loading && !error && allPlans.length > 0 && (
           <Box
-            bg="white"
-            borderRadius="24px"
-            p={6}
+            bg="#E8E9EE"
+            borderRadius="0"
+            px={8}
+            py={4}
             mb={8}
-            boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
           >
-            <Grid
-              templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}
-              gap={4}
-            >
-              {/* Data Filter */}
-              <VStack align="stretch" spacing={2}>
-                <Text fontSize="sm" fontWeight="600" color="#6B7280">
-                  {t('country.dataAmount')}
-                </Text>
-                <Select
-                  value={selectedData}
-                  onChange={(e) => setSelectedData(e.target.value)}
-                  bg="white"
-                  borderColor="#E8E9EE"
-                  borderRadius="12px"
-                  fontWeight="500"
-                  _hover={{ borderColor: '#FE4F18' }}
-                  _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
-                >
-                  <option value="all">{t('country.allData')}</option>
-                  {dataOptions.map((gb) => (
-                    <option key={gb} value={gb}>
-                      {gb >= 1 ? `${gb}GB` : `${Math.round(gb * 1024)}MB`}
-                    </option>
-                  ))}
-                </Select>
-              </VStack>
+            <HStack spacing={6} justify="space-between" wrap="wrap">
+              {/* Left Side: Filters */}
+              <HStack spacing={4} flex={1}>
+                {/* Filters Label and Data Filter */}
+                <HStack spacing={3}>
+                  <Text fontSize="md" fontWeight="600" color="#2C2C2E" whiteSpace="nowrap">
+                    {t('regional.filters')}
+                  </Text>
+                  <Select
+                    value={selectedData}
+                    onChange={(e) => setSelectedData(e.target.value)}
+                    bg="white"
+                    borderColor="transparent"
+                    borderRadius="8px"
+                    fontWeight="500"
+                    fontSize="md"
+                    size="sm"
+                    minW="150px"
+                    _hover={{ borderColor: '#FE4F18' }}
+                    _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
+                  >
+                    <option value="all">{t('regional.allData')}</option>
+                    {dataOptions.map((gb) => (
+                      <option key={gb} value={gb}>
+                        {gb >= 1 ? `${gb}GB` : `${Math.round(gb * 1024)}MB`}
+                      </option>
+                    ))}
+                  </Select>
+                </HStack>
 
-              {/* Duration Filter */}
-              <VStack align="stretch" spacing={2}>
-                <Text fontSize="sm" fontWeight="600" color="#6B7280">
-                  {t('country.validity')}
-                </Text>
+                {/* Duration Filter */}
                 <Select
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
                   bg="white"
-                  borderColor="#E8E9EE"
-                  borderRadius="12px"
+                  borderColor="transparent"
+                  borderRadius="8px"
                   fontWeight="500"
+                  fontSize="md"
+                  size="sm"
+                  minW="120px"
                   _hover={{ borderColor: '#FE4F18' }}
                   _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
                 >
@@ -458,44 +544,40 @@ const RegionalPackagesPage = () => {
                     </option>
                   ))}
                 </Select>
-              </VStack>
 
-              {/* Sort by Price */}
-              <VStack align="stretch" spacing={2}>
-                <Text fontSize="sm" fontWeight="600" color="#6B7280">
-                  {t('country.sortByPrice')}
-                </Text>
-                <Button
+                {/* Sort by Price */}
+                <HStack
+                  spacing={2}
+                  cursor="pointer"
                   onClick={toggleSort}
-                  rightIcon={
-                    sortOrder === 'asc' ? (
-                      <ArrowUp size={18} />
-                    ) : sortOrder === 'desc' ? (
-                      <ArrowDown size={18} />
-                    ) : null
-                  }
-                  bg={sortOrder ? '#FFF4F0' : 'white'}
-                  color={sortOrder ? '#FE4F18' : '#6B7280'}
-                  borderRadius="12px"
-                  fontWeight="600"
-                  border="1px solid"
-                  borderColor={sortOrder ? '#FE4F18' : '#E8E9EE'}
-                  _hover={{
-                    bg: '#FFF4F0',
-                    color: '#FE4F18',
-                    borderColor: '#FE4F18',
-                  }}
+                  px={3}
+                  py={2}
+                  bg="white"
+                  borderRadius="8px"
                   transition="all 0.2s"
-                  height="40px"
+                  _hover={{ bg: '#FFF4F0' }}
                 >
-                  {sortOrder === 'asc'
-                    ? t('country.lowToHigh')
-                    : sortOrder === 'desc'
-                    ? t('country.highToLow')
-                    : t('country.sortByPrice')}
-                </Button>
-              </VStack>
-            </Grid>
+                  <Text fontSize="md" fontWeight="500" color="#2C2C2E" whiteSpace="nowrap">
+                    {t('regional.sortByPrice')}
+                  </Text>
+                  <VStack spacing={0}>
+                    <ArrowUp
+                      size={12}
+                      color={sortOrder === 'asc' ? '#FE4F18' : '#8E8E93'}
+                    />
+                    <ArrowDown
+                      size={12}
+                      color={sortOrder === 'desc' ? '#FE4F18' : '#8E8E93'}
+                    />
+                  </VStack>
+                </HStack>
+              </HStack>
+
+              {/* Right Side: Results Count */}
+              <Text fontSize="md" fontWeight="500" color="#6B7280" whiteSpace="nowrap">
+                {t('regional.showing')} {filteredAndSortedPlans.length} {t('regional.of')} {allPlans.length}
+              </Text>
+            </HStack>
           </Box>
         )}
 
@@ -555,16 +637,16 @@ const RegionalPackagesPage = () => {
                 md: 'repeat(2, 1fr)',
                 lg: 'repeat(3, 1fr)',
               }}
-              gap={3}
-              columnGap={2}
+              gap={6}
               justifyItems="center"
               mb={8}
             >
               {paginatedPlans.map((plan) => (
-                <DataPlanCard
+                <RegionalPlanCard
                   key={plan.id}
                   plan={plan}
                   lang={currentLanguage}
+                  regionName={regionName}
                   onClick={() => navigate(`/package/${plan.slug}`, {
                     state: {
                       plan: plan,
