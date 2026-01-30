@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
-import RegionalPlanCard from '../components/RegionalPlanCard';
+import DataPlanCard from '../components/DataPlanCard';
 import { fetchRegionalPackages } from '../services/esimAccessApi.js';
 import { getRegionName } from '../services/packageCacheService.js';
 import { calculateFinalPriceUSD } from '../config/pricing';
@@ -343,16 +343,6 @@ const RegionalPackagesPage = () => {
     setCurrentPage(1);
   }, [selectedData, selectedDuration, sortOrder]);
 
-  const toggleSort = () => {
-    if (sortOrder === null) {
-      setSortOrder('asc');
-    } else if (sortOrder === 'asc') {
-      setSortOrder('desc');
-    } else {
-      setSortOrder(null);
-    }
-  };
-
   // Get background image based on region
   const getBackgroundImage = (region) => {
     const regionLower = region?.toLowerCase() || '';
@@ -426,17 +416,15 @@ const RegionalPackagesPage = () => {
             {/* Title and Region */}
             <VStack align="start" spacing={2}>
               <Text
-                fontSize="18px"
+                fontSize="26px"
                 fontWeight="600"
                 color="white"
                 fontFamily="'Manrope', sans-serif"
-                textTransform="uppercase"
-                letterSpacing="wide"
               >
                 {t('regional.title')}
               </Text>
               <Heading
-                fontSize={{ base: '48px', md: '64px' }}
+                fontSize={{ base: '53px', md: '70px' }}
                 fontWeight="800"
                 color="white"
                 fontFamily="'Manrope', sans-serif"
@@ -449,7 +437,7 @@ const RegionalPackagesPage = () => {
                 fontWeight="400"
                 color="rgba(255, 255, 255, 0.9)"
                 fontFamily="'Manrope', sans-serif"
-                maxW="600px"
+                maxW="750px"
                 lineHeight="1.6"
               >
                 {getRegionDescription(regionCode)}
@@ -484,98 +472,129 @@ const RegionalPackagesPage = () => {
 
       <Container maxW="1400px" pb={20}>
 
-        {/* Filters Bar */}
+        {/* Filters Bar - Matching CountryPage */}
         {!loading && !error && allPlans.length > 0 && (
           <Box
             bg="#E8E9EE"
-            borderRadius="0"
-            px={8}
-            py={4}
-            mb={8}
+            py={6}
+            borderBottom="1px solid"
+            borderColor="gray.200"
           >
-            <HStack spacing={6} justify="space-between" wrap="wrap">
-              {/* Left Side: Filters */}
-              <HStack spacing={4} flex={1}>
-                {/* Filters Label and Data Filter */}
-                <HStack spacing={3}>
-                  <Text fontSize="md" fontWeight="600" color="#2C2C2E" whiteSpace="nowrap">
-                    {t('regional.filters')}
-                  </Text>
-                  <Select
-                    value={selectedData}
-                    onChange={(e) => setSelectedData(e.target.value)}
-                    bg="white"
-                    borderColor="transparent"
-                    borderRadius="8px"
-                    fontWeight="500"
-                    fontSize="md"
-                    size="sm"
-                    minW="150px"
-                    _hover={{ borderColor: '#FE4F18' }}
-                    _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
-                  >
-                    <option value="all">{t('regional.allData')}</option>
-                    {dataOptions.map((gb) => (
-                      <option key={gb} value={gb}>
-                        {gb >= 1 ? `${gb}GB` : `${Math.round(gb * 1024)}MB`}
-                      </option>
-                    ))}
-                  </Select>
-                </HStack>
+            <HStack spacing={4} flexWrap="wrap" align="center">
+              <Text fontWeight="700" color="#151618" fontSize="md" fontFamily="'Manrope', sans-serif">
+                {t('countryPage.filters')}
+              </Text>
 
-                {/* Duration Filter */}
+              <Box minW="180px">
+                <Select
+                  value={selectedData}
+                  onChange={(e) => setSelectedData(e.target.value)}
+                  bg="white"
+                  borderRadius="full"
+                  border="1px solid"
+                  borderColor="#E8E9EE"
+                  fontSize="14px"
+                  fontWeight="600"
+                  fontFamily="'Manrope', sans-serif"
+                  color="#151618"
+                  h="46px"
+                  cursor="pointer"
+                  _hover={{
+                    borderColor: '#FE4F18',
+                  }}
+                  _focus={{
+                    borderColor: '#FE4F18',
+                    boxShadow: '0 0 0 1px #FE4F18',
+                  }}
+                >
+                  <option value="all">{t('countryPage.allDataOptions')}</option>
+                  {dataOptions.map((gb) => (
+                    <option key={gb} value={gb}>
+                      {gb >= 1 ? `${gb}GB` : `${Math.round(gb * 1024)}MB`}
+                    </option>
+                  ))}
+                </Select>
+              </Box>
+
+              <Box minW="180px">
                 <Select
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
                   bg="white"
-                  borderColor="transparent"
-                  borderRadius="8px"
-                  fontWeight="500"
-                  fontSize="md"
-                  size="sm"
-                  minW="120px"
-                  _hover={{ borderColor: '#FE4F18' }}
-                  _focus={{ borderColor: '#FE4F18', boxShadow: '0 0 0 1px #FE4F18' }}
+                  borderRadius="full"
+                  border="1px solid"
+                  borderColor="#E8E9EE"
+                  fontSize="14px"
+                  fontWeight="600"
+                  fontFamily="'Manrope', sans-serif"
+                  color="#151618"
+                  h="46px"
+                  cursor="pointer"
+                  _hover={{
+                    borderColor: '#FE4F18',
+                  }}
+                  _focus={{
+                    borderColor: '#FE4F18',
+                    boxShadow: '0 0 0 1px #FE4F18',
+                  }}
                 >
-                  <option value="all">{t('country.allDurations')}</option>
+                  <option value="all">{t('countryPage.allDurationOptions')}</option>
                   {durationOptions.map((days) => (
                     <option key={days} value={days}>
-                      {days} {t('country.days')}
+                      {days} {t('countryPage.banner.days')}
                     </option>
                   ))}
                 </Select>
+              </Box>
 
-                {/* Sort by Price */}
-                <HStack
-                  spacing={2}
-                  cursor="pointer"
-                  onClick={toggleSort}
-                  px={3}
-                  py={2}
-                  bg="white"
-                  borderRadius="8px"
-                  transition="all 0.2s"
-                  _hover={{ bg: '#FFF4F0' }}
-                >
-                  <Text fontSize="md" fontWeight="500" color="#2C2C2E" whiteSpace="nowrap">
-                    {t('regional.sortByPrice')}
-                  </Text>
-                  <VStack spacing={0}>
-                    <ArrowUp
-                      size={12}
-                      color={sortOrder === 'asc' ? '#FE4F18' : '#8E8E93'}
-                    />
-                    <ArrowDown
-                      size={12}
-                      color={sortOrder === 'desc' ? '#FE4F18' : '#8E8E93'}
-                    />
-                  </VStack>
+              {/* Sort by Price */}
+              <HStack spacing={3} align="center">
+                <Text fontWeight="600" color="#151618" fontSize="sm" fontFamily="'Manrope', sans-serif">
+                  {t('countryPage.sortByPrice')}:
+                </Text>
+                <HStack spacing={2}>
+                  <IconButton
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? null : 'asc')}
+                    bg={sortOrder === 'asc' ? '#FE4F18' : 'white'}
+                    color={sortOrder === 'asc' ? 'white' : '#151618'}
+                    borderRadius="full"
+                    size="md"
+                    h="46px"
+                    w="46px"
+                    aria-label="Sort price ascending"
+                    _hover={{
+                      bg: sortOrder === 'asc' ? '#E5461A' : '#FFF4F0',
+                      transform: 'scale(1.05)',
+                    }}
+                    transition="all 0.2s"
+                    title="Low to High"
+                  >
+                    <ArrowUp size={20} />
+                  </IconButton>
+
+                  <IconButton
+                    onClick={() => setSortOrder(sortOrder === 'desc' ? null : 'desc')}
+                    bg={sortOrder === 'desc' ? '#FE4F18' : 'white'}
+                    color={sortOrder === 'desc' ? 'white' : '#151618'}
+                    borderRadius="full"
+                    size="md"
+                    h="46px"
+                    w="46px"
+                    aria-label="Sort price descending"
+                    _hover={{
+                      bg: sortOrder === 'desc' ? '#E5461A' : '#FFF4F0',
+                      transform: 'scale(1.05)',
+                    }}
+                    transition="all 0.2s"
+                    title="High to Low"
+                  >
+                    <ArrowDown size={20} />
+                  </IconButton>
                 </HStack>
               </HStack>
 
-              {/* Right Side: Results Count */}
-              <Text fontSize="md" fontWeight="500" color="#6B7280" whiteSpace="nowrap">
-                {t('regional.showing')} {filteredAndSortedPlans.length} {t('regional.of')} {allPlans.length}
+              <Text color="#6B7280" fontSize="sm" ml="auto" fontFamily="'Manrope', sans-serif" fontWeight="500">
+                {t('countryPage.showing')} {filteredAndSortedPlans.length} {t('countryPage.of')} {allPlans.length}
               </Text>
             </HStack>
           </Box>
@@ -637,16 +656,18 @@ const RegionalPackagesPage = () => {
                 md: 'repeat(2, 1fr)',
                 lg: 'repeat(3, 1fr)',
               }}
-              gap={6}
+              gap={3}
+              columnGap={2}
               justifyItems="center"
               mb={8}
             >
               {paginatedPlans.map((plan) => (
-                <RegionalPlanCard
+                <DataPlanCard
                   key={plan.id}
                   plan={plan}
                   lang={currentLanguage}
-                  regionName={regionName}
+                  showTitle={true}
+                  showLabels={true}
                   onClick={() => navigate(`/package/${plan.slug}`, {
                     state: {
                       plan: plan,

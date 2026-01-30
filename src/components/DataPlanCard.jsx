@@ -7,6 +7,7 @@ import {
   Button,
   HStack,
   VStack,
+  Grid,
 } from '@chakra-ui/react';
 import { WifiIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
@@ -113,8 +114,10 @@ const formatOperatorsList = (operatorList) => {
  * @param {Object} plan - Plan data object
  * @param {string} lang - Current language code
  * @param {Function} onClick - Click handler for the card
+ * @param {boolean} showTitle - Show package title for regional packages
+ * @param {boolean} showLabels - Show "Объем трафика" and "Период" labels in grid
  */
-const DataPlanCard = ({ plan, lang, onClick }) => {
+const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [priceUZS, setPriceUZS] = useState(null);
   const t = (key) => getTranslation(lang, key);
@@ -223,48 +226,94 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
         zIndex={1}
       >
       <VStack align="stretch" spacing={5}>
-        {/* Header Section: Data & Duration */}
-        <HStack justify="space-between" align="flex-start">
-          {/* Data Amount */}
-          <HStack align="baseline" spacing={0.5}>
-            <Text
-              fontSize="48px"
-              fontWeight="700"
-              lineHeight="1"
-              letterSpacing="-1.5px"
-              color="#000"
-            >
-              {dataValue}
-            </Text>
-            <Text
-              fontSize="24px"
-              fontWeight="500"
-              color="#000"
-              ml={1}
-            >
-              {dataUnit}
-            </Text>
-          </HStack>
+        {/* Optional Title for Regional Packages */}
+        {showTitle && (
+          <Text
+            fontSize="20px"
+            fontWeight="700"
+            color="#FE4F18"
+            fontFamily="'Manrope', sans-serif"
+          >
+            {plan.name || `${plan.country} ${dataValue}/${plan.days}`}
+          </Text>
+        )}
 
-          {/* Duration Block */}
-          <VStack align="flex-end" spacing={0}>
-            <Text
-              fontSize="13px"
-              color="#8E8E93"
-              fontWeight="400"
-            >
-              {t('countryPage.card.period')}
-            </Text>
-            <Text
-              fontSize="20px"
-              fontWeight="600"
-              color="#1C1C1E"
-              whiteSpace="nowrap"
-            >
-              {plan.days} {t('plans.card.days')}
-            </Text>
-          </VStack>
-        </HStack>
+        {/* Header Section: Data & Duration */}
+        {showLabels ? (
+          <Grid templateColumns="1fr 1fr" gap={4}>
+            {/* Traffic Volume */}
+            <VStack align="start" spacing={1}>
+              <Text fontSize="13px" fontWeight="500" color="#8E8E93">
+                {t('myPage.orders.dataVolume')}
+              </Text>
+              <HStack align="baseline" spacing={1}>
+                <Text fontSize="28px" fontWeight="700" color="#1C1C1E">
+                  {dataValue}
+                </Text>
+                <Text fontSize="16px" fontWeight="600" color="#1C1C1E">
+                  {dataUnit}
+                </Text>
+              </HStack>
+            </VStack>
+
+            {/* Validity */}
+            <VStack align="start" spacing={1}>
+              <Text fontSize="13px" fontWeight="500" color="#8E8E93">
+                {t('countryPage.card.period')}
+              </Text>
+              <HStack align="baseline" spacing={1}>
+                <Text fontSize="28px" fontWeight="700" color="#1C1C1E">
+                  {plan.days}
+                </Text>
+                <Text fontSize="16px" fontWeight="600" color="#1C1C1E">
+                  {t('plans.card.days')}
+                </Text>
+              </HStack>
+            </VStack>
+          </Grid>
+        ) : (
+          <HStack justify="space-between" align="flex-start">
+            {/* Data Amount */}
+            <HStack align="baseline" spacing={0.5}>
+              <Text
+                fontSize="48px"
+                fontWeight="700"
+                lineHeight="1"
+                letterSpacing="-1.5px"
+                color="#000"
+              >
+                {dataValue}
+              </Text>
+              <Text
+                fontSize="24px"
+                fontWeight="500"
+                color="#000"
+                ml={1}
+              >
+                {dataUnit}
+              </Text>
+            </HStack>
+
+            {/* Duration Block */}
+            <VStack align="flex-end" spacing={0}>
+              <Text
+                fontSize="13px"
+                color="#8E8E93"
+                fontWeight="400"
+              >
+                {t('countryPage.card.period')}
+              </Text>
+              <Text
+                fontSize="20px"
+                fontWeight="600"
+                color="#1C1C1E"
+                whiteSpace="nowrap"
+              >
+                {plan.days} {t('plans.card.days')}
+              </Text>
+            </VStack>
+          </HStack>
+        )}
 
         {/* Middle Section: Network Type & Operators/Countries */}
         <HStack spacing={3} align="center">
@@ -342,7 +391,12 @@ const DataPlanCard = ({ plan, lang, onClick }) => {
             {/* Price Information */}
             <VStack align="flex-start" spacing={0.5}>
               <HStack align="baseline" spacing={1}>
-                <Text fontSize="18px" color="#494951" fontWeight="500">
+                <Text
+                  fontSize="18px"
+                  color="#494951"
+                  fontWeight="500"
+                  textDecoration={showLabels ? "none" : undefined}
+                >
                   {formattedPriceUZS}
                 </Text>
                 <Text fontSize="14px" color="#494951" fontWeight="400" textTransform="uppercase">
