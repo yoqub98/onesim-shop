@@ -411,7 +411,9 @@ export const TRANSLATIONS = {
       of: 'из',
       descriptions: {
         EUROPE: 'Откройте для себя разнообразие европейских стран без границ и лишних забот. Один eSIM с региональным покрытием обеспечивает стабильный интернет, чтобы свободно путешествовать, оставаться на связи и делиться впечатлениями с каждым новым городом.',
-        ASIA: 'Погрузитесь в богатство азиатских культур с безупречной связью. Один региональный eSIM обеспечивает стабильный интернет по всей Азии, позволяя свободно путешествовать, делиться впечатлениями и оставаться на связи в каждом уголке континента.',
+        ASIA: 'Запечатлейте контрасты Азии от древних храмов до футуристичных мегаполисов и легко делитесь этими моментами: один региональный eSIM с покрытием нескольких стран обеспечивает стабильный интернет без смены SIM и роуминга, чтобы вы могли свободно путешествовать и всегда оставаться на связи.',
+        AFRICA: 'Запечатлейте захватывающую дикую природу и невероятные пейзажи Африки и легко делитесь этими моментами: один региональный eSIM с покрытием нескольких стран обеспечивает стабильный интернет без смены SIM, чтобы вы могли наслаждаться путешествием и мгновенно отправлять самые яркие впечатления.',
+        MIDDLE_EAST: 'Запечатлейте золотые пустыни, древние города и современную архитектуру Ближнего Востока и легко делитесь этими моментами: один региональный eSIM с покрытием нескольких стран обеспечивает стабильный интернет без смены SIM и роуминга, чтобы вы могли свободно путешествовать и оставаться на связи.',
         OTHER: 'Исследуйте новые горизонты с надежным региональным покрытием. Один eSIM обеспечивает стабильный интернет в разных странах, позволяя свободно путешествовать, делиться впечатлениями и оставаться на связи в каждом новом месте.',
       },
     },
@@ -933,7 +935,9 @@ export const TRANSLATIONS = {
       of: 'dan',
       descriptions: {
         EUROPE: 'Evropa mamlakatlarining xilma-xilligini chegara va ortiqcha tashvishsiz kashf eting. Bitta mintaqaviy qamrovli eSIM barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, aloqada bo\'lish va har bir yangi shahar bilan taassurotlar ulashish imkonini beradi.',
-        ASIA: 'Osiyo madaniyatlarining boyligiga benuqson aloqa bilan sho\'ng\'ing. Bitta mintaqaviy eSIM butun Osiyo bo\'ylab barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, taassurotlar ulashish va kontinentning har bir burchagida aloqada bo\'lish imkonini beradi.',
+        ASIA: 'Osiyo kontrastlarini qadimiy ibodatxonalardan futuristik megapolislargacha suratga oling va bu lahzalarni osongina ulashing: bir nechta mamlakatni qamrab oluvchi bitta mintaqaviy eSIM SIM almashtirishsiz va roumingsiz barqaror internet ta\'minlaydi, shuning uchun siz erkin sayohat qilishingiz va doimo aloqada bo\'lishingiz mumkin.',
+        AFRICA: 'Afrikaning ajoyib yovvoyi tabiatini va aql bovar qilmaydigan manzaralarini suratga oling va bu lahzalarni osongina ulashing: bir nechta mamlakatni qamrab oluvchi bitta mintaqaviy eSIM SIM almashtirishsiz barqaror internet ta\'minlaydi, shuning uchun siz sayohatdan bahramand bo\'lishingiz va eng yorqin taassurotlarni darhol yuborishingiz mumkin.',
+        MIDDLE_EAST: 'Yaqin Sharqning oltin cho\'llarini, qadimiy shaharlarini va zamonaviy arxitekturasini suratga oling va bu lahzalarni osongina ulashing: bir nechta mamlakatni qamrab oluvchi bitta mintaqaviy eSIM SIM almashtirishsiz va roumingsiz barqaror internet ta\'minlaydi, shuning uchun siz erkin sayohat qilishingiz va aloqada bo\'lishingiz mumkin.',
         OTHER: 'Ishonchli mintaqaviy qamrov bilan yangi ufqlarni o\'rganing. Bitta eSIM turli mamlakatlarda barqaror internet ta\'minlaydi, bu esa erkin sayohat qilish, taassurotlar ulashish va har bir yangi joyda aloqada bo\'lish imkonini beradi.',
       },
     },

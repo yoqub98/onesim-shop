@@ -1,6 +1,6 @@
 // src/App.jsx (FULL FILE - copy entire thing)
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -754,13 +754,21 @@ const FAQSection = () => {
 
 // Home Page Component
 const HomePage = () => {
+  const location = useLocation();
+
+  // Get state from navigation
+  const navigationState = location.state || {};
+
   return (
     <>
       <HeroSection />
       <FeaturesSection />
       <FAQSection />
       <PlansSection />
-      <PopularDestinations />
+      <PopularDestinations
+        scrollToSection={navigationState.scrollToDestinations}
+        initialTab={navigationState.activeTab}
+      />
     </>
   );
 };

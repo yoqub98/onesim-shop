@@ -492,16 +492,55 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
 };
 
 // Main Popular Destinations Component
-const PopularDestinations = () => {
+// Map tab names to indices
+const TAB_MAP = {
+  'countries': 0,
+  'regional': 1,
+  'global': 2
+};
+
+const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
+
+  // Set initial tab based on prop or default to 0
+  const getInitialTabIndex = () => {
+    if (initialTab && TAB_MAP[initialTab] !== undefined) {
+      return TAB_MAP[initialTab];
+    }
+    return 0;
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTabIndex());
   const [regionalPackages, setRegionalPackages] = useState({});
   const [globalPackages, setGlobalPackages] = useState([]);
   const [isLoadingRegional, setIsLoadingRegional] = useState(false);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+
+  // Create ref for scrolling
+  const sectionRef = React.useRef(null);
+
+  // Handle scrolling to section when navigation state indicates it
+  useEffect(() => {
+    if (scrollToSection && sectionRef.current) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        sectionRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
+  }, [scrollToSection]);
+
+  // Update active tab when initialTab prop changes
+  useEffect(() => {
+    if (initialTab && TAB_MAP[initialTab] !== undefined) {
+      setActiveTab(TAB_MAP[initialTab]);
+    }
+  }, [initialTab]);
 
   // Fetch regional packages when Regional tab is selected
   useEffect(() => {
@@ -547,7 +586,7 @@ const PopularDestinations = () => {
   });
 
   return (
-    <Box as="section" py={24} bg="#F5F6F8" position="relative">
+    <Box as="section" ref={sectionRef} py={24} bg="#F5F6F8" position="relative">
       {/* Background decoration */}
       <Box
         position="absolute"

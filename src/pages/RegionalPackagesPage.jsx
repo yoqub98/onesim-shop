@@ -216,6 +216,10 @@ const RegionalPackagesPage = () => {
       return t('regional.descriptions.EUROPE');
     } else if (regionLower.includes('asia')) {
       return t('regional.descriptions.ASIA');
+    } else if (regionLower.includes('africa') || regionLower.includes('afric')) {
+      return t('regional.descriptions.AFRICA');
+    } else if (regionLower.includes('middle') || regionLower.includes('east')) {
+      return t('regional.descriptions.MIDDLE_EAST');
     } else {
       return t('regional.descriptions.OTHER');
     }
@@ -248,7 +252,7 @@ const RegionalPackagesPage = () => {
             {/* Back Button */}
             <Button
               leftIcon={<ArrowLeft size={20} />}
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/', { state: { scrollToDestinations: true, activeTab: 'regional' } })}
               bg="transparent"
               color="white"
               borderRadius="full"

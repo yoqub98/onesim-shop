@@ -428,7 +428,7 @@ const CountryPage = () => {
             <Button
               variant="ghost"
               size="md"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/', { state: { scrollToDestinations: true, activeTab: 'countries' } })}
               fontWeight="700"
               color={headerBgImage ? 'white' : 'gray.800'}
               _hover={{
