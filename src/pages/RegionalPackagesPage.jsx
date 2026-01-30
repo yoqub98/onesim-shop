@@ -12,7 +12,7 @@ import {
   IconButton,
   Select,
 } from '@chakra-ui/react';
-import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DataPlanCard from '../components/DataPlanCard';
 import { fetchRegionalPackages } from '../services/esimAccessApi.js';
@@ -21,7 +21,6 @@ import { calculateFinalPriceUSD } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const PLANS_PER_PAGE = 12;
 const DEFAULT_DURATION_FILTER = 30;
 
 // Loading Skeleton
@@ -70,142 +69,6 @@ const PlanCardSkeleton = () => {
   );
 };
 
-// Pagination Component
-const PaginationControls = ({ currentPage, totalPages, onPageChange }) => {
-  const maxVisiblePages = 5;
-  let start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  let end = Math.min(totalPages, start + maxVisiblePages - 1);
-
-  if (end - start < maxVisiblePages - 1) {
-    start = Math.max(1, end - maxVisiblePages + 1);
-  }
-
-  return (
-    <HStack spacing={2}>
-      <IconButton
-        onClick={() => onPageChange(currentPage - 1)}
-        isDisabled={currentPage === 1}
-        bg="white"
-        borderRadius="12px"
-        size="md"
-        aria-label="Previous"
-        _hover={{
-          bg: '#FFF4F0',
-          transform: 'scale(1.05)',
-        }}
-        _disabled={{
-          opacity: 0.4,
-          cursor: 'not-allowed',
-          _hover: {
-            bg: 'white',
-            transform: 'none',
-          },
-        }}
-        transition="all 0.2s"
-      >
-        <ChevronLeft size={20} color="#151618" />
-      </IconButton>
-
-      {start > 1 && (
-        <>
-          <Button
-            size="md"
-            onClick={() => onPageChange(1)}
-            bg="white"
-            color="#6B7280"
-            borderRadius="12px"
-            fontWeight="600"
-            minW="40px"
-            _hover={{
-              bg: '#FFF4F0',
-              color: '#FE4F18',
-            }}
-            transition="all 0.2s"
-          >
-            1
-          </Button>
-          {start > 2 && (
-            <Text fontSize="md" color="#6B7280" fontWeight="600">
-              ...
-            </Text>
-          )}
-        </>
-      )}
-
-      {Array.from({ length: end - start + 1 }, (_, i) => start + i).map((page) => (
-        <Button
-          key={page}
-          size="md"
-          onClick={() => onPageChange(page)}
-          bg={currentPage === page ? '#2C2C2E' : 'white'}
-          color={currentPage === page ? 'white' : '#6B7280'}
-          borderRadius="12px"
-          fontWeight="600"
-          minW="40px"
-          _hover={{
-            bg: currentPage === page ? '#2C2C2E' : '#FFF4F0',
-            color: currentPage === page ? 'white' : '#FE4F18',
-            transform: 'scale(1.05)',
-          }}
-          transition="all 0.2s"
-        >
-          {page}
-        </Button>
-      ))}
-
-      {end < totalPages && (
-        <>
-          {end < totalPages - 1 && (
-            <Text fontSize="md" color="#6B7280" fontWeight="600">
-              ...
-            </Text>
-          )}
-          <Button
-            size="md"
-            onClick={() => onPageChange(totalPages)}
-            bg="white"
-            color="#6B7280"
-            borderRadius="12px"
-            fontWeight="600"
-            minW="40px"
-            _hover={{
-              bg: '#FFF4F0',
-              color: '#FE4F18',
-            }}
-            transition="all 0.2s"
-          >
-            {totalPages}
-          </Button>
-        </>
-      )}
-
-      <IconButton
-        onClick={() => onPageChange(currentPage + 1)}
-        isDisabled={currentPage === totalPages}
-        bg="white"
-        borderRadius="12px"
-        size="md"
-        aria-label="Next"
-        _hover={{
-          bg: '#FFF4F0',
-          transform: 'scale(1.05)',
-        }}
-        _disabled={{
-          opacity: 0.4,
-          cursor: 'not-allowed',
-          _hover: {
-            bg: 'white',
-            transform: 'none',
-          },
-        }}
-        transition="all 0.2s"
-      >
-        <ChevronRight size={20} color="#151618" />
-      </IconButton>
-    </HStack>
-  );
-};
-
 // Main Regional Packages Page Component
 const RegionalPackagesPage = () => {
   const { regionCode } = useParams();
@@ -219,7 +82,6 @@ const RegionalPackagesPage = () => {
 
   const [selectedData, setSelectedData] = useState('all');
   const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER.toString());
-  const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(null);
 
   const regionName = getRegionName(regionCode, currentLanguage);
@@ -331,17 +193,7 @@ const RegionalPackagesPage = () => {
     return filtered;
   }, [allPlans, selectedData, selectedDuration, sortOrder]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredAndSortedPlans.length / PLANS_PER_PAGE);
-  const paginatedPlans = filteredAndSortedPlans.slice(
-    (currentPage - 1) * PLANS_PER_PAGE,
-    currentPage * PLANS_PER_PAGE
-  );
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedData, selectedDuration, sortOrder]);
+  // No pagination - display all plans
 
   // Get background image based on region
   const getBackgroundImage = (region) => {
@@ -350,6 +202,8 @@ const RegionalPackagesPage = () => {
       return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/europe.webp';
     } else if (regionLower.includes('asia')) {
       return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/asia.webp';
+    } else if (regionLower.includes('africa') || regionLower.includes('afric')) {
+      return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/africa.webp';
     } else {
       return 'https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/latin.webp';
     }
@@ -385,7 +239,7 @@ const RegionalPackagesPage = () => {
           left={0}
           right={0}
           bottom={0}
-          background="linear-gradient(177deg, rgba(0, 0, 0, 0.74) 9.55%, rgba(38, 18, 10, 0.74) 60.58%, rgba(255, 118, 69, 0.74) 118.15%)"
+          background="linear-gradient(177deg, rgba(0, 0, 0, 0.74) 9.55%, rgba(38, 18, 10, 0.74) 60.58%, rgba(255, 118, 69, 0.74) 100%)"
         />
 
         {/* Content */}
@@ -475,10 +329,8 @@ const RegionalPackagesPage = () => {
         {/* Filters Bar - Matching CountryPage */}
         {!loading && !error && allPlans.length > 0 && (
           <Box
-            bg="#E8E9EE"
+            bg="transparent"
             py={6}
-            borderBottom="1px solid"
-            borderColor="gray.200"
           >
             <HStack spacing={4} flexWrap="wrap" align="center">
               <Text fontWeight="700" color="#151618" fontSize="md" fontFamily="'Manrope', sans-serif">
@@ -647,52 +499,39 @@ const RegionalPackagesPage = () => {
         )}
 
         {/* Plans Grid */}
-        {!loading && !error && paginatedPlans.length > 0 && (
-          <>
-            <Grid
-              templateColumns={{
-                base: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(2, 1fr)',
-                lg: 'repeat(3, 1fr)',
-              }}
-              gap={3}
-              columnGap={2}
-              justifyItems="center"
-              mb={8}
-            >
-              {paginatedPlans.map((plan) => (
-                <DataPlanCard
-                  key={plan.id}
-                  plan={plan}
-                  lang={currentLanguage}
-                  showTitle={true}
-                  showLabels={true}
-                  onClick={() => navigate(`/package/${plan.slug}`, {
-                    state: {
-                      plan: plan,
-                      countryCode: plan.countryCode || regionCode
-                    }
-                  })}
-                />
-              ))}
-            </Grid>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Box display="flex" justifyContent="center" mt={8}>
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              </Box>
-            )}
-          </>
+        {!loading && !error && filteredAndSortedPlans.length > 0 && (
+          <Grid
+            templateColumns={{
+              base: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+            }}
+            gap={3}
+            columnGap={2}
+            justifyItems="center"
+            mb={8}
+          >
+            {filteredAndSortedPlans.map((plan) => (
+              <DataPlanCard
+                key={plan.id}
+                plan={plan}
+                lang={currentLanguage}
+                showTitle={true}
+                showLabels={true}
+                onClick={() => navigate(`/package/${plan.slug}`, {
+                  state: {
+                    plan: plan,
+                    countryCode: plan.countryCode || regionCode
+                  }
+                })}
+              />
+            ))}
+          </Grid>
         )}
 
         {/* No Results */}
-        {!loading && !error && paginatedPlans.length === 0 && allPlans.length > 0 && (
+        {!loading && !error && filteredAndSortedPlans.length === 0 && allPlans.length > 0 && (
           <Box
             bg="white"
             borderRadius="24px"

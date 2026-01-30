@@ -242,7 +242,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
         {showLabels ? (
           <Grid templateColumns="1fr 1fr" gap={4}>
             {/* Traffic Volume */}
-            <VStack align="start" spacing={1}>
+            <VStack align="start" spacing={0}>
               <Text fontSize="13px" fontWeight="500" color="#8E8E93">
                 {t('myPage.orders.dataVolume')}
               </Text>
@@ -257,7 +257,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
             </VStack>
 
             {/* Validity */}
-            <VStack align="start" spacing={1}>
+            <VStack align="start" spacing={0}>
               <Text fontSize="13px" fontWeight="500" color="#8E8E93">
                 {t('countryPage.card.period')}
               </Text>
@@ -372,7 +372,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
               <Text
                 fontSize="14px"
                 fontWeight="600"
-                color="#FE4F18"
+                color="#000"
                 whiteSpace="nowrap"
               >
                 {countryCoverage} {t('plans.card.countries')}
