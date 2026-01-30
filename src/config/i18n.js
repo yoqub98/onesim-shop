@@ -326,6 +326,7 @@ export const TRANSLATIONS = {
         coverage: 'Глобальное покрытие',
         countries: 'стран',
         viewPlans: 'Смотреть тарифы',
+        seeMorePlans: 'Смотреть больше тарифов',
       },
     },
     faq: {
@@ -832,6 +833,7 @@ export const TRANSLATIONS = {
         coverage: 'Global qamrov',
         countries: 'mamlakat',
         viewPlans: 'Tariflarni ko\'rish',
+        seeMorePlans: 'Ko\'proq tariflarni ko\'rish',
       },
     },
     faq: {

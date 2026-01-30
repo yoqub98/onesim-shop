@@ -19,7 +19,7 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { ArrowRightIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
+import { ArrowRightIcon, GlobeAsiaAustraliaIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
@@ -391,7 +391,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      h="200px"
+      minH="fit-content"
       _before={{
         content: '""',
         position: 'absolute',
@@ -414,18 +414,18 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
         overflow="hidden"
       />
 
-      <Box position="relative" zIndex={1} p={8} h="100%">
-        <VStack align="stretch" spacing={2} h="100%">
+      <Box position="relative" zIndex={1} p={6}>
+        <VStack align="stretch" spacing={3}>
           {/* Country Count with Globe Icon */}
           <HStack spacing={1} align="center">
-            <GlobeAltIcon
+            <GlobeAsiaAustraliaIcon
               style={{
                 width: '16px',
                 height: '16px',
                 color: '#FE4F18'
               }}
             />
-            <Text fontSize="sm" color="gray.900" fontWeight="600">
+            <Text fontSize="sm" color="gray.600" fontWeight="600">
               {countryCount} {t('destinations.global.countries')}
             </Text>
           </HStack>
@@ -451,7 +451,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
           </VStack>
 
           {/* Country Flags and Arrow */}
-          <HStack justify="space-between" align="center" mt="auto">
+          <HStack justify="space-between" align="center">
             {/* Flags */}
             <HStack spacing="-10px">
               {displayFlags.map((countryCode, index) => (
@@ -816,25 +816,50 @@ const PopularDestinations = () => {
                   <Spinner size="xl" color="#FE4F18" thickness="4px" />
                 </Center>
               ) : (
-                <Grid
-                  templateColumns={{
-                    base: '1fr',
-                    md: 'repeat(2, 1fr)',
-                    lg: 'repeat(3, 1fr)'
-                  }}
-                  gap={6}
-                  w="100%"
-                  className="animate__animated animate__fadeIn"
-                >
-                  {globalPackages.map((pkg, index) => (
-                    <GlobalCard
-                      key={pkg.packageCode}
-                      pkg={pkg}
-                      delay={index * 100}
-                      lang={currentLanguage}
-                    />
-                  ))}
-                </Grid>
+                <>
+                  <Grid
+                    templateColumns={{
+                      base: '1fr',
+                      md: 'repeat(2, 1fr)',
+                      lg: 'repeat(3, 1fr)'
+                    }}
+                    gap={6}
+                    w="100%"
+                    className="animate__animated animate__fadeIn"
+                  >
+                    {globalPackages.slice(0, 8).map((pkg, index) => (
+                      <GlobalCard
+                        key={pkg.packageCode}
+                        pkg={pkg}
+                        delay={index * 100}
+                        lang={currentLanguage}
+                      />
+                    ))}
+                  </Grid>
+
+                  {/* See More Plans Button */}
+                  {globalPackages.length > 8 && (
+                    <Box width="100%" display="flex" justifyContent="center" mt={8}>
+                      <Button
+                        variant="outline"
+                        borderColor="gray.300"
+                        color="gray.700"
+                        fontWeight="600"
+                        fontSize="md"
+                        px={8}
+                        py={6}
+                        borderRadius="xl"
+                        _hover={{
+                          bg: 'gray.50',
+                          borderColor: 'gray.400',
+                        }}
+                        transition="all 0.2s"
+                      >
+                        {t('destinations.global.seeMorePlans')}
+                      </Button>
+                    </Box>
+                  )}
+                </>
               )}
             </>
           )}
