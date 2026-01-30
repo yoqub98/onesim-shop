@@ -19,7 +19,7 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { ArrowRightIcon } from '@heroicons/react/24/solid';
+import { ArrowRightIcon, GlobeAltIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +29,20 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi.js';
 import { getRegionName } from '../services/packageCacheService.js';
+
+// Custom Arrow Circle SVG Component
+const ArrowCircleSvg = () => (
+  <svg width="48" height="48" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M46.5625 55L57.8125 43.75ZM57.8125 43.75L46.5625 32.5ZM57.8125 43.75H29.6875ZM77.5 43.75C77.5 48.1821 76.627 52.5708 74.9309 56.6656C73.2348 60.7603 70.7488 64.4809 67.6149 67.6149C64.4809 70.7488 60.7603 73.2348 56.6656 74.9309C52.5708 76.627 48.1821 77.5 43.75 77.5C39.3179 77.5 34.9292 76.627 30.8344 74.9309C26.7397 73.2348 23.0191 70.7488 19.8851 67.6149C16.7512 64.4809 14.2652 60.7603 12.5691 56.6656C10.873 52.5708 10 48.1821 10 43.75C10 34.7989 13.5558 26.2145 19.8851 19.8851C26.2145 13.5558 34.7989 10 43.75 10C52.7011 10 61.2855 13.5558 67.6149 19.8851C73.9442 26.2145 77.5 34.7989 77.5 43.75Z" fill="white"/>
+    <path d="M46.5625 55L57.8125 43.75M57.8125 43.75L46.5625 32.5M57.8125 43.75H29.6875M77.5 43.75C77.5 48.1821 76.627 52.5708 74.9309 56.6656C73.2348 60.7603 70.7488 64.4809 67.6149 67.6149C64.4809 70.7488 60.7603 73.2348 56.6656 74.9309C52.5708 76.627 48.1821 77.5 43.75 77.5C39.3179 77.5 34.9292 76.627 30.8344 74.9309C26.7397 73.2348 23.0191 70.7488 19.8851 67.6149C16.7512 64.4809 14.2652 60.7603 12.5691 56.6656C10.873 52.5708 10 48.1821 10 43.75C10 34.7989 13.5558 26.2145 19.8851 19.8851C26.2145 13.5558 34.7989 10 43.75 10C52.7011 10 61.2855 13.5558 67.6149 19.8851C73.9442 26.2145 77.5 34.7989 77.5 43.75Z" stroke="url(#paint0_linear_274_3069)" strokeWidth="3.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <defs>
+      <linearGradient id="paint0_linear_274_3069" x1="51.25" y1="56.75" x2="20.75" y2="11.75" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#71727C"/>
+        <stop offset="1" stopColor="#FF6943"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 // Country Destination Card Component
 const DestinationCard = ({ countryCode, delay = 0, lang }) => {
@@ -52,7 +66,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
       overflow="hidden"
       border="2px solid"
       borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
-      transition="all 0.15s ease-out"
+      transition="transform 0.15s ease-out, box-shadow 0s"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
@@ -123,7 +137,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
             opacity={isHovered ? 1 : 0}
             maxHeight={isHovered ? '60px' : '0'}
             overflow="hidden"
-            transition="all 0.15s ease-out"
+            transition="transform 0.15s ease-out, box-shadow 0s"
           >
             <Button
               width="100%"
@@ -188,7 +202,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
       cursor="pointer"
       borderRadius="24px"
       overflow="visible"
-      transition="all 0.15s ease-out"
+      transition="transform 0.15s ease-out, box-shadow 0s"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
@@ -199,7 +213,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      h="180px"
+      h="200px"
       _before={{
         content: '""',
         position: 'absolute',
@@ -223,7 +237,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
       />
 
       <Box position="relative" zIndex={1} p={8} h="100%">
-        <VStack align="stretch" spacing={4} h="100%">
+        <VStack align="stretch" spacing={2} h="100%">
           {/* Region Title */}
           <Heading
             fontSize="24px"
@@ -273,7 +287,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
                   width="32px"
                   height="32px"
                   border="2px solid white"
-                  bg="gray.100"
+                  bg="white"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -289,20 +303,10 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
 
             {/* Arrow Button */}
             <Box
-              bg="white"
-              borderRadius="full"
-              width="48px"
-              height="48px"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              transition="all 0.3s"
-              shadow="md"
+              transition="all 0.15s"
+              transform={isHovered ? 'scale(1.05)' : 'scale(1)'}
             >
-              <ArrowRightIcon
-                className="w-[20px] h-[20px]"
-                style={{ color: '#FE4F18' }}
-              />
+              <ArrowCircleSvg />
             </Box>
           </HStack>
 
@@ -376,7 +380,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
       cursor="pointer"
       borderRadius="24px"
       overflow="visible"
-      transition="all 0.15s ease-out"
+      transition="transform 0.15s ease-out, box-shadow 0s"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
       onMouseEnter={() => setIsHovered(true)}
@@ -387,7 +391,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      h="180px"
+      h="200px"
       _before={{
         content: '""',
         position: 'absolute',
@@ -411,79 +415,76 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
       />
 
       <Box position="relative" zIndex={1} p={8} h="100%">
-        <VStack align="stretch" spacing={4} h="100%">
-          {/* Global Badge */}
-          <Badge
-            bg="#FFF4F0"
-            color="#FE4F18"
-            fontSize="xs"
-            fontWeight="700"
-            px={3}
-            py={1}
-            borderRadius="full"
-            textTransform="uppercase"
-            width="fit-content"
+        <VStack align="stretch" spacing={2} h="100%">
+          {/* Country Count with Globe Icon */}
+          <HStack spacing={1} align="center">
+            <GlobeAltIcon
+              style={{
+                width: '16px',
+                height: '16px',
+                color: '#FE4F18'
+              }}
+            />
+            <Text fontSize="sm" color="gray.900" fontWeight="600">
+              {countryCount} {t('destinations.global.countries')}
+            </Text>
+          </HStack>
+
+          {/* Package Name */}
+          <Heading
+            fontSize="24px"
+            fontWeight="800"
+            color="gray.900"
+            fontFamily="'Manrope', sans-serif"
           >
-            {t('destinations.global.coverage')}
-          </Badge>
+            {pkg.name}
+          </Heading>
 
           {/* Package Details */}
-          <VStack align="stretch" spacing={2}>
-            <Heading fontSize="22px" fontWeight="800" color="gray.900" fontFamily="'Manrope', sans-serif">
+          <VStack align="stretch" spacing={1}>
+            <Text fontSize="18px" fontWeight="600" color="gray.700" fontFamily="'Manrope', sans-serif">
               {dataGB}GB · {days} {t('plans.card.days')}
-            </Heading>
+            </Text>
             <Text fontSize="2xl" fontWeight="800" color="#FE4F18">
               ${priceUSD}
             </Text>
           </VStack>
 
-          {/* Country Flags */}
-          <HStack spacing="-10px" mt="auto">
-            {displayFlags.map((countryCode, index) => (
-              <Box
-                key={countryCode}
-                borderRadius="full"
-                overflow="hidden"
-                width="32px"
-                height="32px"
-                border="2px solid white"
-                shadow="md"
-                zIndex={displayFlags.length - index}
-              >
-                <CountryFlag
-                  code={countryCode}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </Box>
-            ))}
+          {/* Country Flags and Arrow */}
+          <HStack justify="space-between" align="center" mt="auto">
+            {/* Flags */}
+            <HStack spacing="-10px">
+              {displayFlags.map((countryCode, index) => (
+                <Box
+                  key={countryCode}
+                  borderRadius="full"
+                  overflow="hidden"
+                  width="32px"
+                  height="32px"
+                  border="2px solid white"
+                  shadow="md"
+                  zIndex={displayFlags.length - index}
+                >
+                  <CountryFlag
+                    code={countryCode}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </Box>
+              ))}
+            </HStack>
+
+            {/* Arrow Button */}
+            <Box
+              transition="all 0.15s"
+              transform={isHovered ? 'scale(1.05)' : 'scale(1)'}
+            >
+              <ArrowCircleSvg />
+            </Box>
           </HStack>
-
-          {/* Countries Count */}
-          <Text fontSize="sm" color="gray.600" fontWeight="500">
-            {countryCount} {t('destinations.global.countries')}
-          </Text>
-
-          {/* View Button */}
-          <Button
-            width="100%"
-            bg={isHovered ? '#FE4F18' : 'gray.100'}
-            color={isHovered ? 'white' : 'gray.700'}
-            _hover={{
-              bg: '#FF6B3D',
-              color: 'white',
-            }}
-            transition="all 0.3s"
-            borderRadius="lg"
-            fontWeight="700"
-            rightIcon={<ArrowRightIcon className="w-[18px] h-[18px]" />}
-            onClick={handleViewPlan}
-          >
-            {t('destinations.global.viewPlans')}
-          </Button>
         </VStack>
       </Box>
     </Box>
@@ -630,7 +631,7 @@ const PopularDestinations = () => {
                   color: 'gray.900',
                   fontWeight: '700',
                   border: 'none',
-                  shadow: 'sm',
+                  boxShadow: '0 4px 12px 0 rgba(0, 0, 0, 0.16), 0 2px 6px 0 rgba(0, 0, 0, 0.12)',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
@@ -651,7 +652,7 @@ const PopularDestinations = () => {
                   color: 'gray.900',
                   fontWeight: '700',
                   border: 'none',
-                  shadow: 'sm',
+                  boxShadow: '0 4px 12px 0 rgba(0, 0, 0, 0.16), 0 2px 6px 0 rgba(0, 0, 0, 0.12)',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
@@ -672,7 +673,7 @@ const PopularDestinations = () => {
                   color: 'gray.900',
                   fontWeight: '700',
                   border: 'none',
-                  shadow: 'sm',
+                  boxShadow: '0 4px 12px 0 rgba(0, 0, 0, 0.16), 0 2px 6px 0 rgba(0, 0, 0, 0.12)',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
