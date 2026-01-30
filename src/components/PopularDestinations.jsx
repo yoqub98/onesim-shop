@@ -19,7 +19,8 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { ArrowRightIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
@@ -185,11 +186,8 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
       ref={cardRef}
       position="relative"
       cursor="pointer"
-      bg="white"
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
+      borderRadius="24px"
+      overflow="visible"
       transition="all 0.15s ease-out"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
@@ -201,26 +199,35 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minH="200px"
+      h="180px"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '24px',
+        padding: '2px',
+        background: 'radial-gradient(circle at 100% 100%, #FE5F37 0%, rgba(170, 153, 158, 0.45) 50%, rgba(147, 163, 179, 0.3) 100%)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        pointerEvents: 'none',
+      }}
     >
-      {/* Gradient overlay on hover */}
+      {/* Inner content container with background */}
       <Box
         position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        height="6px"
-        background="linear-gradient(90deg, #FE4F18 0%, #FF6B3D 100%)"
-        opacity={isHovered ? 1 : 0}
-        transition="opacity 0.15s"
+        inset="2px"
+        bg="linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)"
+        borderRadius="22px"
+        overflow="hidden"
       />
 
-      <Box p={8}>
+      <Box position="relative" zIndex={1} p={8} h="100%">
         <VStack align="stretch" spacing={4} h="100%">
           {/* Region Title */}
           <Heading
-            size="xl"
-            fontWeight="700"
+            fontSize="24px"
+            fontWeight="800"
             color="gray.900"
             fontFamily="'Manrope', sans-serif"
           >
@@ -235,7 +242,7 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
           {/* Country Flags and Arrow */}
           <HStack justify="space-between" align="center" mt="auto">
             {/* Flags */}
-            <HStack spacing={-2}>
+            <HStack spacing="-10px">
               {displayFlags.map((country, index) => {
                 const countryCode = typeof country === 'string' ? country : country.code;
                 return (
@@ -243,8 +250,8 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
                     key={countryCode}
                     borderRadius="full"
                     overflow="hidden"
-                    width="36px"
-                    height="36px"
+                    width="32px"
+                    height="32px"
                     border="2px solid white"
                     shadow="md"
                     zIndex={displayFlags.length - index}
@@ -263,8 +270,8 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
               {remainingCount > 0 && (
                 <Box
                   borderRadius="full"
-                  width="36px"
-                  height="36px"
+                  width="32px"
+                  height="32px"
                   border="2px solid white"
                   bg="gray.100"
                   display="flex"
@@ -282,18 +289,19 @@ const RegionalCard = ({ regionCode, packages, coveredCountries = [], packageCoun
 
             {/* Arrow Button */}
             <Box
-              bg={isHovered ? '#FE4F18' : 'gray.100'}
+              bg="white"
               borderRadius="full"
-              width="40px"
-              height="40px"
+              width="48px"
+              height="48px"
               display="flex"
               alignItems="center"
               justifyContent="center"
               transition="all 0.3s"
+              shadow="md"
             >
               <ArrowRightIcon
                 className="w-[20px] h-[20px]"
-                style={{ color: isHovered ? 'white' : '#666' }}
+                style={{ color: '#FE4F18' }}
               />
             </Box>
           </HStack>
@@ -366,11 +374,8 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
       ref={cardRef}
       position="relative"
       cursor="pointer"
-      bg="white"
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
+      borderRadius="24px"
+      overflow="visible"
       transition="all 0.15s ease-out"
       transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
       shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
@@ -382,21 +387,30 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minH="200px"
+      h="180px"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '24px',
+        padding: '2px',
+        background: 'radial-gradient(circle at 100% 100%, #FE5F37 0%, rgba(170, 153, 158, 0.45) 50%, rgba(147, 163, 179, 0.3) 100%)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        pointerEvents: 'none',
+      }}
     >
-      {/* Gradient overlay on hover */}
+      {/* Inner content container with background */}
       <Box
         position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        height="6px"
-        background="linear-gradient(90deg, #FE4F18 0%, #FF6B3D 100%)"
-        opacity={isHovered ? 1 : 0}
-        transition="opacity 0.15s"
+        inset="2px"
+        bg="linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%)"
+        borderRadius="22px"
+        overflow="hidden"
       />
 
-      <Box p={8}>
+      <Box position="relative" zIndex={1} p={8} h="100%">
         <VStack align="stretch" spacing={4} h="100%">
           {/* Global Badge */}
           <Badge
@@ -415,7 +429,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
 
           {/* Package Details */}
           <VStack align="stretch" spacing={2}>
-            <Heading size="lg" fontWeight="700" color="gray.900" fontFamily="'Manrope', sans-serif">
+            <Heading fontSize="22px" fontWeight="800" color="gray.900" fontFamily="'Manrope', sans-serif">
               {dataGB}GB · {days} {t('plans.card.days')}
             </Heading>
             <Text fontSize="2xl" fontWeight="800" color="#FE4F18">
@@ -424,7 +438,7 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
           </VStack>
 
           {/* Country Flags */}
-          <HStack spacing={-2} mt="auto">
+          <HStack spacing="-10px" mt="auto">
             {displayFlags.map((countryCode, index) => (
               <Box
                 key={countryCode}
@@ -596,24 +610,27 @@ const PopularDestinations = () => {
             width="100%"
           >
             <TabList
-              bg="white"
-              borderRadius="2xl"
-              p={2}
-              shadow="md"
+              bg="rgba(236, 238, 242, 0.59)"
+              borderRadius="34px"
+              p="8px"
+              gap="8px"
               width="fit-content"
               mx="auto"
-              border="2px solid"
-              borderColor="#E8E9EE"
             >
               <Tab
-                fontWeight="700"
-                fontSize="md"
-                px={8}
-                py={3}
-                borderRadius="xl"
+                fontWeight="600"
+                fontSize="14px"
+                px="16px"
+                py="12px"
+                borderRadius="24px"
+                border="1px solid rgba(33, 40, 48, 0.17)"
+                bg="transparent"
                 _selected={{
-                  bg: '#FE4F18',
-                  color: 'white',
+                  bg: 'white',
+                  color: 'gray.900',
+                  fontWeight: '700',
+                  border: 'none',
+                  shadow: 'sm',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
@@ -622,14 +639,19 @@ const PopularDestinations = () => {
                 {t('destinations.tabs.countries')}
               </Tab>
               <Tab
-                fontWeight="700"
-                fontSize="md"
-                px={8}
-                py={3}
-                borderRadius="xl"
+                fontWeight="600"
+                fontSize="14px"
+                px="16px"
+                py="12px"
+                borderRadius="24px"
+                border="1px solid rgba(33, 40, 48, 0.17)"
+                bg="transparent"
                 _selected={{
-                  bg: '#FE4F18',
-                  color: 'white',
+                  bg: 'white',
+                  color: 'gray.900',
+                  fontWeight: '700',
+                  border: 'none',
+                  shadow: 'sm',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
@@ -638,14 +660,19 @@ const PopularDestinations = () => {
                 {t('destinations.tabs.regional')}
               </Tab>
               <Tab
-                fontWeight="700"
-                fontSize="md"
-                px={8}
-                py={3}
-                borderRadius="xl"
+                fontWeight="600"
+                fontSize="14px"
+                px="16px"
+                py="12px"
+                borderRadius="24px"
+                border="1px solid rgba(33, 40, 48, 0.17)"
+                bg="transparent"
                 _selected={{
-                  bg: '#FE4F18',
-                  color: 'white',
+                  bg: 'white',
+                  color: 'gray.900',
+                  fontWeight: '700',
+                  border: 'none',
+                  shadow: 'sm',
                 }}
                 color="gray.600"
                 transition="all 0.3s"
