@@ -1,5 +1,5 @@
 // src/pages/MyFavorites.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -13,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useFavorites } from '../contexts/FavoritesContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
-import { getTranslation } from '../config/i18n.js';
 import { fetchPackageById } from '../services/esimAccessApi.js';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing.js';
 import DataPlanRow from '../components/DataPlanRow.jsx';
@@ -23,17 +22,12 @@ const MyFavorites = () => {
   const { favoriteIds, loading: favoritesLoading } = useFavorites();
   const { currentLanguage } = useLanguage();
   const navigate = useNavigate();
-  const t = (key) => getTranslation(currentLanguage, key);
 
   const [favoritePlans, setFavoritePlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadFavoritePlans();
-  }, [favoriteIds, currentLanguage]);
-
-  const loadFavoritePlans = async () => {
+  const loadFavoritePlans = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -71,7 +65,11 @@ const MyFavorites = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, favoriteIds, currentLanguage]);
+
+  useEffect(() => {
+    loadFavoritePlans();
+  }, [loadFavoritePlans]);
 
   const handlePlanClick = (plan) => {
     // Extract country code from plan

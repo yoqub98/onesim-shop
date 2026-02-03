@@ -26,6 +26,7 @@ export const FavoritesProvider = ({ children }) => {
       // Clear favorites when user logs out
       setFavoriteIds([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const loadFavorites = async () => {
