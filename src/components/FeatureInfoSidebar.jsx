@@ -5,8 +5,8 @@ import {
   WifiIcon,
   BoltIcon,
   PhoneXMarkIcon,
-  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+import { Battery50Icon } from '@heroicons/react/24/solid';
 
 /**
  * FeatureInfoSidebar - Sticky information panel for desktop layout
@@ -32,7 +32,7 @@ const FeatureInfoSidebar = ({ stickyTop = '180px' }) => {
       subtitle: 'Звонки и SMS не поддерживаются',
     },
     {
-      icon: ArrowPathIcon,
+      icon: Battery50Icon,
       title: 'Продление',
       subtitle: 'Можно пополнить и продлить пакет',
     },
@@ -46,7 +46,7 @@ const FeatureInfoSidebar = ({ stickyTop = '180px' }) => {
       border="1.8px solid #CFD2E3"
       borderRadius="26px"
       px="40px"
-      py="28px"
+      py="36px"
       w="100%"
       fontFamily="'Manrope', sans-serif"
       backdropFilter="blur(10px)"

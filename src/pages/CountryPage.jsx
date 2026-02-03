@@ -623,6 +623,7 @@ const CountryPage = () => {
                   size="md"
                   h="46px"
                   w="46px"
+                  border="1.4px solid rgba(208, 211, 223, 0.60)"
                   aria-label="Sort price ascending"
                   _hover={{
                     bg: sortOrder === 'asc' ? '#E5461A' : '#FFF4F0',
@@ -642,6 +643,7 @@ const CountryPage = () => {
                   size="md"
                   h="46px"
                   w="46px"
+                  border="1.4px solid rgba(208, 211, 223, 0.60)"
                   aria-label="Sort price descending"
                   _hover={{
                     bg: sortOrder === 'desc' ? '#E5461A' : '#FFF4F0',

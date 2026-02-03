@@ -24,6 +24,7 @@ import { parseHighestSpeed, smartRoundDollar, formatOperatorsList } from './Data
  * @param {Function} onClick - Click handler for the row
  */
 const DataPlanRow = ({ plan, lang, onClick }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const [priceUZS, setPriceUZS] = useState(null);
   const t = (key) => getTranslation(lang, key);
   const { convertToUZS } = useCurrency();
@@ -82,20 +83,48 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
 
   return (
     <Box
-      bg="white"
-      borderRadius="20px"
-      px="22px"
-      py="20px"
-      boxShadow="0 -7px 48px 0px rgba(28, 32, 37, 0.1)"
-      cursor="pointer"
-      onClick={onClick}
-      transition="all 0.2s"
-      _hover={{
-        transform: 'translateY(-2px)',
-        boxShadow: '0 -10px 60px 0px rgba(28, 32, 37, 0.15)',
-      }}
+      position="relative"
       fontFamily="'Manrope', sans-serif"
     >
+      {/* Lighting effect background - only visible on hover */}
+      {isHovered && (
+        <Box
+          position="absolute"
+          top="-15px"
+          left="-15px"
+          right="-15px"
+          bottom="-15px"
+          bg="radial-gradient(circle at center, rgba(254, 79, 24, 0.12) 0%, rgba(254, 79, 24, 0.04) 40%, transparent 70%)"
+          borderRadius="35px"
+          filter="blur(20px)"
+          zIndex={-1}
+          pointerEvents="none"
+          sx={{
+            '@keyframes pulse': {
+              '0%, 100%': { opacity: 0.7 },
+              '50%': { opacity: 1 },
+            },
+            animation: 'pulse 2s ease-in-out infinite',
+          }}
+        />
+      )}
+
+      <Box
+        bg="white"
+        borderRadius="20px"
+        px="22px"
+        py="20px"
+        boxShadow="0 -7px 48px 0px rgba(28, 32, 37, 0.1)"
+        cursor="pointer"
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        transition="all 0.15s ease-out"
+        transform={isHovered ? 'translateY(-4px)' : 'translateY(0)'}
+        _hover={{
+          boxShadow: '0 -12px 60px 0px rgba(254, 79, 24, 0.2)',
+        }}
+      >
       <HStack spacing={6} align="center">
         {/* LEFT SECTION - Plan details */}
         <VStack flex={1} align="stretch" spacing="26px">
@@ -124,7 +153,7 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
             </HStack>
 
             {/* Period group */}
-            <VStack align="flex-end" spacing={0}>
+            <VStack align="flex-start" spacing={0}>
               <Text
                 fontSize="11px"
                 fontWeight="500"
@@ -173,12 +202,13 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
               <Box
                 borderRadius="12px"
                 h="36px"
-                w="195px"
                 px="16px"
                 bg="white"
                 border="1px solid #D4D7E5"
                 display="flex"
                 alignItems="center"
+                width="fit-content"
+                maxW="250px"
               >
                 <Text
                   fontSize="13px"
@@ -221,8 +251,8 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
               {/* USD price */}
               <HStack align="baseline" spacing="2px">
                 <Text
-                  fontSize="20px"
-                  fontWeight="700"
+                  fontSize="22px"
+                  fontWeight="800"
                   color="#151618"
                   fontFamily="'Manrope', sans-serif"
                   lineHeight="1"
@@ -230,8 +260,8 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
                   $
                 </Text>
                 <Text
-                  fontSize="22px"
-                  fontWeight="700"
+                  fontSize="26px"
+                  fontWeight="800"
                   color="#151618"
                   fontFamily="'Manrope', sans-serif"
                   lineHeight="1"
@@ -251,8 +281,8 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
                 h="45px"
                 minW="45px"
                 borderRadius="full"
-                bg="white"
-                border="1px solid #E8E8E8"
+                bg="transparent"
+                border="1px solid #C9CCD7"
                 color="#151618"
                 onClick={handleFavoriteClick}
                 _hover={{
@@ -268,19 +298,36 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
                 h="46px"
                 borderRadius="full"
                 bg="rgba(255, 255, 255, 0.33)"
-                border="2px solid #FE4F18"
+                border="2.5px solid #FE4F18"
                 fontSize="15px"
                 fontWeight="700"
                 color="#1F1F1F"
                 fontFamily="'Manrope', sans-serif"
                 onClick={handleBuyClick}
-                _hover={{
+                position="relative"
+                overflow="hidden"
+                zIndex={1}
+                transition="color 0.3s ease-out"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  zIndex: -1,
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   bg: '#FE4F18',
-                  color: 'white',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 10px 30px rgba(254, 79, 24, 0.4)',
+                  transform: 'scaleY(0)',
+                  transformOrigin: '50%',
+                  transition: 'transform 0.3s ease-out',
+                  borderRadius: 'full',
                 }}
-                transition="all 0.3s"
+                _hover={{
+                  color: 'white',
+                  _before: {
+                    transform: 'scaleY(1)',
+                  },
+                }}
               >
                 {t('plans.card.buy')}
               </Button>
@@ -288,6 +335,7 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
           </HStack>
         </Box>
       </HStack>
+      </Box>
     </Box>
   );
 };
