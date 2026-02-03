@@ -121,6 +121,55 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
 };
 
 // ============================================
+// FETCH: Package by ID (packageCode)
+// ============================================
+export const fetchPackageById = async (packageId, lang = DEFAULT_LANGUAGE) => {
+  // Check cache first
+  const cached = getCachedPackage(packageId);
+  if (cached) return cached;
+
+  console.log(`🎯 Fetching package by ID: ${packageId}`);
+
+  try {
+    const response = await fetch(`${API_URL}/packages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        locationCode: '',
+        type: '',
+        slug: '',
+        packageCode: packageId,
+        iccid: '',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
+      const pkg = data.obj.packageList[0];
+
+      // Cache it
+      setCachedPackage(packageId, pkg);
+
+      console.log(`✅ Found package with ID ${packageId}`);
+      return pkg;
+    } else {
+      console.warn(`⚠️ Package with ID ${packageId} not found`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`❌ Error fetching package ${packageId}:`, error.message);
+    return null;
+  }
+};
+
+// ============================================
 // FETCH: Multiple packages by slugs (for handpicked plans)
 // ============================================
 export const fetchHandpickedPackages = async (planSlugsMap, lang = DEFAULT_LANGUAGE) => {

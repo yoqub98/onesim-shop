@@ -39,11 +39,13 @@ import {
   Wifi,
   MapPin,
   Info,
+  Heart,
 } from 'lucide-react';
 import { ReactComponent as AppleIcon } from '../assets/icons/appleIcon.svg';
 import { ReactComponent as AndroidIcon } from '../assets/icons/androidIcon.svg';
 import CountryFlag from '../components/CountryFlag';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useFavorites } from '../contexts/FavoritesContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getTranslation } from '../config/i18n.js';
 import {
@@ -56,10 +58,12 @@ import {
 } from '../services/orderService';
 import MyProfile from './MyProfile.jsx';
 import MyEsims from './MyEsims.jsx';
+import MyFavorites from './MyFavorites.jsx';
 
 const MyPage = () => {
   console.log('🔵 MyPage component rendering...');
   const { user, profile } = useAuth();
+  const { favoriteIds } = useFavorites();
   const { currentLanguage } = useLanguage();
   console.log('👤 User:', user?.id, 'Profile:', profile?.first_name);
 
@@ -288,6 +292,39 @@ const MyPage = () => {
                 )}
               </HStack>
             </Tab>
+            <Tab
+              fontWeight="700"
+              fontSize={{ base: 'sm', md: 'md' }}
+              borderRadius={{ base: 'lg', md: 'xl' }}
+              color="gray.600"
+              px={{ base: 3, md: 4 }}
+              _selected={{
+                bg: '#FE4F18',
+                color: 'white',
+              }}
+              _hover={{
+                color: '#FE4F18',
+              }}
+              transition="all 0.2s"
+            >
+              <HStack spacing={{ base: 1.5, md: 2 }}>
+                <Heart size={18} />
+                <Text display={{ base: 'none', sm: 'block' }}>Избранное</Text>
+                <Text display={{ base: 'block', sm: 'none' }}>❤️</Text>
+                {favoriteIds.length > 0 && (
+                  <Badge
+                    bg="#FEF3C7"
+                    color="#92400E"
+                    borderRadius="full"
+                    fontSize="xs"
+                    fontWeight="700"
+                    px={{ base: 1.5, md: 2 }}
+                  >
+                    {favoriteIds.length}
+                  </Badge>
+                )}
+              </HStack>
+            </Tab>
           </TabList>
 
           <TabPanels>
@@ -310,6 +347,11 @@ const MyPage = () => {
                 handleCancelClick={handleCancelClick}
                 handleCheckStatus={handleCheckStatus}
               />
+            </TabPanel>
+
+            {/* Favorites Tab */}
+            <TabPanel p={0}>
+              <MyFavorites />
             </TabPanel>
           </TabPanels>
         </Tabs>

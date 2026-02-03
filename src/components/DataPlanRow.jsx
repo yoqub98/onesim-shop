@@ -8,10 +8,14 @@ import {
   VStack,
   IconButton,
   Button,
+  useToast,
 } from '@chakra-ui/react';
 import { WifiIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { getTranslation } from '../config/i18n';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useAuth } from '../contexts/AuthContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { parseHighestSpeed, smartRoundDollar, formatOperatorsList } from './DataPlanCard';
 
@@ -26,8 +30,14 @@ import { parseHighestSpeed, smartRoundDollar, formatOperatorsList } from './Data
 const DataPlanRow = ({ plan, lang, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [priceUZS, setPriceUZS] = useState(null);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const t = (key) => getTranslation(lang, key);
   const { convertToUZS } = useCurrency();
+  const { user } = useAuth();
+  const { isFavorited, toggleFavorite } = useFavorites();
+  const toast = useToast();
+
+  const favorited = isFavorited(plan.id);
 
   // Parse data value
   const parseDataValue = (data) => {
@@ -70,9 +80,48 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
 
   const formattedPriceUZS = priceUZS !== null ? formatPrice(priceUZS) : '...';
 
-  const handleFavoriteClick = (e) => {
+  const handleFavoriteClick = async (e) => {
     e.stopPropagation();
-    // Future favorites feature
+
+    if (!user) {
+      toast({
+        title: 'Войдите в аккаунт',
+        description: 'Чтобы добавить в избранное, необходимо войти в аккаунт',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      setIsTogglingFavorite(true);
+      const newState = await toggleFavorite(plan.id);
+
+      toast({
+        title: newState ? 'Добавлено в избранное' : 'Удалено из избранного',
+        description: newState
+          ? 'eSIM добавлен в список избранных'
+          : 'eSIM удален из списка избранных',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+        position: 'top',
+      });
+    } catch (error) {
+      console.error('[DataPlanRow] Error toggling favorite:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось обновить избранное',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      });
+    } finally {
+      setIsTogglingFavorite(false);
+    }
   };
 
   const handleBuyClick = (e) => {
@@ -275,16 +324,23 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
             <HStack spacing="11px">
               {/* Heart icon button */}
               <IconButton
-                aria-label="Add to favorites"
-                icon={<HeartIcon style={{ width: '24px', height: '24px' }} />}
+                aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                icon={
+                  favorited ? (
+                    <HeartIconSolid style={{ width: '24px', height: '24px' }} />
+                  ) : (
+                    <HeartIcon style={{ width: '24px', height: '24px' }} />
+                  )
+                }
                 w="45px"
                 h="45px"
                 minW="45px"
                 borderRadius="full"
                 bg="transparent"
                 border="1px solid #C9CCD7"
-                color="#151618"
+                color={favorited ? '#5A5A5A' : '#151618'}
                 onClick={handleFavoriteClick}
+                isLoading={isTogglingFavorite}
                 _hover={{
                   color: '#FE4F18',
                   borderColor: '#FE4F18',
@@ -307,7 +363,7 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
                 position="relative"
                 overflow="hidden"
                 zIndex={1}
-                transition="color 0.3s ease-out"
+                transition="color 0.2s ease-out"
                 _before={{
                   content: '""',
                   position: 'absolute',
@@ -319,7 +375,7 @@ const DataPlanRow = ({ plan, lang, onClick }) => {
                   bg: '#FE4F18',
                   transform: 'scaleY(0)',
                   transformOrigin: '50%',
-                  transition: 'transform 0.3s ease-out',
+                  transition: 'transform 0.2s ease-out',
                   borderRadius: 'full',
                 }}
                 _hover={{

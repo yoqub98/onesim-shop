@@ -59,6 +59,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
+import { FavoritesProvider } from './contexts/FavoritesContext.jsx';
 import { getTranslation, LANGUAGES } from './config/i18n.js';
 // Logo imports
 import logoWhite from './assets/images/logo-white.svg';
@@ -819,7 +820,9 @@ function App() {
       <LanguageProvider>
         <CurrencyProvider>
           <AuthProvider>
-            <AppContent />
+            <FavoritesProvider>
+              <AppContent />
+            </FavoritesProvider>
           </AuthProvider>
         </CurrencyProvider>
       </LanguageProvider>
