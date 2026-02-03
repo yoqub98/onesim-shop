@@ -1,7 +1,7 @@
 // src/contexts/FavoritesContext.jsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from './AuthContext';
-import { getUserFavorites, toggleFavorite as toggleFavoriteService } from '../services/favoritesService';
+import { useAuth } from './AuthContext.jsx';
+import { getUserFavorites, toggleFavorite as toggleFavoriteService } from '../services/favoritesService.js';
 
 const FavoritesContext = createContext({});
 

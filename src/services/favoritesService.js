@@ -1,6 +1,6 @@
 // src/services/favoritesService.js
 // Service for managing user favorites (liked eSIM packages)
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient.js';
 
 /**
  * Get all favorite package IDs for a user

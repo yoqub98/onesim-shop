@@ -10,13 +10,13 @@ import {
 } from '@chakra-ui/react';
 import { Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { getTranslation } from '../config/i18n';
-import { fetchPackageById } from '../services/esimAccessApi';
-import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
-import DataPlanRow from '../components/DataPlanRow';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useFavorites } from '../contexts/FavoritesContext.jsx';
+import { useLanguage } from '../contexts/LanguageContext.jsx';
+import { getTranslation } from '../config/i18n.js';
+import { fetchPackageById } from '../services/esimAccessApi.js';
+import { calculateFinalPriceUSD, formatPrice } from '../config/pricing.js';
+import DataPlanRow from '../components/DataPlanRow.jsx';
 
 const MyFavorites = () => {
   const { user } = useAuth();

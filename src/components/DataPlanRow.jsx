@@ -12,12 +12,12 @@ import {
 } from '@chakra-ui/react';
 import { WifiIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { getTranslation } from '../config/i18n';
-import { useCurrency } from '../contexts/CurrencyContext';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { useAuth } from '../contexts/AuthContext';
-import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
-import { parseHighestSpeed, smartRoundDollar, formatOperatorsList } from './DataPlanCard';
+import { getTranslation } from '../config/i18n.js';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { useFavorites } from '../contexts/FavoritesContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { calculateFinalPriceUSD, formatPrice } from '../config/pricing.js';
+import { parseHighestSpeed, smartRoundDollar, formatOperatorsList } from './DataPlanCard.jsx';
 
 /**
  * DataPlanRow - Desktop horizontal plan row component
