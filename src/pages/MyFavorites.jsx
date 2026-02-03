@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useFavorites } from '../contexts/FavoritesContext.jsx';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
-import { fetchPackageById } from '../services/esimAccessApi.js';
+import { fetchPackageById, transformPackageData } from '../services/esimAccessApi.js';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing.js';
 import DataPlanRow from '../components/DataPlanRow.jsx';
 
@@ -34,7 +34,10 @@ const MyFavorites = () => {
       setLoading(true);
       setError(null);
 
+      console.log('[MyFavorites] Loading favorites, IDs:', favoriteIds);
+
       if (favoriteIds.length === 0) {
+        console.log('[MyFavorites] No favorite IDs, showing empty state');
         setFavoritePlans([]);
         setLoading(false);
         return;
@@ -43,11 +46,26 @@ const MyFavorites = () => {
       // Fetch details for each favorite package
       const planPromises = favoriteIds.map(async (packageId) => {
         try {
-          const pkg = await fetchPackageById(packageId, currentLanguage);
+          const rawPackage = await fetchPackageById(packageId, currentLanguage);
+
+          if (!rawPackage) {
+            console.warn('[MyFavorites] Package not found:', packageId);
+            return null;
+          }
+
+          // Extract country code from the package
+          const countryCode = rawPackage.locationCode || rawPackage.location || '';
+
+          // Transform the raw API package data
+          const transformedPackage = transformPackageData(rawPackage, countryCode, currentLanguage);
+
+          // Apply pricing calculations
+          const priceUSDWithMargin = calculateFinalPriceUSD(transformedPackage.priceUSD);
+
           return {
-            ...pkg,
-            priceUSD: calculateFinalPriceUSD(pkg.priceUSD),
-            price: formatPrice(calculateFinalPriceUSD(pkg.priceUSD)),
+            ...transformedPackage,
+            priceUSD: priceUSDWithMargin,
+            price: formatPrice(priceUSDWithMargin),
           };
         } catch (err) {
           console.error('[MyFavorites] Error fetching package:', packageId, err);
@@ -58,6 +76,10 @@ const MyFavorites = () => {
       const plans = await Promise.all(planPromises);
       // Filter out null values (failed fetches)
       const validPlans = plans.filter(plan => plan !== null);
+
+      console.log('[MyFavorites] Fetched plans:', plans.length, 'Valid plans:', validPlans.length);
+      console.log('[MyFavorites] Valid plans data:', validPlans);
+
       setFavoritePlans(validPlans);
     } catch (err) {
       console.error('[MyFavorites] Error loading favorite plans:', err);
