@@ -40,7 +40,7 @@ export const parseHighestSpeed = (speed) => {
 // Higher than XX.5 → round up
 // Less than XX.5 → round down
 // Exactly XX.5 → display as is
-const smartRoundDollar = (value) => {
+export const smartRoundDollar = (value) => {
   const decimalPart = value - Math.floor(value);
 
   if (decimalPart === 0.5) {
@@ -76,7 +76,7 @@ const smartRoundUZS = (value) => {
 };
 
 // Format operators list to show first two and count the rest
-const formatOperatorsList = (operatorList) => {
+export const formatOperatorsList = (operatorList) => {
   if (!operatorList || operatorList.length === 0) return '';
 
   // Handle both array of objects and array of strings

@@ -18,6 +18,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide
 import { useParams, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
 import DataPlanCard from '../components/DataPlanCard';
+import DataPlanRow from '../components/DataPlanRow';
+import FeatureInfoSidebar from '../components/FeatureInfoSidebar';
 import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
 import { calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
@@ -114,6 +116,26 @@ const PlanCardSkeleton = () => {
         />
       </VStack>
     </Box>
+  );
+};
+
+// Desktop Row Skeleton
+const PlanRowSkeleton = () => {
+  return (
+    <Box
+      borderRadius="20px"
+      bg="white"
+      boxShadow="0 -7px 48px 0px rgba(28, 32, 37, 0.1)"
+      height="137px"
+      width="100%"
+      sx={{
+        '@keyframes pulse': {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.5 },
+        },
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }}
+    />
   );
 };
 
@@ -512,9 +534,9 @@ const CountryPage = () => {
 
       {/* Filters */}
       <Box
-        bg="#E8E9EE"
+        bg={{ base: '#E8E9EE', lg: '#F9F9F9' }}
         py={6}
-        borderBottom="1px solid"
+        borderBottom={{ base: '1px solid', lg: 'none' }}
         borderColor="gray.200"
       >
         <Container maxW="8xl">
@@ -643,7 +665,7 @@ const CountryPage = () => {
       </Box>
 
       {/* Plans Grid */}
-      <Box py={12} bg="#E8E9EE">
+      <Box py={12} bg={{ base: '#E8E9EE', lg: '#F9F9F9' }}>
         <Container maxW="8xl">
           {error && (
             <Box p={4} bg="red.50" borderRadius="lg" border="1px solid" borderColor="red.200" mb={6}>
@@ -654,47 +676,91 @@ const CountryPage = () => {
           )}
 
           {loading ? (
-            <Grid
-              templateColumns={{ 
-                base: '1fr', 
-                md: 'repeat(2, 1fr)', 
-                lg: 'repeat(3, 1fr)',
-                xl: 'repeat(4, 1fr)' 
-              }}
-              gap={4}
-            >
-              {Array.from({ length: 8 }).map((_, i) => (
-                <PlanCardSkeleton key={i} />
-              ))}
-            </Grid>
+            <>
+              {/* DESKTOP loading skeleton */}
+              <Box display={{ base: 'none', lg: 'block' }}>
+                <VStack align="stretch" spacing="34px">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <PlanRowSkeleton key={i} />
+                  ))}
+                </VStack>
+              </Box>
+
+              {/* MOBILE loading skeleton */}
+              <Box display={{ base: 'block', lg: 'none' }}>
+                <Grid
+                  templateColumns={{
+                    base: '1fr',
+                    md: 'repeat(2, 1fr)'
+                  }}
+                  gap={4}
+                >
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <PlanCardSkeleton key={i} />
+                  ))}
+                </Grid>
+              </Box>
+            </>
           ) : paginatedPlans.length > 0 ? (
             <>
-              <Grid
-                templateColumns={{
-                  base: '1fr',
-                  md: 'repeat(2, 1fr)',
-                  lg: 'repeat(3, 1fr)',
-                  xl: 'repeat(4, 1fr)'
-                }}
-                gap={6}
-              >
-                {paginatedPlans.map((plan) => (
-                  <DataPlanCard
-                    key={plan.id}
-                    plan={plan}
-                    lang={currentLanguage}
-                    onClick={() => navigate(`/package/${plan.id}`, { state: { plan, countryCode } })}
-                  />
-                ))}
-              </Grid>
+              {/* DESKTOP layout: two-column with rows + sidebar */}
+              <Box display={{ base: 'none', lg: 'block' }}>
+                <Grid templateColumns="1fr 453px" gap={10}>
+                  {/* LEFT: plan rows */}
+                  <VStack align="stretch" spacing="34px">
+                    {paginatedPlans.map((plan) => (
+                      <DataPlanRow
+                        key={plan.id}
+                        plan={plan}
+                        lang={currentLanguage}
+                        onClick={() => navigate(`/package/${plan.id}`, { state: { plan, countryCode } })}
+                      />
+                    ))}
+                  </VStack>
 
-              {totalPages > 1 && (
-                <Pagination 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
+                  {/* RIGHT: sticky sidebar */}
+                  <Box position="sticky" top="180px" alignSelf="flex-start">
+                    <FeatureInfoSidebar />
+                  </Box>
+                </Grid>
+
+                {/* Pagination below grid */}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </Box>
+
+              {/* MOBILE layout: card grid */}
+              <Box display={{ base: 'block', lg: 'none' }}>
+                <Grid
+                  templateColumns={{
+                    base: '1fr',
+                    md: 'repeat(2, 1fr)'
+                  }}
+                  gap={6}
+                >
+                  {paginatedPlans.map((plan) => (
+                    <DataPlanCard
+                      key={plan.id}
+                      plan={plan}
+                      lang={currentLanguage}
+                      onClick={() => navigate(`/package/${plan.id}`, { state: { plan, countryCode } })}
+                    />
+                  ))}
+                </Grid>
+
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </Box>
             </>
           ) : (
             <Box textAlign="center" py={12}>
