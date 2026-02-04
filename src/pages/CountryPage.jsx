@@ -323,7 +323,8 @@ const CountryPage = () => {
 
         const transformedPackages = packages.map(pkg => ({
           ...pkg,
-          priceUSD: calculateFinalPriceUSD(pkg.priceUSD), // USD price with margin
+          originalPriceUSD: pkg.priceUSD, // Keep ORIGINAL price without margin
+          priceUSD: calculateFinalPriceUSD(pkg.priceUSD), // USD price with margin for DISPLAY
           price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
         }));
 

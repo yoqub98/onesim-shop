@@ -88,8 +88,41 @@ const PackagePage = () => {
   const plan = location.state?.plan;
   const countryCode = location.state?.countryCode;
 
-  // Calculate prices with margin (before early return)
-  const priceUSDWithMargin = plan ? calculateFinalPriceUSD(plan.priceUSD || 0) : 0;
+  // Get ORIGINAL price (without margin) - handle multiple data formats
+  const getOriginalPriceUSD = () => {
+    if (!plan) return 0;
+
+    // Priority 1: originalPriceUSD field (from CountryPage, PlansPage)
+    if (plan.originalPriceUSD) {
+      console.log('[PackagePage] Using originalPriceUSD:', plan.originalPriceUSD);
+      return parseFloat(plan.originalPriceUSD);
+    }
+
+    // Priority 2: originalPrice field (raw API price, needs division by 10000)
+    if (plan.originalPrice) {
+      const price = plan.originalPrice / 10000;
+      console.log('[PackagePage] Using originalPrice / 10000:', price);
+      return price;
+    }
+
+    // Priority 3: Check if priceUSD is already without margin (from RegionalPackagesPage)
+    // If it came from RegionalPackagesPage, it's originalPrice / 10000
+    if (plan.rawPackage && plan.priceUSD) {
+      console.log('[PackagePage] Using priceUSD from RegionalPackagesPage (no margin):', plan.priceUSD);
+      return parseFloat(plan.priceUSD);
+    }
+
+    // Priority 4: Reverse calculate from priceUSD with margin
+    // Remove 50% margin: original = priceWithMargin / 1.5
+    const reversedPrice = parseFloat(plan.priceUSD) / 1.5;
+    console.log('[PackagePage] Reversed from priceUSD / 1.5:', reversedPrice);
+    return reversedPrice;
+  };
+
+  const originalPriceUSD = getOriginalPriceUSD();
+
+  // Calculate prices with margin (for DISPLAY only)
+  const priceUSDWithMargin = calculateFinalPriceUSD(originalPriceUSD);
 
   // Convert USD to UZS asynchronously (must be before early return)
   useEffect(() => {
@@ -191,7 +224,12 @@ const PackagePage = () => {
     try {
       // IMPORTANT: Send ORIGINAL price to backend (without margin)
       // The margin is only for display/revenue tracking, not for eSIM Access API
-      const originalPriceUSD = plan.priceUSD || 0;
+      console.log('📦 [ORDER] Sending order with ORIGINAL price:', {
+        originalPriceUSD,
+        priceUSDWithMargin,
+        packageCode: plan.packageCode,
+        planData: plan
+      });
 
       const orderData = {
         userId: user.id,
@@ -204,12 +242,6 @@ const PackagePage = () => {
         priceUzs: priceUZS,
         priceUsd: originalPriceUSD, // Use ORIGINAL price, not priceUSDWithMargin
       };
-
-      console.log('📦 [ORDER] Sending order with ORIGINAL price:', {
-        originalPriceUSD,
-        priceUSDWithMargin,
-        packageCode: plan.packageCode
-      });
 
       await createOrder(orderData);
 
@@ -625,50 +657,65 @@ const PackagePage = () => {
           position="fixed"
           bottom={4}
           left={4}
-          bg="rgba(0, 0, 0, 0.85)"
+          bg="rgba(0, 0, 0, 0.9)"
           color="white"
-          p={3}
-          borderRadius="lg"
+          p={4}
+          borderRadius="xl"
           fontSize="xs"
           fontFamily="monospace"
           zIndex={9999}
-          backdropFilter="blur(8px)"
-          border="1px solid rgba(255, 255, 255, 0.1)"
-          shadow="xl"
-          maxW="320px"
+          backdropFilter="blur(10px)"
+          border="2px solid rgba(254, 79, 24, 0.3)"
+          shadow="2xl"
+          maxW="340px"
         >
-          <VStack align="flex-start" spacing={1}>
-            <Text fontWeight="700" color="orange.300" fontSize="sm" mb={1}>
-              Package Debug Info
+          <VStack align="flex-start" spacing={2}>
+            <Text fontWeight="800" color="#FE4F18" fontSize="md" mb={1}>
+              📦 Package Debug Info
             </Text>
-            <HStack spacing={2}>
-              <Text color="gray.400" fontWeight="600">Slug:</Text>
-              <Text color="white">{plan.slug || 'N/A'}</Text>
-            </HStack>
-            <HStack spacing={2}>
-              <Text color="gray.400" fontWeight="600">Code:</Text>
-              <Text color="white">{plan.packageCode || 'N/A'}</Text>
-            </HStack>
-            <HStack spacing={2}>
-              <Text color="gray.400" fontWeight="600">Original USD:</Text>
-              <Text color="green.300" fontWeight="700">
-                ${typeof plan.priceUSD === 'number'
-                  ? plan.priceUSD.toFixed(2)
-                  : typeof plan.priceUSD === 'string'
-                  ? parseFloat(plan.priceUSD).toFixed(2)
-                  : plan.originalPrice
-                  ? (plan.originalPrice / 10000).toFixed(2)
-                  : '0.00'}
-              </Text>
-            </HStack>
-            <HStack spacing={2}>
-              <Text color="gray.400" fontWeight="600">With Margin:</Text>
-              <Text color="yellow.300" fontWeight="700">
-                ${priceUSDWithMargin.toFixed(2)}
-              </Text>
-            </HStack>
-            <Text color="gray.500" fontSize="10px" mt={1}>
-              * Original = from eSIM Access API
+
+            <Box width="100%" bg="rgba(255,255,255,0.05)" p={2} borderRadius="md">
+              <HStack spacing={2} justify="space-between">
+                <Text color="gray.400" fontWeight="600" fontSize="10px">SLUG:</Text>
+                <Text color="white" fontWeight="600">{plan.slug || 'N/A'}</Text>
+              </HStack>
+            </Box>
+
+            <Box width="100%" bg="rgba(255,255,255,0.05)" p={2} borderRadius="md">
+              <HStack spacing={2} justify="space-between">
+                <Text color="gray.400" fontWeight="600" fontSize="10px">CODE:</Text>
+                <Text color="white" fontWeight="600">{plan.packageCode || 'N/A'}</Text>
+              </HStack>
+            </Box>
+
+            <Divider borderColor="rgba(255,255,255,0.1)" />
+
+            <Box width="100%" bg="rgba(34,197,94,0.1)" p={2} borderRadius="md" border="1px solid rgba(34,197,94,0.3)">
+              <VStack align="stretch" spacing={1}>
+                <Text color="green.300" fontWeight="600" fontSize="10px">ORIGINAL (API):</Text>
+                <Text color="green.300" fontWeight="900" fontSize="lg">
+                  ${originalPriceUSD.toFixed(2)}
+                </Text>
+                <Text color="green.400" fontSize="9px">
+                  → Sent to eSIM Access API
+                </Text>
+              </VStack>
+            </Box>
+
+            <Box width="100%" bg="rgba(251,191,36,0.1)" p={2} borderRadius="md" border="1px solid rgba(251,191,36,0.3)">
+              <VStack align="stretch" spacing={1}>
+                <Text color="yellow.300" fontWeight="600" fontSize="10px">WITH 50% MARGIN:</Text>
+                <Text color="yellow.300" fontWeight="900" fontSize="lg">
+                  ${priceUSDWithMargin.toFixed(2)}
+                </Text>
+                <Text color="yellow.400" fontSize="9px">
+                  → Shown to customer
+                </Text>
+              </VStack>
+            </Box>
+
+            <Text color="gray.500" fontSize="9px" mt={1} fontStyle="italic">
+              ⚠️ eSIM Access validates original price
             </Text>
           </VStack>
         </Box>

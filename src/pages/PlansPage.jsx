@@ -153,7 +153,8 @@ const PlansPage = () => {
           dataGB: volumeInGB, // in GB (for filtering)
           days: pkg.duration, // Match popular packages structure
           duration: pkg.duration, // Keep for compatibility
-          priceUSD: finalPriceUSD, // USD with margin applied
+          originalPriceUSD: rawPriceUSD, // Keep ORIGINAL price without margin
+          priceUSD: finalPriceUSD, // USD with margin applied for DISPLAY
           priceUsd: finalPriceUSD, // Keep lowercase for compatibility
           priceUzs: calculateFinalPrice(rawPriceUSD),
           network: pkg.networkType,
