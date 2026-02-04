@@ -2,10 +2,14 @@
 // Initial data load from eSIM Access API to Supabase
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const SUPABASE_URL = process.env.REACT_APP_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -44,7 +48,10 @@ async function loadAllPackages() {
 
   try {
     console.log('📡 Fetching packages from eSIM Access API...');
-    const response = await fetch(`${ESIMACCESS_API_URL}/packages`, {
+    console.log('🔑 Using API Key:', ESIMACCESS_API_KEY ? 'Present' : 'MISSING');
+    console.log('🌐 API URL:', ESIMACCESS_API_URL);
+
+    const response = await fetch(`${ESIMACCESS_API_URL}/package/list`, {
       method: 'POST',
       headers: {
         'RT-AccessCode': ESIMACCESS_API_KEY,
@@ -58,6 +65,8 @@ async function loadAllPackages() {
         iccid: '',
       }),
     });
+
+    console.log('📥 Response status:', response.status, response.statusText);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
