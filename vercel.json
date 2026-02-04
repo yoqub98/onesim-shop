@@ -7,7 +7,7 @@
   ],
   "crons": [
     {
-      "path": "/api/sync/price-sync",
+      "path": "/api/price-sync",
       "schedule": "0 2 * * *"
     }
   ],

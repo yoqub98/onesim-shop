@@ -1,14 +1,13 @@
-// api/sync/price-sync.js
+// api/price-sync.js
 // Daily price sync from eSIM Access pricing history API
 import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch';
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -24,7 +23,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  // Simple auth check (you can add proper admin auth later)
+  // Simple auth check
   const authHeader = req.headers.authorization;
   if (!authHeader || authHeader !== `Bearer ${process.env.SYNC_SECRET_KEY}`) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
@@ -36,7 +35,6 @@ export default async function handler(req, res) {
   try {
     console.log(`🔄 [${logId}] Starting price sync...`);
 
-    // Create sync log entry
     const { data: syncLog, error: logError } = await supabase
       .from('price_sync_log')
       .insert({
@@ -51,8 +49,6 @@ export default async function handler(req, res) {
     }
 
     const syncLogId = syncLog?.id;
-
-    // Fetch price changes from last 7 days
     const daysToCheck = req.body?.days || 7;
     console.log(`📡 [${logId}] Fetching price changes (last ${daysToCheck} days)...`);
 
@@ -111,7 +107,6 @@ export default async function handler(req, res) {
         `📝 [${logId}] ${change.packageCode}: $${oldPriceUSD} → $${newPriceUSD} (${changePercent >= 0 ? '+' : ''}${changePercent}%)`
       );
 
-      // Check if package exists
       const { data: existingPkg } = await supabase
         .from('esim_packages')
         .select('package_code, api_price')
@@ -124,7 +119,6 @@ export default async function handler(req, res) {
         continue;
       }
 
-      // Log price change
       await supabase.from('package_price_changes').insert({
         package_code: change.packageCode,
         old_price: change.oldPrice,
@@ -137,7 +131,6 @@ export default async function handler(req, res) {
         changed_at: change.changedAt || new Date().toISOString(),
       });
 
-      // Update package price
       const { error: updateError } = await supabase
         .from('esim_packages')
         .update({
@@ -163,7 +156,6 @@ export default async function handler(req, res) {
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-    // Update sync log
     await supabase
       .from('price_sync_log')
       .update({
@@ -174,7 +166,7 @@ export default async function handler(req, res) {
         changes_summary: {
           duration_seconds: duration,
           not_found: notFound,
-          changes: changeDetails.slice(0, 50), // Store first 50
+          changes: changeDetails.slice(0, 50),
         },
       })
       .eq('id', syncLogId);
@@ -192,13 +184,12 @@ export default async function handler(req, res) {
         notFound,
         durationSeconds: duration,
       },
-      changes: changeDetails.slice(0, 10), // Return first 10
+      changes: changeDetails.slice(0, 10),
     });
 
   } catch (error) {
     console.error(`❌ [${logId}] Price sync failed:`, error);
 
-    // Update sync log as failed
     await supabase
       .from('price_sync_log')
       .update({

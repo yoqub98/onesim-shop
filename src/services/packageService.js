@@ -19,7 +19,7 @@ export const fetchPackagesByCountry = async (countryCode) => {
   console.log(`📦 [PKG_SERVICE] Fetching packages for country: ${countryCode}`);
 
   try {
-    const response = await fetch(`${API_URL}/packages/country/${countryCode}`);
+    const response = await fetch(`${API_URL}/packages-v2?type=country&country=${countryCode}`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -49,7 +49,7 @@ export const fetchPackagesByRegion = async (regionCode) => {
   console.log(`📦 [PKG_SERVICE] Fetching regional packages for: ${regionCode}`);
 
   try {
-    const response = await fetch(`${API_URL}/packages/regional/${regionCode}`);
+    const response = await fetch(`${API_URL}/packages-v2?type=regional&region=${regionCode}`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -78,7 +78,7 @@ export const fetchAllRegionalPackages = async () => {
   console.log('📦 [PKG_SERVICE] Fetching all regional packages');
 
   try {
-    const response = await fetch(`${API_URL}/packages/regional-all`);
+    const response = await fetch(`${API_URL}/packages-v2?type=regional-all`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -107,7 +107,7 @@ export const fetchGlobalPackages = async () => {
   console.log('📦 [PKG_SERVICE] Fetching global packages');
 
   try {
-    const response = await fetch(`${API_URL}/packages/global`);
+    const response = await fetch(`${API_URL}/packages-v2?type=global`);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -137,7 +137,7 @@ export const fetchPackageBySlug = async (slug) => {
   console.log(`📦 [PKG_SERVICE] Fetching package by slug: ${slug}`);
 
   try {
-    const response = await fetch(`${API_URL}/packages/slug/${slug}`);
+    const response = await fetch(`${API_URL}/packages-v2?type=slug&slug=${slug}`);
 
     if (!response.ok) {
       if (response.status === 404) {

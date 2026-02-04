@@ -45,7 +45,11 @@
       "mcp__clickup__clickup_search",
       "Bash(git pull:*)",
       "Bash(git stash:*)",
-      "Bash(echo \"# Sync Secret (for cron job authentication)\nSYNC_SECRET_KEY=generate_random_secret_key_here\")"
+      "Bash(echo \"# Sync Secret (for cron job authentication)\nSYNC_SECRET_KEY=generate_random_secret_key_here\")",
+      "Bash(node scripts/initial-load.js:*)",
+      "Bash(timeout 120 node:*)",
+      "Bash(timeout 180 node:*)",
+      "Bash(timeout 300 node:*)"
     ],
     "deny": [],
     "ask": []
