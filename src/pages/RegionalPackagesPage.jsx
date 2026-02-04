@@ -15,7 +15,7 @@ import {
 import { ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DataPlanCard from '../components/DataPlanCard';
-import { fetchRegionalPackages } from '../services/esimAccessApi.js';
+import { fetchPackagesByRegion } from '../services/packageService.js';
 import { getRegionName } from '../services/packageCacheService.js';
 import { calculateFinalPriceUSD } from '../config/pricing';
 import { getTranslation } from '../config/i18n';
@@ -95,40 +95,17 @@ const RegionalPackagesPage = () => {
         setLoading(true);
         setError(null);
 
-        const regionalData = await fetchRegionalPackages(currentLanguage);
+        const packages = await fetchPackagesByRegion(regionCode);
 
         if (!isMounted) return;
 
-        // Get packages for this specific region
-        const regionData = regionalData[regionCode];
-
-        if (!regionData || !regionData.packages || regionData.packages.length === 0) {
+        if (!packages || packages.length === 0) {
           setError(getTranslation(currentLanguage, 'country.noPlansAvailable'));
           setAllPlans([]);
           return;
         }
 
-        // Transform packages to match expected format
-        const packages = regionData.packages.map(pkg => ({
-          id: `${pkg.packageCode}_${pkg.slug}`,
-          packageCode: pkg.packageCode,
-          slug: pkg.slug,
-          country: regionName,
-          countryCode: regionCode,
-          data: pkg.volume >= 1073741824
-            ? `${Math.round(pkg.volume / 1073741824)}GB`
-            : `${Math.round(pkg.volume / 1048576)}MB`,
-          dataGB: pkg.volume / 1073741824,
-          days: pkg.duration,
-          speed: pkg.speed || '4G/5G',
-          priceUSD: pkg.price / 10000,
-          originalPrice: pkg.price,
-          description: pkg.description || pkg.name,
-          name: pkg.name,
-          operatorList: pkg.locationNetworkList || [],
-          rawPackage: pkg
-        }));
-
+        // Packages come from DB already formatted
         setAllPlans(packages);
       } catch (err) {
         console.error('Error loading regional packages:', err);

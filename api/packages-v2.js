@@ -129,7 +129,9 @@ async function handleCountryPackages(countryCode, res) {
 async function handleRegionalPackages(regionCode, res) {
   console.log(`📦 [PACKAGES-V2] Fetching regional packages for: ${regionCode}`);
 
-  const { data, error } = await supabase
+  // Query packages where location_code starts with regionCode
+  // e.g., "EU" matches "EU", "EU-42", "EU-28", etc.
+  const { data, error} = await supabase
     .from('esim_packages')
     .select(`
       package_code,
@@ -148,7 +150,7 @@ async function handleRegionalPackages(regionCode, res) {
       is_featured,
       popularity_score
     `)
-    .eq('location_code', regionCode.toUpperCase())
+    .like('location_code', `${regionCode.toUpperCase()}%`)
     .eq('location_type', 'regional')
     .eq('is_active', true)
     .eq('is_hidden', false)
@@ -196,7 +198,11 @@ async function handleAllRegionalPackages(res) {
 
   const regionGroups = {};
   for (const pkg of data) {
-    const regionCode = pkg.location_code;
+    // Normalize region code: "EU-42" -> "EU", "SA-19" -> "SA"
+    let regionCode = pkg.location_code;
+    if (regionCode && regionCode.includes('-')) {
+      regionCode = regionCode.split('-')[0];
+    }
     if (!regionGroups[regionCode]) {
       regionGroups[regionCode] = {
         packageCount: 0,
