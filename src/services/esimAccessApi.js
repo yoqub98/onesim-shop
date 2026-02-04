@@ -121,7 +121,8 @@ export const fetchPackageBySlug = async (slug, countryCode) => {
 };
 
 // ============================================
-// FETCH: Package by ID (packageCode)
+// FETCH: Package by ID (packageCode or composite ID)
+// Handles both simple packageCode and composite "packageCode_slug" format
 // ============================================
 export const fetchPackageById = async (packageId, lang = DEFAULT_LANGUAGE) => {
   // Check cache first
@@ -130,7 +131,35 @@ export const fetchPackageById = async (packageId, lang = DEFAULT_LANGUAGE) => {
 
   console.log(`🎯 Fetching package by ID: ${packageId}`);
 
+  // Check if this is a composite ID (packageCode_slug format)
+  // Example: "CKH268_TR_10_30" should be split into packageCode="CKH268" and slug="TR_10_30"
+  let packageCode = packageId;
+  let slug = '';
+
+  if (packageId.includes('_')) {
+    console.log(`🔍 Detected composite ID format: ${packageId}`);
+    // Find the first underscore to split packageCode and slug
+    const firstUnderscore = packageId.indexOf('_');
+    packageCode = packageId.substring(0, firstUnderscore);
+    slug = packageId.substring(firstUnderscore + 1);
+    console.log(`   → packageCode: ${packageCode}, slug: ${slug}`);
+  }
+
   try {
+    // If we have a slug, try fetching by slug first (more specific)
+    if (slug) {
+      console.log(`🎯 Trying to fetch by slug: ${slug}`);
+      const pkgBySlug = await fetchPackageBySlug(slug, '');
+      if (pkgBySlug) {
+        // Cache using the composite ID
+        setCachedPackage(packageId, pkgBySlug);
+        console.log(`✅ Found package with slug ${slug}`);
+        return pkgBySlug;
+      }
+      console.log(`⚠️ Package not found by slug, trying packageCode...`);
+    }
+
+    // Fallback: Try fetching by packageCode
     const response = await fetch(`${API_URL}/packages`, {
       method: 'POST',
       headers: {
@@ -140,7 +169,7 @@ export const fetchPackageById = async (packageId, lang = DEFAULT_LANGUAGE) => {
         locationCode: '',
         type: '',
         slug: '',
-        packageCode: packageId,
+        packageCode: packageCode,
         iccid: '',
       }),
     });
@@ -154,13 +183,13 @@ export const fetchPackageById = async (packageId, lang = DEFAULT_LANGUAGE) => {
     if (data.success && data.obj && data.obj.packageList && data.obj.packageList.length > 0) {
       const pkg = data.obj.packageList[0];
 
-      // Cache it
+      // Cache it using the original packageId
       setCachedPackage(packageId, pkg);
 
-      console.log(`✅ Found package with ID ${packageId}`);
+      console.log(`✅ Found package with packageCode ${packageCode}`);
       return pkg;
     } else {
-      console.warn(`⚠️ Package with ID ${packageId} not found`);
+      console.warn(`⚠️ Package with ID ${packageId} (packageCode: ${packageCode}) not found`);
       return null;
     }
   } catch (error) {
