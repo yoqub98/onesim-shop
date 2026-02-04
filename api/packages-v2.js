@@ -263,15 +263,22 @@ async function handleGlobalPackages(res) {
   if (error) throw error;
 
   const packages = data.map(pkg => ({
+    id: pkg.slug,
     packageCode: pkg.package_code,
     slug: pkg.slug,
     name: pkg.name,
     description: pkg.description,
-    price: pkg.final_price_usd * 10000,
-    volume: pkg.data_volume,
-    duration: pkg.duration,
+    country: 'Global',
+    countryCode: 'GLOBAL',
+    data: pkg.data_gb >= 1
+      ? `${pkg.data_gb.toFixed(0)}GB`
+      : `${Math.round(pkg.data_volume / 1048576)}MB`,
+    dataGB: parseFloat(pkg.data_gb),
+    days: pkg.duration,
     speed: pkg.speed || '4G/5G',
-    locationNetworkList: pkg.location_network_list || [],
+    originalPriceUSD: parseFloat(pkg.api_price_usd),
+    priceUSD: parseFloat(pkg.final_price_usd),
+    operatorList: pkg.location_network_list || [],
     coveredCountries: pkg.covered_countries || [],
     isFeatured: pkg.is_featured,
   }));
