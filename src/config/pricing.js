@@ -32,6 +32,7 @@ export const HANDPICKED_PLAN_SLUGS = {
 export const POPULAR_DESTINATIONS = [
   { code: 'TR' }, // Turkey
   { code: 'AE' }, // UAE
+  { code: 'SA' }, // Saudi Arabia
   { code: 'TH' }, // Thailand
   { code: 'IT' }, // Italy
   { code: 'FR' }, // France
