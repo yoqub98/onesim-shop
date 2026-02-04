@@ -21,7 +21,6 @@ import DataPlanCard from '../components/DataPlanCard';
 import DataPlanRow from '../components/DataPlanRow';
 import FeatureInfoSidebar from '../components/FeatureInfoSidebar';
 import { fetchPackagesByCountry } from '../services/packageService';
-import { calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
