@@ -189,6 +189,10 @@ const PackagePage = () => {
     setOrderError(null);
 
     try {
+      // IMPORTANT: Send ORIGINAL price to backend (without margin)
+      // The margin is only for display/revenue tracking, not for eSIM Access API
+      const originalPriceUSD = plan.priceUSD || 0;
+
       const orderData = {
         userId: user.id,
         userEmail: user.email,
@@ -198,8 +202,14 @@ const PackagePage = () => {
         dataAmount: plan.data,
         validityDays: plan.days,
         priceUzs: priceUZS,
-        priceUsd: priceUSDWithMargin,
+        priceUsd: originalPriceUSD, // Use ORIGINAL price, not priceUSDWithMargin
       };
+
+      console.log('📦 [ORDER] Sending order with ORIGINAL price:', {
+        originalPriceUSD,
+        priceUSDWithMargin,
+        packageCode: plan.packageCode
+      });
 
       await createOrder(orderData);
 
@@ -625,7 +635,7 @@ const PackagePage = () => {
           backdropFilter="blur(8px)"
           border="1px solid rgba(255, 255, 255, 0.1)"
           shadow="xl"
-          maxW="300px"
+          maxW="320px"
         >
           <VStack align="flex-start" spacing={1}>
             <Text fontWeight="700" color="orange.300" fontSize="sm" mb={1}>
@@ -642,11 +652,23 @@ const PackagePage = () => {
             <HStack spacing={2}>
               <Text color="gray.400" fontWeight="600">Original USD:</Text>
               <Text color="green.300" fontWeight="700">
-                ${(plan.priceUSD || 0).toFixed(2)}
+                ${typeof plan.priceUSD === 'number'
+                  ? plan.priceUSD.toFixed(2)
+                  : typeof plan.priceUSD === 'string'
+                  ? parseFloat(plan.priceUSD).toFixed(2)
+                  : plan.originalPrice
+                  ? (plan.originalPrice / 10000).toFixed(2)
+                  : '0.00'}
+              </Text>
+            </HStack>
+            <HStack spacing={2}>
+              <Text color="gray.400" fontWeight="600">With Margin:</Text>
+              <Text color="yellow.300" fontWeight="700">
+                ${priceUSDWithMargin.toFixed(2)}
               </Text>
             </HStack>
             <Text color="gray.500" fontSize="10px" mt={1}>
-              * Price shown is without margin
+              * Original = from eSIM Access API
             </Text>
           </VStack>
         </Box>
