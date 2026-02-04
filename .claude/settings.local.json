@@ -44,7 +44,8 @@
       "mcp__clickup__clickup_get_workspace_members",
       "mcp__clickup__clickup_search",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(echo \"# Sync Secret (for cron job authentication)\nSYNC_SECRET_KEY=generate_random_secret_key_here\")"
     ],
     "deny": [],
     "ask": []

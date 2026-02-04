@@ -20,7 +20,7 @@ import CountryFlag from '../components/CountryFlag';
 import DataPlanCard from '../components/DataPlanCard';
 import DataPlanRow from '../components/DataPlanRow';
 import FeatureInfoSidebar from '../components/FeatureInfoSidebar';
-import { fetchAllPackagesForCountry } from '../services/esimAccessApi';
+import { fetchPackagesByCountry } from '../services/packageService';
 import { calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -311,7 +311,7 @@ const CountryPage = () => {
         setLoading(true);
         setError(null);
 
-        const packages = await fetchAllPackagesForCountry(countryCode, currentLanguage);
+        const packages = await fetchPackagesByCountry(countryCode);
         
         if (!isMounted) return;
         
@@ -321,14 +321,9 @@ const CountryPage = () => {
           return;
         }
 
-        const transformedPackages = packages.map(pkg => ({
-          ...pkg,
-          originalPriceUSD: pkg.priceUSD, // Keep ORIGINAL price without margin
-          priceUSD: calculateFinalPriceUSD(pkg.priceUSD), // USD price with margin for DISPLAY
-          price: formatPrice(calculateFinalPrice(pkg.priceUSD)),
-        }));
-
-        setAllPlans(transformedPackages);
+        // Packages now come from DB with prices already calculated
+        // originalPriceUSD = API price, priceUSD = final price with margin
+        setAllPlans(packages);
         
       } catch (err) {
         if (!isMounted) return;

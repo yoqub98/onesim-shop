@@ -27,7 +27,7 @@ import { POPULAR_DESTINATIONS } from '../config/pricing';
 import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fetchRegionalPackages, fetchGlobalPackages } from '../services/esimAccessApi.js';
+import { fetchAllRegionalPackages, fetchGlobalPackages } from '../services/packageService.js';
 import { getRegionName } from '../services/packageCacheService.js';
 
 // Custom Arrow Circle SVG Component
@@ -546,7 +546,7 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
   useEffect(() => {
     if (activeTab === 1 && Object.keys(regionalPackages).length === 0) {
       setIsLoadingRegional(true);
-      fetchRegionalPackages(currentLanguage)
+      fetchAllRegionalPackages()
         .then(data => {
           console.log('✅ Regional packages loaded:', data);
           setRegionalPackages(data);
@@ -558,13 +558,13 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
           setIsLoadingRegional(false);
         });
     }
-  }, [activeTab, currentLanguage, regionalPackages]);
+  }, [activeTab, regionalPackages]);
 
   // Fetch global packages when Global tab is selected
   useEffect(() => {
     if (activeTab === 2 && globalPackages.length === 0) {
       setIsLoadingGlobal(true);
-      fetchGlobalPackages(currentLanguage)
+      fetchGlobalPackages()
         .then(data => {
           console.log('✅ Global packages loaded:', data);
           setGlobalPackages(data);
@@ -576,7 +576,7 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
           setIsLoadingGlobal(false);
         });
     }
-  }, [activeTab, currentLanguage, globalPackages]);
+  }, [activeTab, globalPackages]);
 
   // Filter destinations based on search query - first letter must match
   const filteredDestinations = POPULAR_DESTINATIONS.filter(destination => {
