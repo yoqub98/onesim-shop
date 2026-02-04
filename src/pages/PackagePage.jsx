@@ -609,6 +609,49 @@ const PackagePage = () => {
         </Grid>
       </Container>
 
+      {/* Debug Info Overlay - Bottom Left */}
+      {plan && (
+        <Box
+          position="fixed"
+          bottom={4}
+          left={4}
+          bg="rgba(0, 0, 0, 0.85)"
+          color="white"
+          p={3}
+          borderRadius="lg"
+          fontSize="xs"
+          fontFamily="monospace"
+          zIndex={9999}
+          backdropFilter="blur(8px)"
+          border="1px solid rgba(255, 255, 255, 0.1)"
+          shadow="xl"
+          maxW="300px"
+        >
+          <VStack align="flex-start" spacing={1}>
+            <Text fontWeight="700" color="orange.300" fontSize="sm" mb={1}>
+              Package Debug Info
+            </Text>
+            <HStack spacing={2}>
+              <Text color="gray.400" fontWeight="600">Slug:</Text>
+              <Text color="white">{plan.slug || 'N/A'}</Text>
+            </HStack>
+            <HStack spacing={2}>
+              <Text color="gray.400" fontWeight="600">Code:</Text>
+              <Text color="white">{plan.packageCode || 'N/A'}</Text>
+            </HStack>
+            <HStack spacing={2}>
+              <Text color="gray.400" fontWeight="600">Original USD:</Text>
+              <Text color="green.300" fontWeight="700">
+                ${(plan.priceUSD || 0).toFixed(2)}
+              </Text>
+            </HStack>
+            <Text color="gray.500" fontSize="10px" mt={1}>
+              * Price shown is without margin
+            </Text>
+          </VStack>
+        </Box>
+      )}
+
       {/* Login Required Modal */}
       <Modal isOpen={isLoginModalOpen} onClose={onLoginModalClose} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
