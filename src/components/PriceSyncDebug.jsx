@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, HStack, VStack, Text, IconButton, Collapse } from '@chakra-ui/react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getTranslation } from '../config/i18n';
+import { getTranslation, TRANSLATIONS } from '../config/i18n';
 
 /**
  * PriceSyncDebug - Shows price sync status and last update info
@@ -63,21 +63,32 @@ const PriceSyncDebug = () => {
     }
   };
 
-  const formatTimeAgo = () => {
-    if (!syncData) return t('priceSync.noData');
+  const formatDateTime = (dateString) => {
+    if (!dateString) return t('priceSync.noData');
 
-    const { hoursAgo, minutesAgo } = syncData;
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthNames = TRANSLATIONS[currentLanguage]?.priceSync?.months || TRANSLATIONS['ru'].priceSync.months;
+    const month = monthNames[date.getMonth()];
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
 
-    if (hoursAgo >= 24) {
-      const daysAgo = Math.floor(hoursAgo / 24);
-      return `${daysAgo} ${currentLanguage === 'uz' ? 'kun' : 'дн.'} ${t('priceSync.hoursAgo')}`;
-    } else if (hoursAgo > 0) {
-      return `${hoursAgo} ${t('priceSync.hoursAgo')}`;
-    } else if (minutesAgo > 0) {
-      return `${minutesAgo} ${t('priceSync.minutesAgo')}`;
-    } else {
-      return t('priceSync.minutesAgo').replace(/\d+\s*/, '< 1 ');
+    return `${day} ${month}, ${hours}:${minutes}`;
+  };
+
+  const getNextScheduledSync = () => {
+    const now = new Date();
+    const nextSync = new Date();
+
+    // Next sync is at 02:00 UTC daily
+    nextSync.setUTCHours(2, 0, 0, 0);
+
+    // If we've already passed 02:00 UTC today, schedule for tomorrow
+    if (now.getUTCHours() >= 2) {
+      nextSync.setUTCDate(nextSync.getUTCDate() + 1);
     }
+
+    return formatDateTime(nextSync.toISOString());
   };
 
   return (
@@ -146,7 +157,20 @@ const PriceSyncDebug = () => {
                   {t('priceSync.lastUpdate')}
                 </Text>
                 <Text fontSize="sm" fontWeight="bold" color="gray.900">
-                  {formatTimeAgo()}
+                  {formatDateTime(syncData.lastSyncAt)}
+                </Text>
+              </Box>
+
+              {/* Next Scheduled Update */}
+              <Box>
+                <Text fontSize="xs" color="gray.600" mb={1}>
+                  {t('priceSync.nextUpdate')}
+                </Text>
+                <Text fontSize="sm" fontWeight="bold" color="#FE4F18">
+                  {getNextScheduledSync()}
+                </Text>
+                <Text fontSize="xs" color="gray.500" mt={0.5}>
+                  {t('priceSync.daily')}
                 </Text>
               </Box>
 
