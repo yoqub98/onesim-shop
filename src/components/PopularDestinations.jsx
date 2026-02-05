@@ -20,7 +20,7 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { GlobeAsiaAustraliaIcon } from '@heroicons/react/24/solid';
-import { MagnifyingGlassIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
@@ -690,6 +690,11 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
+  // Carousel state for Countries tab
+  const countriesScrollRef = React.useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
   // Set initial tab based on prop or default to 0
   const getInitialTabIndex = () => {
     if (initialTab && TAB_MAP[initialTab] !== undefined) {
@@ -769,6 +774,40 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
     const countryName = getCountryName(destination.code, currentLanguage).toLowerCase();
     return countryName.startsWith(searchQuery.toLowerCase());
   });
+
+  // Check scroll position and update arrow states
+  const checkScrollPosition = () => {
+    if (!countriesScrollRef.current) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = countriesScrollRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  // Handle scroll left
+  const handleScrollLeft = () => {
+    if (!countriesScrollRef.current) return;
+    const scrollAmount = 900; // Approximately 2-3 cards (300px each)
+    countriesScrollRef.current.scrollBy({
+      left: -scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  // Handle scroll right
+  const handleScrollRight = () => {
+    if (!countriesScrollRef.current) return;
+    const scrollAmount = 900; // Approximately 2-3 cards (300px each)
+    countriesScrollRef.current.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  // Update scroll position when filtered destinations change
+  useEffect(() => {
+    checkScrollPosition();
+  }, [filteredDestinations]);
 
   return (
     <Box as="section" ref={sectionRef} py={24} bg="#F5F6F8" position="relative">
@@ -911,84 +950,162 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
           {/* Countries Tab Content */}
           {activeTab === 0 && (
             <>
-              {/* Animated Search */}
-              <Box width="100%" display="flex" justifyContent="flex-start">
-                {!isSearchExpanded ? (
+              {/* Top Section: Arrow Buttons and Search */}
+              <Box width="100%" display="flex" justifyContent="space-between" alignItems="center">
+                {/* Arrow Navigation Buttons - Left Side */}
+                <HStack spacing={2}>
                   <Button
-                    leftIcon={<MagnifyingGlassIcon className="w-[18px] h-[18px]" />}
-                    onClick={() => setIsSearchExpanded(true)}
-                    variant="outline"
-                    borderColor="#FE4F18"
-                    color="#FE4F18"
-                    borderWidth="2px"
-                    fontWeight="700"
+                    onClick={handleScrollLeft}
+                    isDisabled={!canScrollLeft}
+                    variant="ghost"
                     size="md"
-                    _hover={{ bg: '#FFF4F0' }}
-                    className="animate__animated animate__fadeIn"
+                    borderRadius="12px"
+                    w="44px"
+                    h="44px"
+                    minW="44px"
+                    p={0}
+                    bg="white"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    color="gray.700"
+                    _hover={{
+                      bg: 'gray.50',
+                      borderColor: 'gray.300',
+                    }}
+                    _disabled={{
+                      opacity: 0.4,
+                      cursor: 'not-allowed',
+                      _hover: {
+                        bg: 'white',
+                        borderColor: 'gray.200',
+                      }
+                    }}
+                    transition="all 0.2s"
                   >
-                    {t('destinations.search')}
+                    <ChevronLeftIcon style={{ width: '20px', height: '20px' }} />
                   </Button>
-                ) : (
-                  <InputGroup
-                    maxW="400px"
-                    className="animate__animated animate__fadeIn animate__faster"
+                  <Button
+                    onClick={handleScrollRight}
+                    isDisabled={!canScrollRight}
+                    variant="ghost"
+                    size="md"
+                    borderRadius="12px"
+                    w="44px"
+                    h="44px"
+                    minW="44px"
+                    p={0}
+                    bg="white"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    color="gray.700"
+                    _hover={{
+                      bg: 'gray.50',
+                      borderColor: 'gray.300',
+                    }}
+                    _disabled={{
+                      opacity: 0.4,
+                      cursor: 'not-allowed',
+                      _hover: {
+                        bg: 'white',
+                        borderColor: 'gray.200',
+                      }
+                    }}
+                    transition="all 0.2s"
                   >
-                    <InputLeftElement pointerEvents="none">
-                      <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#FE4F18]" />
-                    </InputLeftElement>
-                    <Input
-                      placeholder={t('destinations.searchPlaceholder')}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onBlur={() => {
-                        if (!searchQuery) {
-                          setIsSearchExpanded(false);
-                        }
-                      }}
-                      autoFocus
+                    <ChevronRightIcon style={{ width: '20px', height: '20px' }} />
+                  </Button>
+                </HStack>
+
+                {/* Search - Right Side */}
+                <Box>
+                  {!isSearchExpanded ? (
+                    <Button
+                      leftIcon={<MagnifyingGlassIcon className="w-[18px] h-[18px]" />}
+                      onClick={() => setIsSearchExpanded(true)}
+                      variant="outline"
+                      borderColor="#FE4F18"
+                      color="#FE4F18"
                       borderWidth="2px"
-                      borderColor="#E8E9EE"
-                      _focus={{
-                        borderColor: '#FE4F18',
-                        boxShadow: '0 0 0 1px #FE4F18',
-                      }}
-                      fontWeight="600"
+                      fontWeight="700"
                       size="md"
-                    />
-                  </InputGroup>
-                )}
+                      _hover={{ bg: '#FFF4F0' }}
+                      className="animate__animated animate__fadeIn"
+                    >
+                      {t('destinations.search')}
+                    </Button>
+                  ) : (
+                    <InputGroup
+                      maxW="400px"
+                      className="animate__animated animate__fadeIn animate__faster"
+                    >
+                      <InputLeftElement pointerEvents="none">
+                        <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#FE4F18]" />
+                      </InputLeftElement>
+                      <Input
+                        placeholder={t('destinations.searchPlaceholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onBlur={() => {
+                          if (!searchQuery) {
+                            setIsSearchExpanded(false);
+                          }
+                        }}
+                        autoFocus
+                        borderWidth="2px"
+                        borderColor="#E8E9EE"
+                        _focus={{
+                          borderColor: '#FE4F18',
+                          boxShadow: '0 0 0 1px #FE4F18',
+                        }}
+                        fontWeight="600"
+                        size="md"
+                      />
+                    </InputGroup>
+                  )}
+                </Box>
               </Box>
 
-              {/* Countries Grid */}
-              <Grid
-                templateColumns={{
-                  base: '1fr',
-                  md: 'repeat(2, 1fr)',
-                  lg: 'repeat(4, 1fr)'
-                }}
-              rowGap={8}        // ← Vertical gap between rows
-  columnGap={0.2} 
-                w="90%"
+              {/* Horizontal Scrolling Carousel */}
+              <Box
+                ref={countriesScrollRef}
+                width="100%"
+                overflowX="auto"
+                overflowY="hidden"
+                onScroll={checkScrollPosition}
                 className="animate__animated animate__fadeIn"
                 style={{ animationDelay: '200ms' }}
+                css={{
+                  '&::-webkit-scrollbar': {
+                    display: 'none',
+                  },
+                  '-ms-overflow-style': 'none',
+                  'scrollbarWidth': 'none',
+                }}
               >
                 {filteredDestinations.length > 0 ? (
-                  filteredDestinations.map((destination, index) => (
-                    <DestinationCard
-                      key={destination.code}
-                      countryCode={destination.code}
-                      delay={index * 100}
-                      lang={currentLanguage}
-                    />
-                  ))
+                  <HStack
+                    spacing={6}
+                    align="flex-start"
+                    pb={4}
+                  >
+                    {filteredDestinations.map((destination, index) => (
+                      <Box key={destination.code} flexShrink={0}>
+                        <DestinationCard
+                          countryCode={destination.code}
+                          delay={index * 100}
+                          lang={currentLanguage}
+                        />
+                      </Box>
+                    ))}
+                  </HStack>
                 ) : (
-                  <Box gridColumn="1 / -1" textAlign="center" py={12}>
+                  <Box textAlign="center" py={12}>
                     <Text fontSize="xl" color="gray.500" fontWeight="600">
                       {t('destinations.notFound')}
                     </Text>
                   </Box>
                 )}
-              </Grid>
+              </Box>
             </>
           )}
 
