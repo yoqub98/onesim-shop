@@ -63,14 +63,40 @@ const getBackgroundImageUrl = (countryCode) => {
   return `https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/Country%20Cards/${slug}.jpg`;
 };
 
-// Country Destination Card Component - NEW DESIGN
+// Country name overrides for long names
+const COUNTRY_NAME_OVERRIDES = {
+  ru: {
+    SA: 'С. Аравия',
+    AE: 'ОАЭ',
+    US: 'США',
+  },
+  uz: {
+    SA: 'S. Arabiya',
+    AE: 'BAA',
+    US: 'AQSh',
+  },
+  en: {
+    SA: 'Saudi Arabia',
+    AE: 'UAE',
+    US: 'USA',
+  }
+};
+
+const getDisplayCountryName = (countryCode, lang) => {
+  if (COUNTRY_NAME_OVERRIDES[lang]?.[countryCode]) {
+    return COUNTRY_NAME_OVERRIDES[lang][countryCode];
+  }
+  return getCountryName(countryCode, lang);
+};
+
+// Country Destination Card Component - NEW DESIGN (SCALED & FIXED)
 const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [packageCount, setPackageCount] = useState(null);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
-  const countryName = getCountryName(countryCode, lang);
+  const countryName = getDisplayCountryName(countryCode, lang);
   const backgroundImageUrl = getBackgroundImageUrl(countryCode);
 
   // Fetch package count
@@ -97,9 +123,9 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   return (
     <Box
       ref={cardRef}
-      w="438px"
-      h="570px"
-      borderRadius="48px"
+      w="360px"
+      h="470px"
+      borderRadius="39px"
       overflow="hidden"
       position="relative"
       cursor="pointer"
@@ -139,39 +165,55 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
         bottom="0"
         left="0"
         right="0"
-        h="420px"
+        h="345px"
         bgGradient="linear(to-b, rgba(55,55,55,0) 0%, rgba(4,4,4,0.47) 64%, rgba(0,0,0,0.5) 96%)"
-        borderRadius="33px"
+        borderRadius="27px"
         opacity={isHovered ? 1 : 0}
         transition="opacity 0.3s ease-out"
         zIndex={1}
         pointerEvents="none"
       />
 
-      {/* 3. Bottom Bar (flag + name + arrow) */}
+      {/* 3. Orange Overlay Gradient (appears on hover) - NEW */}
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        bgGradient="linear(to-b, rgba(157,157,157,0) 0%, #DE5226 100%)"
+        borderRadius="39px"
+        opacity={isHovered ? 1 : 0}
+        transition="opacity 0.4s ease-out"
+        zIndex={1.5}
+        pointerEvents="none"
+      />
+
+      {/* 4. Bottom Bar (flag + name + arrow) */}
       <HStack
         position="absolute"
-        bottom="26px"
-        left="26px"
-        w="385px"
-        h="90px"
+        bottom="21px"
+        left="21px"
+        w="316px"
+        h="74px"
         bg="rgba(255, 255, 255, 0.07)"
-        backdropFilter="blur(66.65px)"
-        css={{ WebkitBackdropFilter: 'blur(66.65px)' }}
-        borderRadius="47px"
-        border={isHovered ? '1px solid rgba(255,255,255,0.15)' : '3px solid rgba(255,255,255,0.24)'}
-        boxShadow={isHovered ? 'none' : '0px 4px 23.6px 0px rgba(255, 161, 128, 0.4)'}
+        backdropFilter="blur(40px)"
+        css={{ WebkitBackdropFilter: 'blur(40px)' }}
+        borderRadius="39px"
+        border={isHovered ? '3px solid rgba(255,255,255,0.24)' : '1px solid rgba(255,255,255,0.15)'}
+        boxShadow={isHovered ? '0 4px 23.6px 0 rgba(255,161,128,0.40)' : 'none'}
         transition="all 0.3s ease-out"
         justify="space-between"
         align="center"
-        px="22px"
-        py="7px"
+        pl="18px"
+        pr="10px"
+        py="6px"
         zIndex={2}
         pointerEvents="none"
       >
         {/* Left: flag + name */}
-        <HStack spacing="17px" align="center">
-          <Box w="51.5px" h="34.333px" borderRadius="8px" overflow="hidden">
+        <HStack spacing="14px" align="center">
+          <Box w="42px" h="28px" borderRadius="7px" overflow="hidden">
             <CountryFlag
               code={countryCode}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -180,11 +222,14 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
           <Text
             fontFamily="'Manrope', sans-serif"
             fontWeight="700"
-            fontSize="36px"
+            fontSize="26px"
             color="white"
-            letterSpacing="-0.36px"
-            lineHeight="45.427px"
+            letterSpacing="-0.26px"
+            lineHeight="normal"
             whiteSpace="nowrap"
+            maxW="200px"
+            overflow="hidden"
+            textOverflow="ellipsis"
           >
             {countryName}
           </Text>
@@ -192,31 +237,31 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
 
         {/* Right: arrow icon (slides in on hover) */}
         <Box
-          w="67.281px"
-          h="67.281px"
+          w="55px"
+          h="55px"
           borderRadius="full"
           bg="rgba(255, 255, 255, 0.15)"
           border="1px solid rgba(255, 255, 255, 0.2)"
           display="flex"
           alignItems="center"
           justifyContent="center"
-          transform={isHovered ? 'translateX(0)' : 'translateX(-80px)'}
+          transform={isHovered ? 'translateX(0)' : 'translateX(-65px)'}
           opacity={isHovered ? 1 : 0}
           transition="transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, opacity 0.3s ease-out"
         >
-          <ArrowRightIcon style={{ width: '24px', height: '24px', color: 'white' }} />
+          <ArrowRightIcon style={{ width: '20px', height: '20px', color: 'white' }} />
         </Box>
       </HStack>
 
-      {/* 4. Top-Right Badge (package count, appears on hover) */}
+      {/* 5. Top-Right Badge (package count, appears on hover) */}
       {packageCount !== null && (
         <Box
           position="absolute"
-          top="27px"
-          right="26px"
-          w="149px"
-          h="50px"
-          borderRadius="54px"
+          top="22px"
+          right="21px"
+          w="122px"
+          h="41px"
+          borderRadius="44px"
           bg="rgba(0, 0, 0, 0.14)"
           backdropFilter="blur(10px)"
           css={{ WebkitBackdropFilter: 'blur(10px)' }}
@@ -232,10 +277,10 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
           <Text
             fontFamily="'Manrope', sans-serif"
             fontWeight="400"
-            fontSize="20px"
+            fontSize="16px"
             color="white"
-            letterSpacing="-0.2px"
-            lineHeight="45.427px"
+            letterSpacing="-0.16px"
+            lineHeight="normal"
           >
             {packageCount}+ {t('destinations.plans')}
           </Text>
