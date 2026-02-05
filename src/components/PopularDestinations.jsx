@@ -99,6 +99,51 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   const countryName = getDisplayCountryName(countryCode, lang);
   const backgroundImageUrl = getBackgroundImageUrl(countryCode);
 
+  // ============================================
+  // 🎛️ CARD SIZE CONTROL - Adjust this to scale entire card
+  // Decreasing these values will proportionally scale ALL elements
+  // ============================================
+  const CARD_WIDTH = 360;   // Default: 360px (was 438px originally, scaled down 18%)
+  const CARD_HEIGHT = 470;  // Default: 470px (was 570px originally, scaled down 18%)
+  const SCALE_FACTOR = CARD_WIDTH / 360; // All elements scale based on this ratio
+
+  // Calculate scaled values based on SCALE_FACTOR
+  const scaled = {
+    cardRadius: Math.round(39 * SCALE_FACTOR),
+    bottomBarWidth: Math.round(316 * SCALE_FACTOR),
+    bottomBarHeight: Math.round(74 * SCALE_FACTOR),
+    bottomBarRadius: Math.round(39 * SCALE_FACTOR),
+    bottomBarPosition: Math.round(21 * SCALE_FACTOR),
+    flagWidth: Math.round(42 * SCALE_FACTOR),
+    flagHeight: Math.round(28 * SCALE_FACTOR),
+    flagRadius: Math.round(7 * SCALE_FACTOR),
+    countryNameSize: Math.round(26 * SCALE_FACTOR),
+    arrowCircleSize: Math.round(55 * SCALE_FACTOR),
+    arrowIconSize: Math.round(20 * SCALE_FACTOR),
+    badgeWidth: Math.round(122 * SCALE_FACTOR),
+    badgeHeight: Math.round(41 * SCALE_FACTOR),
+    badgeRadius: Math.round(44 * SCALE_FACTOR),
+    badgeTop: Math.round(22 * SCALE_FACTOR),
+    badgeRight: Math.round(21 * SCALE_FACTOR),
+    badgeTextSize: Math.round(16 * SCALE_FACTOR),
+    overlayHeight: Math.round(345 * SCALE_FACTOR),
+    overlayRadius: Math.round(27 * SCALE_FACTOR),
+  };
+
+  // ============================================
+  // 🎨 OVERLAY GRADIENT CONTROLS
+  // ============================================
+  const DARK_OVERLAY_OPACITY = 1;      // Dark gradient opacity on hover (0-1). Default: 1
+  const DARK_OVERLAY_HEIGHT_PERCENT = 73; // Height as % of card (0-100). Default: 73% (345px/470px)
+
+  const ORANGE_OVERLAY_OPACITY = 1;    // Orange gradient opacity on hover (0-1). Default: 1
+
+  // ============================================
+  // 🌫️ BOTTOM BAR BLUR & OPACITY CONTROLS
+  // ============================================
+  const BOTTOM_BAR_BLUR = 40;              // Blur strength in px. Default: 40px (was 66.65px)
+  const BOTTOM_BAR_BG_OPACITY = 0.07;      // Background opacity (0-1). Default: 0.07
+
   // Fetch package count
   useEffect(() => {
     const fetchPackageCount = async () => {
@@ -123,9 +168,9 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   return (
     <Box
       ref={cardRef}
-      w="360px"
-      h="470px"
-      borderRadius="39px"
+      w={`${CARD_WIDTH}px`}
+      h={`${CARD_HEIGHT}px`}
+      borderRadius={`${scaled.cardRadius}px`}
       overflow="hidden"
       position="relative"
       cursor="pointer"
@@ -160,21 +205,23 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
       </Box>
 
       {/* 2. Dark Overlay (appears on hover) */}
+      {/* 🎨 DARK OVERLAY - Adjust DARK_OVERLAY_OPACITY and DARK_OVERLAY_HEIGHT_PERCENT above */}
       <Box
         position="absolute"
         bottom="0"
         left="0"
         right="0"
-        h="345px"
+        h={`${DARK_OVERLAY_HEIGHT_PERCENT}%`}  // ← HEIGHT CONTROL
         bgGradient="linear(to-b, rgba(55,55,55,0) 0%, rgba(4,4,4,0.47) 64%, rgba(0,0,0,0.5) 96%)"
-        borderRadius="27px"
-        opacity={isHovered ? 1 : 0}
+        borderRadius={`${scaled.overlayRadius}px`}
+        opacity={isHovered ? DARK_OVERLAY_OPACITY : 0}  // ← OPACITY CONTROL
         transition="opacity 0.3s ease-out"
         zIndex={1}
         pointerEvents="none"
       />
 
       {/* 3. Orange Overlay Gradient (appears on hover) - NEW */}
+      {/* 🎨 ORANGE OVERLAY - Adjust ORANGE_OVERLAY_OPACITY above */}
       <Box
         position="absolute"
         top="0"
@@ -182,38 +229,39 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
         right="0"
         bottom="0"
         bgGradient="linear(to-b, rgba(157,157,157,0) 0%, #DE5226 100%)"
-        borderRadius="39px"
-        opacity={isHovered ? 1 : 0}
+        borderRadius={`${scaled.cardRadius}px`}
+        opacity={isHovered ? ORANGE_OVERLAY_OPACITY : 0}  // ← OPACITY CONTROL
         transition="opacity 0.4s ease-out"
         zIndex={1.5}
         pointerEvents="none"
       />
 
       {/* 4. Bottom Bar (flag + name + arrow) */}
+      {/* 🌫️ BOTTOM BAR BLUR & OPACITY - Adjust BOTTOM_BAR_BLUR and BOTTOM_BAR_BG_OPACITY above */}
       <HStack
         position="absolute"
-        bottom="21px"
-        left="21px"
-        w="316px"
-        h="74px"
-        bg="rgba(255, 255, 255, 0.07)"
-        backdropFilter="blur(40px)"
-        css={{ WebkitBackdropFilter: 'blur(40px)' }}
-        borderRadius="39px"
+        bottom={`${scaled.bottomBarPosition}px`}
+        left={`${scaled.bottomBarPosition}px`}
+        w={`${scaled.bottomBarWidth}px`}
+        h={`${scaled.bottomBarHeight}px`}
+        bg={`rgba(255, 255, 255, ${BOTTOM_BAR_BG_OPACITY})`}  // ← OPACITY CONTROL
+        backdropFilter={`blur(${BOTTOM_BAR_BLUR}px)`}  // ← BLUR CONTROL
+        css={{ WebkitBackdropFilter: `blur(${BOTTOM_BAR_BLUR}px)` }}  // ← BLUR CONTROL (Safari)
+        borderRadius={`${scaled.bottomBarRadius}px`}
         border={isHovered ? '3px solid rgba(255,255,255,0.24)' : '1px solid rgba(255,255,255,0.15)'}
         boxShadow={isHovered ? '0 4px 23.6px 0 rgba(255,161,128,0.40)' : 'none'}
         transition="all 0.3s ease-out"
         justify="space-between"
         align="center"
-        pl="18px"
-        pr="10px"
-        py="6px"
+        pl={`${Math.round(18 * SCALE_FACTOR)}px`}
+        pr={`${Math.round(10 * SCALE_FACTOR)}px`}
+        py={`${Math.round(6 * SCALE_FACTOR)}px`}
         zIndex={2}
         pointerEvents="none"
       >
         {/* Left: flag + name */}
-        <HStack spacing="14px" align="center">
-          <Box w="42px" h="28px" borderRadius="7px" overflow="hidden">
+        <HStack spacing={`${Math.round(14 * SCALE_FACTOR)}px`} align="center">
+          <Box w={`${scaled.flagWidth}px`} h={`${scaled.flagHeight}px`} borderRadius={`${scaled.flagRadius}px`} overflow="hidden">
             <CountryFlag
               code={countryCode}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -222,12 +270,12 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
           <Text
             fontFamily="'Manrope', sans-serif"
             fontWeight="700"
-            fontSize="26px"
+            fontSize={`${scaled.countryNameSize}px`}
             color="white"
-            letterSpacing="-0.26px"
+            letterSpacing={`${-0.26 * SCALE_FACTOR}px`}
             lineHeight="normal"
             whiteSpace="nowrap"
-            maxW="200px"
+            maxW={`${Math.round(200 * SCALE_FACTOR)}px`}
             overflow="hidden"
             textOverflow="ellipsis"
           >
@@ -237,19 +285,19 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
 
         {/* Right: arrow icon (slides in on hover) */}
         <Box
-          w="55px"
-          h="55px"
+          w={`${scaled.arrowCircleSize}px`}
+          h={`${scaled.arrowCircleSize}px`}
           borderRadius="full"
           bg="rgba(255, 255, 255, 0.15)"
           border="1px solid rgba(255, 255, 255, 0.2)"
           display="flex"
           alignItems="center"
           justifyContent="center"
-          transform={isHovered ? 'translateX(0)' : 'translateX(-65px)'}
+          transform={isHovered ? 'translateX(0)' : `translateX(${-65 * SCALE_FACTOR}px)`}
           opacity={isHovered ? 1 : 0}
           transition="transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, opacity 0.3s ease-out"
         >
-          <ArrowRightIcon style={{ width: '20px', height: '20px', color: 'white' }} />
+          <ArrowRightIcon style={{ width: `${scaled.arrowIconSize}px`, height: `${scaled.arrowIconSize}px`, color: 'white' }} />
         </Box>
       </HStack>
 
@@ -257,11 +305,11 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
       {packageCount !== null && (
         <Box
           position="absolute"
-          top="22px"
-          right="21px"
-          w="122px"
-          h="41px"
-          borderRadius="44px"
+          top={`${scaled.badgeTop}px`}
+          right={`${scaled.badgeRight}px`}
+          w={`${scaled.badgeWidth}px`}
+          h={`${scaled.badgeHeight}px`}
+          borderRadius={`${scaled.badgeRadius}px`}
           bg="rgba(0, 0, 0, 0.14)"
           backdropFilter="blur(10px)"
           css={{ WebkitBackdropFilter: 'blur(10px)' }}
@@ -277,9 +325,9 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
           <Text
             fontFamily="'Manrope', sans-serif"
             fontWeight="400"
-            fontSize="16px"
+            fontSize={`${scaled.badgeTextSize}px`}
             color="white"
-            letterSpacing="-0.16px"
+            letterSpacing={`${-0.16 * SCALE_FACTOR}px`}
             lineHeight="normal"
           >
             {packageCount}+ {t('destinations.plans')}
