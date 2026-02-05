@@ -84,7 +84,7 @@ const PriceSyncDebug = () => {
     <Box
       position="fixed"
       bottom="0"
-      right="20px"
+      right="320px"
       bg="white"
       borderRadius="xl xl 0 0"
       shadow="lg"
