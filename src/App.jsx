@@ -65,6 +65,7 @@ import { getTranslation, LANGUAGES } from './config/i18n.js';
 import logoWhite from './assets/images/logo-white.svg';
 import logoColored from './assets/new-logo.svg';
 import CurrencyDebug from './components/CurrencyDebug';
+import PriceSyncDebug from './components/PriceSyncDebug';
 
 // Navigation Component
 const Navigation = () => {
@@ -770,6 +771,7 @@ const HomePage = () => {
         scrollToSection={navigationState.scrollToDestinations}
         initialTab={navigationState.activeTab}
       />
+      <PriceSyncDebug />
     </>
   );
 };
