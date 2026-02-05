@@ -45,7 +45,7 @@ const ArrowCircleSvg = () => (
   gradientUnits="userSpaceOnUse"
 >
   <stop offset="0" stopColor="rgba(157,157,157,0)" />      {/* Top: transparent gray */}
-  <stop offset="0.7" stopColor="#CC380A" stopOpacity="0.8" />  {/* 70%: orange starts */}
+  <stop offset="0.2" stopColor="#CC380A" stopOpacity="0.8" />  {/* 70%: orange starts */}
   <stop offset="1" stopColor="#CC380A" />                  {/* Bottom: solid orange */}
 </linearGradient>
     </defs>
@@ -111,8 +111,8 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   // 🎛️ CARD SIZE CONTROL - Adjust this to scale entire card
   // Decreasing these values will proportionally scale ALL elements
   // ============================================
-  const CARD_WIDTH = 360;   // Default: 360px (was 438px originally, scaled down 18%)
-  const CARD_HEIGHT = 455;  // Default: 470px (was 570px originally, scaled down 18%)
+  const CARD_WIDTH = 300;   // Default: 360px (was 438px originally, scaled down 18%)
+  const CARD_HEIGHT = 415;  // Default: 470px (was 570px originally, scaled down 18%)
   const SCALE_FACTOR = CARD_WIDTH / 360; // All elements scale based on this ratio
 
   // Calculate scaled values based on SCALE_FACTOR
@@ -966,8 +966,9 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
                   md: 'repeat(2, 1fr)',
                   lg: 'repeat(4, 1fr)'
                 }}
-                gap={6}
-                w="100%"
+              rowGap={8}        // ← Vertical gap between rows
+  columnGap={0.2} 
+                w="90%"
                 className="animate__animated animate__fadeIn"
                 style={{ animationDelay: '200ms' }}
               >
