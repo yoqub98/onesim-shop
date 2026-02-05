@@ -36,10 +36,18 @@ const ArrowCircleSvg = () => (
     <path d="M46.5625 55L57.8125 43.75ZM57.8125 43.75L46.5625 32.5ZM57.8125 43.75H29.6875ZM77.5 43.75C77.5 48.1821 76.627 52.5708 74.9309 56.6656C73.2348 60.7603 70.7488 64.4809 67.6149 67.6149C64.4809 70.7488 60.7603 73.2348 56.6656 74.9309C52.5708 76.627 48.1821 77.5 43.75 77.5C39.3179 77.5 34.9292 76.627 30.8344 74.9309C26.7397 73.2348 23.0191 70.7488 19.8851 67.6149C16.7512 64.4809 14.2652 60.7603 12.5691 56.6656C10.873 52.5708 10 48.1821 10 43.75C10 34.7989 13.5558 26.2145 19.8851 19.8851C26.2145 13.5558 34.7989 10 43.75 10C52.7011 10 61.2855 13.5558 67.6149 19.8851C73.9442 26.2145 77.5 34.7989 77.5 43.75Z" fill="white"/>
     <path d="M46.5625 55L57.8125 43.75M57.8125 43.75L46.5625 32.5M57.8125 43.75H29.6875M77.5 43.75C77.5 48.1821 76.627 52.5708 74.9309 56.6656C73.2348 60.7603 70.7488 64.4809 67.6149 67.6149C64.4809 70.7488 60.7603 73.2348 56.6656 74.9309C52.5708 76.627 48.1821 77.5 43.75 77.5C39.3179 77.5 34.9292 76.627 30.8344 74.9309C26.7397 73.2348 23.0191 70.7488 19.8851 67.6149C16.7512 64.4809 14.2652 60.7603 12.5691 56.6656C10.873 52.5708 10 48.1821 10 43.75C10 34.7989 13.5558 26.2145 19.8851 19.8851C26.2145 13.5558 34.7989 10 43.75 10C52.7011 10 61.2855 13.5558 67.6149 19.8851C73.9442 26.2145 77.5 34.7989 77.5 43.75Z" stroke="url(#paint0_linear_274_3069)" strokeWidth="3.3" strokeLinecap="round" strokeLinejoin="round"/>
     <defs>
-      <linearGradient id="paint0_linear_274_3069" x1="51.25" y1="56.75" x2="20.75" y2="11.75" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#71727C"/>
-        <stop offset="1" stopColor="#FF6943"/>
-      </linearGradient>
+  <linearGradient 
+  id="paint0_linear_274_3069" 
+  x1="50%" 
+  y1="0%" 
+  x2="50%" 
+  y2="100%" 
+  gradientUnits="userSpaceOnUse"
+>
+  <stop offset="0" stopColor="rgba(157,157,157,0)" />      {/* Top: transparent gray */}
+  <stop offset="0.7" stopColor="#CC380A" stopOpacity="0.8" />  {/* 70%: orange starts */}
+  <stop offset="1" stopColor="#CC380A" />                  {/* Bottom: solid orange */}
+</linearGradient>
     </defs>
   </svg>
 );
@@ -104,7 +112,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   // Decreasing these values will proportionally scale ALL elements
   // ============================================
   const CARD_WIDTH = 360;   // Default: 360px (was 438px originally, scaled down 18%)
-  const CARD_HEIGHT = 470;  // Default: 470px (was 570px originally, scaled down 18%)
+  const CARD_HEIGHT = 455;  // Default: 470px (was 570px originally, scaled down 18%)
   const SCALE_FACTOR = CARD_WIDTH / 360; // All elements scale based on this ratio
 
   // Calculate scaled values based on SCALE_FACTOR
@@ -133,16 +141,16 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   // ============================================
   // 🎨 OVERLAY GRADIENT CONTROLS
   // ============================================
-  const DARK_OVERLAY_OPACITY = 1;      // Dark gradient opacity on hover (0-1). Default: 1
+  const DARK_OVERLAY_OPACITY = 1.5;      // Dark gradient opacity on hover (0-1). Default: 1
   const DARK_OVERLAY_HEIGHT_PERCENT = 73; // Height as % of card (0-100). Default: 73% (345px/470px)
 
-  const ORANGE_OVERLAY_OPACITY = 1;    // Orange gradient opacity on hover (0-1). Default: 1
+  const ORANGE_OVERLAY_OPACITY = 0.9;    // Orange gradient opacity on hover (0-1). Default: 1
 
   // ============================================
   // 🌫️ BOTTOM BAR BLUR & OPACITY CONTROLS
   // ============================================
-  const BOTTOM_BAR_BLUR = 40;              // Blur strength in px. Default: 40px (was 66.65px)
-  const BOTTOM_BAR_BG_OPACITY = 0.07;      // Background opacity (0-1). Default: 0.07
+  const BOTTOM_BAR_BLUR = 10;              // Blur strength in px. Default: 40px (was 66.65px)
+  const BOTTOM_BAR_BG_OPACITY = 0.05;      // Background opacity (0-1). Default: 0.07
 
   // Fetch package count
   useEffect(() => {
