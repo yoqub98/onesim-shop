@@ -111,7 +111,8 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   // 🎛️ CARD SIZE CONTROL - Adjust this to scale entire card
   // Decreasing these values will proportionally scale ALL elements
   // ============================================
-  const CARD_WIDTH = 300;   // Default: 360px (was 438px originally, scaled down 18%)
+  const CARD_WIDTH = 275;
+  ;   // Default: 360px (was 438px originally, scaled down 18%)
   const CARD_HEIGHT = 415;  // Default: 470px (was 570px originally, scaled down 18%)
   const SCALE_FACTOR = CARD_WIDTH / 360; // All elements scale based on this ratio
 
@@ -825,9 +826,9 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
       />
 
       <Container maxW="8xl" position="relative">
-        <VStack spacing={16}>
+        <VStack spacing={8}>
           {/* Section Header */}
-          <VStack spacing={4} textAlign="center" className="animate__animated animate__fadeIn" width="100%">
+          <VStack spacing={2} textAlign="center" className="animate__animated animate__fadeIn" width="100%">
             <Badge
               bg="#FFF4F0"
               color="#FE4F18"
