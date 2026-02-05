@@ -688,7 +688,6 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // Carousel state for Countries tab
   const countriesScrollRef = React.useRef(null);
@@ -950,9 +949,39 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
           {/* Countries Tab Content */}
           {activeTab === 0 && (
             <>
-              {/* Top Section: Arrow Buttons and Search */}
+              {/* Top Section: Search Bar and Arrow Buttons */}
               <Box width="100%" display="flex" justifyContent="space-between" alignItems="center">
-                {/* Arrow Navigation Buttons - Left Side */}
+                {/* Search Bar - Left Side (Always Open) */}
+                <InputGroup maxW="400px">
+                  <InputLeftElement pointerEvents="none" h="44px">
+                    <MagnifyingGlassIcon style={{ width: '18px', height: '18px', color: '#9CA3AF' }} />
+                  </InputLeftElement>
+                  <Input
+                    placeholder={t('destinations.searchPlaceholder')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    h="44px"
+                    borderRadius="full"
+                    borderWidth="1px"
+                    borderColor="gray.300"
+                    bg="transparent"
+                    _hover={{
+                      borderColor: 'gray.400',
+                    }}
+                    _focus={{
+                      borderColor: 'gray.500',
+                      boxShadow: 'none',
+                    }}
+                    fontWeight="500"
+                    fontSize="14px"
+                    color="gray.700"
+                    _placeholder={{
+                      color: 'gray.400'
+                    }}
+                  />
+                </InputGroup>
+
+                {/* Arrow Navigation Buttons - Right Side */}
                 <HStack spacing={2}>
                   <Button
                     onClick={handleScrollLeft}
@@ -1015,54 +1044,6 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
                     <ChevronRightIcon style={{ width: '20px', height: '20px' }} />
                   </Button>
                 </HStack>
-
-                {/* Search - Right Side */}
-                <Box>
-                  {!isSearchExpanded ? (
-                    <Button
-                      leftIcon={<MagnifyingGlassIcon className="w-[18px] h-[18px]" />}
-                      onClick={() => setIsSearchExpanded(true)}
-                      variant="outline"
-                      borderColor="#FE4F18"
-                      color="#FE4F18"
-                      borderWidth="2px"
-                      fontWeight="700"
-                      size="md"
-                      _hover={{ bg: '#FFF4F0' }}
-                      className="animate__animated animate__fadeIn"
-                    >
-                      {t('destinations.search')}
-                    </Button>
-                  ) : (
-                    <InputGroup
-                      maxW="400px"
-                      className="animate__animated animate__fadeIn animate__faster"
-                    >
-                      <InputLeftElement pointerEvents="none">
-                        <MagnifyingGlassIcon className="w-[18px] h-[18px] text-[#FE4F18]" />
-                      </InputLeftElement>
-                      <Input
-                        placeholder={t('destinations.searchPlaceholder')}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onBlur={() => {
-                          if (!searchQuery) {
-                            setIsSearchExpanded(false);
-                          }
-                        }}
-                        autoFocus
-                        borderWidth="2px"
-                        borderColor="#E8E9EE"
-                        _focus={{
-                          borderColor: '#FE4F18',
-                          boxShadow: '0 0 0 1px #FE4F18',
-                        }}
-                        fontWeight="600"
-                        size="md"
-                      />
-                    </InputGroup>
-                  )}
-                </Box>
               </Box>
 
               {/* Horizontal Scrolling Carousel */}
