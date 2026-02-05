@@ -28,21 +28,19 @@ export const HANDPICKED_PLAN_SLUGS = {
 
 // ============================================
 // POPULAR DESTINATIONS - For "Where are you heading?" section
+// Updated to match new Figma design - 10 countries
 // ============================================
 export const POPULAR_DESTINATIONS = [
   { code: 'TR' }, // Turkey
-  { code: 'AE' }, // UAE
   { code: 'SA' }, // Saudi Arabia
+  { code: 'AE' }, // UAE
+  { code: 'EG' }, // Egypt
   { code: 'TH' }, // Thailand
-  { code: 'IT' }, // Italy
-  { code: 'FR' }, // France
-  { code: 'GE' }, // Georgia
   { code: 'VN' }, // Vietnam
-  { code: 'ES' }, // Spain
-  { code: 'KR' }, // South Korea
-  { code: 'UZ' }, // Uzbekistan
-  { code: 'DE' }, // Germany
-  { code: 'BR' }, // Brazil
+  { code: 'CN' }, // China
+  { code: 'US' }, // USA
+  { code: 'MY' }, // Malaysia
+  { code: 'ID' }, // Indonesia
 ];
 
 /**

@@ -19,8 +19,8 @@ import {
   Spinner,
   Center,
 } from '@chakra-ui/react';
-import { ArrowRightIcon, GlobeAsiaAustraliaIcon } from '@heroicons/react/24/solid';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { GlobeAsiaAustraliaIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useNavigate } from 'react-router-dom';
 import { POPULAR_DESTINATIONS } from '../config/pricing';
@@ -44,13 +44,51 @@ const ArrowCircleSvg = () => (
   </svg>
 );
 
-// Country Destination Card Component
+// Background image mapping for country cards
+const IMAGE_SLUG_MAP = {
+  TR: 'turkey',
+  SA: 'saudi-arabia',
+  AE: 'uae',
+  EG: 'egypt',
+  TH: 'thailand',
+  VN: 'vietnam',
+  CN: 'china',
+  US: 'usa',
+  MY: 'malaysia',
+  ID: 'indonesia',
+};
+
+const getBackgroundImageUrl = (countryCode) => {
+  const slug = IMAGE_SLUG_MAP[countryCode] || countryCode.toLowerCase();
+  return `https://ik.imagekit.io/php1jcf0t/OneSim/Background-Cover-Images/Country%20Cards/${slug}.jpg`;
+};
+
+// Country Destination Card Component - NEW DESIGN
 const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [packageCount, setPackageCount] = useState(null);
   const [cardRef, isVisible] = useScrollAnimation(0.1);
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
   const countryName = getCountryName(countryCode, lang);
+  const backgroundImageUrl = getBackgroundImageUrl(countryCode);
+
+  // Fetch package count
+  useEffect(() => {
+    const fetchPackageCount = async () => {
+      try {
+        const response = await fetch(`/api/packages-v2?type=country&country=${countryCode}`);
+        if (response.ok) {
+          const result = await response.json();
+          setPackageCount(result.data?.length || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching package count:', error);
+        setPackageCount(0);
+      }
+    };
+    fetchPackageCount();
+  }, [countryCode]);
 
   const handleExplore = () => {
     navigate(`/country/${countryCode}`);
@@ -59,104 +97,150 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   return (
     <Box
       ref={cardRef}
+      w="438px"
+      h="570px"
+      borderRadius="48px"
+      overflow="hidden"
       position="relative"
       cursor="pointer"
-      bg="white"
-      borderRadius="2xl"
-      overflow="hidden"
-      border="2px solid"
-      borderColor={isHovered ? '#FE4F18' : '#E8E9EE'}
-      transition="transform 0.15s ease-out, box-shadow 0s"
-      transform={isHovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)'}
-      shadow={isHovered ? '0 25px 50px rgba(254, 79, 24, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.08)'}
+      onClick={handleExplore}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleExplore}
       opacity={isVisible ? 1 : 0}
       style={{
         transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
         transition: `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${delay}ms`,
       }}
-      minH="160px"
     >
-      {/* Gradient overlay on hover */}
+      {/* 1. Background Image (scales on hover) */}
       <Box
         position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        height="6px"
-        background="linear-gradient(90deg, #FE4F18 0%, #FF6B3D 100%)"
+        top="-10%"
+        left="0"
+        w="100%"
+        h="122%"
+        zIndex={0}
+        transition="transform 0.4s ease-out"
+        transform={isHovered ? 'scale(1.08)' : 'scale(1)'}
+      >
+        <Box
+          as="img"
+          src={backgroundImageUrl}
+          alt={countryName}
+          w="100%"
+          h="100%"
+          objectFit="cover"
+        />
+      </Box>
+
+      {/* 2. Dark Overlay (appears on hover) */}
+      <Box
+        position="absolute"
+        bottom="0"
+        left="0"
+        right="0"
+        h="420px"
+        bgGradient="linear(to-b, rgba(55,55,55,0) 0%, rgba(4,4,4,0.47) 64%, rgba(0,0,0,0.5) 96%)"
+        borderRadius="33px"
         opacity={isHovered ? 1 : 0}
-        transition="opacity 0.15s"
+        transition="opacity 0.3s ease-out"
+        zIndex={1}
+        pointerEvents="none"
       />
 
-      <Box p={8}>
-        <VStack align="stretch" spacing={6} justify="space-between" h="100%">
-          {/* Flag and Country Name */}
-          <HStack spacing={4} flexWrap="nowrap">
-            <Box
-              borderRadius="xl"
-              overflow="hidden"
-              shadow="md"
-              width="64px"
-              height="48px"
-              flexShrink={0}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              border="2px solid"
-              borderColor="gray.100"
-              transition="all 0.3s"
-              transform={isHovered ? 'scale(1.1)' : 'scale(1)'}
-            >
-              <CountryFlag
-                code={countryCode}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-            <Heading
-              size="lg"
-              fontWeight="700"
-              color="gray.900"
-              fontFamily="'Manrope', sans-serif"
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
-              {countryName}
-            </Heading>
-          </HStack>
-
-          {/* Explore Button - Appears on Hover */}
-          <Box
-            opacity={isHovered ? 1 : 0}
-            maxHeight={isHovered ? '60px' : '0'}
-            overflow="hidden"
-            transition="transform 0.15s ease-out, box-shadow 0s"
-          >
-            <Button
-              width="100%"
-              bg="#FE4F18"
-              color="white"
-              _hover={{
-                bg: '#FF6B3D',
-              }}
-              transition="all 0.3s"
-              borderRadius="lg"
-              fontWeight="700"
-              rightIcon={<ArrowRightIcon className="w-[18px] h-[18px]" />}
-              onClick={handleExplore}
-            >
-              {t('destinations.explore')}
-            </Button>
+      {/* 3. Bottom Bar (flag + name + arrow) */}
+      <HStack
+        position="absolute"
+        bottom="26px"
+        left="26px"
+        w="385px"
+        h="90px"
+        bg="rgba(255, 255, 255, 0.07)"
+        backdropFilter="blur(66.65px)"
+        css={{ WebkitBackdropFilter: 'blur(66.65px)' }}
+        borderRadius="47px"
+        border={isHovered ? '1px solid rgba(255,255,255,0.15)' : '3px solid rgba(255,255,255,0.24)'}
+        boxShadow={isHovered ? 'none' : '0px 4px 23.6px 0px rgba(255, 161, 128, 0.4)'}
+        transition="all 0.3s ease-out"
+        justify="space-between"
+        align="center"
+        px="22px"
+        py="7px"
+        zIndex={2}
+        pointerEvents="none"
+      >
+        {/* Left: flag + name */}
+        <HStack spacing="17px" align="center">
+          <Box w="51.5px" h="34.333px" borderRadius="8px" overflow="hidden">
+            <CountryFlag
+              code={countryCode}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
           </Box>
-        </VStack>
-      </Box>
+          <Text
+            fontFamily="'Manrope', sans-serif"
+            fontWeight="700"
+            fontSize="36px"
+            color="white"
+            letterSpacing="-0.36px"
+            lineHeight="45.427px"
+            whiteSpace="nowrap"
+          >
+            {countryName}
+          </Text>
+        </HStack>
+
+        {/* Right: arrow icon (slides in on hover) */}
+        <Box
+          w="67.281px"
+          h="67.281px"
+          borderRadius="full"
+          bg="rgba(255, 255, 255, 0.15)"
+          border="1px solid rgba(255, 255, 255, 0.2)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          transform={isHovered ? 'translateX(0)' : 'translateX(-80px)'}
+          opacity={isHovered ? 1 : 0}
+          transition="transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, opacity 0.3s ease-out"
+        >
+          <ArrowRightIcon style={{ width: '24px', height: '24px', color: 'white' }} />
+        </Box>
+      </HStack>
+
+      {/* 4. Top-Right Badge (package count, appears on hover) */}
+      {packageCount !== null && (
+        <Box
+          position="absolute"
+          top="27px"
+          right="26px"
+          w="149px"
+          h="50px"
+          borderRadius="54px"
+          bg="rgba(0, 0, 0, 0.14)"
+          backdropFilter="blur(10px)"
+          css={{ WebkitBackdropFilter: 'blur(10px)' }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          opacity={isHovered ? 1 : 0}
+          transform={isHovered ? 'scale(1)' : 'scale(0.9)'}
+          transition="opacity 0.3s ease-out 0.15s, transform 0.3s ease-out 0.15s"
+          zIndex={3}
+          pointerEvents="none"
+        >
+          <Text
+            fontFamily="'Manrope', sans-serif"
+            fontWeight="400"
+            fontSize="20px"
+            color="white"
+            letterSpacing="-0.2px"
+            lineHeight="45.427px"
+          >
+            {packageCount}+ {t('destinations.plans')}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };
