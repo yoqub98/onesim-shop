@@ -255,6 +255,13 @@ const PlansPage = () => {
   const applyFilters = useCallback(() => {
     let filtered = [...packages];
 
+    // Debug: Log dataType values
+    console.log('🔍 [PLANS] Applying filters to packages:', {
+      totalPackages: packages.length,
+      unlimitedToggle: filters.isUnlimited,
+      dataTypes: packages.map(p => ({ slug: p.slug, dataType: p.dataType })),
+    });
+
     // Filter by data volume
     if (filters.dataVolume && !filters.isUnlimited) {
       const targetGB = parseFloat(filters.dataVolume);
@@ -264,10 +271,11 @@ const PlansPage = () => {
       });
     }
 
-    // Filter by unlimited (if enabled, only show unlimited packages)
-    // dataType = 4 means "Daily Unlimited" from eSIM Access API
+    // Filter by unlimited (if enabled, only show unlimited/daily packages)
+    // dataType = 2: Daily Limit (Speed Reduced) - Daily data with FUP
+    // dataType = 4: Daily Unlimited - Daily unlimited data
     if (filters.isUnlimited) {
-      filtered = filtered.filter(pkg => pkg.dataType === 4);
+      filtered = filtered.filter(pkg => pkg.dataType === 2 || pkg.dataType === 4);
     }
 
     // Filter by price range (use priceUSD field)
