@@ -625,7 +625,7 @@ export const TRANSLATIONS = {
         dataLabel: 'Количество трафика',
         countries: 'стран',
       },
-      badge: {
+      dataTypeBadge: {
         dailyUnlimited: 'Безлимит в день ♾️',
         dailyLimit: 'Дневной лимит',
       },
@@ -1190,7 +1190,7 @@ export const TRANSLATIONS = {
         dataLabel: 'Trafik miqdori',
         countries: 'mamlakat',
       },
-      badge: {
+      dataTypeBadge: {
         dailyUnlimited: 'Kunlik limitsiz ♾️',
         dailyLimit: 'Kunlik limit',
       },

@@ -345,7 +345,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
               minW="fit-content"
             >
               <Text fontSize="14px" fontWeight="600" color="#000" whiteSpace="nowrap">
-                {t('plans.badge.dailyUnlimited')}
+                {t('plans.dataTypeBadge.dailyUnlimited')}
               </Text>
             </HStack>
           )}
@@ -360,7 +360,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
               minW="fit-content"
             >
               <Text fontSize="14px" fontWeight="600" color="#000" whiteSpace="nowrap">
-                {t('plans.badge.dailyLimit')}
+                {t('plans.dataTypeBadge.dailyLimit')}
               </Text>
             </HStack>
           )}
