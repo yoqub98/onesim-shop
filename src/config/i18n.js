@@ -767,11 +767,14 @@ export const TRANSLATIONS = {
       },
       provider: {
         title: 'Информация о провайдере',
+        coverageTitle: 'Информация о покрытии',
         operator: 'Оператор',
         coverage: 'Покрытие',
         speed: 'Скорость',
         allOperators: 'Все операторы:',
         notSpecified: 'Не указан',
+        coveredCountries: 'Охваченные страны',
+        countries: 'стран',
       },
       installation: {
         title: 'Инструкция по установке',
@@ -1332,11 +1335,14 @@ export const TRANSLATIONS = {
       },
       provider: {
         title: 'Provayder ma\'lumotlari',
+        coverageTitle: 'Qamrov haqida ma\'lumot',
         operator: 'Operator',
         coverage: 'Qamrov',
         speed: 'Tezlik',
         allOperators: 'Barcha operatorlar:',
         notSpecified: 'Ko\'rsatilmagan',
+        coveredCountries: 'Qamrov mamlakatlar',
+        countries: 'mamlakat',
       },
       installation: {
         title: 'O\'rnatish bo\'yicha ko\'rsatma',

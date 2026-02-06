@@ -3,17 +3,12 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
-  Heading,
   Text,
   Button,
   VStack,
   HStack,
-  Badge,
   Grid,
-  GridItem,
   Divider,
-  List,
-  ListItem,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -23,11 +18,10 @@ import {
   ModalCloseButton,
   useDisclosure,
   Spinner,
-  Alert,
-  AlertIcon,
 } from '@chakra-ui/react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
+import { smartRoundDollar } from '../components/DataPlanCard';
 import {
   ArrowLeft,
   Wifi,
@@ -45,6 +39,8 @@ import {
   Smartphone,
   LogIn,
   AlertCircle,
+  Shield,
+  Zap,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
@@ -92,39 +88,30 @@ const PackagePage = () => {
   const getOriginalPriceUSD = () => {
     if (!plan) return 0;
 
-    // Priority 1: originalPriceUSD field (from CountryPage, PlansPage)
     if (plan.originalPriceUSD) {
       console.log('[PackagePage] Using originalPriceUSD:', plan.originalPriceUSD);
       return parseFloat(plan.originalPriceUSD);
     }
 
-    // Priority 2: originalPrice field (raw API price, needs division by 10000)
     if (plan.originalPrice) {
       const price = plan.originalPrice / 10000;
       console.log('[PackagePage] Using originalPrice / 10000:', price);
       return price;
     }
 
-    // Priority 3: Check if priceUSD is already without margin (from RegionalPackagesPage)
-    // If it came from RegionalPackagesPage, it's originalPrice / 10000
     if (plan.rawPackage && plan.priceUSD) {
       console.log('[PackagePage] Using priceUSD from RegionalPackagesPage (no margin):', plan.priceUSD);
       return parseFloat(plan.priceUSD);
     }
 
-    // Priority 4: Reverse calculate from priceUSD with margin
-    // Remove 50% margin: original = priceWithMargin / 1.5
     const reversedPrice = parseFloat(plan.priceUSD) / 1.5;
     console.log('[PackagePage] Reversed from priceUSD / 1.5:', reversedPrice);
     return reversedPrice;
   };
 
   const originalPriceUSD = getOriginalPriceUSD();
-
-  // Calculate prices with margin (for DISPLAY only)
   const priceUSDWithMargin = calculateFinalPriceUSD(originalPriceUSD);
 
-  // Convert USD to UZS asynchronously (must be before early return)
   useEffect(() => {
     if (!plan) return;
 
@@ -144,17 +131,33 @@ const PackagePage = () => {
     convertPrice();
   }, [plan, priceUSDWithMargin, convertToUZS]);
 
+  const t = (key) => getTranslation(currentLanguage, key);
+
   // Redirect if no plan data
   if (!plan) {
     return (
-      <Box minH="100vh" bg="gray.50" py={20}>
-        <Container maxW="4xl" textAlign="center">
-          <Heading mb={4}>Пакет не найден</Heading>
-          <Text color="gray.600" mb={6}>Информация о пакете недоступна</Text>
-          <Button onClick={() => navigate('/')} colorScheme="purple">
-            Вернуться на главную
+      <Box minH="100vh" bg="#F9F9F9" display="flex" alignItems="center" justifyContent="center">
+        <VStack spacing={4} textAlign="center" p={8}>
+          <Text fontSize="24px" fontWeight="700" color="#1C1C1E">
+            {t('packagePage.notFound')}
+          </Text>
+          <Text color="#8E8E93" fontSize="15px">
+            {t('packagePage.notFoundDescription')}
+          </Text>
+          <Button
+            onClick={() => navigate('/')}
+            bg="#FE4F18"
+            color="white"
+            borderRadius="full"
+            px={8}
+            py={5}
+            h="auto"
+            fontWeight="700"
+            _hover={{ bg: '#E44615' }}
+          >
+            {t('packagePage.backToHome')}
           </Button>
-        </Container>
+        </VStack>
       </Box>
     );
   }
@@ -173,17 +176,16 @@ const PackagePage = () => {
     planTitle = currentLanguage === 'uz' ? `Mintaqaviy reja ${regionName}` : `Региональный план ${regionName}`;
   } else {
     const countryName = getCountryName(countryCode, currentLanguage);
-    planTitle = `eSIM для ${countryName}`;
+    planTitle = `eSIM ${t('packagePage.esimFor')} ${countryName}`;
   }
 
-  const t = (key) => getTranslation(currentLanguage, key);
-  const operatorName = plan.operatorList?.[0]?.operatorName || 'Не указан';
+  const operatorName = plan.operatorList?.[0]?.operatorName || t('packagePage.provider.notSpecified');
   const networkType = plan.operatorList?.[0]?.networkType || '4G/LTE';
 
   // Determine package type text based on dataType
   const getPackageTypeText = () => {
     if (plan.dataType === 4) {
-      return currentLanguage === 'uz' ? 'Kunlik limitsiz' : 'Безлимит в день';
+      return t('plans.dataTypeBadge.dailyUnlimited');
     }
     if (plan.dataType === 2) {
       return currentLanguage === 'uz' ? 'Kunlik limit (tezlik kamayadi)' : 'Дневной лимит (снижение скорости)';
@@ -192,123 +194,170 @@ const PackagePage = () => {
       return currentLanguage === 'uz' ? 'Kunlik limit (to\'xtatiladi)' : 'Дневной лимит (отключение)';
     }
     return plan.smsSupported || plan.callsSupported
-      ? (currentLanguage === 'uz' ? 'Ma\'lumot + Qo\'ng\'iroqlar/SMS' : 'Данные + Звонки/SMS')
-      : (currentLanguage === 'uz' ? 'Faqat ma\'lumot' : 'Только данные');
+      ? t('packagePage.details.dataWithCalls')
+      : t('packagePage.details.dataOnly');
   };
   const packageType = getPackageTypeText();
 
   // Extract covered countries for regional/global plans
   const coveredCountries = new Set();
   if (plan.operatorList && Array.isArray(plan.operatorList)) {
-    console.log('[PackagePage] operatorList:', plan.operatorList);
     plan.operatorList.forEach(op => {
       if (op.locationCode && !op.locationCode.startsWith('!')) {
-        // Remove region prefix if present (e.g., "EU-GB" -> "GB")
-        let countryCode = op.locationCode;
-        const hyphenIndex = countryCode.indexOf('-');
+        let code = op.locationCode;
+        const hyphenIndex = code.indexOf('-');
         if (hyphenIndex > 0) {
-          countryCode = countryCode.substring(hyphenIndex + 1);
+          code = code.substring(hyphenIndex + 1);
         }
-        console.log('[PackagePage] Adding country:', countryCode, 'from', op.locationCode);
-        coveredCountries.add(countryCode);
+        coveredCountries.add(code);
       }
     });
   }
   const countryList = Array.from(coveredCountries);
-  console.log('[PackagePage] Final country list:', countryList);
-  console.log('[PackagePage] isRegionalPlan:', isRegionalPlan, 'isGlobalPlan:', isGlobalPlan);
+
+  // Parse data value and unit
+  const parseDataValue = (data) => {
+    if (!data) return { value: plan.dataGB || '0', unit: 'GB' };
+    const dataStr = String(data).trim();
+    if (/MB|МБ/i.test(dataStr)) {
+      return { value: dataStr.replace(/\s?(MB|МБ)/i, '').trim(), unit: 'MB' };
+    }
+    return { value: dataStr.replace(/\s?(GB|ГБ)/i, '').trim(), unit: 'GB' };
+  };
+  const { value: dataValue, unit: dataUnit } = parseDataValue(plan.data);
+
+  // Parse highest speed
+  const parseHighestSpeed = (speed) => {
+    if (!speed) return '4G';
+    const networks = speed.match(/(5G|4G|LTE|3G|2G)/gi) || [];
+    if (networks.length === 0) return speed;
+    const priority = ['5G', '4G', 'LTE', '3G', '2G'];
+    for (const net of priority) {
+      if (networks.some(n => n.toUpperCase() === net)) return net;
+    }
+    return networks[0] || speed;
+  };
+  const highestSpeed = parseHighestSpeed(plan.speed || networkType);
 
   const installationSteps = [
-    { icon: Mail, text: 'После покупки QR-код будет в разделе "Мои eSIM"' },
-    { icon: Settings, text: 'Откройте настройки телефона' },
-    { icon: QrCode, text: 'Отсканируйте QR-код' },
-    { icon: Download, text: 'Установите профиль eSIM' },
-    { icon: Smartphone, text: 'Активируйте и начните использовать' },
+    { icon: Mail, text: t('packagePage.installation.step1') },
+    { icon: Settings, text: t('packagePage.installation.step2') },
+    { icon: QrCode, text: t('packagePage.installation.step3') },
+    { icon: Download, text: t('packagePage.installation.step4') },
+    { icon: Smartphone, text: t('packagePage.installation.step5') },
   ];
 
   // Handle purchase button click
   const handlePurchaseClick = async () => {
-    // Check if user is logged in
     if (!user) {
       onLoginModalOpen();
       return;
     }
 
-    // User is logged in, proceed with order
     setIsOrdering(true);
     setOrderError(null);
 
     try {
-      // IMPORTANT: Send ORIGINAL price to backend (without margin)
-      // The margin is only for display/revenue tracking, not for eSIM Access API
-      console.log('📦 [ORDER] Sending order with ORIGINAL price:', {
+      console.log('[ORDER] Sending order with ORIGINAL price:', {
         originalPriceUSD,
         priceUSDWithMargin,
         packageCode: plan.packageCode,
-        planData: plan
       });
 
       const orderData = {
         userId: user.id,
         userEmail: user.email,
         packageCode: plan.packageCode || plan.id,
-        packageName: plan.name || `${plan.data} - ${plan.days} дней`,
+        packageName: plan.name || `${plan.data} - ${plan.days} ${t('packagePage.details.days')}`,
         countryCode: countryCode,
         dataAmount: plan.data,
         validityDays: plan.days,
         priceUzs: priceUZS,
-        priceUsd: originalPriceUSD, // Use ORIGINAL price, not priceUSDWithMargin
+        priceUsd: originalPriceUSD,
       };
 
       await createOrder(orderData);
-
       onSuccessModalOpen();
-
     } catch (error) {
-      console.error('Order failed:', error);
-      setOrderError(error.message || 'Не удалось создать заказ. Попробуйте позже.');
+      console.error('[ORDER] Failed:', error);
+      setOrderError(error.message || 'Order failed');
       onErrorModalOpen();
     } finally {
       setIsOrdering(false);
     }
   };
 
+  // --- Detail row component ---
+  const DetailRow = ({ icon: Icon, label, value, iconColor = '#FE4F18', badge = false }) => (
+    <HStack justify="space-between" py={3}>
+      <HStack spacing={3}>
+        <Box
+          bg="#F2F2F7"
+          p={2}
+          borderRadius="12px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Icon size={18} color={iconColor} />
+        </Box>
+        <Text fontSize="15px" fontWeight="500" color="#8E8E93">
+          {label}
+        </Text>
+      </HStack>
+      {badge ? (
+        <Box bg="#F2F2F7" px={3} py={1.5} borderRadius="10px">
+          <Text fontSize="14px" fontWeight="700" color="#1C1C1E">{value}</Text>
+        </Box>
+      ) : (
+        <Text fontSize="15px" fontWeight="700" color="#1C1C1E">{value}</Text>
+      )}
+    </HStack>
+  );
+
   return (
-    <Box minH="100vh" bg="gray.50">
-      {/* Header */}
-      <Box bg="white" borderBottom="1px solid" borderColor="gray.200" py={4}>
+    <Box minH="100vh" bg="#F9F9F9" fontFamily="'Manrope', sans-serif">
+      {/* Back Header */}
+      <Box bg="white" borderBottom="1px solid #E8E9EE" py={3}>
         <Container maxW="6xl">
           <Button
             variant="ghost"
             onClick={() => navigate(-1)}
             fontWeight="600"
-            color="gray.700"
-            _hover={{ bg: 'gray.100' }}
+            color="#1C1C1E"
+            _hover={{ bg: '#F2F2F7' }}
+            borderRadius="12px"
+            px={3}
           >
             <HStack spacing={2}>
-              <ArrowLeft size={20} />
-              <Text>Назад</Text>
+              <ArrowLeft size={20} color="#1C1C1E" />
+              <Text>{t('packagePage.back')}</Text>
             </HStack>
           </Button>
         </Container>
       </Box>
 
       <Container maxW="6xl" py={8}>
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
+        <Grid templateColumns={{ base: '1fr', lg: '1fr 380px' }} gap={8}>
           {/* Main Content */}
-          <GridItem>
-            {/* Package Header */}
-            <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
+          <Box>
+            {/* Hero Card — Data & Duration */}
+            <Box
+              bg="white"
+              borderRadius="32px"
+              p={{ base: 6, md: 8 }}
+              mb={6}
+              boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+            >
+              {/* Title with flag */}
               <HStack spacing={4} mb={6}>
-                {/* Only show flag for single country plans */}
                 {!isRegionalPlan && !isGlobalPlan && (
                   <Box
-                    borderRadius="xl"
+                    borderRadius="14px"
                     overflow="hidden"
-                    width="60px"
-                    height="45px"
-                    border="2px solid"
-                    borderColor="gray.200"
+                    width="56px"
+                    height="42px"
+                    border="2px solid #E8E9EE"
                     flexShrink={0}
                   >
                     <CountryFlag
@@ -317,362 +366,364 @@ const PackagePage = () => {
                     />
                   </Box>
                 )}
+                {(isRegionalPlan || isGlobalPlan) && (
+                  <Box
+                    bg="#F2F2F7"
+                    p={2.5}
+                    borderRadius="14px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                  >
+                    <Globe size={24} color="#FE4F18" />
+                  </Box>
+                )}
                 <VStack align="flex-start" spacing={0}>
-                  <Heading size="lg" color="gray.800">
+                  <Text fontSize="22px" fontWeight="700" color="#1C1C1E">
                     {planTitle}
-                  </Heading>
-                  <Text color="gray.500" fontSize="sm">
-                    {plan.name || `${plan.data} / ${plan.days} дней`}
+                  </Text>
+                  <Text color="#8E8E93" fontSize="14px" fontWeight="500">
+                    {plan.name || `${plan.data} / ${plan.days} ${t('packagePage.details.days')}`}
                   </Text>
                 </VStack>
               </HStack>
 
-              {/* Key Details Grid */}
-              <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }} gap={4}>
-                {/* Data Volume */}
-                <Box bg="purple.50" p={4} borderRadius="xl" border="1px solid" borderColor="purple.100">
-                  <HStack spacing={3}>
-                    <Box bg="purple.100" p={2} borderRadius="lg">
-                      <Database size={20} color="#7c3aed" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0}>
-                      <Text fontSize="xs" color="purple.600" fontWeight="600">Объем данных</Text>
-                      <Text fontSize="xl" fontWeight="700" color="purple.700">{plan.data}</Text>
-                    </VStack>
+              {/* Data & Duration - Big Numbers */}
+              <Grid templateColumns="1fr 1fr" gap={4} mb={6}>
+                <Box bg="#F2F2F7" borderRadius="20px" p={5}>
+                  <Text fontSize="13px" fontWeight="500" color="#8E8E93" mb={1}>
+                    {t('packagePage.details.dataVolume')}
+                  </Text>
+                  <HStack align="baseline" spacing={1}>
+                    <Text fontSize="36px" fontWeight="800" color="#1C1C1E" lineHeight="1">
+                      {dataValue}
+                    </Text>
+                    <Text fontSize="18px" fontWeight="600" color="#1C1C1E">
+                      {dataUnit}
+                    </Text>
                   </HStack>
                 </Box>
-
-                {/* Validity */}
-                <Box bg="blue.50" p={4} borderRadius="xl" border="1px solid" borderColor="blue.100">
-                  <HStack spacing={3}>
-                    <Box bg="blue.100" p={2} borderRadius="lg">
-                      <Calendar size={20} color="#2563eb" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0}>
-                      <Text fontSize="xs" color="blue.600" fontWeight="600">Срок действия</Text>
-                      <Text fontSize="xl" fontWeight="700" color="blue.700">{plan.days} дней</Text>
-                    </VStack>
-                  </HStack>
-                </Box>
-
-                {/* Network Type */}
-                <Box bg="green.50" p={4} borderRadius="xl" border="1px solid" borderColor="green.100">
-                  <HStack spacing={3}>
-                    <Box bg="green.100" p={2} borderRadius="lg">
-                      <Wifi size={20} color="#16a34a" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0}>
-                      <Text fontSize="xs" color="green.600" fontWeight="600">Тип сети</Text>
-                      <Text fontSize="xl" fontWeight="700" color="green.700">{plan.speed || networkType}</Text>
-                    </VStack>
-                  </HStack>
-                </Box>
-
-                {/* Package Type */}
-                <Box bg="orange.50" p={4} borderRadius="xl" border="1px solid" borderColor="orange.100">
-                  <HStack spacing={3}>
-                    <Box bg="orange.100" p={2} borderRadius="lg">
-                      <Phone size={20} color="#ea580c" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0}>
-                      <Text fontSize="xs" color="orange.600" fontWeight="600">Тип пакета</Text>
-                      <Text fontSize="lg" fontWeight="700" color="orange.700">{packageType}</Text>
-                    </VStack>
+                <Box bg="#F2F2F7" borderRadius="20px" p={5}>
+                  <Text fontSize="13px" fontWeight="500" color="#8E8E93" mb={1}>
+                    {t('packagePage.details.validity')}
+                  </Text>
+                  <HStack align="baseline" spacing={1}>
+                    <Text fontSize="36px" fontWeight="800" color="#1C1C1E" lineHeight="1">
+                      {plan.days}
+                    </Text>
+                    <Text fontSize="18px" fontWeight="600" color="#1C1C1E">
+                      {t('packagePage.details.days')}
+                    </Text>
                   </HStack>
                 </Box>
               </Grid>
-            </Box>
 
-            {/* Provider & Coverage Info */}
-            <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
-              <Heading size="md" mb={4} color="gray.800">
-                {isRegionalPlan || isGlobalPlan
-                  ? (currentLanguage === 'uz' ? 'Qamrov haqida' : 'Информация о покрытии')
-                  : (currentLanguage === 'uz' ? 'Provayder haqida' : 'Информация о провайдере')}
-              </Heading>
-
-              <VStack align="stretch" spacing={4}>
-                {/* For single country plans - show operator info */}
-                {!isRegionalPlan && !isGlobalPlan && (
-                  <>
-                    <HStack justify="space-between" py={2}>
-                      <HStack spacing={3}>
-                        <Radio size={18} color="#6b7280" />
-                        <Text color="gray.600">
-                          {currentLanguage === 'uz' ? 'Operator' : 'Оператор'}
-                        </Text>
-                      </HStack>
-                      <Text fontWeight="700" color="gray.800">{operatorName}</Text>
-                    </HStack>
-
-                    <Divider />
-                  </>
-                )}
-
-                {/* Coverage info */}
-                <HStack justify="space-between" py={2}>
-                  <HStack spacing={3}>
-                    <Globe size={18} color="#6b7280" />
-                    <Text color="gray.600">
-                      {currentLanguage === 'uz' ? 'Qamrov' : 'Покрытие'}
-                    </Text>
-                  </HStack>
-                  <Text fontWeight="700" color="gray.800">
-                    {isGlobalPlan
-                      ? (currentLanguage === 'uz' ? `${countryList.length} mamlakat` : `${countryList.length} стран`)
-                      : isRegionalPlan
-                      ? (currentLanguage === 'uz' ? `${countryList.length} mamlakat` : `${countryList.length} стран`)
-                      : getCountryName(countryCode, currentLanguage)}
+              {/* Badges Row */}
+              <HStack spacing={3} flexWrap="wrap">
+                {/* Network badge */}
+                <HStack
+                  spacing={2}
+                  px={4}
+                  py={2.5}
+                  borderRadius="14px"
+                  bg="#F2F2F7"
+                >
+                  <Wifi size={18} color="#FE4F18" />
+                  <Text fontSize="15px" fontWeight="600" color="#1C1C1E">
+                    {highestSpeed}
                   </Text>
                 </HStack>
 
-                <Divider />
-
-                <HStack justify="space-between" py={2}>
-                  <HStack spacing={3}>
-                    <Wifi size={18} color="#6b7280" />
-                    <Text color="gray.600">
-                      {currentLanguage === 'uz' ? 'Tezlik' : 'Скорость'}
+                {/* Data type badge */}
+                {plan.dataType === 4 && (
+                  <HStack spacing={2} px={4} py={2.5} borderRadius="14px" bg="#FFF4F0">
+                    <Zap size={16} color="#FE4F18" />
+                    <Text fontSize="14px" fontWeight="600" color="#FE4F18">
+                      {t('plans.dataTypeBadge.dailyUnlimited')}
                     </Text>
                   </HStack>
-                  <Badge colorScheme="purple" fontSize="sm" px={3} py={1}>
-                    {plan.speed || '4G/LTE'}
-                  </Badge>
+                )}
+                {(plan.dataType === 2 || plan.dataType === 3) && (
+                  <HStack spacing={2} px={4} py={2.5} borderRadius="14px" bg="#FFF4F0">
+                    <AlertCircle size={16} color="#FE4F18" />
+                    <Text fontSize="14px" fontWeight="600" color="#FE4F18">
+                      {t('plans.dataTypeBadge.dailyLimit')}
+                    </Text>
+                  </HStack>
+                )}
+
+                {/* Package type badge */}
+                <HStack spacing={2} px={4} py={2.5} borderRadius="14px" bg="#F2F2F7">
+                  <Phone size={16} color="#8E8E93" />
+                  <Text fontSize="14px" fontWeight="500" color="#1C1C1E">
+                    {packageType}
+                  </Text>
                 </HStack>
-
-                {/* For regional/global plans - show covered countries */}
-                {(isRegionalPlan || isGlobalPlan) && countryList.length > 0 && (
-                  <>
-                    <Divider />
-                    <Box py={2}>
-                      <HStack justify="space-between" align="center" mb={3}>
-                        <Text color="gray.600" fontWeight="600">
-                          {currentLanguage === 'uz' ? 'Qamrov mamlakatlar:' : 'Охваченные страны:'}
-                        </Text>
-                        <Badge colorScheme="purple" fontSize="xs" px={2} py={1}>
-                          {countryList.length} {currentLanguage === 'uz' ? 'mamlakat' : 'стран'}
-                        </Badge>
-                      </HStack>
-                      <Box
-                        maxH="400px"
-                        overflowY="auto"
-                        pr={2}
-                        css={{
-                          '&::-webkit-scrollbar': {
-                            width: '6px',
-                          },
-                          '&::-webkit-scrollbar-track': {
-                            background: '#f1f1f1',
-                            borderRadius: '10px',
-                          },
-                          '&::-webkit-scrollbar-thumb': {
-                            background: '#cbd5e0',
-                            borderRadius: '10px',
-                          },
-                          '&::-webkit-scrollbar-thumb:hover': {
-                            background: '#a0aec0',
-                          },
-                        }}
-                      >
-                        <Grid templateColumns="repeat(auto-fill, minmax(140px, 1fr))" gap={3}>
-                          {countryList.map((code) => (
-                            <HStack
-                              key={code}
-                              spacing={2}
-                              bg="gray.50"
-                              px={3}
-                              py={2}
-                              borderRadius="lg"
-                              border="1px solid"
-                              borderColor="gray.200"
-                            >
-                              <Box
-                                borderRadius="sm"
-                                overflow="hidden"
-                                width="24px"
-                                height="18px"
-                                flexShrink={0}
-                                border="1px solid"
-                                borderColor="gray.300"
-                              >
-                                <CountryFlag
-                                  code={code}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                              </Box>
-                              <Text fontSize="sm" fontWeight="500" color="gray.700">
-                                {getCountryName(code, currentLanguage)}
-                              </Text>
-                            </HStack>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </Box>
-                  </>
-                )}
-
-                {/* For single country plans - show all operators if multiple */}
-                {!isRegionalPlan && !isGlobalPlan && plan.operatorList && plan.operatorList.length > 1 && (
-                  <>
-                    <Divider />
-                    <Box py={2}>
-                      <Text color="gray.600" mb={2}>
-                        {currentLanguage === 'uz' ? 'Barcha operatorlar:' : 'Все операторы:'}
-                      </Text>
-                      <HStack flexWrap="wrap" spacing={2}>
-                        {plan.operatorList.map((op, idx) => (
-                          <Badge key={idx} colorScheme="blue" fontSize="xs" px={2} py={1}>
-                            {op.operatorName} {op.networkType && `(${op.networkType})`}
-                          </Badge>
-                        ))}
-                      </HStack>
-                    </Box>
-                  </>
-                )}
-              </VStack>
+              </HStack>
             </Box>
 
-            {/* Daily Limit Explanation - for dataType 2, 3, or 4 */}
-            {(plan.dataType === 2 || plan.dataType === 3 || plan.dataType === 4) && (
-              <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
-                <HStack spacing={3} mb={4}>
-                  <Box bg="orange.100" p={2} borderRadius="lg">
-                    <AlertCircle size={20} color="#ea580c" />
+            {/* Provider & Coverage Info */}
+            <Box
+              bg="white"
+              borderRadius="32px"
+              p={{ base: 6, md: 8 }}
+              mb={6}
+              boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+            >
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E" mb={4}>
+                {isRegionalPlan || isGlobalPlan
+                  ? t('packagePage.provider.coverageTitle')
+                  : t('packagePage.provider.title')}
+              </Text>
+
+              <VStack align="stretch" spacing={0} divider={<Divider borderColor="#F2F2F7" />}>
+                {/* Operator - only for single country */}
+                {!isRegionalPlan && !isGlobalPlan && (
+                  <DetailRow
+                    icon={Radio}
+                    label={t('packagePage.provider.operator')}
+                    value={operatorName}
+                  />
+                )}
+
+                {/* Coverage */}
+                <DetailRow
+                  icon={Globe}
+                  label={t('packagePage.provider.coverage')}
+                  value={
+                    isGlobalPlan || isRegionalPlan
+                      ? `${countryList.length} ${t('packagePage.provider.countries')}`
+                      : getCountryName(countryCode, currentLanguage)
+                  }
+                />
+
+                {/* Speed */}
+                <DetailRow
+                  icon={Wifi}
+                  label={t('packagePage.provider.speed')}
+                  value={plan.speed || '4G/LTE'}
+                  badge
+                />
+              </VStack>
+
+              {/* Covered countries list */}
+              {(isRegionalPlan || isGlobalPlan) && countryList.length > 0 && (
+                <Box mt={5}>
+                  <HStack justify="space-between" align="center" mb={3}>
+                    <Text fontSize="15px" fontWeight="600" color="#1C1C1E">
+                      {t('packagePage.provider.coveredCountries')}
+                    </Text>
+                    <Box bg="#FFF4F0" px={3} py={1} borderRadius="10px">
+                      <Text fontSize="13px" fontWeight="700" color="#FE4F18">
+                        {countryList.length} {t('packagePage.provider.countries')}
+                      </Text>
+                    </Box>
+                  </HStack>
+                  <Box
+                    maxH="360px"
+                    overflowY="auto"
+                    pr={1}
+                    css={{
+                      '&::-webkit-scrollbar': { width: '4px' },
+                      '&::-webkit-scrollbar-track': { background: 'transparent' },
+                      '&::-webkit-scrollbar-thumb': { background: '#D1D3D9', borderRadius: '10px' },
+                    }}
+                  >
+                    <Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={2.5}>
+                      {countryList.map((code) => (
+                        <HStack
+                          key={code}
+                          spacing={2.5}
+                          bg="#F2F2F7"
+                          px={3}
+                          py={2.5}
+                          borderRadius="14px"
+                        >
+                          <Box
+                            borderRadius="6px"
+                            overflow="hidden"
+                            width="24px"
+                            height="18px"
+                            flexShrink={0}
+                            border="1px solid #E8E9EE"
+                          >
+                            <CountryFlag
+                              code={code}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </Box>
+                          <Text fontSize="13px" fontWeight="600" color="#1C1C1E">
+                            {getCountryName(code, currentLanguage)}
+                          </Text>
+                        </HStack>
+                      ))}
+                    </Grid>
                   </Box>
-                  <Heading size="md" color="gray.800">
+                </Box>
+              )}
+
+              {/* Multiple operators */}
+              {!isRegionalPlan && !isGlobalPlan && plan.operatorList && plan.operatorList.length > 1 && (
+                <Box mt={4}>
+                  <Text fontSize="14px" fontWeight="600" color="#8E8E93" mb={2}>
+                    {t('packagePage.provider.allOperators')}
+                  </Text>
+                  <HStack flexWrap="wrap" gap={2}>
+                    {plan.operatorList.map((op, idx) => (
+                      <Box key={idx} bg="#F2F2F7" px={3} py={1.5} borderRadius="10px">
+                        <Text fontSize="13px" fontWeight="600" color="#1C1C1E">
+                          {op.operatorName} {op.networkType && `(${op.networkType})`}
+                        </Text>
+                      </Box>
+                    ))}
+                  </HStack>
+                </Box>
+              )}
+            </Box>
+
+            {/* Daily Limit Explanation */}
+            {(plan.dataType === 2 || plan.dataType === 3 || plan.dataType === 4) && (
+              <Box
+                bg="white"
+                borderRadius="32px"
+                p={{ base: 6, md: 8 }}
+                mb={6}
+                boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+              >
+                <HStack spacing={3} mb={5}>
+                  <Box bg="#FFF4F0" p={2.5} borderRadius="14px">
+                    <AlertCircle size={20} color="#FE4F18" />
+                  </Box>
+                  <Text fontSize="18px" fontWeight="700" color="#1C1C1E">
                     {t('packagePage.dailyLimit.title')}
-                  </Heading>
+                  </Text>
                 </HStack>
 
                 <VStack align="stretch" spacing={3}>
-                  <HStack align="flex-start" spacing={3}>
-                    <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {t('packagePage.dailyLimit.resetInfo')}
-                    </Text>
-                  </HStack>
-
-                  {plan.dataType === 2 && (
-                    <HStack align="flex-start" spacing={3}>
-                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
-                      <Text color="gray.600" fontSize="sm">
-                        {t('packagePage.dailyLimit.speedReduced')}
+                  {[
+                    t('packagePage.dailyLimit.resetInfo'),
+                    plan.dataType === 2 && t('packagePage.dailyLimit.speedReduced'),
+                    plan.dataType === 3 && t('packagePage.dailyLimit.serviceCutoff'),
+                    plan.dataType === 4 && (
+                      currentLanguage === 'uz'
+                        ? 'Kunlik internet cheklanmagan, lekin adolatli foydalanish siyosati amal qiladi'
+                        : 'Безлимитный интернет в день, но действует политика справедливого использования'
+                    ),
+                    t('packagePage.dailyLimit.difference'),
+                  ].filter(Boolean).map((text, idx) => (
+                    <HStack key={idx} align="flex-start" spacing={3}>
+                      <Box
+                        w="6px"
+                        h="6px"
+                        borderRadius="full"
+                        bg="#FE4F18"
+                        mt={2}
+                        flexShrink={0}
+                      />
+                      <Text fontSize="14px" color="#6B7280" lineHeight="1.6">
+                        {text}
                       </Text>
                     </HStack>
-                  )}
-
-                  {plan.dataType === 3 && (
-                    <HStack align="flex-start" spacing={3}>
-                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
-                      <Text color="gray.600" fontSize="sm">
-                        {t('packagePage.dailyLimit.serviceCutoff')}
-                      </Text>
-                    </HStack>
-                  )}
-
-                  {plan.dataType === 4 && (
-                    <HStack align="flex-start" spacing={3}>
-                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
-                      <Text color="gray.600" fontSize="sm">
-                        {currentLanguage === 'uz'
-                          ? 'Kunlik internet cheklanmagan, lekin adolatli foydalanish siyosati amal qiladi'
-                          : 'Безлимитный интернет в день, но действует политика справедливого использования'}
-                      </Text>
-                    </HStack>
-                  )}
-
-                  <HStack align="flex-start" spacing={3}>
-                    <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {t('packagePage.dailyLimit.difference')}
-                    </Text>
-                  </HStack>
+                  ))}
                 </VStack>
               </Box>
             )}
 
             {/* Installation Instructions */}
-            <Box bg="white" borderRadius="2xl" p={6} shadow="sm">
-              <Heading size="md" mb={4} color="gray.800">Инструкция по установке</Heading>
-
-              <List spacing={4}>
-                {installationSteps.map((step, index) => (
-                  <ListItem key={index} display="flex" alignItems="flex-start">
-                    <Box
-                      bg="purple.100"
-                      p={2}
-                      borderRadius="lg"
-                      mr={4}
-                      flexShrink={0}
-                    >
-                      <step.icon size={18} color="#7c3aed" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0}>
-                      <Text fontWeight="600" color="gray.700">Шаг {index + 1}</Text>
-                      <Text color="gray.600">{step.text}</Text>
-                    </VStack>
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          </GridItem>
-
-          {/* Sidebar - Purchase Section */}
-          <GridItem>
             <Box
               bg="white"
-              borderRadius="2xl"
-              p={6}
-              shadow="sm"
+              borderRadius="32px"
+              p={{ base: 6, md: 8 }}
+              boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+            >
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E" mb={5}>
+                {t('packagePage.installation.title')}
+              </Text>
+
+              <VStack align="stretch" spacing={4}>
+                {installationSteps.map((step, index) => (
+                  <HStack key={index} spacing={4} align="flex-start">
+                    <Box
+                      bg="#F2F2F7"
+                      minW="44px"
+                      h="44px"
+                      borderRadius="14px"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                    >
+                      <step.icon size={20} color="#FE4F18" />
+                    </Box>
+                    <VStack align="flex-start" spacing={0} pt={1}>
+                      <Text fontSize="13px" fontWeight="600" color="#FE4F18">
+                        {t('packagePage.installation.step')} {index + 1}
+                      </Text>
+                      <Text fontSize="15px" fontWeight="500" color="#1C1C1E">
+                        {step.text}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                ))}
+              </VStack>
+            </Box>
+          </Box>
+
+          {/* Sidebar — Purchase Card */}
+          <Box>
+            <Box
+              bg="white"
+              borderRadius="32px"
+              p={7}
+              boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
               position="sticky"
               top="100px"
             >
               <VStack align="stretch" spacing={6}>
+                {/* Price */}
                 <Box textAlign="center">
-                  <Text fontSize="sm" color="gray.500" fontWeight="600" mb={1}>
-                    {currentLanguage === 'uz' ? 'Paket narxi' : 'Стоимость пакета'}
+                  <Text fontSize="13px" color="#8E8E93" fontWeight="600" mb={2}>
+                    {t('packagePage.purchase.packagePrice')}
                   </Text>
-                  <HStack justify="center" spacing={1} mb={2}>
-                    <Text fontSize="lg" color="gray.500" fontWeight="500">
+                  <HStack justify="center" spacing={1} mb={1}>
+                    <Text fontSize="16px" color="#8E8E93" fontWeight="500">
                       {formattedPriceUZS}
                     </Text>
-                    <Text fontSize="md" color="gray.500" fontWeight="500" textTransform="uppercase">
+                    <Text fontSize="14px" color="#8E8E93" fontWeight="500" textTransform="uppercase">
                       UZS
                     </Text>
                   </HStack>
-                  <HStack justify="center" spacing={2}>
-                    <Heading fontSize="4xl" fontWeight="700" color="gray.800">
-                      {priceUSDWithMargin.toFixed(2)}
-                    </Heading>
-                    <Text fontSize="xl" color="gray.600" fontWeight="700">
-                      $
+                  <HStack justify="center" spacing={1}>
+                    <Text fontSize="40px" fontWeight="800" color="#1C1C1E" lineHeight="1.1">
+                      ${smartRoundDollar(priceUSDWithMargin)}
                     </Text>
                   </HStack>
                 </Box>
 
-                <Divider />
+                <Box h="1px" bg="#F2F2F7" />
 
                 {/* Quick Summary */}
                 <VStack align="stretch" spacing={3}>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">
-                      {currentLanguage === 'uz' ? 'Ma\'lumot' : 'Данные'}
+                    <Text color="#8E8E93" fontSize="14px" fontWeight="500">
+                      {t('packagePage.purchase.data')}
                     </Text>
-                    <Text fontWeight="700" color="gray.700">{plan.data}</Text>
+                    <Text fontWeight="700" fontSize="15px" color="#1C1C1E">{plan.data}</Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">
-                      {currentLanguage === 'uz' ? 'Muddat' : 'Срок'}
+                    <Text color="#8E8E93" fontSize="14px" fontWeight="500">
+                      {t('packagePage.purchase.period')}
                     </Text>
-                    <Text fontWeight="700" color="gray.700">
-                      {plan.days} {currentLanguage === 'uz' ? 'kun' : 'дней'}
+                    <Text fontWeight="700" fontSize="15px" color="#1C1C1E">
+                      {plan.days} {t('packagePage.details.days')}
                     </Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text color="gray.500" fontSize="sm">
-                      {currentLanguage === 'uz' ? 'Mintaqa' : 'Регион'}
+                    <Text color="#8E8E93" fontSize="14px" fontWeight="500">
+                      {t('packagePage.purchase.region')}
                     </Text>
-                    <Text fontWeight="700" color="gray.700">
+                    <Text fontWeight="700" fontSize="15px" color="#1C1C1E">
                       {isGlobalPlan
                         ? (currentLanguage === 'uz' ? 'Global' : 'Глобальный')
                         : isRegionalPlan
@@ -682,157 +733,120 @@ const PackagePage = () => {
                   </HStack>
                 </VStack>
 
+                {/* Buy Button */}
                 <Button
                   size="lg"
-                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  bg="#FE4F18"
                   color="white"
                   py={7}
                   fontWeight="700"
-                  borderRadius="xl"
+                  fontSize="16px"
+                  borderRadius="full"
                   _hover={{
+                    bg: '#E44615',
                     transform: 'translateY(-2px)',
-                    shadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+                    boxShadow: '0 10px 30px rgba(254, 79, 24, 0.35)',
+                  }}
+                  _active={{
+                    bg: '#C93D12',
+                    transform: 'translateY(0)',
                   }}
                   _disabled={{
-                    opacity: 0.7,
+                    opacity: 0.6,
                     cursor: 'not-allowed',
                     transform: 'none',
                   }}
-                  transition="all 0.3s"
+                  transition="all 0.3s ease"
                   onClick={handlePurchaseClick}
                   isDisabled={isOrdering}
                 >
                   {isOrdering ? (
                     <HStack spacing={2}>
                       <Spinner size="sm" />
-                      <Text>Оформление...</Text>
+                      <Text>{t('packagePage.purchase.ordering')}</Text>
                     </HStack>
                   ) : (
                     <HStack spacing={2}>
                       <ShoppingCart size={20} />
-                      <Text>Купить</Text>
+                      <Text>{t('packagePage.purchase.buy')}</Text>
                     </HStack>
                   )}
                 </Button>
 
-                <HStack justify="center" spacing={4} pt={2}>
-                  <HStack spacing={1}>
-                    <CheckCircle size={14} color="#16a34a" />
-                    <Text fontSize="xs" color="gray.500">Мгновенная доставка</Text>
+                {/* Trust badges */}
+                <HStack justify="center" spacing={4}>
+                  <HStack spacing={1.5}>
+                    <CheckCircle size={14} color="#10B981" />
+                    <Text fontSize="12px" color="#8E8E93" fontWeight="500">
+                      {t('packagePage.purchase.instantDelivery')}
+                    </Text>
+                  </HStack>
+                  <HStack spacing={1.5}>
+                    <Shield size={14} color="#10B981" />
+                    <Text fontSize="12px" color="#8E8E93" fontWeight="500">
+                      eSIM
+                    </Text>
                   </HStack>
                 </HStack>
               </VStack>
             </Box>
-          </GridItem>
+          </Box>
         </Grid>
       </Container>
 
-      {/* Debug Info Overlay - Bottom Left */}
-      {plan && (
-        <Box
-          position="fixed"
-          bottom={4}
-          left={4}
-          bg="rgba(0, 0, 0, 0.9)"
-          color="white"
-          p={4}
-          borderRadius="xl"
-          fontSize="xs"
-          fontFamily="monospace"
-          zIndex={9999}
-          backdropFilter="blur(10px)"
-          border="2px solid rgba(254, 79, 24, 0.3)"
-          shadow="2xl"
-          maxW="340px"
-        >
-          <VStack align="flex-start" spacing={2}>
-            <Text fontWeight="800" color="#FE4F18" fontSize="md" mb={1}>
-              📦 Package Debug Info
-            </Text>
-
-            <Box width="100%" bg="rgba(255,255,255,0.05)" p={2} borderRadius="md">
-              <HStack spacing={2} justify="space-between">
-                <Text color="gray.400" fontWeight="600" fontSize="10px">SLUG:</Text>
-                <Text color="white" fontWeight="600">{plan.slug || 'N/A'}</Text>
-              </HStack>
-            </Box>
-
-            <Box width="100%" bg="rgba(255,255,255,0.05)" p={2} borderRadius="md">
-              <HStack spacing={2} justify="space-between">
-                <Text color="gray.400" fontWeight="600" fontSize="10px">CODE:</Text>
-                <Text color="white" fontWeight="600">{plan.packageCode || 'N/A'}</Text>
-              </HStack>
-            </Box>
-
-            <Divider borderColor="rgba(255,255,255,0.1)" />
-
-            <Box width="100%" bg="rgba(34,197,94,0.1)" p={2} borderRadius="md" border="1px solid rgba(34,197,94,0.3)">
-              <VStack align="stretch" spacing={1}>
-                <Text color="green.300" fontWeight="600" fontSize="10px">ORIGINAL (API):</Text>
-                <Text color="green.300" fontWeight="900" fontSize="lg">
-                  ${originalPriceUSD.toFixed(2)}
-                </Text>
-                <Text color="green.400" fontSize="9px">
-                  → Sent to eSIM Access API
-                </Text>
-              </VStack>
-            </Box>
-
-            <Box width="100%" bg="rgba(251,191,36,0.1)" p={2} borderRadius="md" border="1px solid rgba(251,191,36,0.3)">
-              <VStack align="stretch" spacing={1}>
-                <Text color="yellow.300" fontWeight="600" fontSize="10px">WITH 50% MARGIN:</Text>
-                <Text color="yellow.300" fontWeight="900" fontSize="lg">
-                  ${priceUSDWithMargin.toFixed(2)}
-                </Text>
-                <Text color="yellow.400" fontSize="9px">
-                  → Shown to customer
-                </Text>
-              </VStack>
-            </Box>
-
-            <Text color="gray.500" fontSize="9px" mt={1} fontStyle="italic">
-              ⚠️ eSIM Access validates original price
-            </Text>
-          </VStack>
-        </Box>
-      )}
-
       {/* Login Required Modal */}
       <Modal isOpen={isLoginModalOpen} onClose={onLoginModalClose} isCentered>
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent mx={4} borderRadius="2xl">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="28px" p={2}>
           <ModalHeader>
             <HStack spacing={3}>
-              <Box bg="purple.100" p={2} borderRadius="lg">
-                <LogIn size={24} color="#7c3aed" />
+              <Box bg="#F2F2F7" p={2.5} borderRadius="14px">
+                <LogIn size={22} color="#FE4F18" />
               </Box>
-              <Text>Требуется авторизация</Text>
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E">
+                {t('packagePage.loginModal.title')}
+              </Text>
             </HStack>
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <Text color="gray.600">
-              Для оформления заказа на eSIM необходимо войти в аккаунт или зарегистрироваться.
+          <ModalCloseButton top={5} right={5} />
+          <ModalBody pb={4}>
+            <Text color="#6B7280" fontSize="15px">
+              {t('packagePage.loginModal.message')}
             </Text>
           </ModalBody>
           <ModalFooter gap={3}>
-            <Button variant="outline" onClick={onLoginModalClose}>
-              Отмена
+            <Button
+              variant="ghost"
+              onClick={onLoginModalClose}
+              borderRadius="full"
+              color="#8E8E93"
+              fontWeight="600"
+            >
+              {t('packagePage.loginModal.cancel')}
             </Button>
             <Button
-              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              bg="#FE4F18"
               color="white"
-              _hover={{ opacity: 0.9 }}
+              borderRadius="full"
+              px={6}
+              fontWeight="700"
+              _hover={{ bg: '#E44615' }}
               onClick={() => navigate('/login')}
             >
-              Войти
+              {t('packagePage.loginModal.login')}
             </Button>
             <Button
               variant="outline"
-              colorScheme="purple"
+              borderColor="#FE4F18"
+              color="#FE4F18"
+              borderWidth="2px"
+              borderRadius="full"
+              px={6}
+              fontWeight="700"
+              _hover={{ bg: '#FFF4F0' }}
               onClick={() => navigate('/signup')}
             >
-              Регистрация
+              {t('packagePage.loginModal.signup')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -840,41 +854,51 @@ const PackagePage = () => {
 
       {/* Order Success Modal */}
       <Modal isOpen={isSuccessModalOpen} onClose={onSuccessModalClose} isCentered>
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent mx={4} borderRadius="2xl">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="28px" p={2}>
           <ModalHeader>
             <HStack spacing={3}>
-              <Box bg="green.100" p={2} borderRadius="lg">
-                <CheckCircle size={24} color="#16a34a" />
+              <Box bg="#ECFDF5" p={2.5} borderRadius="14px">
+                <CheckCircle size={22} color="#10B981" />
               </Box>
-              <Text>Заказ оформлен!</Text>
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E">
+                {t('packagePage.successModal.title')}
+              </Text>
             </HStack>
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
+          <ModalCloseButton top={5} right={5} />
+          <ModalBody pb={4}>
             <VStack align="stretch" spacing={4}>
-              <Text color="gray.600">
-                Ваш eSIM успешно заказан! QR-код для активации будет доступен в разделе "Мои eSIM" через несколько минут.
+              <Text color="#6B7280" fontSize="15px">
+                {t('packagePage.successModal.message')}
               </Text>
-              <Alert status="success" borderRadius="lg">
-                <AlertIcon />
-                <Text fontSize="sm">
-                  Обработка занимает 1-2 минуты. После этого вы сможете просмотреть и скачать QR-код в личном кабинете.
+              <Box bg="#ECFDF5" px={4} py={3} borderRadius="16px">
+                <Text fontSize="13px" color="#059669" fontWeight="500">
+                  {t('packagePage.successModal.info')}
                 </Text>
-              </Alert>
+              </Box>
             </VStack>
           </ModalBody>
           <ModalFooter gap={3}>
-            <Button variant="outline" onClick={onSuccessModalClose}>
-              Закрыть
+            <Button
+              variant="ghost"
+              onClick={onSuccessModalClose}
+              borderRadius="full"
+              color="#8E8E93"
+              fontWeight="600"
+            >
+              {t('packagePage.successModal.close')}
             </Button>
             <Button
-              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              bg="#FE4F18"
               color="white"
-              _hover={{ opacity: 0.9 }}
+              borderRadius="full"
+              px={6}
+              fontWeight="700"
+              _hover={{ bg: '#E44615' }}
               onClick={() => navigate('/mypage')}
             >
-              Перейти в профиль
+              {t('packagePage.successModal.goToProfile')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -882,31 +906,35 @@ const PackagePage = () => {
 
       {/* Order Error Modal */}
       <Modal isOpen={isErrorModalOpen} onClose={onErrorModalClose} isCentered>
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-        <ModalContent mx={4} borderRadius="2xl">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="28px" p={2}>
           <ModalHeader>
             <HStack spacing={3}>
-              <Box bg="red.100" p={2} borderRadius="lg">
-                <AlertCircle size={24} color="#dc2626" />
+              <Box bg="#FEF2F2" p={2.5} borderRadius="14px">
+                <AlertCircle size={22} color="#EF4444" />
               </Box>
-              <Text>Ошибка заказа</Text>
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E">
+                {t('packagePage.errorModal.title')}
+              </Text>
             </HStack>
           </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={6}>
-            <Alert status="error" borderRadius="lg">
-              <AlertIcon />
-              <Text>{orderError}</Text>
-            </Alert>
+          <ModalCloseButton top={5} right={5} />
+          <ModalBody pb={4}>
+            <Box bg="#FEF2F2" px={4} py={3} borderRadius="16px">
+              <Text fontSize="14px" color="#DC2626" fontWeight="500">{orderError}</Text>
+            </Box>
           </ModalBody>
           <ModalFooter>
             <Button
-              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              bg="#FE4F18"
               color="white"
-              _hover={{ opacity: 0.9 }}
+              borderRadius="full"
+              px={6}
+              fontWeight="700"
+              _hover={{ bg: '#E44615' }}
               onClick={onErrorModalClose}
             >
-              Понятно
+              {t('packagePage.errorModal.ok')}
             </Button>
           </ModalFooter>
         </ModalContent>
