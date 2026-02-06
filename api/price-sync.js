@@ -191,7 +191,8 @@ export default async function handler(req, res) {
               api_price: newPrice,
               final_price_usd: newPriceUSD * 1.5, // Apply 50% default margin
               data_volume: dataVolume,
-              duration_days: duration,
+              duration: duration, // Column is 'duration', not 'duration_days'
+              duration_unit: 'DAY',
               is_active: change.new_value?.is_active !== false, // Active unless explicitly false
               is_featured: false,
               popularity_score: 0,
