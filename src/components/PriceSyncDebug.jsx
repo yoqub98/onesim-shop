@@ -159,6 +159,12 @@ const PriceSyncDebug = () => {
                 <Text fontSize="sm" fontWeight="bold" color="gray.900">
                   {formatDateTime(syncData.lastSyncAt)}
                 </Text>
+                {/* Warning if last sync is more than 30 hours old */}
+                {syncData.hoursAgo > 30 && (
+                  <Text fontSize="xs" color="orange.600" mt={1}>
+                    ⚠️ {currentLanguage === 'uz' ? 'Yangilanish kechikmoqda' : 'Обновление задерживается'}
+                  </Text>
+                )}
               </Box>
 
               {/* Next Scheduled Update */}

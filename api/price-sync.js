@@ -23,9 +23,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
-  // Simple auth check
+  // Auth check: Allow Vercel Cron OR Bearer token
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.SYNC_SECRET_KEY}`) {
+  const isVercelCron = req.headers['x-vercel-cron'];
+
+  if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.SYNC_SECRET_KEY}`)) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
 

@@ -759,7 +759,7 @@ export const TRANSLATIONS = {
       statusFailed: 'Ошибка',
       loading: 'Загрузка...',
       noData: 'Нет данных',
-      daily: 'Ежедневно в 02:00 UTC',
+      daily: 'Каждый день в 02:00 UTC (07:00 Ташкент)',
       months: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'],
     },
     footer: {
@@ -1318,7 +1318,7 @@ export const TRANSLATIONS = {
       statusFailed: 'Xatolik',
       loading: 'Yuklanmoqda...',
       noData: 'Ma\'lumot yo\'q',
-      daily: 'Har kuni 02:00 UTC',
+      daily: 'Har kuni 02:00 UTC (07:00 Toshkent)',
       months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'],
     },
     footer: {
