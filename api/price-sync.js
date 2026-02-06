@@ -80,20 +80,32 @@ export default async function handler(req, res) {
     }
 
     const priceData = await response.json();
-    console.log(`📊 [${logId}] API response structure:`, {
-      success: priceData.success,
-      hasData: !!priceData.data,
-      dataType: typeof priceData.data,
-      dataLength: Array.isArray(priceData.data) ? priceData.data.length : 'not an array',
-      message: priceData.message,
-      error: priceData.error,
-    });
 
-    if (!priceData.success || !priceData.data) {
-      throw new Error(`Invalid price history response - success: ${priceData.success}, data: ${!!priceData.data}, message: ${priceData.message || priceData.error || 'none'}`);
+    // Log raw response structure
+    console.log(`📊 [${logId}] Raw API response keys:`, Object.keys(priceData));
+    console.log(`📊 [${logId}] Raw API response type:`, typeof priceData);
+    console.log(`📊 [${logId}] Is array?:`, Array.isArray(priceData));
+
+    // Handle different response formats
+    let changes;
+
+    if (Array.isArray(priceData)) {
+      // Response is directly an array
+      console.log(`✅ [${logId}] Response is direct array with ${priceData.length} items`);
+      changes = priceData;
+    } else if (priceData.success && priceData.data) {
+      // Response has {success, data} wrapper
+      console.log(`✅ [${logId}] Response has success/data wrapper`);
+      changes = priceData.data;
+    } else if (priceData.data) {
+      // Response just has {data} field
+      console.log(`✅ [${logId}] Response has data field`);
+      changes = priceData.data;
+    } else {
+      // Unknown format
+      console.error(`❌ [${logId}] Unknown response format:`, JSON.stringify(priceData).substring(0, 500));
+      throw new Error(`Invalid price history response format. Keys: ${Object.keys(priceData).join(', ')}`);
     }
-
-    const changes = priceData.data;
     console.log(`📊 [${logId}] Found ${changes.length} price changes`);
 
     if (changes.length === 0) {
