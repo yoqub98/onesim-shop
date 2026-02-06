@@ -25,8 +25,6 @@ import { smartRoundDollar } from '../components/DataPlanCard';
 import {
   ArrowLeft,
   Wifi,
-  Calendar,
-  Database,
   Globe,
   Radio,
   Phone,
