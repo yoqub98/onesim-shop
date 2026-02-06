@@ -570,14 +570,14 @@ const PlansPage = () => {
                   onClick={handleSearch}
                   isLoading={loading}
                   flex={1}
-                  bg="#FE4F18"
+                  bg="#111827"
                   color="white"
                   borderRadius="full"
                   fontWeight="700"
                   _hover={{
-                    bg: "#E5460D",
+                    bg="#1F2937",
                     transform: "translateY(-2px)",
-                    boxShadow: "0 8px 24px rgba(254, 79, 24, 0.4)",
+                    boxShadow: "0 8px 24px rgba(17, 24, 39, 0.4)",
                   }}
                   transition="all 0.3s"
                 >
@@ -588,13 +588,15 @@ const PlansPage = () => {
                   variant="outline"
                   size="lg"
                   onClick={handleReset}
-                  borderColor="#FE4F18"
-                  color="#FE4F18"
+                  borderColor="#9CA3AF"
+                  color="#4B5563"
                   borderWidth="2px"
                   borderRadius="full"
                   fontWeight="700"
+                  bg="transparent"
                   _hover={{
-                    bg: "#FFF4F0",
+                    bg: "#F3F4F6",
+                    borderColor: "#6B7280",
                   }}
                 >
                   {t('plansPage.filters.resetButton')}
@@ -705,8 +707,8 @@ const PlansPage = () => {
                             {/* Data Only Badge */}
                             {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
                               <Badge
-                                bg="#FFF4F0"
-                                color="#FE4F18"
+                                bg="#F3F4F6"
+                                color="#000000"
                                 fontSize="11px"
                                 fontWeight="700"
                                 px={2}
@@ -720,12 +722,12 @@ const PlansPage = () => {
                           </VStack>
                         </Td>
                         <Td isNumeric>
-                          <Badge bg="#F2F2F7" color="#000" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
+                          <Badge bg="#FFF4F0" color="#FE4F18" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
                             {getDataVolumeGB(pkg)} GB
                           </Badge>
                         </Td>
                         <Td isNumeric>
-                          <Badge bg="#F2F2F7" color="#000" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
+                          <Badge bg="#FFF4F0" color="#FE4F18" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
                             {getDays(pkg)} {t('packagePage.details.days')}
                           </Badge>
                         </Td>
@@ -734,7 +736,7 @@ const PlansPage = () => {
                             <Text fontSize="13px" color="#494951" fontWeight="500">
                               {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
                             </Text>
-                            <Text fontWeight="800" color="#FE4F18" fontSize="18px">
+                            <Text fontWeight="800" color="#000000" fontSize="18px">
                               ${getPriceUSD(pkg)}
                             </Text>
                           </VStack>
