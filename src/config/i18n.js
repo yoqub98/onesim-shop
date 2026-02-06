@@ -760,6 +760,10 @@ export const TRANSLATIONS = {
       loading: 'Загрузка...',
       noData: 'Нет данных',
       daily: 'Каждый день в 02:00 UTC (07:00 Ташкент)',
+      manualSync: 'Обновить сейчас',
+      syncing: 'Обновление...',
+      syncSuccess: 'Обновлено успешно!',
+      syncError: 'Ошибка обновления',
       months: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'],
     },
     footer: {
@@ -1319,6 +1323,10 @@ export const TRANSLATIONS = {
       loading: 'Yuklanmoqda...',
       noData: 'Ma\'lumot yo\'q',
       daily: 'Har kuni 02:00 UTC (07:00 Toshkent)',
+      manualSync: 'Hozir yangilash',
+      syncing: 'Yangilanmoqda...',
+      syncSuccess: 'Muvaffaqiyatli yangilandi!',
+      syncError: 'Yangilash xatosi',
       months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'],
     },
     footer: {

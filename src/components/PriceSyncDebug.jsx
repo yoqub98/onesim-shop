@@ -1,7 +1,7 @@
 // src/components/PriceSyncDebug.jsx
 import React, { useState, useEffect } from 'react';
-import { Box, HStack, VStack, Text, IconButton, Collapse } from '@chakra-ui/react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { Box, HStack, VStack, Text, IconButton, Collapse, Button, useToast } from '@chakra-ui/react';
+import { ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTranslation, TRANSLATIONS } from '../config/i18n';
 
@@ -13,8 +13,10 @@ const PriceSyncDebug = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [syncData, setSyncData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
+  const toast = useToast();
 
   useEffect(() => {
     // Fetch sync status on mount
@@ -89,6 +91,49 @@ const PriceSyncDebug = () => {
     }
 
     return formatDateTime(nextSync.toISOString());
+  };
+
+  const handleManualSync = async () => {
+    try {
+      setSyncing(true);
+
+      const response = await fetch('/api/price-sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-vercel-cron': '1', // Simulate cron request
+        },
+        body: JSON.stringify({ days: 7 }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast({
+          title: t('priceSync.syncSuccess'),
+          description: `${t('priceSync.packagesUpdated')} ${result.stats?.updated || 0}`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+
+        // Refresh sync data
+        await fetchSyncStatus();
+      } else {
+        throw new Error(result.error || result.message || 'Sync failed');
+      }
+    } catch (error) {
+      console.error('Manual sync failed:', error);
+      toast({
+        title: t('priceSync.syncError'),
+        description: error.message,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setSyncing(false);
+    }
   };
 
   return (
@@ -206,6 +251,21 @@ const PriceSyncDebug = () => {
                   {syncData.errorMessage}
                 </Text>
               )}
+
+              {/* Manual Sync Button */}
+              <Button
+                size="sm"
+                colorScheme="orange"
+                leftIcon={<RefreshCw size={14} />}
+                onClick={handleManualSync}
+                isLoading={syncing}
+                loadingText={t('priceSync.syncing')}
+                width="full"
+                mt={2}
+                fontWeight="600"
+              >
+                {t('priceSync.manualSync')}
+              </Button>
             </>
           ) : (
             <Text fontSize="xs" color="gray.600">
