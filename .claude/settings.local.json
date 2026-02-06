@@ -51,7 +51,9 @@
       "Bash(timeout 180 node:*)",
       "Bash(timeout 300 node:*)",
       "Bash(node test-cron.js:*)",
-      "Bash(node test-endpoint.js:*)"
+      "Bash(node test-endpoint.js:*)",
+      "Bash(node scripts/check-countries.js:*)",
+      "Bash(node scripts/find-missing-countries.js:*)"
     ],
     "deny": [],
     "ask": []
