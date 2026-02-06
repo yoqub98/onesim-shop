@@ -71,14 +71,26 @@ export default async function handler(req, res) {
       }
     );
 
+    console.log(`📡 [${logId}] API response status: ${response.status}`);
+
     if (!response.ok) {
-      throw new Error(`Price history API returned ${response.status}`);
+      const errorText = await response.text();
+      console.error(`❌ [${logId}] API error response:`, errorText.substring(0, 500));
+      throw new Error(`Price history API returned ${response.status}: ${errorText.substring(0, 100)}`);
     }
 
     const priceData = await response.json();
+    console.log(`📊 [${logId}] API response structure:`, {
+      success: priceData.success,
+      hasData: !!priceData.data,
+      dataType: typeof priceData.data,
+      dataLength: Array.isArray(priceData.data) ? priceData.data.length : 'not an array',
+      message: priceData.message,
+      error: priceData.error,
+    });
 
     if (!priceData.success || !priceData.data) {
-      throw new Error('Invalid price history response');
+      throw new Error(`Invalid price history response - success: ${priceData.success}, data: ${!!priceData.data}, message: ${priceData.message || priceData.error || 'none'}`);
     }
 
     const changes = priceData.data;
