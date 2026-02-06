@@ -48,7 +48,7 @@ import { useRef } from 'react';
 import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
-import { getTranslation, getCountryName, COUNTRY_TRANSLATIONS } from '../config/i18n';
+import { getTranslation, getCountryName, getCountrySearchNames, COUNTRY_TRANSLATIONS } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // Package cache - stores fetched packages by country code
@@ -94,16 +94,21 @@ const PlansPage = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [currentLanguage]);
 
-  // Filter countries based on search
+  // Filter countries based on search (searches in both translated and English names)
   const filteredCountries = useMemo(() => {
     if (!filters.countrySearch) return allCountries;
 
     const search = filters.countrySearch.toLowerCase();
-    return allCountries.filter(country =>
-      country.name.toLowerCase().includes(search) ||
-      country.code.toLowerCase().includes(search)
-    );
-  }, [allCountries, filters.countrySearch]);
+    return allCountries.filter(country => {
+      // Get all search names (translated + English + code)
+      const searchNames = getCountrySearchNames(country.code, currentLanguage);
+
+      // Check if any of the names match the search query
+      return searchNames.some(name =>
+        name.toLowerCase().includes(search)
+      );
+    });
+  }, [allCountries, filters.countrySearch, currentLanguage]);
 
   // Highlight matching text
   const highlightText = (text, search) => {

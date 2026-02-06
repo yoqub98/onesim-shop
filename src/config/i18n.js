@@ -34,6 +34,11 @@ export const COUNTRY_TRANSLATIONS = {
     MN: 'Монголия',
     NP: 'Непал',
     LK: 'Шри-Ланка',
+    AF: 'Афганистан',
+    BD: 'Бангладеш',
+    PK: 'Пакистан',
+    IQ: 'Ирак',
+    BN: 'Бруней',
 
     // Europe
     TR: 'Турция',
@@ -70,6 +75,24 @@ export const COUNTRY_TRANSLATIONS = {
     LU: 'Люксембург',
     MT: 'Мальта',
     CY: 'Кипр',
+    EE: 'Эстония',
+    LV: 'Латвия',
+    LT: 'Литва',
+    SK: 'Словакия',
+    SI: 'Словения',
+    AL: 'Албания',
+    BA: 'Босния и Герцеговина',
+    ME: 'Черногория',
+    MK: 'Северная Македония',
+    RU: 'Россия',
+    LI: 'Лихтенштейн',
+    MC: 'Монако',
+    XK: 'Косово',
+    GG: 'Гернси',
+    IM: 'Остров Мэн',
+    JE: 'Джерси',
+    GI: 'Гибралтар',
+    AX: 'Аландские острова',
 
     // Americas
     US: 'США',
@@ -87,6 +110,30 @@ export const COUNTRY_TRANSLATIONS = {
     BO: 'Боливия',
     CR: 'Коста-Рика',
     PA: 'Панама',
+    DO: 'Доминиканская Республика',
+    GT: 'Гватемала',
+    HN: 'Гондурас',
+    NI: 'Никарагуа',
+    SV: 'Сальвадор',
+    PR: 'Пуэрто-Рико',
+    JM: 'Ямайка',
+    AG: 'Антигуа и Барбуда',
+    AI: 'Ангилья',
+    AN: 'Нидерландские Антильские острова',
+    BB: 'Барбадос',
+    DM: 'Доминика',
+    GD: 'Гренада',
+    GF: 'Французская Гвиана',
+    GP: 'Гваделупа',
+    KN: 'Сент-Китс и Невис',
+    KY: 'Каймановы острова',
+    LC: 'Сент-Люсия',
+    MQ: 'Мартиника',
+    MS: 'Монтсеррат',
+    TC: 'Теркс и Кайкос',
+    VC: 'Сент-Винсент и Гренадины',
+    VG: 'Британские Виргинские острова',
+    GU: 'Гуам',
 
     // Middle East & Africa
     SA: 'Саудовская Аравия',
@@ -103,6 +150,32 @@ export const COUNTRY_TRANSLATIONS = {
     KE: 'Кения',
     NG: 'Нигерия',
     GH: 'Гана',
+    DZ: 'Алжир',
+    BF: 'Буркина-Фасо',
+    BW: 'Ботсвана',
+    CD: 'Демократическая Республика Конго',
+    CF: 'Центральноафриканская Республика',
+    CG: 'Конго',
+    CI: 'Кот-д\'Ивуар',
+    CM: 'Камерун',
+    GA: 'Габон',
+    LR: 'Либерия',
+    MG: 'Мадагаскар',
+    ML: 'Мали',
+    MU: 'Маврикий',
+    MW: 'Малави',
+    MZ: 'Мозамбик',
+    NE: 'Нигер',
+    RE: 'Реюньон',
+    SC: 'Сейшельские острова',
+    SD: 'Судан',
+    SN: 'Сенегал',
+    SZ: 'Эсватини',
+    TD: 'Чад',
+    TZ: 'Танзания',
+    UG: 'Уганда',
+    ZM: 'Замбия',
+    GW: 'Гвинея-Бисау',
 
     // Oceania
     AU: 'Австралия',
@@ -142,6 +215,11 @@ export const COUNTRY_TRANSLATIONS = {
     MN: 'Mo\'g\'uliston',
     NP: 'Nepal',
     LK: 'Shri-Lanka',
+    AF: 'Afg\'oniston',
+    BD: 'Bangladesh',
+    PK: 'Pokiston',
+    IQ: 'Iroq',
+    BN: 'Bruney',
 
     // Europe
     TR: 'Turkiya',
@@ -178,6 +256,24 @@ export const COUNTRY_TRANSLATIONS = {
     LU: 'Lyuksemburg',
     MT: 'Malta',
     CY: 'Kipr',
+    EE: 'Estoniya',
+    LV: 'Latviya',
+    LT: 'Litva',
+    SK: 'Slovakiya',
+    SI: 'Sloveniya',
+    AL: 'Albaniya',
+    BA: 'Bosniya va Gertsegovina',
+    ME: 'Chernogoriya',
+    MK: 'Shimoliy Makedoniya',
+    RU: 'Rossiya',
+    LI: 'Lixtenshteyn',
+    MC: 'Monako',
+    XK: 'Kosovo',
+    GG: 'Gernsi',
+    IM: 'Men oroli',
+    JE: 'Jersi',
+    GI: 'Gibraltar',
+    AX: 'Aland orollari',
 
     // Americas
     US: 'AQSH',
@@ -195,6 +291,30 @@ export const COUNTRY_TRANSLATIONS = {
     BO: 'Boliviya',
     CR: 'Kosta-Rika',
     PA: 'Panama',
+    DO: 'Dominikan Respublikasi',
+    GT: 'Gvatemala',
+    HN: 'Gonduras',
+    NI: 'Nikaragua',
+    SV: 'Salvador',
+    PR: 'Puerto-Riko',
+    JM: 'Yamayka',
+    AG: 'Antigua va Barbuda',
+    AI: 'Angilya',
+    AN: 'Niderlandiya Antil orollari',
+    BB: 'Barbados',
+    DM: 'Dominika',
+    GD: 'Grenada',
+    GF: 'Fransuz Gvianasi',
+    GP: 'Gvadelupa',
+    KN: 'Sent-Kits va Nevis',
+    KY: 'Kayman orollari',
+    LC: 'Sent-Lyusiya',
+    MQ: 'Martinika',
+    MS: 'Montserrat',
+    TC: 'Terks va Kaykos',
+    VC: 'Sent-Vinsent va Grenadinlar',
+    VG: 'Britaniya Virgin orollari',
+    GU: 'Guam',
 
     // Middle East & Africa
     SA: 'Saudiya Arabistoni',
@@ -211,6 +331,32 @@ export const COUNTRY_TRANSLATIONS = {
     KE: 'Keniya',
     NG: 'Nigeriya',
     GH: 'Gana',
+    DZ: 'Jazoir',
+    BF: 'Burkina-Faso',
+    BW: 'Botsvana',
+    CD: 'Kongo Demokratik Respublikasi',
+    CF: 'Markaziy Afrika Respublikasi',
+    CG: 'Kongo',
+    CI: 'Kot-d\'Ivuar',
+    CM: 'Kamerun',
+    GA: 'Gabon',
+    LR: 'Liberiya',
+    MG: 'Madagaskar',
+    ML: 'Mali',
+    MU: 'Mavrikiy',
+    MW: 'Malavi',
+    MZ: 'Mozambik',
+    NE: 'Niger',
+    RE: 'Reyunyon',
+    SC: 'Seyshel orollari',
+    SD: 'Sudan',
+    SN: 'Senegal',
+    SZ: 'Esvatini',
+    TD: 'Chad',
+    TZ: 'Tanzaniya',
+    UG: 'Uganda',
+    ZM: 'Zambiya',
+    GW: 'Gvineya-Bisau',
 
     // Oceania
     AU: 'Avstraliya',
@@ -227,6 +373,188 @@ export const COUNTRY_TRANSLATIONS = {
     // Multi-country regions
     EU: 'Yevropa',
     EUROPE: 'Yevropa',
+  },
+  // English fallback for countries without translations
+  en: {
+    // Asia
+    TH: 'Thailand',
+    AE: 'United Arab Emirates',
+    VN: 'Vietnam',
+    MY: 'Malaysia',
+    CN: 'China',
+    JP: 'Japan',
+    KR: 'South Korea',
+    SG: 'Singapore',
+    ID: 'Indonesia',
+    PH: 'Philippines',
+    IN: 'India',
+    HK: 'Hong Kong',
+    TW: 'Taiwan',
+    KH: 'Cambodia',
+    LA: 'Laos',
+    MM: 'Myanmar',
+    MO: 'Macau',
+    MN: 'Mongolia',
+    NP: 'Nepal',
+    LK: 'Sri Lanka',
+    AF: 'Afghanistan',
+    BD: 'Bangladesh',
+    PK: 'Pakistan',
+    IQ: 'Iraq',
+    BN: 'Brunei',
+
+    // Europe
+    TR: 'Turkey',
+    GE: 'Georgia',
+    IT: 'Italy',
+    FR: 'France',
+    AZ: 'Azerbaijan',
+    ES: 'Spain',
+    DE: 'Germany',
+    GB: 'United Kingdom',
+    PT: 'Portugal',
+    GR: 'Greece',
+    NL: 'Netherlands',
+    BE: 'Belgium',
+    AT: 'Austria',
+    CH: 'Switzerland',
+    SE: 'Sweden',
+    NO: 'Norway',
+    DK: 'Denmark',
+    FI: 'Finland',
+    PL: 'Poland',
+    CZ: 'Czech Republic',
+    HU: 'Hungary',
+    RO: 'Romania',
+    BG: 'Bulgaria',
+    HR: 'Croatia',
+    RS: 'Serbia',
+    UA: 'Ukraine',
+    BY: 'Belarus',
+    MD: 'Moldova',
+    AM: 'Armenia',
+    IE: 'Ireland',
+    IS: 'Iceland',
+    LU: 'Luxembourg',
+    MT: 'Malta',
+    CY: 'Cyprus',
+    EE: 'Estonia',
+    LV: 'Latvia',
+    LT: 'Lithuania',
+    SK: 'Slovakia',
+    SI: 'Slovenia',
+    AL: 'Albania',
+    BA: 'Bosnia and Herzegovina',
+    ME: 'Montenegro',
+    MK: 'North Macedonia',
+    RU: 'Russia',
+    LI: 'Liechtenstein',
+    MC: 'Monaco',
+    XK: 'Kosovo',
+    GG: 'Guernsey',
+    IM: 'Isle of Man',
+    JE: 'Jersey',
+    GI: 'Gibraltar',
+    AX: 'Åland Islands',
+
+    // Americas
+    US: 'United States',
+    CA: 'Canada',
+    MX: 'Mexico',
+    BR: 'Brazil',
+    AR: 'Argentina',
+    CL: 'Chile',
+    CO: 'Colombia',
+    PE: 'Peru',
+    VE: 'Venezuela',
+    EC: 'Ecuador',
+    UY: 'Uruguay',
+    PY: 'Paraguay',
+    BO: 'Bolivia',
+    CR: 'Costa Rica',
+    PA: 'Panama',
+    DO: 'Dominican Republic',
+    GT: 'Guatemala',
+    HN: 'Honduras',
+    NI: 'Nicaragua',
+    SV: 'El Salvador',
+    PR: 'Puerto Rico',
+    JM: 'Jamaica',
+    AG: 'Antigua and Barbuda',
+    AI: 'Anguilla',
+    AN: 'Netherlands Antilles',
+    BB: 'Barbados',
+    DM: 'Dominica',
+    GD: 'Grenada',
+    GF: 'French Guiana',
+    GP: 'Guadeloupe',
+    KN: 'Saint Kitts and Nevis',
+    KY: 'Cayman Islands',
+    LC: 'Saint Lucia',
+    MQ: 'Martinique',
+    MS: 'Montserrat',
+    TC: 'Turks and Caicos',
+    VC: 'Saint Vincent and the Grenadines',
+    VG: 'British Virgin Islands',
+    GU: 'Guam',
+
+    // Middle East & Africa
+    SA: 'Saudi Arabia',
+    QA: 'Qatar',
+    KW: 'Kuwait',
+    BH: 'Bahrain',
+    OM: 'Oman',
+    JO: 'Jordan',
+    IL: 'Israel',
+    EG: 'Egypt',
+    ZA: 'South Africa',
+    MA: 'Morocco',
+    TN: 'Tunisia',
+    KE: 'Kenya',
+    NG: 'Nigeria',
+    GH: 'Ghana',
+    DZ: 'Algeria',
+    BF: 'Burkina Faso',
+    BW: 'Botswana',
+    CD: 'Democratic Republic of Congo',
+    CF: 'Central African Republic',
+    CG: 'Congo',
+    CI: 'Côte d\'Ivoire',
+    CM: 'Cameroon',
+    GA: 'Gabon',
+    LR: 'Liberia',
+    MG: 'Madagascar',
+    ML: 'Mali',
+    MU: 'Mauritius',
+    MW: 'Malawi',
+    MZ: 'Mozambique',
+    NE: 'Niger',
+    RE: 'Réunion',
+    SC: 'Seychelles',
+    SD: 'Sudan',
+    SN: 'Senegal',
+    SZ: 'Eswatini',
+    TD: 'Chad',
+    TZ: 'Tanzania',
+    UG: 'Uganda',
+    ZM: 'Zambia',
+    GW: 'Guinea-Bissau',
+
+    // Oceania
+    AU: 'Australia',
+    NZ: 'New Zealand',
+    FJ: 'Fiji',
+
+    // Central Asia
+    UZ: 'Uzbekistan',
+    KZ: 'Kazakhstan',
+    KG: 'Kyrgyzstan',
+    TJ: 'Tajikistan',
+    TM: 'Turkmenistan',
+
+    // Multi-country regions
+    EU: 'Europe',
+    EUROPE: 'Europe',
   },
 };
 
@@ -1412,7 +1740,7 @@ export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
       return langCountries['EU'] || 'Europe';
     }
 
-    // Get the language-specific country translations, fallback to default language
+    // Get the language-specific country translations
     const langCountries = COUNTRY_TRANSLATIONS[lang] || COUNTRY_TRANSLATIONS[DEFAULT_LANGUAGE];
 
     if (!langCountries) {
@@ -1420,11 +1748,17 @@ export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
       return countryCode;
     }
 
-    // Get the country name
-    const countryName = langCountries[countryCode];
+    // Get the country name from the current language
+    let countryName = langCountries[countryCode];
 
+    // If not found, fallback to English
+    if (!countryName && COUNTRY_TRANSLATIONS['en']) {
+      countryName = COUNTRY_TRANSLATIONS['en'][countryCode];
+    }
+
+    // If still not found, return the country code
     if (!countryName) {
-      console.warn(`getCountryName: Country code "${countryCode}" not found for language "${lang}"`);
+      console.warn(`getCountryName: Country code "${countryCode}" not found for language "${lang}" or English fallback`);
       return countryCode;
     }
 
@@ -1433,4 +1767,28 @@ export const getCountryName = (countryCode, lang = DEFAULT_LANGUAGE) => {
     console.error('getCountryName error:', error);
     return countryCode;
   }
+};
+
+// Helper function to get both translated and English names for search
+export const getCountrySearchNames = (countryCode, lang = DEFAULT_LANGUAGE) => {
+  const names = [];
+
+  // Add translated name
+  const langCountries = COUNTRY_TRANSLATIONS[lang] || COUNTRY_TRANSLATIONS[DEFAULT_LANGUAGE];
+  if (langCountries && langCountries[countryCode]) {
+    names.push(langCountries[countryCode]);
+  }
+
+  // Add English name
+  if (COUNTRY_TRANSLATIONS['en'] && COUNTRY_TRANSLATIONS['en'][countryCode]) {
+    const englishName = COUNTRY_TRANSLATIONS['en'][countryCode];
+    if (!names.includes(englishName)) {
+      names.push(englishName);
+    }
+  }
+
+  // Add country code
+  names.push(countryCode);
+
+  return names;
 };
