@@ -1,5 +1,5 @@
-// src/pages/PlansPage.jsx - High-performance Plans page with advanced filtering
-import { useState, useEffect, useCallback } from 'react';
+// src/pages/PlansPage.jsx - Refreshed UI with advanced search and filtering
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -9,13 +9,9 @@ import {
   HStack,
   VStack,
   Select,
+  Input,
   InputGroup,
   InputLeftElement,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
   Table,
   Thead,
   Tbody,
@@ -35,42 +31,111 @@ import {
   CardBody,
   Stack,
   Divider,
+  RangeSlider,
+  RangeSliderTrack,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  Switch,
+  FormControl,
+  FormLabel,
+  List,
+  ListItem,
+  useOutsideClick,
 } from '@chakra-ui/react';
-import { Search, RotateCcw, Package, Globe, Calendar, ChevronDown } from 'lucide-react';
+import { MagnifyingGlassIcon, ArrowPathIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages } from '../services/esimAccessApi';
-import { HANDPICKED_PLAN_SLUGS, POPULAR_DESTINATIONS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
-import { getTranslation, getCountryName } from '../config/i18n';
+import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
+import { getTranslation, getCountryName, COUNTRY_TRANSLATIONS } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
-
-// Duration options for dropdown
-const DURATION_OPTIONS = [1, 7, 10, 15, 30, 180];
 
 const PlansPage = () => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
   const navigate = useNavigate();
   const toast = useToast();
+  const searchRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Filter state
   const [filters, setFilters] = useState({
     country: '',
-    minDuration: '',
-    minDataVolume: '',
-    minPrice: '',
-    maxPrice: '',
+    countrySearch: '',
+    dataVolume: '',
+    isUnlimited: false,
+    priceRange: [0, 100],
   });
 
-  // Data state
+  // UI state
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [packages, setPackages] = useState([]);
   const [displayedPackages, setDisplayedPackages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [initialLoad, setInitialLoad] = useState(true);
+
+  // Close dropdown when clicking outside
+  useOutsideClick({
+    ref: dropdownRef,
+    handler: () => setShowCountryDropdown(false),
+  });
+
+  // Get all available countries
+  const allCountries = useMemo(() => {
+    const countries = COUNTRY_TRANSLATIONS[currentLanguage] || {};
+    return Object.entries(countries)
+      .filter(([code]) => code.length === 2) // Only country codes, exclude regions
+      .map(([code, name]) => ({ code, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [currentLanguage]);
+
+  // Filter countries based on search
+  const filteredCountries = useMemo(() => {
+    if (!filters.countrySearch) return allCountries;
+
+    const search = filters.countrySearch.toLowerCase();
+    return allCountries.filter(country =>
+      country.name.toLowerCase().includes(search) ||
+      country.code.toLowerCase().includes(search)
+    );
+  }, [allCountries, filters.countrySearch]);
+
+  // Highlight matching text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+
+    const index = text.toLowerCase().indexOf(search.toLowerCase());
+    if (index === -1) return text;
+
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + search.length);
+    const after = text.substring(index + search.length);
+
+    return (
+      <>
+        {before}
+        <Text as="span" bg="#FFF4F0" color="#FE4F18" fontWeight="700">
+          {match}
+        </Text>
+        {after}
+      </>
+    );
+  };
+
+  // Handle country selection
+  const handleCountrySelect = (countryCode, countryName) => {
+    setFilters(prev => ({
+      ...prev,
+      country: countryCode,
+      countrySearch: countryName
+    }));
+    setShowCountryDropdown(false);
+  };
 
   // Load popular packages on mount (cached from landing page)
   const loadPopularPackages = useCallback(async () => {
@@ -183,30 +248,30 @@ const PlansPage = () => {
   const applyFilters = useCallback(() => {
     let filtered = [...packages];
 
-    // Filter by minimum duration
-    if (filters.minDuration) {
-      const minDays = parseInt(filters.minDuration);
-      filtered = filtered.filter(pkg => (pkg.days || pkg.duration) >= minDays);
-    }
-
-    // Filter by minimum data volume (use dataGB field)
-    if (filters.minDataVolume) {
-      const minGB = parseFloat(filters.minDataVolume);
+    // Filter by data volume
+    if (filters.dataVolume && !filters.isUnlimited) {
+      const targetGB = parseFloat(filters.dataVolume);
       filtered = filtered.filter(pkg => {
         const volumeGB = pkg.dataGB || (pkg.volume / (1024 * 1024 * 1024));
-        return volumeGB >= minGB;
+        return volumeGB >= targetGB;
+      });
+    }
+
+    // Filter by unlimited (if enabled, only show unlimited packages)
+    if (filters.isUnlimited) {
+      filtered = filtered.filter(pkg => {
+        const volumeGB = pkg.dataGB || (pkg.volume / (1024 * 1024 * 1024));
+        // Consider packages with > 50GB as "unlimited" or check for unlimited flag
+        return volumeGB > 50 || pkg.isUnlimited;
       });
     }
 
     // Filter by price range (use priceUSD field)
-    if (filters.minPrice) {
-      const minPrice = parseFloat(filters.minPrice);
-      filtered = filtered.filter(pkg => (pkg.priceUSD || pkg.priceUsd) >= minPrice);
-    }
-    if (filters.maxPrice) {
-      const maxPrice = parseFloat(filters.maxPrice);
-      filtered = filtered.filter(pkg => (pkg.priceUSD || pkg.priceUsd) <= maxPrice);
-    }
+    const [minPrice, maxPrice] = filters.priceRange;
+    filtered = filtered.filter(pkg => {
+      const price = pkg.priceUSD || pkg.priceUsd;
+      return price >= minPrice && price <= maxPrice;
+    });
 
     setDisplayedPackages(filtered);
   }, [packages, filters]);
@@ -237,10 +302,10 @@ const PlansPage = () => {
   const handleReset = () => {
     setFilters({
       country: '',
-      minDuration: '',
-      minDataVolume: '',
-      minPrice: '',
-      maxPrice: '',
+      countrySearch: '',
+      dataVolume: '',
+      isUnlimited: false,
+      priceRange: [0, 100],
     });
     loadPopularPackages();
     setInitialLoad(true);
@@ -271,15 +336,17 @@ const PlansPage = () => {
   };
 
   return (
-    <Box minHeight="100vh" bg="gray.50" pt={24} pb={16}>
+    <Box minHeight="100vh" bg="#E8E9EE" pt={24} pb={16} fontFamily="'Manrope', sans-serif">
       <Container maxW="7xl">
         {/* Header */}
         <VStack spacing={4} align="center" mb={10}>
           <Badge
-            colorScheme="purple"
+            bg="#FFF4F0"
+            color="#FE4F18"
             fontSize="sm"
-            px={3}
-            py={1}
+            fontWeight="700"
+            px={5}
+            py={2}
             borderRadius="full"
             textTransform="uppercase"
           >
@@ -287,180 +354,245 @@ const PlansPage = () => {
           </Badge>
           <Heading
             as="h1"
-            size="2xl"
+            fontSize={{ base: '4xl', md: '5xl' }}
+            fontWeight="800"
             textAlign="center"
-            bgGradient="linear(to-r, purple.600, pink.500)"
-            bgClip="text"
+            color="#000"
+            letterSpacing="tight"
           >
             {t('plansPage.title')}
           </Heading>
-          <Text fontSize="lg" color="gray.600" textAlign="center" maxW="2xl">
+          <Text fontSize="lg" color="#494951" textAlign="center" maxW="2xl" fontWeight="500">
             {t('plansPage.subtitle')}
           </Text>
         </VStack>
 
         {/* Filter Panel */}
-        <Card mb={8} shadow="lg">
-          <CardBody>
+        <Card mb={8} borderRadius="32px" overflow="hidden" boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)">
+          <CardBody p={8}>
             <Stack spacing={6}>
-              <Heading size="md" color="gray.700">
+              <Heading size="md" color="#000" fontWeight="700">
                 {t('plansPage.filters.title')}
               </Heading>
-              <Divider />
+              <Divider borderColor="#E8E9EE" />
 
               {/* Filter Inputs */}
-              <Stack spacing={4}>
-                {/* Country Filter with Globe Icon */}
-                <Box>
-                  <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
+              <Stack spacing={6}>
+                {/* Country Search with Autocomplete */}
+                <Box position="relative" ref={searchRef}>
+                  <Text fontWeight="600" mb={2} color="#000" fontSize="15px">
                     {t('plansPage.filters.country')}
                   </Text>
                   <InputGroup size="lg">
                     <InputLeftElement pointerEvents="none" height="100%">
-                      <Globe size={20} color="#9333ea" />
+                      <Box as={GlobeAltIcon} w="20px" h="20px" color="#FE4F18" />
                     </InputLeftElement>
-                    <Select
+                    <Input
                       placeholder={t('plansPage.filters.countryPlaceholder')}
-                      value={filters.country}
-                      onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+                      value={filters.countrySearch}
+                      onChange={(e) => {
+                        setFilters({ ...filters, countrySearch: e.target.value, country: '' });
+                        setShowCountryDropdown(true);
+                      }}
+                      onFocus={() => setShowCountryDropdown(true)}
                       size="lg"
-                      icon={<ChevronDown size={20} />}
-                      pl={10}
-                      fontSize="sm"
-                      _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
-                    >
-                      {POPULAR_DESTINATIONS.map((dest) => (
-                        <option key={dest.code} value={dest.code}>
-                          {getCountryName(dest.code, currentLanguage)}
-                        </option>
-                      ))}
-                    </Select>
+                      pl={12}
+                      borderRadius="16px"
+                      border="2px solid"
+                      borderColor="#E8E9EE"
+                      _hover={{ borderColor: "#FE4F18" }}
+                      _focus={{ borderColor: "#FE4F18", boxShadow: "0 0 0 1px #FE4F18" }}
+                      bg="white"
+                    />
                   </InputGroup>
+
+                  {/* Autocomplete Dropdown */}
+                  {showCountryDropdown && filteredCountries.length > 0 && (
+                    <Box
+                      ref={dropdownRef}
+                      position="absolute"
+                      top="100%"
+                      left={0}
+                      right={0}
+                      mt={2}
+                      bg="white"
+                      borderRadius="20px"
+                      boxShadow="0 8px 24px rgba(0, 0, 0, 0.12)"
+                      maxH="300px"
+                      overflowY="auto"
+                      zIndex={1000}
+                      border="1px solid"
+                      borderColor="#E8E9EE"
+                      css={{
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: '#F2F2F7',
+                          borderRadius: '10px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: '#FE4F18',
+                          borderRadius: '10px',
+                        },
+                      }}
+                    >
+                        <List spacing={0}>
+                          {filteredCountries.map((country) => (
+                            <ListItem
+                              key={country.code}
+                              onClick={() => handleCountrySelect(country.code, country.name)}
+                              cursor="pointer"
+                              px={4}
+                              py={3}
+                              _hover={{ bg: '#FFF4F0' }}
+                              transition="all 0.2s"
+                            >
+                              <HStack spacing={3}>
+                                <Box
+                                  width="32px"
+                                  height="24px"
+                                  borderRadius="6px"
+                                  overflow="hidden"
+                                  border="1px solid"
+                                  borderColor="#E8E9EE"
+                                  flexShrink={0}
+                                >
+                                  <CountryFlag
+                                    code={country.code}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  />
+                                </Box>
+                                <Text fontWeight="500" color="#000">
+                                  {highlightText(country.name, filters.countrySearch)}
+                                </Text>
+                              </HStack>
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Box>
+                  )}
                 </Box>
 
-                {/* Duration and Data Volume */}
+                {/* Data Volume & Unlimited Toggle */}
                 <HStack spacing={4} align="flex-start">
                   <Box flex={1}>
-                    <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
-                      {t('plansPage.filters.duration')}
-                    </Text>
-                    <InputGroup size="lg">
-                      <InputLeftElement pointerEvents="none" height="100%">
-                        <Calendar size={20} color="#10b981" />
-                      </InputLeftElement>
-                      <Select
-                        placeholder={t('plansPage.filters.durationPlaceholder')}
-                        value={filters.minDuration}
-                        onChange={(e) => setFilters({ ...filters, minDuration: e.target.value })}
-                        size="lg"
-                        icon={<ChevronDown size={20} />}
-                        pl={10}
-                        fontSize="sm"
-                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
-                      >
-                        {DURATION_OPTIONS.map((days) => (
-                          <option key={days} value={days}>
-                            {days} {t('packagePage.details.days')}
-                          </option>
-                        ))}
-                      </Select>
-                    </InputGroup>
-                  </Box>
-                  <Box flex={1}>
-                    <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
+                    <Text fontWeight="600" mb={2} color="#000" fontSize="15px">
                       {t('plansPage.filters.dataVolume')}
                     </Text>
-                    <NumberInput
-                      value={filters.minDataVolume}
-                      onChange={(value) => setFilters({ ...filters, minDataVolume: value })}
+                    <Select
+                      placeholder={t('plansPage.filters.dataPlaceholder')}
+                      value={filters.dataVolume}
+                      onChange={(e) => setFilters({ ...filters, dataVolume: e.target.value })}
                       size="lg"
-                      min={0.1}
-                      step={0.5}
-                      precision={1}
+                      isDisabled={filters.isUnlimited}
+                      borderRadius="16px"
+                      border="2px solid"
+                      borderColor="#E8E9EE"
+                      _hover={{ borderColor: "#FE4F18" }}
+                      _focus={{ borderColor: "#FE4F18", boxShadow: "0 0 0 1px #FE4F18" }}
+                      bg="white"
                     >
-                      <NumberInputField
-                        placeholder={t('plansPage.filters.dataPlaceholder')}
-                        fontSize="sm"
-                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
+                      <option value="0.5">500 MB</option>
+                      <option value="1">1 GB</option>
+                      <option value="2">2 GB</option>
+                      <option value="3">3 GB</option>
+                      <option value="5">5 GB</option>
+                      <option value="10">10 GB</option>
+                      <option value="20">20 GB</option>
+                      <option value="50">50 GB</option>
+                    </Select>
+                  </Box>
+
+                  <Box pt={8}>
+                    <FormControl display="flex" alignItems="center">
+                      <FormLabel htmlFor="unlimited-toggle" mb="0" mr={3} fontWeight="600" color="#000" fontSize="15px">
+                        {t('plansPage.filters.unlimited')}
+                      </FormLabel>
+                      <Switch
+                        id="unlimited-toggle"
+                        size="lg"
+                        colorScheme="orange"
+                        isChecked={filters.isUnlimited}
+                        onChange={(e) => setFilters({ ...filters, isUnlimited: e.target.checked, dataVolume: '' })}
+                        sx={{
+                          '.chakra-switch__track': {
+                            bg: '#E8E9EE',
+                            _checked: {
+                              bg: '#FE4F18',
+                            },
+                          },
+                        }}
                       />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
+                    </FormControl>
                   </Box>
                 </HStack>
 
-                {/* Price Range */}
+                {/* Price Range Slider */}
                 <Box>
-                  <Text fontWeight="semibold" mb={2} color="gray.800" fontSize="md">
+                  <Text fontWeight="600" mb={2} color="#000" fontSize="15px">
                     {t('plansPage.filters.priceRange')} (USD)
                   </Text>
-                  <HStack spacing={3} maxW="600px">
-                    <NumberInput
-                      value={filters.minPrice}
-                      onChange={(value) => setFilters({ ...filters, minPrice: value })}
-                      size="lg"
+                  <Box px={4} pt={2} pb={4}>
+                    <RangeSlider
+                      value={filters.priceRange}
+                      onChange={(val) => setFilters({ ...filters, priceRange: val })}
                       min={0}
+                      max={100}
                       step={1}
-                      precision={1}
-                      flex={1}
                     >
-                      <NumberInputField
-                        placeholder={t('plansPage.filters.minPrice')}
-                        fontSize="sm"
-                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
-                      />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                    <Text color="gray.400" fontSize="lg" fontWeight="bold">—</Text>
-                    <NumberInput
-                      value={filters.maxPrice}
-                      onChange={(value) => setFilters({ ...filters, maxPrice: value })}
-                      size="lg"
-                      min={0}
-                      step={1}
-                      precision={1}
-                      flex={1}
-                    >
-                      <NumberInputField
-                        placeholder={t('plansPage.filters.maxPrice')}
-                        fontSize="sm"
-                        _placeholder={{ color: 'gray.400', fontSize: 'sm' }}
-                      />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </HStack>
+                      <RangeSliderTrack bg="#E8E9EE" h="8px" borderRadius="full">
+                        <RangeSliderFilledTrack bg="#FE4F18" />
+                      </RangeSliderTrack>
+                      <RangeSliderThumb index={0} boxSize={6} bg="#FE4F18" border="3px solid white" boxShadow="0 2px 8px rgba(254, 79, 24, 0.4)" />
+                      <RangeSliderThumb index={1} boxSize={6} bg="#FE4F18" border="3px solid white" boxShadow="0 2px 8px rgba(254, 79, 24, 0.4)" />
+                    </RangeSlider>
+                    <HStack justify="space-between" mt={3}>
+                      <Text fontSize="14px" fontWeight="600" color="#494951">
+                        ${filters.priceRange[0]}
+                      </Text>
+                      <Text fontSize="14px" fontWeight="600" color="#494951">
+                        ${filters.priceRange[1]}
+                      </Text>
+                    </HStack>
+                  </Box>
                 </Box>
               </Stack>
 
               {/* Action Buttons */}
               <HStack spacing={4}>
                 <Button
-                  leftIcon={<Search size={18} />}
-                  colorScheme="blue"
+                  leftIcon={<Box as={MagnifyingGlassIcon} w="20px" h="20px" />}
                   size="lg"
                   onClick={handleSearch}
                   isLoading={loading}
                   flex={1}
-                  bgGradient="linear(to-r, blue.400, blue.600)"
+                  bg="#FE4F18"
+                  color="white"
+                  borderRadius="full"
+                  fontWeight="700"
                   _hover={{
-                    bgGradient: "linear(to-r, blue.500, blue.700)",
+                    bg: "#E5460D",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 24px rgba(254, 79, 24, 0.4)",
                   }}
+                  transition="all 0.3s"
                 >
                   {t('plansPage.filters.searchButton')}
                 </Button>
                 <Button
-                  leftIcon={<RotateCcw size={18} />}
+                  leftIcon={<Box as={ArrowPathIcon} w="20px" h="20px" />}
                   variant="outline"
                   size="lg"
                   onClick={handleReset}
+                  borderColor="#FE4F18"
+                  color="#FE4F18"
+                  borderWidth="2px"
+                  borderRadius="full"
+                  fontWeight="700"
+                  _hover={{
+                    bg: "#FFF4F0",
+                  }}
                 >
                   {t('plansPage.filters.resetButton')}
                 </Button>
@@ -473,29 +605,39 @@ const PlansPage = () => {
         {loading ? (
           <Flex justify="center" align="center" minH="300px">
             <VStack spacing={4}>
-              <Spinner size="xl" color="purple.500" thickness="4px" />
-              <Text color="gray.600">{t('plansPage.loading')}</Text>
+              <Spinner size="xl" color="#FE4F18" thickness="4px" />
+              <Text color="#494951" fontWeight="600">{t('plansPage.loading')}</Text>
             </VStack>
           </Flex>
         ) : error ? (
-          <Alert status="error" borderRadius="lg">
-            <AlertIcon />
+          <Alert status="error" borderRadius="20px" bg="#FFF4F0" borderColor="#FE4F18" borderWidth="2px">
+            <AlertIcon color="#FE4F18" />
             <Box flex={1}>
-              <AlertTitle>{t('plansPage.error')}</AlertTitle>
-              <AlertDescription>{t('plansPage.errorDescription')}</AlertDescription>
+              <AlertTitle color="#FE4F18" fontWeight="700">{t('plansPage.error')}</AlertTitle>
+              <AlertDescription color="#000">{t('plansPage.errorDescription')}</AlertDescription>
             </Box>
           </Alert>
         ) : displayedPackages.length === 0 ? (
-          <Card>
-            <CardBody>
-              <VStack spacing={4} py={8}>
-                <Package size={64} color="gray.400" />
-                <Heading size="md" color="gray.600">
+          <Card borderRadius="32px" boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)">
+            <CardBody p={12}>
+              <VStack spacing={4}>
+                <Box
+                  w="80px"
+                  h="80px"
+                  bg="#F2F2F7"
+                  borderRadius="full"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Box as={GlobeAltIcon} w="40px" h="40px" color="#494951" />
+                </Box>
+                <Heading size="md" color="#000" fontWeight="700">
                   {initialLoad
                     ? t('plansPage.results.selectCountry')
                     : t('plansPage.results.noResults')}
                 </Heading>
-                <Text color="gray.500" textAlign="center">
+                <Text color="#494951" textAlign="center" fontWeight="500">
                   {initialLoad
                     ? t('plansPage.results.selectCountryDescription')
                     : t('plansPage.results.noResultsDescription')}
@@ -507,30 +649,30 @@ const PlansPage = () => {
           <>
             {/* Results Count */}
             <Flex justify="space-between" align="center" mb={4}>
-              <Text color="gray.600">
-                {t('plansPage.results.showing')} <strong>{displayedPackages.length}</strong> {t('plansPage.results.of')} <strong>{packages.length}</strong> {t('plansPage.results.packages')}
+              <Text color="#494951" fontWeight="600" fontSize="15px">
+                {t('plansPage.results.showing')} <Text as="span" fontWeight="800" color="#FE4F18">{displayedPackages.length}</Text> {t('plansPage.results.of')} <Text as="span" fontWeight="800" color="#000">{packages.length}</Text> {t('plansPage.results.packages')}
               </Text>
             </Flex>
 
             {/* Results Table */}
-            <Card shadow="lg" overflow="hidden">
+            <Card borderRadius="32px" overflow="hidden" boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)">
               <TableContainer>
                 <Table variant="simple" size="md">
-                  <Thead bg="gray.50">
+                  <Thead bg="#F2F2F7">
                     <Tr>
-                      <Th>{t('plansPage.table.country')}</Th>
-                      <Th>{t('plansPage.table.packageName')}</Th>
-                      <Th isNumeric>{t('plansPage.table.data')}</Th>
-                      <Th isNumeric>{t('plansPage.table.duration')}</Th>
-                      <Th isNumeric>{t('plansPage.table.price')}</Th>
-                      <Th>{t('plansPage.table.action')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px">{t('plansPage.table.country')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px">{t('plansPage.table.packageName')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px" isNumeric>{t('plansPage.table.data')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px" isNumeric>{t('plansPage.table.duration')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px" isNumeric>{t('plansPage.table.price')}</Th>
+                      <Th color="#000" fontWeight="700" textTransform="none" fontSize="14px">{t('plansPage.table.action')}</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
                     {displayedPackages.map((pkg, index) => (
                       <Tr
                         key={`${pkg.id}-${index}`}
-                        _hover={{ bg: 'purple.50' }}
+                        _hover={{ bg: '#FFF4F0' }}
                         transition="all 0.2s"
                       >
                         <Td>
@@ -538,10 +680,10 @@ const PlansPage = () => {
                             <Box
                               width="40px"
                               height="30px"
-                              borderRadius="md"
+                              borderRadius="8px"
                               overflow="hidden"
                               border="1px solid"
-                              borderColor="gray.200"
+                              borderColor="#E8E9EE"
                               flexShrink={0}
                             >
                               <CountryFlag
@@ -549,39 +691,65 @@ const PlansPage = () => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               />
                             </Box>
-                            <Text fontWeight="medium">
+                            <Text fontWeight="600" color="#000">
                               {getCountryName(pkg.countryCode, currentLanguage)}
                             </Text>
                           </HStack>
                         </Td>
                         <Td>
-                          <Text noOfLines={1}>{pkg.name}</Text>
+                          <VStack align="flex-start" spacing={1}>
+                            <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
+                            {/* Data Only Badge */}
+                            {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
+                              <Badge
+                                bg="#FFF4F0"
+                                color="#FE4F18"
+                                fontSize="11px"
+                                fontWeight="700"
+                                px={2}
+                                py={0.5}
+                                borderRadius="6px"
+                                textTransform="uppercase"
+                              >
+                                {t('plansPage.table.dataOnly')}
+                              </Badge>
+                            )}
+                          </VStack>
                         </Td>
                         <Td isNumeric>
-                          <Badge colorScheme="blue" fontSize="sm">
+                          <Badge bg="#F2F2F7" color="#000" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
                             {getDataVolumeGB(pkg)} GB
                           </Badge>
                         </Td>
                         <Td isNumeric>
-                          <Badge colorScheme="green" fontSize="sm">
+                          <Badge bg="#F2F2F7" color="#000" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
                             {getDays(pkg)} {t('packagePage.details.days')}
                           </Badge>
                         </Td>
                         <Td isNumeric>
                           <VStack align="flex-end" spacing={0}>
-                            <Text fontSize="sm" color="gray.500">
+                            <Text fontSize="13px" color="#494951" fontWeight="500">
                               {formatPrice(pkg.priceUzs || calculateFinalPrice(getPriceUSD(pkg)))} UZS
                             </Text>
-                            <Text fontWeight="bold" color="purple.600" fontSize="lg">
-                              {getPriceUSD(pkg)}$
+                            <Text fontWeight="800" color="#FE4F18" fontSize="18px">
+                              ${getPriceUSD(pkg)}
                             </Text>
                           </VStack>
                         </Td>
                         <Td>
                           <Button
                             size="sm"
-                            colorScheme="purple"
+                            bg="#FE4F18"
+                            color="white"
+                            borderRadius="full"
+                            fontWeight="700"
                             onClick={() => handleBuyClick(pkg)}
+                            _hover={{
+                              bg: "#E5460D",
+                              transform: "translateY(-2px)",
+                              boxShadow: "0 4px 12px rgba(254, 79, 24, 0.4)",
+                            }}
+                            transition="all 0.3s"
                           >
                             {t('plansPage.table.buy')}
                           </Button>
