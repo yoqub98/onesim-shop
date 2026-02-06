@@ -35,6 +35,7 @@ export default async function handler(req, res) {
 
   const startTime = Date.now();
   const logId = `sync_${Date.now()}`;
+  let syncLogId = null;
 
   try {
     console.log(`🔄 [${logId}] Starting price sync...`);
@@ -50,9 +51,14 @@ export default async function handler(req, res) {
 
     if (logError) {
       console.error('❌ Failed to create sync log:', logError);
+      throw new Error(`Failed to create sync log: ${logError.message}`);
     }
 
-    const syncLogId = syncLog?.id;
+    syncLogId = syncLog?.id;
+
+    if (!syncLogId) {
+      throw new Error('Sync log created but no ID returned');
+    }
     const daysToCheck = req.body?.days || 7;
     console.log(`📡 [${logId}] Fetching price changes (last ${daysToCheck} days)...`);
 
@@ -193,20 +199,25 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error(`❌ [${logId}] Price sync failed:`, error);
+    console.error('Error stack:', error.stack);
 
-    await supabase
-      .from('price_sync_log')
-      .update({
-        sync_completed_at: new Date().toISOString(),
-        status: 'failed',
-        error_message: error.message,
-      })
-      .eq('id', syncLogId);
+    // Only update log if we have a syncLogId
+    if (syncLogId) {
+      await supabase
+        .from('price_sync_log')
+        .update({
+          sync_completed_at: new Date().toISOString(),
+          status: 'failed',
+          error_message: error.message,
+        })
+        .eq('id', syncLogId);
+    }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'Price sync failed',
       message: error.message,
+      details: error.stack ? error.stack.substring(0, 200) : undefined,
     });
   }
 }

@@ -106,7 +106,18 @@ const PriceSyncDebug = () => {
         body: JSON.stringify({ days: 7 }),
       });
 
-      const result = await response.json();
+      // Try to parse JSON, but handle non-JSON responses
+      let result;
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        // Got HTML error page instead of JSON
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned HTML error page (check Vercel logs)');
+      }
 
       if (response.ok && result.success) {
         toast({
@@ -120,7 +131,7 @@ const PriceSyncDebug = () => {
         // Refresh sync data
         await fetchSyncStatus();
       } else {
-        throw new Error(result.error || result.message || 'Sync failed');
+        throw new Error(result.message || result.error || 'Sync failed');
       }
     } catch (error) {
       console.error('Manual sync failed:', error);
@@ -128,7 +139,7 @@ const PriceSyncDebug = () => {
         title: t('priceSync.syncError'),
         description: error.message,
         status: 'error',
-        duration: 5000,
+        duration: 8000,
         isClosable: true,
       });
     } finally {
