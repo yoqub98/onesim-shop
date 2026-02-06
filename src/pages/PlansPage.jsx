@@ -228,6 +228,7 @@ const PlansPage = () => {
           priceUsd: finalPriceUSD, // Keep lowercase for compatibility
           priceUzs: calculateFinalPrice(rawPriceUSD),
           network: pkg.networkType,
+          dataType: pkg.dataType, // 1=Total, 2=Daily Limit (Speed Reduced), 3=Daily Limit (Cut-off), 4=Daily Unlimited
         };
       });
 
@@ -263,12 +264,9 @@ const PlansPage = () => {
     }
 
     // Filter by unlimited (if enabled, only show unlimited packages)
+    // dataType = 4 means "Daily Unlimited" from eSIM Access API
     if (filters.isUnlimited) {
-      filtered = filtered.filter(pkg => {
-        const volumeGB = pkg.dataGB || (pkg.volume / (1024 * 1024 * 1024));
-        // Consider packages with > 50GB as "unlimited" or check for unlimited flag
-        return volumeGB > 50 || pkg.isUnlimited;
-      });
+      filtered = filtered.filter(pkg => pkg.dataType === 4);
     }
 
     // Filter by price range (use priceUSD field)

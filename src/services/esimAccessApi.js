@@ -342,6 +342,7 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
     description: apiPackage.description,
     name: apiPackage.name,
     operatorList: operators,
+    dataType: apiPackage.dataType, // 1=Total, 2=Daily Limit (Speed Reduced), 3=Daily Limit (Cut-off), 4=Daily Unlimited
   };
 };
 
