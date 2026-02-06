@@ -83,22 +83,20 @@ export default async function handler(req, res) {
 
     // Log raw response structure
     console.log(`📊 [${logId}] Raw API response keys:`, Object.keys(priceData));
-    console.log(`📊 [${logId}] Raw API response type:`, typeof priceData);
-    console.log(`📊 [${logId}] Is array?:`, Array.isArray(priceData));
 
-    // Handle different response formats
+    // Handle actual eSIM Access API format: {changes, summary, pagination, filters}
     let changes;
 
-    if (Array.isArray(priceData)) {
+    if (priceData.changes && Array.isArray(priceData.changes)) {
+      // eSIM Access API format: {changes: [...]}
+      console.log(`✅ [${logId}] Found ${priceData.changes.length} changes in 'changes' field`);
+      changes = priceData.changes;
+    } else if (Array.isArray(priceData)) {
       // Response is directly an array
       console.log(`✅ [${logId}] Response is direct array with ${priceData.length} items`);
       changes = priceData;
-    } else if (priceData.success && priceData.data) {
-      // Response has {success, data} wrapper
-      console.log(`✅ [${logId}] Response has success/data wrapper`);
-      changes = priceData.data;
-    } else if (priceData.data) {
-      // Response just has {data} field
+    } else if (priceData.data && Array.isArray(priceData.data)) {
+      // Response has {data} field
       console.log(`✅ [${logId}] Response has data field`);
       changes = priceData.data;
     } else {
@@ -133,57 +131,73 @@ export default async function handler(req, res) {
     const changeDetails = [];
 
     for (const change of changes) {
-      const oldPriceUSD = (change.oldPrice / 10000).toFixed(2);
-      const newPriceUSD = (change.newPrice / 10000).toFixed(2);
-      const changePercent = (((change.newPrice - change.oldPrice) / change.oldPrice) * 100).toFixed(2);
+      // Skip product_added events (new products, not price changes)
+      if (change.event_type === 'product_added') {
+        console.log(`ℹ️  [${logId}] Skipping new product: ${change.package_code}`);
+        continue;
+      }
+
+      // Skip if no price change data
+      if (!change.old_value?.price || !change.new_value?.price) {
+        console.warn(`⚠️  [${logId}] ${change.package_code}: Missing price data, skipping`);
+        continue;
+      }
+
+      // Map API format to our internal format
+      const packageCode = change.package_code;
+      const oldPriceUSD = parseFloat(change.old_value.price);
+      const newPriceUSD = parseFloat(change.new_value.price);
+      const oldPrice = Math.round(oldPriceUSD * 10000); // Convert to cents * 100
+      const newPrice = Math.round(newPriceUSD * 10000);
+      const changePercent = (((newPrice - oldPrice) / oldPrice) * 100).toFixed(2);
 
       console.log(
-        `📝 [${logId}] ${change.packageCode}: $${oldPriceUSD} → $${newPriceUSD} (${changePercent >= 0 ? '+' : ''}${changePercent}%)`
+        `📝 [${logId}] ${packageCode}: $${oldPriceUSD.toFixed(2)} → $${newPriceUSD.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent}%)`
       );
 
       const { data: existingPkg } = await supabase
         .from('esim_packages')
         .select('package_code, api_price')
-        .eq('package_code', change.packageCode)
+        .eq('package_code', packageCode)
         .single();
 
       if (!existingPkg) {
-        console.warn(`⚠️  [${logId}] Package ${change.packageCode} not found in DB`);
+        console.warn(`⚠️  [${logId}] Package ${packageCode} not found in DB`);
         notFound++;
         continue;
       }
 
       await supabase.from('package_price_changes').insert({
-        package_code: change.packageCode,
-        old_price: change.oldPrice,
-        new_price: change.newPrice,
-        old_price_usd: oldPriceUSD,
-        new_price_usd: newPriceUSD,
-        change_amount: change.newPrice - change.oldPrice,
+        package_code: packageCode,
+        old_price: oldPrice,
+        new_price: newPrice,
+        old_price_usd: oldPriceUSD.toFixed(2),
+        new_price_usd: newPriceUSD.toFixed(2),
+        change_amount: newPrice - oldPrice,
         change_percent: changePercent,
         change_source: 'price_sync',
-        changed_at: change.changedAt || new Date().toISOString(),
+        changed_at: change.event_timestamp || new Date().toISOString(),
       });
 
       const { error: updateError } = await supabase
         .from('esim_packages')
         .update({
-          api_price: change.newPrice,
+          api_price: newPrice,
           price_last_updated_at: new Date().toISOString(),
           last_synced_at: new Date().toISOString(),
         })
-        .eq('package_code', change.packageCode);
+        .eq('package_code', packageCode);
 
       if (updateError) {
-        console.error(`❌ [${logId}] Failed to update ${change.packageCode}:`, updateError);
+        console.error(`❌ [${logId}] Failed to update ${packageCode}:`, updateError);
         continue;
       }
 
       updated++;
       changeDetails.push({
-        packageCode: change.packageCode,
-        oldPrice: oldPriceUSD,
-        newPrice: newPriceUSD,
+        packageCode: packageCode,
+        oldPrice: oldPriceUSD.toFixed(2),
+        newPrice: newPriceUSD.toFixed(2),
         changePercent: changePercent,
       });
     }
