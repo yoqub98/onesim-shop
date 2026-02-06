@@ -834,6 +834,7 @@ export const TRANSLATIONS = {
         action: 'Действие',
         buy: 'Купить',
         dataOnly: 'Только данные',
+        dailyUnlimited: 'Безлимит ежедневно',
       },
       results: {
         showing: 'Показано',
@@ -1384,6 +1385,7 @@ export const TRANSLATIONS = {
         action: 'Harakat',
         buy: 'Sotib olish',
         dataOnly: 'Faqat ma\'lumot',
+        dailyUnlimited: 'Kunlik cheksiz',
       },
       results: {
         showing: 'Ko\'rsatilgan',

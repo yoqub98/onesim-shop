@@ -50,6 +50,7 @@ import { fetchHandpickedPackages } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName, getCountrySearchNames, COUNTRY_TRANSLATIONS } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
+import { isDailyUnlimited, getDailyDataAmount, getDataTypeLabel } from '../utils/dailyUnlimited';
 
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
@@ -704,26 +705,43 @@ const PlansPage = () => {
                         <Td>
                           <VStack align="flex-start" spacing={1}>
                             <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
-                            {/* Data Only Badge */}
-                            {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
-                              <Badge
-                                bg="#F3F4F6"
-                                color="#000000"
-                                fontSize="11px"
-                                fontWeight="700"
-                                px={2}
-                                py={0.5}
-                                borderRadius="6px"
-                                textTransform="uppercase"
-                              >
-                                {t('plansPage.table.dataOnly')}
-                              </Badge>
-                            )}
+                            <HStack spacing={2}>
+                              {/* Data Only Badge */}
+                              {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
+                                <Badge
+                                  bg="#F3F4F6"
+                                  color="#000000"
+                                  fontSize="11px"
+                                  fontWeight="700"
+                                  px={2}
+                                  py={0.5}
+                                  borderRadius="6px"
+                                  textTransform="uppercase"
+                                >
+                                  {t('plansPage.table.dataOnly')}
+                                </Badge>
+                              )}
+                              {/* Daily Unlimited Badge */}
+                              {isDailyUnlimited(pkg) && (
+                                <Badge
+                                  bg="#DCFCE7"
+                                  color="#166534"
+                                  fontSize="11px"
+                                  fontWeight="700"
+                                  px={2}
+                                  py={0.5}
+                                  borderRadius="6px"
+                                  textTransform="uppercase"
+                                >
+                                  {getDataTypeLabel(pkg.dataType, currentLanguage)}
+                                </Badge>
+                              )}
+                            </HStack>
                           </VStack>
                         </Td>
                         <Td isNumeric>
                           <Badge bg="#FFF4F0" color="#FE4F18" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
-                            {getDataVolumeGB(pkg)} GB
+                            {isDailyUnlimited(pkg) ? getDailyDataAmount(pkg) || `${getDataVolumeGB(pkg)} GB` : `${getDataVolumeGB(pkg)} GB`}
                           </Badge>
                         </Td>
                         <Td isNumeric>
