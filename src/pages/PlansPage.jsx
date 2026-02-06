@@ -575,7 +575,7 @@ const PlansPage = () => {
                   borderRadius="full"
                   fontWeight="700"
                   _hover={{
-                    bg="#1F2937",
+                    bg: "#1F2937",
                     transform: "translateY(-2px)",
                     boxShadow: "0 8px 24px rgba(17, 24, 39, 0.4)",
                   }}
