@@ -754,6 +754,7 @@ export const TRANSLATIONS = {
       nextUpdate: 'Следующее обновление:',
       packagesChecked: 'Проверено пакетов:',
       packagesUpdated: 'Обновлено цен:',
+      packagesNotFound: 'Не найдено в БД:',
       statusSuccess: 'Успешно',
       statusRunning: 'Выполняется',
       statusFailed: 'Ошибка',
@@ -764,6 +765,7 @@ export const TRANSLATIONS = {
       syncing: 'Обновление...',
       syncSuccess: 'Обновлено успешно!',
       syncError: 'Ошибка обновления',
+      warning: 'Внимание! Некоторые пакеты отсутствуют в БД',
       months: ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'],
     },
     footer: {
@@ -1317,6 +1319,7 @@ export const TRANSLATIONS = {
       nextUpdate: 'Keyingi yangilanish:',
       packagesChecked: 'Tekshirilgan paketlar:',
       packagesUpdated: 'Yangilangan narxlar:',
+      packagesNotFound: 'Bazada topilmagan:',
       statusSuccess: 'Muvaffaqiyatli',
       statusRunning: 'Bajarilmoqda',
       statusFailed: 'Xatolik',
@@ -1327,6 +1330,7 @@ export const TRANSLATIONS = {
       syncing: 'Yangilanmoqda...',
       syncSuccess: 'Muvaffaqiyatli yangilandi!',
       syncError: 'Yangilash xatosi',
+      warning: 'Diqqat! Ba\'zi paketlar bazada yo\'q',
       months: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'],
     },
     footer: {

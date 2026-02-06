@@ -71,6 +71,11 @@ export default async function handler(req, res) {
     const hoursAgo = Math.floor((now - syncTime) / (1000 * 60 * 60));
     const minutesAgo = Math.floor((now - syncTime) / (1000 * 60));
 
+    // Extract missing packages info from summary
+    const summary = latestSync.changes_summary || {};
+    const packagesNotFound = summary.not_found || 0;
+    const missingPackages = summary.missing_packages || [];
+
     return res.json({
       success: true,
       data: {
@@ -78,6 +83,8 @@ export default async function handler(req, res) {
         lastSyncAt: latestSync.sync_completed_at || latestSync.sync_started_at,
         totalChangesDetected: latestSync.total_changes_detected || 0,
         packagesUpdated: latestSync.packages_updated || 0,
+        packagesNotFound,
+        missingPackages,
         hoursAgo,
         minutesAgo,
         errorMessage: latestSync.error_message,

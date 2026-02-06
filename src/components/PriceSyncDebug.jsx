@@ -43,6 +43,8 @@ const PriceSyncDebug = () => {
     switch (status) {
       case 'success':
         return 'green.500';
+      case 'partial':
+        return 'orange.500';
       case 'running':
         return 'blue.500';
       case 'failed':
@@ -56,6 +58,8 @@ const PriceSyncDebug = () => {
     switch (status) {
       case 'success':
         return t('priceSync.statusSuccess');
+      case 'partial':
+        return currentLanguage === 'uz' ? 'Qisman' : 'Частично';
       case 'running':
         return t('priceSync.statusRunning');
       case 'failed':
@@ -255,6 +259,39 @@ const PriceSyncDebug = () => {
                   {syncData.packagesUpdated || 0}
                 </Text>
               </HStack>
+
+              {/* Packages Not Found - Warning */}
+              {syncData.packagesNotFound > 0 && (
+                <>
+                  <HStack spacing={2} justify="space-between">
+                    <Text fontSize="xs" color="gray.600">
+                      {t('priceSync.packagesNotFound')}
+                    </Text>
+                    <Text fontSize="sm" fontWeight="600" color="orange.600">
+                      {syncData.packagesNotFound}
+                    </Text>
+                  </HStack>
+                  <Box bg="orange.50" p={2} borderRadius="md" border="1px solid" borderColor="orange.200">
+                    <Text fontSize="xs" color="orange.700" fontWeight="600">
+                      ⚠️ {t('priceSync.warning')}
+                    </Text>
+                    {syncData.missingPackages && syncData.missingPackages.length > 0 && (
+                      <VStack align="stretch" mt={2} spacing={1}>
+                        {syncData.missingPackages.slice(0, 3).map((pkg, idx) => (
+                          <Text key={idx} fontSize="xs" color="orange.600">
+                            • {pkg.package_code} - {pkg.product_name}
+                          </Text>
+                        ))}
+                        {syncData.missingPackages.length > 3 && (
+                          <Text fontSize="xs" color="orange.600" fontStyle="italic">
+                            ...{currentLanguage === 'uz' ? 'va yana' : 'и ещё'} {syncData.missingPackages.length - 3}
+                          </Text>
+                        )}
+                      </VStack>
+                    )}
+                  </Box>
+                </>
+              )}
 
               {/* Error message if failed */}
               {syncData.status === 'failed' && syncData.errorMessage && (

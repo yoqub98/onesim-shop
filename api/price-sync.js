@@ -129,6 +129,7 @@ export default async function handler(req, res) {
     let updated = 0;
     let notFound = 0;
     const changeDetails = [];
+    const missingPackages = []; // Track packages not found in DB
 
     for (const change of changes) {
       // Skip product_added events (new products, not price changes)
@@ -164,6 +165,13 @@ export default async function handler(req, res) {
       if (!existingPkg) {
         console.warn(`⚠️  [${logId}] Package ${packageCode} not found in DB`);
         notFound++;
+        missingPackages.push({
+          package_code: packageCode,
+          product_name: change.product_name,
+          slug: change.slug,
+          new_price_usd: newPriceUSD.toFixed(2),
+          event_type: change.event_type,
+        });
         continue;
       }
 
@@ -208,12 +216,13 @@ export default async function handler(req, res) {
       .from('price_sync_log')
       .update({
         sync_completed_at: new Date().toISOString(),
-        status: 'success',
+        status: notFound > 0 ? 'partial' : 'success', // Mark as partial if packages are missing
         total_changes_detected: changes.length,
         packages_updated: updated,
         changes_summary: {
           duration_seconds: duration,
           not_found: notFound,
+          missing_packages: missingPackages, // Store missing package details
           changes: changeDetails.slice(0, 50),
         },
       })
