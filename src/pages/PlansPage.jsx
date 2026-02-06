@@ -46,7 +46,7 @@ import { MagnifyingGlassIcon, ArrowPathIcon, GlobeAltIcon } from '@heroicons/rea
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import CountryFlag from '../components/CountryFlag';
-import { fetchHandpickedPackages } from '../services/esimAccessApi';
+import { fetchHandpickedPackages, fetchRegionalAndGlobalForCountry } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName, getCountrySearchNames, COUNTRY_TRANSLATIONS } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -233,9 +233,34 @@ const PlansPage = () => {
         };
       });
 
+      // Also fetch regional/global packages covering this country
+      let regionalGlobal = [];
+      try {
+        regionalGlobal = await fetchRegionalAndGlobalForCountry(countryCode, currentLanguage);
+        // Apply margin to regional/global packages
+        regionalGlobal = regionalGlobal.map(pkg => {
+          const rawPriceUSD = pkg.priceUSD;
+          const finalPriceUSD = calculateFinalPriceUSD(rawPriceUSD);
+          return {
+            ...pkg,
+            priceUSD: finalPriceUSD,
+            priceUsd: finalPriceUSD,
+            priceUzs: calculateFinalPrice(rawPriceUSD),
+          };
+        });
+      } catch (err) {
+        console.warn('⚠️ [PLANS] Failed to fetch regional/global:', err);
+      }
+
+      // Merge: country plans first, then regional, then global
+      const allPackages = [
+        ...fetchedPackages,
+        ...regionalGlobal,
+      ];
+
       // Cache the results
-      packageCache.set(countryCode, fetchedPackages);
-      setPackages(fetchedPackages);
+      packageCache.set(countryCode, allPackages);
+      setPackages(allPackages);
     } catch (err) {
       console.error('❌ [PLANS] Error fetching packages:', err);
       setError(err.message);
@@ -325,8 +350,10 @@ const PlansPage = () => {
 
   // Navigate to package page
   const handleBuyClick = (pkg) => {
+    // For regional/global plans, pass the regionCode so PackagePage recognizes it
+    const navCountryCode = pkg.isGlobal ? 'GLOBAL' : pkg.isRegional ? pkg.regionCode : pkg.countryCode;
     navigate(`/package/${pkg.id}`, {
-      state: { plan: pkg, countryCode: pkg.countryCode }
+      state: { plan: pkg, countryCode: navCountryCode }
     });
   };
 
@@ -691,61 +718,93 @@ const PlansPage = () => {
                       >
                         <Td>
                           <HStack spacing={3}>
-                            <Box
-                              width="40px"
-                              height="30px"
-                              borderRadius="8px"
-                              overflow="hidden"
-                              border="1px solid"
-                              borderColor="#E8E9EE"
-                              flexShrink={0}
-                            >
-                              <CountryFlag
-                                code={pkg.countryCode}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                              />
-                            </Box>
+                            {!pkg.isRegional && !pkg.isGlobal ? (
+                              <Box
+                                width="40px"
+                                height="30px"
+                                borderRadius="8px"
+                                overflow="hidden"
+                                border="1px solid"
+                                borderColor="#E8E9EE"
+                                flexShrink={0}
+                              >
+                                <CountryFlag
+                                  code={pkg.countryCode}
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
+                              </Box>
+                            ) : (
+                              <Box
+                                width="40px"
+                                height="30px"
+                                borderRadius="8px"
+                                bg={pkg.isGlobal ? '#EFF6FF' : '#F5F3FF'}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexShrink={0}
+                              >
+                                <Box as={GlobeAltIcon} w="18px" h="18px" color={pkg.isGlobal ? '#3b82f6' : '#9333ea'} />
+                              </Box>
+                            )}
                             <Text fontWeight="600" color="#000">
-                              {getCountryName(pkg.countryCode, currentLanguage)}
+                              {pkg.isRegional || pkg.isGlobal
+                                ? (currentLanguage === 'uz' ? pkg.regionNameUz : pkg.regionNameRu)
+                                : getCountryName(pkg.countryCode, currentLanguage)}
                             </Text>
                           </HStack>
                         </Td>
                         <Td>
-                          <VStack align="flex-start" spacing={1}>
-                            <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
-                            <HStack spacing={2}>
-                              {/* Data Only Badge */}
-                              {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
-                                <Badge
-                                  bg="#F3F4F6"
-                                  color="#000000"
-                                  fontSize="11px"
-                                  fontWeight="700"
-                                  px={2}
-                                  py={0.5}
-                                  borderRadius="6px"
-                                  textTransform="uppercase"
-                                >
-                                  {t('plansPage.table.dataOnly')}
-                                </Badge>
-                              )}
-                              {/* Daily Unlimited Badge */}
-                              {isDailyUnlimited(pkg) && (
-                                <Badge
-                                  bg="#DCFCE7"
-                                  color="#166534"
-                                  fontSize="11px"
-                                  fontWeight="700"
-                                  px={2}
-                                  py={0.5}
-                                  borderRadius="6px"
-                                  textTransform="uppercase"
-                                >
-                                  {getDataTypeLabel(pkg.dataType, currentLanguage)}
-                                </Badge>
-                              )}
-                            </HStack>
-                          </VStack>
+                          {pkg.isRegional || pkg.isGlobal ? (
+                            <VStack align="flex-start" spacing={1}>
+                              <Text fontWeight="600" noOfLines={1} color="#000">
+                                {currentLanguage === 'uz' ? pkg.regionNameUz : pkg.regionNameRu}
+                                {' - '}
+                                {pkg.isRegional
+                                  ? t('plansPage.regionalPackage')
+                                  : t('plansPage.globalPackage')}
+                              </Text>
+                              <Text fontSize="xs" color="#494951">
+                                {pkg.countryCount} {t('plansPage.countriesPlus')} {getCountryName(filters.country, currentLanguage)}
+                              </Text>
+                            </VStack>
+                          ) : (
+                            <VStack align="flex-start" spacing={1}>
+                              <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
+                              <HStack spacing={2}>
+                                {/* Data Only Badge */}
+                                {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
+                                  <Badge
+                                    bg="#F3F4F6"
+                                    color="#000000"
+                                    fontSize="11px"
+                                    fontWeight="700"
+                                    px={2}
+                                    py={0.5}
+                                    borderRadius="6px"
+                                    textTransform="uppercase"
+                                  >
+                                    {t('plansPage.table.dataOnly')}
+                                  </Badge>
+                                )}
+                                {/* Daily Unlimited Badge */}
+                                {isDailyUnlimited(pkg) && (
+                                  <Badge
+                                    bg="#DCFCE7"
+                                    color="#166534"
+                                    fontSize="11px"
+                                    fontWeight="700"
+                                    px={2}
+                                    py={0.5}
+                                    borderRadius="6px"
+                                    textTransform="uppercase"
+                                  >
+                                    {getDataTypeLabel(pkg.dataType, currentLanguage)}
+                                  </Badge>
+                                )}
+                              </HStack>
+                            </VStack>
+                          )}
                         </Td>
                         <Td isNumeric>
                           <Badge bg="#FFF4F0" color="#FE4F18" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">

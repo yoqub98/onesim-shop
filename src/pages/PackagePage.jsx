@@ -48,7 +48,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
-import { getCountryName } from '../config/i18n';
+import { getCountryName, getTranslation } from '../config/i18n';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { createOrder } from '../services/orderService';
@@ -176,9 +176,26 @@ const PackagePage = () => {
     planTitle = `eSIM для ${countryName}`;
   }
 
+  const t = (key) => getTranslation(currentLanguage, key);
   const operatorName = plan.operatorList?.[0]?.operatorName || 'Не указан';
   const networkType = plan.operatorList?.[0]?.networkType || '4G/LTE';
-  const packageType = plan.smsSupported || plan.callsSupported ? 'Данные + Звонки/SMS' : 'Только данные';
+
+  // Determine package type text based on dataType
+  const getPackageTypeText = () => {
+    if (plan.dataType === 4) {
+      return currentLanguage === 'uz' ? 'Kunlik limitsiz' : 'Безлимит в день';
+    }
+    if (plan.dataType === 2) {
+      return currentLanguage === 'uz' ? 'Kunlik limit (tezlik kamayadi)' : 'Дневной лимит (снижение скорости)';
+    }
+    if (plan.dataType === 3) {
+      return currentLanguage === 'uz' ? 'Kunlik limit (to\'xtatiladi)' : 'Дневной лимит (отключение)';
+    }
+    return plan.smsSupported || plan.callsSupported
+      ? (currentLanguage === 'uz' ? 'Ma\'lumot + Qo\'ng\'iroqlar/SMS' : 'Данные + Звонки/SMS')
+      : (currentLanguage === 'uz' ? 'Faqat ma\'lumot' : 'Только данные');
+  };
+  const packageType = getPackageTypeText();
 
   // Extract covered countries for regional/global plans
   const coveredCountries = new Set();
@@ -514,6 +531,65 @@ const PackagePage = () => {
                 )}
               </VStack>
             </Box>
+
+            {/* Daily Limit Explanation - for dataType 2, 3, or 4 */}
+            {(plan.dataType === 2 || plan.dataType === 3 || plan.dataType === 4) && (
+              <Box bg="white" borderRadius="2xl" p={6} mb={6} shadow="sm">
+                <HStack spacing={3} mb={4}>
+                  <Box bg="orange.100" p={2} borderRadius="lg">
+                    <AlertCircle size={20} color="#ea580c" />
+                  </Box>
+                  <Heading size="md" color="gray.800">
+                    {t('packagePage.dailyLimit.title')}
+                  </Heading>
+                </HStack>
+
+                <VStack align="stretch" spacing={3}>
+                  <HStack align="flex-start" spacing={3}>
+                    <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
+                    <Text color="gray.600" fontSize="sm">
+                      {t('packagePage.dailyLimit.resetInfo')}
+                    </Text>
+                  </HStack>
+
+                  {plan.dataType === 2 && (
+                    <HStack align="flex-start" spacing={3}>
+                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
+                      <Text color="gray.600" fontSize="sm">
+                        {t('packagePage.dailyLimit.speedReduced')}
+                      </Text>
+                    </HStack>
+                  )}
+
+                  {plan.dataType === 3 && (
+                    <HStack align="flex-start" spacing={3}>
+                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
+                      <Text color="gray.600" fontSize="sm">
+                        {t('packagePage.dailyLimit.serviceCutoff')}
+                      </Text>
+                    </HStack>
+                  )}
+
+                  {plan.dataType === 4 && (
+                    <HStack align="flex-start" spacing={3}>
+                      <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
+                      <Text color="gray.600" fontSize="sm">
+                        {currentLanguage === 'uz'
+                          ? 'Kunlik internet cheklanmagan, lekin adolatli foydalanish siyosati amal qiladi'
+                          : 'Безлимитный интернет в день, но действует политика справедливого использования'}
+                      </Text>
+                    </HStack>
+                  )}
+
+                  <HStack align="flex-start" spacing={3}>
+                    <Text color="orange.500" fontWeight="700" mt={0.5}>•</Text>
+                    <Text color="gray.600" fontSize="sm">
+                      {t('packagePage.dailyLimit.difference')}
+                    </Text>
+                  </HStack>
+                </VStack>
+              </Box>
+            )}
 
             {/* Installation Instructions */}
             <Box bg="white" borderRadius="2xl" p={6} shadow="sm">

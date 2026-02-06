@@ -25,7 +25,7 @@ import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const PLANS_PER_PAGE = 12;
-const DEFAULT_DURATION_FILTER = 30; // Default to 30 days
+const DEFAULT_DURATION_FILTER = 'all'; // Show all durations by default
 
 // Loading Skeleton matching new DataPlanCard design
 const PlanCardSkeleton = () => {
@@ -295,7 +295,7 @@ const CountryPage = () => {
   
   // Default to 30 days filter
   const [selectedData, setSelectedData] = useState('all');
-  const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER.toString());
+  const [selectedDuration, setSelectedDuration] = useState(DEFAULT_DURATION_FILTER);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(null); // null | 'asc' | 'desc'
   

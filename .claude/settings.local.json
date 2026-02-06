@@ -53,7 +53,10 @@
       "Bash(node test-cron.js:*)",
       "Bash(node test-endpoint.js:*)",
       "Bash(node scripts/check-countries.js:*)",
-      "Bash(node scripts/find-missing-countries.js:*)"
+      "Bash(node scripts/find-missing-countries.js:*)",
+      "Bash(xargs:*)",
+      "Bash(grep:*)",
+      "Bash(npx react-scripts build:*)"
     ],
     "deny": [],
     "ask": []

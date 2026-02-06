@@ -333,6 +333,38 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
             </Text>
           </HStack>
 
+          {/* Data Type Badge - for daily unlimited or daily limit plans */}
+          {plan.dataType === 4 && (
+            <HStack
+              spacing={2}
+              px={3.5}
+              py={2}
+              borderRadius="12px"
+              bg="#F2F2F7"
+              align="center"
+              minW="fit-content"
+            >
+              <Text fontSize="14px" fontWeight="600" color="#000" whiteSpace="nowrap">
+                {t('plans.badge.dailyUnlimited')}
+              </Text>
+            </HStack>
+          )}
+          {(plan.dataType === 2 || plan.dataType === 3) && (
+            <HStack
+              spacing={2}
+              px={3.5}
+              py={2}
+              borderRadius="12px"
+              bg="#F2F2F7"
+              align="center"
+              minW="fit-content"
+            >
+              <Text fontSize="14px" fontWeight="600" color="#000" whiteSpace="nowrap">
+                {t('plans.badge.dailyLimit')}
+              </Text>
+            </HStack>
+          )}
+
           {/* Operators Badge - for single country */}
           {operatorsText && (
             <Box

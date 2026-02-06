@@ -1,6 +1,7 @@
 // src/services/esimAccessApi.js
 
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
+import { detectRegion, REGION_DEFINITIONS } from './packageCacheService.js';
 
 // Smart API URL detection
 const getApiUrl = () => {
@@ -343,6 +344,7 @@ export const transformPackageData = (apiPackage, countryCode, lang = DEFAULT_LAN
     name: apiPackage.name,
     operatorList: operators,
     dataType: apiPackage.dataType, // 1=Total, 2=Daily Limit (Speed Reduced), 3=Daily Limit (Cut-off), 4=Daily Unlimited
+    rawPackage: apiPackage,
   };
 };
 
@@ -442,3 +444,92 @@ export const fetchAllPackagesForCountry = async (
 // NOTE: fetchRegionalPackages and fetchGlobalPackages have been removed
 // Regional/global packages now come from database via packageService.js
 // These functions used old eSIM Access API with cache - no longer needed
+
+// ============================================
+// FETCH: Regional & Global packages covering a specific country
+// Used by PlansPage to show multi-country plans alongside country plans
+// ============================================
+export const fetchRegionalAndGlobalForCountry = async (countryCode, lang = DEFAULT_LANGUAGE) => {
+  console.log(`🌍 Fetching regional/global packages covering ${countryCode}...`);
+
+  const results = [];
+
+  try {
+    // Fetch regional packages
+    const regionalResponse = await fetch(`${API_URL}/packages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationCode: '!RG', type: '', slug: '', packageCode: '', iccid: '' }),
+    });
+
+    if (regionalResponse.ok) {
+      const regionalData = await regionalResponse.json();
+      if (regionalData.success && regionalData.obj?.packageList) {
+        const matchingRegional = regionalData.obj.packageList.filter(pkg => {
+          if (!pkg.locationNetworkList) return false;
+          return pkg.locationNetworkList.some(loc => loc.locationCode === countryCode);
+        });
+
+        console.log(`✅ Found ${matchingRegional.length} regional packages covering ${countryCode}`);
+
+        matchingRegional.forEach(pkg => {
+          const regionCode = detectRegion(pkg.locationCode);
+          const regionDef = REGION_DEFINITIONS[regionCode];
+          const countryCount = pkg.locationNetworkList ? pkg.locationNetworkList.length : 0;
+
+          const transformed = transformPackageData(pkg, countryCode, lang);
+          results.push({
+            ...transformed,
+            isRegional: true,
+            regionCode,
+            regionNameRu: regionDef?.nameRu || regionCode,
+            regionNameUz: regionDef?.nameUz || regionCode,
+            countryCount,
+          });
+        });
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error fetching regional packages for country:', err);
+  }
+
+  try {
+    // Fetch global packages
+    const globalResponse = await fetch(`${API_URL}/packages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locationCode: '!GL', type: '', slug: '', packageCode: '', iccid: '' }),
+    });
+
+    if (globalResponse.ok) {
+      const globalData = await globalResponse.json();
+      if (globalData.success && globalData.obj?.packageList) {
+        const matchingGlobal = globalData.obj.packageList.filter(pkg => {
+          if (!pkg.locationNetworkList) return false;
+          return pkg.locationNetworkList.some(loc => loc.locationCode === countryCode);
+        });
+
+        console.log(`✅ Found ${matchingGlobal.length} global packages covering ${countryCode}`);
+
+        matchingGlobal.forEach(pkg => {
+          const countryCount = pkg.locationNetworkList ? pkg.locationNetworkList.length : 0;
+
+          const transformed = transformPackageData(pkg, countryCode, lang);
+          results.push({
+            ...transformed,
+            isGlobal: true,
+            regionCode: 'GLOBAL',
+            regionNameRu: 'Глобальный',
+            regionNameUz: 'Global',
+            countryCount,
+          });
+        });
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error fetching global packages for country:', err);
+  }
+
+  console.log(`📦 Total regional/global packages for ${countryCode}: ${results.length}`);
+  return results;
+};
