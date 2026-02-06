@@ -50,7 +50,8 @@
       "Bash(timeout 120 node:*)",
       "Bash(timeout 180 node:*)",
       "Bash(timeout 300 node:*)",
-      "Bash(node test-cron.js:*)"
+      "Bash(node test-cron.js:*)",
+      "Bash(node test-endpoint.js:*)"
     ],
     "deny": [],
     "ask": []

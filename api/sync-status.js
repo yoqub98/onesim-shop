@@ -21,7 +21,26 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
+  // Diagnostic mode: ?test=1
+  const isTestMode = req.query.test === '1';
+
   try {
+    // In test mode, return diagnostic info
+    if (isTestMode) {
+      const envCheck = {
+        supabaseUrl: !!process.env.REACT_APP_SUPABASE_URL,
+        supabaseKey: !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY),
+        esimAccessKey: !!(process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY),
+        syncSecretKey: !!process.env.SYNC_SECRET_KEY,
+      };
+
+      return res.json({
+        success: true,
+        message: 'Diagnostic mode',
+        environment: envCheck,
+        timestamp: new Date().toISOString(),
+      });
+    }
     // Fetch the latest sync log entry
     const { data: latestSync, error } = await supabase
       .from('price_sync_log')
