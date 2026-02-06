@@ -128,8 +128,10 @@ export default async function handler(req, res) {
 
     let updated = 0;
     let notFound = 0;
+    let autoImported = 0;
     const changeDetails = [];
     const missingPackages = []; // Track packages not found in DB
+    const importedPackages = []; // Track auto-imported packages
 
     for (const change of changes) {
       // Skip product_added events (new products, not price changes)
@@ -163,16 +165,74 @@ export default async function handler(req, res) {
         .single();
 
       if (!existingPkg) {
-        console.warn(`⚠️  [${logId}] Package ${packageCode} not found in DB`);
-        notFound++;
-        missingPackages.push({
-          package_code: packageCode,
-          product_name: change.product_name,
-          slug: change.slug,
-          new_price_usd: newPriceUSD.toFixed(2),
-          event_type: change.event_type,
-        });
-        continue;
+        console.log(`🔄 [${logId}] Package ${packageCode} not found - AUTO-IMPORTING...`);
+
+        try {
+          // Extract location info from slug (e.g., "CR_3_30" -> country: CR)
+          const slugParts = change.slug?.split('_') || [];
+          const locationCode = slugParts[0] || 'UNKNOWN';
+
+          // Determine location type (country codes are 2 letters, regional are longer)
+          const locationType = locationCode.length === 2 ? 'country' : 'regional';
+
+          // Extract data volume and duration from new_value
+          const dataVolume = change.new_value?.volume || null; // bytes
+          const duration = change.new_value?.duration || null; // days
+
+          // Import the package
+          const { data: importedPkg, error: importError } = await supabase
+            .from('esim_packages')
+            .insert({
+              package_code: packageCode,
+              slug: change.slug,
+              product_name: change.product_name,
+              location_code: locationCode,
+              location_type: locationType,
+              api_price: newPrice,
+              final_price_usd: newPriceUSD * 1.5, // Apply 50% default margin
+              data_volume: dataVolume,
+              duration_days: duration,
+              is_active: change.new_value?.is_active !== false, // Active unless explicitly false
+              is_featured: false,
+              popularity_score: 0,
+              view_count: 0,
+              last_synced_at: new Date().toISOString(),
+              price_last_updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+
+          if (importError) {
+            console.error(`❌ [${logId}] Failed to auto-import ${packageCode}:`, importError);
+            notFound++;
+            missingPackages.push({
+              package_code: packageCode,
+              product_name: change.product_name,
+              slug: change.slug,
+              new_price_usd: newPriceUSD.toFixed(2),
+              error: importError.message,
+            });
+            continue;
+          }
+
+          console.log(`✅ [${logId}] Auto-imported ${packageCode}: ${change.product_name}`);
+          autoImported++;
+          importedPackages.push({
+            package_code: packageCode,
+            product_name: change.product_name,
+            slug: change.slug,
+            location_code: locationCode,
+            price_usd: newPriceUSD.toFixed(2),
+            imported_at: new Date().toISOString(),
+          });
+
+          // Now continue with price update (no need to skip)
+
+        } catch (importErr) {
+          console.error(`❌ [${logId}] Exception importing ${packageCode}:`, importErr);
+          notFound++;
+          continue;
+        }
       }
 
       await supabase.from('package_price_changes').insert({
@@ -216,13 +276,15 @@ export default async function handler(req, res) {
       .from('price_sync_log')
       .update({
         sync_completed_at: new Date().toISOString(),
-        status: notFound > 0 ? 'partial' : 'success', // Mark as partial if packages are missing
+        status: notFound > 0 ? 'partial' : 'success', // Mark as partial if import failed
         total_changes_detected: changes.length,
         packages_updated: updated,
         changes_summary: {
           duration_seconds: duration,
           not_found: notFound,
-          missing_packages: missingPackages, // Store missing package details
+          auto_imported: autoImported,
+          imported_packages: importedPackages, // Log auto-imported packages
+          missing_packages: missingPackages, // Only failed imports
           changes: changeDetails.slice(0, 50),
         },
       })
@@ -230,6 +292,7 @@ export default async function handler(req, res) {
 
     console.log(`✅ [${logId}] Price sync completed in ${duration}s`);
     console.log(`   📦 Updated: ${updated}`);
+    console.log(`   ➕ Auto-imported: ${autoImported}`);
     console.log(`   ⚠️  Not found: ${notFound}`);
 
     res.json({
@@ -238,10 +301,12 @@ export default async function handler(req, res) {
       stats: {
         totalChanges: changes.length,
         updated,
+        autoImported,
         notFound,
         durationSeconds: duration,
       },
       changes: changeDetails.slice(0, 10),
+      imported: importedPackages,
     });
 
   } catch (error) {

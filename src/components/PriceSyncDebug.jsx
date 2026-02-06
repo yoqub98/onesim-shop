@@ -124,9 +124,17 @@ const PriceSyncDebug = () => {
       }
 
       if (response.ok && result.success) {
+        const updatedCount = result.stats?.updated || 0;
+        const importedCount = result.stats?.autoImported || 0;
+
+        let description = `${t('priceSync.packagesUpdated')} ${updatedCount}`;
+        if (importedCount > 0) {
+          description += `\n${t('priceSync.autoImported')} ${importedCount}`;
+        }
+
         toast({
           title: t('priceSync.syncSuccess'),
-          description: `${t('priceSync.packagesUpdated')} ${result.stats?.updated || 0}`,
+          description,
           status: 'success',
           duration: 5000,
           isClosable: true,
@@ -259,6 +267,39 @@ const PriceSyncDebug = () => {
                   {syncData.packagesUpdated || 0}
                 </Text>
               </HStack>
+
+              {/* Auto Imported - Success */}
+              {syncData.autoImported > 0 && (
+                <>
+                  <HStack spacing={2} justify="space-between">
+                    <Text fontSize="xs" color="gray.600">
+                      {t('priceSync.autoImported')}
+                    </Text>
+                    <Text fontSize="sm" fontWeight="600" color="green.600">
+                      {syncData.autoImported}
+                    </Text>
+                  </HStack>
+                  <Box bg="green.50" p={2} borderRadius="md" border="1px solid" borderColor="green.200">
+                    <Text fontSize="xs" color="green.700" fontWeight="600">
+                      ✅ {t('priceSync.successImport')}
+                    </Text>
+                    {syncData.importedPackages && syncData.importedPackages.length > 0 && (
+                      <VStack align="stretch" mt={2} spacing={1}>
+                        {syncData.importedPackages.slice(0, 3).map((pkg, idx) => (
+                          <Text key={idx} fontSize="xs" color="green.600">
+                            • {pkg.package_code} - {pkg.product_name}
+                          </Text>
+                        ))}
+                        {syncData.importedPackages.length > 3 && (
+                          <Text fontSize="xs" color="green.600" fontStyle="italic">
+                            ...{currentLanguage === 'uz' ? 'va yana' : 'и ещё'} {syncData.importedPackages.length - 3}
+                          </Text>
+                        )}
+                      </VStack>
+                    )}
+                  </Box>
+                </>
+              )}
 
               {/* Packages Not Found - Warning */}
               {syncData.packagesNotFound > 0 && (
