@@ -27,6 +27,8 @@ export default async function handler(req, res) {
   const authHeader = req.headers.authorization;
   const isVercelCron = req.headers['x-vercel-cron'];
 
+  console.log('🔍 Auth check:', { isVercelCron: !!isVercelCron, hasAuthHeader: !!authHeader });
+
   if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${process.env.SYNC_SECRET_KEY}`)) {
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }
