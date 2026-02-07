@@ -22,6 +22,8 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
+  Image,
+  Flex,
 } from '@chakra-ui/react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
@@ -93,6 +95,12 @@ const PackagePage = () => {
     isOpen: isPasswordModalOpen,
     onOpen: onPasswordModalOpen,
     onClose: onPasswordModalClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isCompatibilityModalOpen,
+    onOpen: onCompatibilityModalOpen,
+    onClose: onCompatibilityModalClose
   } = useDisclosure();
 
   const plan = location.state?.plan;
@@ -261,8 +269,21 @@ const PackagePage = () => {
     { icon: Smartphone, text: t('packagePage.installation.step5') },
   ];
 
-  // Handle purchase button click - show password modal first
-  const handlePurchaseClick = () => {
+  // Check if eSIM compatibility has been verified
+  const isEsimCompatibilityVerified = () => {
+    return localStorage.getItem('esim_compatibility_verified') === 'true';
+  };
+
+  // Handle compatibility confirmation
+  const handleCompatibilityConfirm = () => {
+    localStorage.setItem('esim_compatibility_verified', 'true');
+    onCompatibilityModalClose();
+    // Proceed with purchase flow
+    proceedToPurchase();
+  };
+
+  // Proceed to purchase (after compatibility check)
+  const proceedToPurchase = () => {
     if (!user) {
       onLoginModalOpen();
       return;
@@ -271,6 +292,15 @@ const PackagePage = () => {
     setPasswordError(false);
     setShowPassword(false);
     onPasswordModalOpen();
+  };
+
+  // Handle purchase button click - check compatibility first
+  const handlePurchaseClick = () => {
+    if (!isEsimCompatibilityVerified()) {
+      onCompatibilityModalOpen();
+      return;
+    }
+    proceedToPurchase();
   };
 
   // Handle password confirmation and proceed with order
@@ -304,6 +334,7 @@ const PackagePage = () => {
       };
 
       await createOrder(orderData);
+      localStorage.setItem('esim_compatibility_verified', 'true');
       onSuccessModalOpen();
     } catch (error) {
       console.error('[ORDER] Failed:', error);
@@ -1047,6 +1078,171 @@ const PackagePage = () => {
               {t('packagePage.errorModal.ok')}
             </Button>
           </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* eSIM Compatibility Verification Modal */}
+      <Modal isOpen={isCompatibilityModalOpen} onClose={onCompatibilityModalClose} isCentered size="lg">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="28px" p={{ base: 5, md: 8 }} maxW="520px">
+          <ModalBody p={0}>
+            <VStack spacing={5} align="center">
+              {/* Warning Icon */}
+              <Flex
+                w="48px"
+                h="48px"
+                borderRadius="full"
+                align="center"
+                justify="center"
+              >
+                <AlertCircle size={42} color="#FE4F18" />
+              </Flex>
+
+              {/* Main Heading */}
+              <Text
+                fontSize={{ base: '18px', md: '20px' }}
+                fontWeight="800"
+                color="#1C1C1E"
+                textAlign="center"
+                lineHeight="1.3"
+              >
+                {t('packagePage.compatibilityModal.heading')}
+              </Text>
+
+              {/* Instructions */}
+              <VStack spacing={2} align="center">
+                {/* Dial instruction */}
+                <Text fontSize="15px" textAlign="center" lineHeight="1.5">
+                  <Text as="span" fontWeight="500" color="#6B7280">
+                    {t('packagePage.compatibilityModal.dialPrefix')}
+                  </Text>
+                  <Text as="span" fontWeight="700" color="#FE4F18">
+                    {t('packagePage.compatibilityModal.dialCode')}
+                  </Text>
+                  <Text as="span" fontWeight="500" color="#6B7280">
+                    {t('packagePage.compatibilityModal.dialSuffix')}
+                  </Text>
+                </Text>
+
+                {/* EID confirmation */}
+                <Text
+                  fontSize="15px"
+                  fontWeight="600"
+                  color="#1C1C1E"
+                  textAlign="center"
+                  textDecoration="underline"
+                >
+                  {t('packagePage.compatibilityModal.eidConfirm')}
+                </Text>
+                <Text
+                  fontSize="14px"
+                  fontWeight="500"
+                  color="#8E8E93"
+                  textAlign="center"
+                >
+                  {t('packagePage.compatibilityModal.recommendation')}
+                </Text>
+              </VStack>
+
+              {/* iPhone Mockup Images */}
+              <HStack spacing={3} w="100%" justify="center">
+                <Box
+                  bg="rgba(245, 246, 250, 0.8)"
+                  border="1px solid #E8E9EE"
+                  borderRadius="16px"
+                  p={3}
+                  flex="1"
+                  maxW="200px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Image
+                    src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot1.jpg"
+                    alt="Phone dialer *#06#"
+                    objectFit="contain"
+                    maxH="240px"
+                    w="100%"
+                    borderRadius="8px"
+                  />
+                </Box>
+                <Box
+                  bg="rgba(245, 246, 250, 0.8)"
+                  border="1px solid #E8E9EE"
+                  borderRadius="16px"
+                  p={3}
+                  flex="1"
+                  maxW="200px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <Image
+                    src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot2.jpg"
+                    alt="Device info with EID"
+                    objectFit="contain"
+                    maxH="240px"
+                    w="100%"
+                    borderRadius="8px"
+                  />
+                </Box>
+              </HStack>
+
+              {/* Action Buttons */}
+              <HStack spacing={3} w="100%" mt={1}>
+                {/* Cancel Button */}
+                <Button
+                  flex="1"
+                  variant="outline"
+                  borderColor="rgba(150, 150, 160, 0.4)"
+                  borderWidth="1.5px"
+                  borderRadius="full"
+                  bg="transparent"
+                  h="56px"
+                  fontWeight="600"
+                  fontSize="15px"
+                  color="#1C1C1E"
+                  _hover={{ bg: '#F2F2F7' }}
+                  onClick={onCompatibilityModalClose}
+                >
+                  {t('packagePage.compatibilityModal.cancel')}
+                </Button>
+
+                {/* Continue Button */}
+                <Button
+                  flex="1"
+                  bg="#FE4F18"
+                  borderRadius="full"
+                  h="56px"
+                  _hover={{ bg: '#E44615' }}
+                  _active={{ bg: '#C93D12' }}
+                  onClick={handleCompatibilityConfirm}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="flex-start"
+                  px={5}
+                  py={2}
+                >
+                  <Text
+                    fontSize="15px"
+                    fontWeight="800"
+                    color="white"
+                    textTransform="uppercase"
+                  >
+                    {t('packagePage.compatibilityModal.continue')}
+                  </Text>
+                  <Text
+                    fontSize="11px"
+                    fontWeight="400"
+                    color="rgba(255, 220, 200, 0.9)"
+                    mt="-1px"
+                  >
+                    {t('packagePage.compatibilityModal.continueSubtext')}
+                  </Text>
+                </Button>
+              </HStack>
+            </VStack>
+          </ModalBody>
         </ModalContent>
       </Modal>
     </Box>
