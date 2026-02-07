@@ -55,6 +55,47 @@ import { isDailyUnlimited, getDailyDataAmount, getDataTypeLabel } from '../utils
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
 
+// Region slug prefixes → localized names
+const REGION_SLUG_MAP = {
+  'EU': { ru: 'Европа', uz: 'Yevropa' },
+  'ASIA': { ru: 'Азия', uz: 'Osiyo' },
+  'AS': { ru: 'Азия', uz: 'Osiyo' },
+  'ME': { ru: 'Ближний Восток', uz: 'Yaqin Sharq' },
+  'AF': { ru: 'Африка', uz: 'Afrika' },
+  'AM': { ru: 'Америка', uz: 'Amerika' },
+  'LATAM': { ru: 'Латинская Америка', uz: 'Lotin Amerika' },
+  'OC': { ru: 'Океания', uz: 'Okeaniya' },
+  'GL': { ru: 'Глобальное покрытие', uz: 'Global qamrov' },
+  'GLOBAL': { ru: 'Глобальное покрытие', uz: 'Global qamrov' },
+};
+
+/**
+ * Parse a regional/global slug like "EU-30_1.5_Daily" or "GL-120_1_30"
+ * Returns { regionPrefix, countryCount, isGlobalSlug, regionName }
+ */
+const parseRegionalSlug = (slug, lang = 'ru') => {
+  if (!slug) return null;
+
+  // Slug format: PREFIX-COUNTRYCOUNT_DATA_DAYS or PREFIX-COUNTRYCOUNT_DATA_Daily
+  // Examples: EU-30_1.5_Daily, GL-120_1_30, ASIA-12_3_7, ME-9_5_30
+  const parts = slug.split('-');
+  if (parts.length < 2) return null;
+
+  const regionPrefix = parts[0].toUpperCase();
+  const rest = parts.slice(1).join('-'); // e.g. "30_1.5_Daily"
+  const countryCount = parseInt(rest.split('_')[0], 10);
+
+  const isGlobalSlug = regionPrefix === 'GL' || regionPrefix === 'GLOBAL';
+  const regionEntry = REGION_SLUG_MAP[regionPrefix];
+
+  return {
+    regionPrefix,
+    countryCount: isNaN(countryCount) ? 0 : countryCount,
+    isGlobalSlug,
+    regionName: regionEntry ? regionEntry[lang] || regionEntry.ru : regionPrefix,
+  };
+};
+
 const PlansPage = () => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
@@ -734,96 +775,106 @@ const PlansPage = () => {
                         _hover={{ bg: '#FFF4F0' }}
                         transition="all 0.2s"
                       >
-                        <Td>
-                          <HStack spacing={3}>
-                            {!pkg.isRegional && !pkg.isGlobal ? (
-                              <Box
-                                width="40px"
-                                height="30px"
-                                borderRadius="8px"
-                                overflow="hidden"
-                                border="1px solid"
-                                borderColor="#E8E9EE"
-                                flexShrink={0}
-                              >
-                                <CountryFlag
-                                  code={pkg.countryCode}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                              </Box>
-                            ) : (
-                              <Box
-                                width="40px"
-                                height="30px"
-                                borderRadius="8px"
-                                bg={pkg.isGlobal ? '#EFF6FF' : '#F5F3FF'}
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center"
-                                flexShrink={0}
-                              >
-                                <Box as={GlobeAltIcon} w="18px" h="18px" color={pkg.isGlobal ? '#3b82f6' : '#9333ea'} />
-                              </Box>
-                            )}
-                            <Text fontWeight="600" color="#000">
-                              {pkg.isRegional || pkg.isGlobal
-                                ? (currentLanguage === 'uz' ? pkg.regionNameUz : pkg.regionNameRu)
-                                : getCountryName(pkg.countryCode, currentLanguage)}
-                            </Text>
-                          </HStack>
-                        </Td>
-                        <Td>
-                          {pkg.isRegional || pkg.isGlobal ? (
-                            <VStack align="flex-start" spacing={1}>
-                              <Text fontWeight="600" noOfLines={1} color="#000">
-                                {currentLanguage === 'uz' ? pkg.regionNameUz : pkg.regionNameRu}
-                                {' - '}
-                                {pkg.isRegional
-                                  ? t('plansPage.regionalPackage')
-                                  : t('plansPage.globalPackage')}
-                              </Text>
-                              <Text fontSize="xs" color="#494951">
-                                {pkg.countryCount} {t('plansPage.countriesPlus')} {filters.country ? getCountryName(filters.country, currentLanguage) : ''}
-                              </Text>
-                            </VStack>
-                          ) : (
-                            <VStack align="flex-start" spacing={1}>
-                              <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
-                              <HStack spacing={2}>
-                                {/* Data Only Badge */}
-                                {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
-                                  <Badge
-                                    bg="#F3F4F6"
-                                    color="#000000"
-                                    fontSize="11px"
-                                    fontWeight="700"
-                                    px={2}
-                                    py={0.5}
-                                    borderRadius="6px"
-                                    textTransform="uppercase"
-                                  >
-                                    {t('plansPage.table.dataOnly')}
-                                  </Badge>
+                        {(() => {
+                          const slugInfo = (pkg.isRegional || pkg.isGlobal) ? parseRegionalSlug(pkg.slug, currentLanguage) : null;
+                          const isRG = pkg.isRegional || pkg.isGlobal || slugInfo;
+                          return (
+                            <>
+                              <Td>
+                                <HStack spacing={3}>
+                                  {!isRG ? (
+                                    <Box
+                                      width="40px"
+                                      height="30px"
+                                      borderRadius="8px"
+                                      overflow="hidden"
+                                      border="1px solid"
+                                      borderColor="#E8E9EE"
+                                      flexShrink={0}
+                                    >
+                                      <CountryFlag
+                                        code={pkg.countryCode}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                      />
+                                    </Box>
+                                  ) : (
+                                    <Box
+                                      width="40px"
+                                      height="30px"
+                                      borderRadius="8px"
+                                      bg={slugInfo?.isGlobalSlug ? '#EFF6FF' : '#F2F2F7'}
+                                      display="flex"
+                                      alignItems="center"
+                                      justifyContent="center"
+                                      flexShrink={0}
+                                    >
+                                      <Box as={GlobeAltIcon} w="18px" h="18px" color={slugInfo?.isGlobalSlug ? '#3b82f6' : '#FE4F18'} />
+                                    </Box>
+                                  )}
+                                  <Text fontWeight="600" color="#000">
+                                    {isRG
+                                      ? (slugInfo?.regionName || (currentLanguage === 'uz' ? pkg.regionNameUz : pkg.regionNameRu))
+                                      : getCountryName(pkg.countryCode, currentLanguage)}
+                                  </Text>
+                                </HStack>
+                              </Td>
+                              <Td>
+                                {isRG ? (
+                                  <VStack align="flex-start" spacing={1}>
+                                    <Text fontWeight="600" noOfLines={1} color="#000">
+                                      {slugInfo?.isGlobalSlug
+                                        ? (currentLanguage === 'uz' ? 'Global qamrov' : 'Глобальное покрытие')
+                                        : (currentLanguage === 'uz' ? 'Regional qamrov' : 'Региональное покрытие')
+                                      }
+                                      {' '}
+                                      {pkg.data} / {getDays(pkg)} {t('packagePage.details.days')}
+                                    </Text>
+                                    <Text fontSize="xs" color="#494951" fontWeight="500">
+                                      {slugInfo?.countryCount || pkg.countryCount || ''} {t('plansPage.countriesPlus')}{' '}
+                                      {filters.country ? getCountryName(filters.country, currentLanguage) : ''}
+                                      {' '}
+                                      {currentLanguage === 'uz' ? 'shu jumladan' : 'включительно'}
+                                    </Text>
+                                  </VStack>
+                                ) : (
+                                  <VStack align="flex-start" spacing={1}>
+                                    <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
+                                    <HStack spacing={2}>
+                                      {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
+                                        <Badge
+                                          bg="#F3F4F6"
+                                          color="#000000"
+                                          fontSize="11px"
+                                          fontWeight="700"
+                                          px={2}
+                                          py={0.5}
+                                          borderRadius="6px"
+                                          textTransform="uppercase"
+                                        >
+                                          {t('plansPage.table.dataOnly')}
+                                        </Badge>
+                                      )}
+                                      {isDailyUnlimited(pkg) && (
+                                        <Badge
+                                          bg="#DCFCE7"
+                                          color="#166534"
+                                          fontSize="11px"
+                                          fontWeight="700"
+                                          px={2}
+                                          py={0.5}
+                                          borderRadius="6px"
+                                          textTransform="uppercase"
+                                        >
+                                          {getDataTypeLabel(pkg.dataType, currentLanguage)}
+                                        </Badge>
+                                      )}
+                                    </HStack>
+                                  </VStack>
                                 )}
-                                {/* Daily Unlimited Badge */}
-                                {isDailyUnlimited(pkg) && (
-                                  <Badge
-                                    bg="#DCFCE7"
-                                    color="#166534"
-                                    fontSize="11px"
-                                    fontWeight="700"
-                                    px={2}
-                                    py={0.5}
-                                    borderRadius="6px"
-                                    textTransform="uppercase"
-                                  >
-                                    {getDataTypeLabel(pkg.dataType, currentLanguage)}
-                                  </Badge>
-                                )}
-                              </HStack>
-                            </VStack>
-                          )}
-                        </Td>
+                              </Td>
+                            </>
+                          );
+                        })()}
                         <Td isNumeric>
                           <Badge bg="#FFF4F0" color="#FE4F18" fontSize="13px" fontWeight="600" px={3} py={1} borderRadius="8px">
                             {isDailyUnlimited(pkg) ? getDailyDataAmount(pkg) || `${getDataVolumeGB(pkg)} GB` : `${getDataVolumeGB(pkg)} GB`}
