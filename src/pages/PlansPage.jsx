@@ -812,8 +812,8 @@ const PlansPage = () => {
                                     </Box>
                                   ) : (
                                     <Box
-                                      width="40px"
-                                      height="30px"
+                                      width="42px"
+                                      height="32px"
                                       borderRadius="8px"
                                       bg={slugInfo?.isGlobalSlug ? '#EFF6FF' : '#F2F2F7'}
                                       display="flex"
@@ -821,7 +821,7 @@ const PlansPage = () => {
                                       justifyContent="center"
                                       flexShrink={0}
                                     >
-                                      <Box as={GlobeAltIcon} w="18px" h="18px" color={slugInfo?.isGlobalSlug ? '#3b82f6' : '#FE4F18'} />
+                                      <Box as={GlobeAltIcon} w="20px" h="20px" color={slugInfo?.isGlobalSlug ? '#3b82f6' : '#FE4F18'} />
                                     </Box>
                                   )}
                                   <Text fontWeight="600" color="#000">
@@ -834,7 +834,7 @@ const PlansPage = () => {
                               <Td>
                                 {isRG ? (
                                   <VStack align="flex-start" spacing={1}>
-                                    <Text fontWeight="600" noOfLines={1} color="#000">
+                                    <Text fontWeight="700" noOfLines={1} color="#000">
                                       {slugInfo?.isGlobalSlug
                                         ? (currentLanguage === 'uz' ? 'Global qamrov' : 'Глобальное покрытие')
                                         : (currentLanguage === 'uz' ? 'Regional qamrov' : 'Региональное покрытие')
@@ -842,7 +842,7 @@ const PlansPage = () => {
                                       {' '}
                                       {pkg.data} / {getDays(pkg)} {t('packagePage.details.days')}
                                     </Text>
-                                    <Text fontSize="xs" color="#494951" fontWeight="500">
+                                    <Text fontSize="13px" color="#494951" fontWeight="500">
                                       {slugInfo?.countryCount || pkg.countryCount || ''} {t('plansPage.countriesPlus')}{' '}
                                       {filters.country ? getCountryName(filters.country, currentLanguage) : ''}
                                       {' '}
@@ -851,15 +851,15 @@ const PlansPage = () => {
                                   </VStack>
                                 ) : (
                                   <VStack align="flex-start" spacing={1}>
-                                    <Text noOfLines={1} fontWeight="500" color="#000">{pkg.name}</Text>
+                                    <Text noOfLines={1} fontWeight="600" color="#000">{pkg.name}</Text>
                                     <HStack spacing={2}>
                                       {(pkg.network === 'Data' || pkg.networkType === 'Data' || !pkg.hasVoice) && (
                                         <Badge
-                                          bg="#F3F4F6"
-                                          color="#000000"
-                                          fontSize="11px"
+                                          bg="#E8E9EE"
+                                          color="#1C1C1E"
+                                          fontSize="12px"
                                           fontWeight="700"
-                                          px={2}
+                                          px={2.5}
                                           py={0.5}
                                           borderRadius="6px"
                                           textTransform="uppercase"
