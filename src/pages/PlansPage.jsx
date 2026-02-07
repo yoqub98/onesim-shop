@@ -252,10 +252,15 @@ const PlansPage = () => {
         console.warn('⚠️ [PLANS] Failed to fetch regional/global:', err);
       }
 
-      // Merge: country plans first, then regional, then global
+      // Merge: country plans first, then regional, then global (sorted)
       const allPackages = [
         ...fetchedPackages,
-        ...regionalGlobal,
+        ...regionalGlobal.sort((a, b) => {
+          // Regional before global
+          if (a.isRegional && b.isGlobal) return -1;
+          if (a.isGlobal && b.isRegional) return 1;
+          return 0;
+        }),
       ];
 
       // Cache the results
@@ -308,6 +313,19 @@ const PlansPage = () => {
     filtered = filtered.filter(pkg => {
       const price = pkg.priceUSD || pkg.priceUsd;
       return price >= minPrice && price <= maxPrice;
+    });
+
+    // Sort: country-specific plans first, then regional, then global
+    filtered.sort((a, b) => {
+      const aIsRG = a.isRegional || a.isGlobal ? 1 : 0;
+      const bIsRG = b.isRegional || b.isGlobal ? 1 : 0;
+      if (aIsRG !== bIsRG) return aIsRG - bIsRG;
+      // Within regional/global: regional before global
+      if (aIsRG && bIsRG) {
+        if (a.isRegional && b.isGlobal) return -1;
+        if (a.isGlobal && b.isRegional) return 1;
+      }
+      return 0;
     });
 
     setDisplayedPackages(filtered);
@@ -765,7 +783,7 @@ const PlansPage = () => {
                                   : t('plansPage.globalPackage')}
                               </Text>
                               <Text fontSize="xs" color="#494951">
-                                {pkg.countryCount} {t('plansPage.countriesPlus')} {getCountryName(filters.country, currentLanguage)}
+                                {pkg.countryCount} {t('plansPage.countriesPlus')} {filters.country ? getCountryName(filters.country, currentLanguage) : ''}
                               </Text>
                             </VStack>
                           ) : (

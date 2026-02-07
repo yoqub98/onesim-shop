@@ -130,19 +130,19 @@ export const getDataTypeLabel = (dataType, lang = 'ru') => {
   const labels = {
     ru: {
       1: 'Фиксированный объем',
-      2: 'Дневной лимит (сниженная скорость)',
+      2: 'Дневной безлимит',
       3: 'Дневной лимит (отключение)',
       4: 'Безлимит ежедневно',
     },
     uz: {
       1: 'Belgilangan hajm',
-      2: 'Kunlik limit (kamaytirilgan tezlik)',
+      2: 'Kunlik cheksiz',
       3: 'Kunlik limit (o\'chirish)',
       4: 'Kunlik cheksiz',
     },
     en: {
       1: 'Fixed Data',
-      2: 'Daily Limit (Speed Reduced)',
+      2: 'Daily Unlimited',
       3: 'Daily Limit (Cut-off)',
       4: 'Daily Unlimited',
     },
