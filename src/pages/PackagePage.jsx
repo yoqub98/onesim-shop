@@ -1084,7 +1084,7 @@ const PackagePage = () => {
       {/* eSIM Compatibility Verification Modal */}
       <Modal isOpen={isCompatibilityModalOpen} onClose={onCompatibilityModalClose} isCentered size="lg">
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
-        <ModalContent mx={4} borderRadius="28px" p={{ base: 5, md: 8 }} maxW="520px">
+        <ModalContent mx={4} borderRadius="28px" p={{ base: 5, md: 8 }} maxW="580px">
           <ModalBody p={0}>
             <VStack spacing={5} align="center">
               {/* Warning Icon */}
@@ -1112,7 +1112,7 @@ const PackagePage = () => {
               {/* Instructions */}
               <VStack spacing={2} align="center">
                 {/* Dial instruction */}
-                <Text fontSize="15px" textAlign="center" lineHeight="1.5">
+                <Text fontSize="16px" textAlign="center" lineHeight="1.5">
                   <Text as="span" fontWeight="500" color="#6B7280">
                     {t('packagePage.compatibilityModal.dialPrefix')}
                   </Text>
@@ -1126,7 +1126,7 @@ const PackagePage = () => {
 
                 {/* EID confirmation */}
                 <Text
-                  fontSize="15px"
+                  fontSize="16px"
                   fontWeight="600"
                   color="#1C1C1E"
                   textAlign="center"
@@ -1135,7 +1135,7 @@ const PackagePage = () => {
                   {t('packagePage.compatibilityModal.eidConfirm')}
                 </Text>
                 <Text
-                  fontSize="14px"
+                  fontSize="15px"
                   fontWeight="500"
                   color="#8E8E93"
                   textAlign="center"
@@ -1145,14 +1145,14 @@ const PackagePage = () => {
               </VStack>
 
               {/* iPhone Mockup Images */}
-              <HStack spacing={3} w="100%" justify="center">
+              <HStack spacing={4} w="100%" justify="center">
                 <Box
                   bg="rgba(245, 246, 250, 0.8)"
                   border="1px solid #E8E9EE"
                   borderRadius="16px"
                   p={3}
                   flex="1"
-                  maxW="200px"
+                  maxW="270px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -1161,7 +1161,7 @@ const PackagePage = () => {
                     src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot1.jpg"
                     alt="Phone dialer *#06#"
                     objectFit="contain"
-                    maxH="240px"
+                    maxH="325px"
                     w="100%"
                     borderRadius="8px"
                   />
@@ -1172,7 +1172,7 @@ const PackagePage = () => {
                   borderRadius="16px"
                   p={3}
                   flex="1"
-                  maxW="200px"
+                  maxW="270px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -1181,7 +1181,7 @@ const PackagePage = () => {
                     src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot2.jpg"
                     alt="Device info with EID"
                     objectFit="contain"
-                    maxH="240px"
+                    maxH="325px"
                     w="100%"
                     borderRadius="8px"
                   />
