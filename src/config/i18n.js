@@ -812,6 +812,14 @@ export const TRANSLATIONS = {
         title: 'Ошибка заказа',
         ok: 'Понятно',
       },
+      passwordModal: {
+        title: 'Подтверждение покупки',
+        message: 'Введите пароль для подтверждения покупки.',
+        placeholder: 'Введите пароль',
+        error: 'Неверный пароль. Попробуйте снова.',
+        cancel: 'Отмена',
+        confirm: 'Подтвердить',
+      },
       dailyLimit: {
         title: 'Как работает дневной лимит',
         resetInfo: 'Объем данных обновляется каждые 24 часа',
@@ -1379,6 +1387,14 @@ export const TRANSLATIONS = {
       errorModal: {
         title: 'Buyurtma xatosi',
         ok: 'Tushunarli',
+      },
+      passwordModal: {
+        title: 'Xaridni tasdiqlash',
+        message: 'Xaridni tasdiqlash uchun parolni kiriting.',
+        placeholder: 'Parolni kiriting',
+        error: 'Noto\'g\'ri parol. Qayta urinib ko\'ring.',
+        cancel: 'Bekor qilish',
+        confirm: 'Tasdiqlash',
       },
       dailyLimit: {
         title: 'Kunlik limit qanday ishlaydi',

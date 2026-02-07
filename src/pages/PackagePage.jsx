@@ -18,6 +18,10 @@ import {
   ModalCloseButton,
   useDisclosure,
   Spinner,
+  Input,
+  InputGroup,
+  InputRightElement,
+  IconButton,
 } from '@chakra-ui/react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
@@ -39,6 +43,9 @@ import {
   AlertCircle,
   Shield,
   Zap,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CountryFlag from '../components/CountryFlag';
@@ -59,6 +66,9 @@ const PackagePage = () => {
   const [orderError, setOrderError] = useState(null);
   const [priceUZS, setPriceUZS] = useState(0);
   const [formattedPriceUZS, setFormattedPriceUZS] = useState('0');
+  const [purchasePassword, setPurchasePassword] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Modal controls
   const {
@@ -77,6 +87,12 @@ const PackagePage = () => {
     isOpen: isErrorModalOpen,
     onOpen: onErrorModalOpen,
     onClose: onErrorModalClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isPasswordModalOpen,
+    onOpen: onPasswordModalOpen,
+    onClose: onPasswordModalClose
   } = useDisclosure();
 
   const plan = location.state?.plan;
@@ -245,13 +261,26 @@ const PackagePage = () => {
     { icon: Smartphone, text: t('packagePage.installation.step5') },
   ];
 
-  // Handle purchase button click
-  const handlePurchaseClick = async () => {
+  // Handle purchase button click - show password modal first
+  const handlePurchaseClick = () => {
     if (!user) {
       onLoginModalOpen();
       return;
     }
+    setPurchasePassword('');
+    setPasswordError(false);
+    setShowPassword(false);
+    onPasswordModalOpen();
+  };
 
+  // Handle password confirmation and proceed with order
+  const handlePasswordConfirm = async () => {
+    if (purchasePassword !== 'Yoqub610!') {
+      setPasswordError(true);
+      return;
+    }
+
+    onPasswordModalClose();
     setIsOrdering(true);
     setOrderError(null);
 
@@ -845,6 +874,89 @@ const PackagePage = () => {
               onClick={() => navigate('/signup')}
             >
               {t('packagePage.loginModal.signup')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Purchase Password Modal */}
+      <Modal isOpen={isPasswordModalOpen} onClose={onPasswordModalClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent mx={4} borderRadius="28px" p={2}>
+          <ModalHeader>
+            <HStack spacing={3}>
+              <Box bg="#FFF4F0" p={2.5} borderRadius="14px">
+                <Lock size={22} color="#FE4F18" />
+              </Box>
+              <Text fontSize="18px" fontWeight="700" color="#1C1C1E">
+                {t('packagePage.passwordModal.title')}
+              </Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton top={4} right={4} />
+          <ModalBody pb={2}>
+            <Text color="#8E8E93" fontSize="14px" mb={4}>
+              {t('packagePage.passwordModal.message')}
+            </Text>
+            <InputGroup>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder={t('packagePage.passwordModal.placeholder')}
+                value={purchasePassword}
+                onChange={(e) => {
+                  setPurchasePassword(e.target.value);
+                  setPasswordError(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handlePasswordConfirm();
+                }}
+                borderRadius="14px"
+                borderColor={passwordError ? '#EF4444' : '#E5E5EA'}
+                borderWidth="2px"
+                py={5}
+                fontSize="15px"
+                _focus={{
+                  borderColor: passwordError ? '#EF4444' : '#FE4F18',
+                  boxShadow: 'none',
+                }}
+              />
+              <InputRightElement h="full">
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                  icon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  color="#8E8E93"
+                />
+              </InputRightElement>
+            </InputGroup>
+            {passwordError && (
+              <Text color="#EF4444" fontSize="13px" mt={2} fontWeight="500">
+                {t('packagePage.passwordModal.error')}
+              </Text>
+            )}
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button
+              variant="ghost"
+              onClick={onPasswordModalClose}
+              borderRadius="full"
+              color="#8E8E93"
+              fontWeight="600"
+            >
+              {t('packagePage.passwordModal.cancel')}
+            </Button>
+            <Button
+              bg="#FE4F18"
+              color="white"
+              borderRadius="full"
+              px={8}
+              fontWeight="700"
+              _hover={{ bg: '#E44615' }}
+              onClick={handlePasswordConfirm}
+            >
+              {t('packagePage.passwordModal.confirm')}
             </Button>
           </ModalFooter>
         </ModalContent>
