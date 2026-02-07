@@ -82,17 +82,21 @@ const parseRegionalSlug = (slug, lang = 'ru') => {
   if (parts.length < 2) return null;
 
   const regionPrefix = parts[0].toUpperCase();
-  const rest = parts.slice(1).join('-'); // e.g. "30_1.5_Daily"
+  const regionEntry = REGION_SLUG_MAP[regionPrefix];
+
+  // Only treat as regional/global if the prefix is a KNOWN region
+  if (!regionEntry) return null;
+
+  const rest = parts.slice(1).join('-'); // e.g. "43_20_30"
   const countryCount = parseInt(rest.split('_')[0], 10);
 
   const isGlobalSlug = regionPrefix === 'GL' || regionPrefix === 'GLOBAL';
-  const regionEntry = REGION_SLUG_MAP[regionPrefix];
 
   return {
     regionPrefix,
     countryCount: isNaN(countryCount) ? 0 : countryCount,
     isGlobalSlug,
-    regionName: regionEntry ? regionEntry[lang] || regionEntry.ru : regionPrefix,
+    regionName: regionEntry[lang] || regionEntry.ru,
   };
 };
 
@@ -358,13 +362,17 @@ const PlansPage = () => {
 
     // Sort: country-specific plans first, then regional, then global
     filtered.sort((a, b) => {
-      const aIsRG = a.isRegional || a.isGlobal ? 1 : 0;
-      const bIsRG = b.isRegional || b.isGlobal ? 1 : 0;
+      const aSlug = parseRegionalSlug(a.slug);
+      const bSlug = parseRegionalSlug(b.slug);
+      const aIsRG = a.isRegional || a.isGlobal || aSlug ? 1 : 0;
+      const bIsRG = b.isRegional || b.isGlobal || bSlug ? 1 : 0;
       if (aIsRG !== bIsRG) return aIsRG - bIsRG;
       // Within regional/global: regional before global
       if (aIsRG && bIsRG) {
-        if (a.isRegional && b.isGlobal) return -1;
-        if (a.isGlobal && b.isRegional) return 1;
+        const aIsGlobal = a.isGlobal || aSlug?.isGlobalSlug;
+        const bIsGlobal = b.isGlobal || bSlug?.isGlobalSlug;
+        if (!aIsGlobal && bIsGlobal) return -1;
+        if (aIsGlobal && !bIsGlobal) return 1;
       }
       return 0;
     });
@@ -410,7 +418,10 @@ const PlansPage = () => {
   // Navigate to package page
   const handleBuyClick = (pkg) => {
     // For regional/global plans, pass the regionCode so PackagePage recognizes it
-    const navCountryCode = pkg.isGlobal ? 'GLOBAL' : pkg.isRegional ? pkg.regionCode : pkg.countryCode;
+    const slugInfo = parseRegionalSlug(pkg.slug);
+    const isGlobal = pkg.isGlobal || slugInfo?.isGlobalSlug;
+    const isRegional = pkg.isRegional || (slugInfo && !slugInfo.isGlobalSlug);
+    const navCountryCode = isGlobal ? 'GLOBAL' : isRegional ? (pkg.regionCode || slugInfo?.regionPrefix) : pkg.countryCode;
     navigate(`/package/${pkg.id}`, {
       state: { plan: pkg, countryCode: navCountryCode }
     });
@@ -776,7 +787,9 @@ const PlansPage = () => {
                         transition="all 0.2s"
                       >
                         {(() => {
-                          const slugInfo = (pkg.isRegional || pkg.isGlobal) ? parseRegionalSlug(pkg.slug, currentLanguage) : null;
+                          // Always try parsing slug — the main API fetch also returns regional/global packages
+                          // without isRegional/isGlobal flags
+                          const slugInfo = parseRegionalSlug(pkg.slug, currentLanguage);
                           const isRG = pkg.isRegional || pkg.isGlobal || slugInfo;
                           return (
                             <>
