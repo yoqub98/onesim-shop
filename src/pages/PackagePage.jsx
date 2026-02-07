@@ -712,7 +712,7 @@ const PackagePage = () => {
                       justifyContent="center"
                       flexShrink={0}
                     >
-                      <step.icon size={20} color="#FE4F18" />
+                      <step.icon size={20} color="#1C1C1E" />
                     </Box>
                     <VStack align="flex-start" spacing={0} pt={1}>
                       <Text fontSize="13px" fontWeight="600" color="#FE4F18">
@@ -1084,7 +1084,7 @@ const PackagePage = () => {
       {/* eSIM Compatibility Verification Modal */}
       <Modal isOpen={isCompatibilityModalOpen} onClose={onCompatibilityModalClose} isCentered size="lg">
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
-        <ModalContent mx={4} borderRadius="28px" p={{ base: 5, md: 8 }} maxW="580px">
+        <ModalContent mx={4} borderRadius="28px" p={{ base: 5, md: 8 }} maxW="660px">
           <ModalBody p={0}>
             <VStack spacing={5} align="center">
               {/* Warning Icon */}
@@ -1152,7 +1152,7 @@ const PackagePage = () => {
                   borderRadius="16px"
                   p={3}
                   flex="1"
-                  maxW="270px"
+                  maxW="340px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -1161,7 +1161,7 @@ const PackagePage = () => {
                     src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot1.jpg"
                     alt="Phone dialer *#06#"
                     objectFit="contain"
-                    maxH="325px"
+                    maxH="420px"
                     w="100%"
                     borderRadius="8px"
                   />
@@ -1172,7 +1172,7 @@ const PackagePage = () => {
                   borderRadius="16px"
                   p={3}
                   flex="1"
-                  maxW="270px"
+                  maxW="340px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -1181,7 +1181,7 @@ const PackagePage = () => {
                     src="https://ik.imagekit.io/php1jcf0t/OneSim/screenshot2.jpg"
                     alt="Device info with EID"
                     objectFit="contain"
-                    maxH="325px"
+                    maxH="420px"
                     w="100%"
                     borderRadius="8px"
                   />
