@@ -49,54 +49,20 @@ import CountryFlag from '../components/CountryFlag';
 import { fetchHandpickedPackages, fetchRegionalAndGlobalForCountry } from '../services/esimAccessApi';
 import { HANDPICKED_PLAN_SLUGS, calculateFinalPrice, calculateFinalPriceUSD, formatPrice } from '../config/pricing';
 import { getTranslation, getCountryName, getCountrySearchNames, COUNTRY_TRANSLATIONS } from '../config/i18n';
+import { parseRegionalSlug as parseRegionalSlugShared } from '../services/packageCacheService.js';
 import { useLanguage } from '../contexts/LanguageContext';
 import { isDailyUnlimited, getDailyDataAmount, getDataTypeLabel } from '../utils/dailyUnlimited';
 
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
 
-// Region slug prefixes → localized names
-const REGION_SLUG_MAP = {
-  'EU': { ru: 'Европа', uz: 'Yevropa' },
-  'ASIA': { ru: 'Азия', uz: 'Osiyo' },
-  'AS': { ru: 'Азия', uz: 'Osiyo' },
-  'ME': { ru: 'Ближний Восток', uz: 'Yaqin Sharq' },
-  'AF': { ru: 'Африка', uz: 'Afrika' },
-  'AM': { ru: 'Америка', uz: 'Amerika' },
-  'LATAM': { ru: 'Латинская Америка', uz: 'Lotin Amerika' },
-  'OC': { ru: 'Океания', uz: 'Okeaniya' },
-  'GL': { ru: 'Глобальное покрытие', uz: 'Global qamrov' },
-  'GLOBAL': { ru: 'Глобальное покрытие', uz: 'Global qamrov' },
-};
-
-/**
- * Parse a regional/global slug like "EU-30_1.5_Daily" or "GL-120_1_30"
- * Returns { regionPrefix, countryCount, isGlobalSlug, regionName }
- */
+// Wrapper around shared parseRegionalSlug - adapts field names for PlansPage
 const parseRegionalSlug = (slug, lang = 'ru') => {
-  if (!slug) return null;
-
-  // Slug format: PREFIX-COUNTRYCOUNT_DATA_DAYS or PREFIX-COUNTRYCOUNT_DATA_Daily
-  // Examples: EU-30_1.5_Daily, GL-120_1_30, ASIA-12_3_7, ME-9_5_30
-  const parts = slug.split('-');
-  if (parts.length < 2) return null;
-
-  const regionPrefix = parts[0].toUpperCase();
-  const regionEntry = REGION_SLUG_MAP[regionPrefix];
-
-  // Only treat as regional/global if the prefix is a KNOWN region
-  if (!regionEntry) return null;
-
-  const rest = parts.slice(1).join('-'); // e.g. "43_20_30"
-  const countryCount = parseInt(rest.split('_')[0], 10);
-
-  const isGlobalSlug = regionPrefix === 'GL' || regionPrefix === 'GLOBAL';
-
+  const info = parseRegionalSlugShared(slug, lang);
+  if (!info) return null;
   return {
-    regionPrefix,
-    countryCount: isNaN(countryCount) ? 0 : countryCount,
-    isGlobalSlug,
-    regionName: regionEntry[lang] || regionEntry.ru,
+    ...info,
+    isGlobalSlug: info.isGlobal,
   };
 };
 

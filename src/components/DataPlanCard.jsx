@@ -13,7 +13,7 @@ import { WifiIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { getTranslation } from '../config/i18n';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
-import { REGION_DEFINITIONS } from '../services/packageCacheService.js';
+import { REGION_DEFINITIONS, getLocalizedPackageTitle } from '../services/packageCacheService.js';
 
 // Utility function to extract the highest network speed
 export const parseHighestSpeed = (speed) => {
@@ -234,7 +234,7 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
             color="#FE4F18"
             fontFamily="'Manrope', sans-serif"
           >
-            {plan.name || `${plan.country} ${dataValue}/${plan.days}`}
+            {getLocalizedPackageTitle(plan, lang) || plan.name || `${plan.country} ${dataValue}/${plan.days}`}
           </Text>
         )}
 

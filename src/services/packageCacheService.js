@@ -39,7 +39,7 @@ export const REGION_DEFINITIONS = {
     name: 'Americas',
     nameRu: 'Америка',
     nameUz: 'Amerika',
-    patterns: ['AM-', 'AM_', 'AMERICAS-', 'AMERICAS_', 'LATAM-', 'LATAM_'],
+    patterns: ['AM-', 'AM_', 'AMERICAS-', 'AMERICAS_', 'LATAM-', 'LATAM_', 'SA-', 'SA_', 'NA-', 'NA_'],
     icon: '🌎'
   },
   'AF': {
@@ -113,6 +113,90 @@ export const getRegionName = (regionCode, lang = 'en') => {
     default:
       return region.name;
   }
+};
+
+// Slug prefix → localized region names (covers prefixes not in REGION_DEFINITIONS)
+const SLUG_PREFIX_MAP = {
+  'EU': { ru: 'Европа', uz: 'Yevropa' },
+  'EUROPE': { ru: 'Европа', uz: 'Yevropa' },
+  'ASIA': { ru: 'Азия', uz: 'Osiyo' },
+  'AS': { ru: 'Азия', uz: 'Osiyo' },
+  'ME': { ru: 'Ближний Восток', uz: 'Yaqin Sharq' },
+  'AF': { ru: 'Африка', uz: 'Afrika' },
+  'AFRICA': { ru: 'Африка', uz: 'Afrika' },
+  'AM': { ru: 'Америка', uz: 'Amerika' },
+  'SA': { ru: 'Южная Америка', uz: 'Janubiy Amerika' },
+  'NA': { ru: 'Северная Америка', uz: 'Shimoliy Amerika' },
+  'LATAM': { ru: 'Латинская Америка', uz: 'Lotin Amerika' },
+  'OC': { ru: 'Океания', uz: 'Okeaniya' },
+  'OCEANIA': { ru: 'Океания', uz: 'Okeaniya' },
+  'GL': { ru: 'Глобальный', uz: 'Global' },
+  'GLOBAL': { ru: 'Глобальный', uz: 'Global' },
+  'CIS': { ru: 'СНГ', uz: 'MDH' },
+  'SEA': { ru: 'Юго-Восточная Азия', uz: 'Janubi-Sharqiy Osiyo' },
+  'MENA': { ru: 'Ближний Восток и Африка', uz: 'Yaqin Sharq va Afrika' },
+  'CARIBBEAN': { ru: 'Карибский регион', uz: 'Karib mintaqasi' },
+  'BALKANS': { ru: 'Балканы', uz: 'Balkanlar' },
+  'NORDIC': { ru: 'Скандинавия', uz: 'Skandinaviya' },
+};
+
+/**
+ * Parse a regional/global slug to extract localized info.
+ * Handles: EU-43_20_30, GL-120_1_30, SA-18_5_30, ASIA-12_3_Daily, etc.
+ *
+ * @param {string} slug - Package slug
+ * @param {string} lang - Language code (ru, uz)
+ * @returns {object|null} { regionPrefix, regionName, countryCount, isGlobal, dataAmount, days }
+ */
+export const parseRegionalSlug = (slug, lang = 'ru') => {
+  if (!slug) return null;
+
+  const parts = slug.split('-');
+  if (parts.length < 2) return null;
+
+  const regionPrefix = parts[0].toUpperCase();
+  const entry = SLUG_PREFIX_MAP[regionPrefix];
+
+  // Only treat as regional/global if the prefix is known
+  if (!entry) return null;
+
+  const rest = parts.slice(1).join('-'); // e.g. "43_20_30" or "120_1_Daily"
+  const segments = rest.split('_');
+  const countryCount = parseInt(segments[0], 10);
+  const dataAmount = segments.length > 1 ? parseFloat(segments[1]) : 0;
+  const daysOrType = segments.length > 2 ? segments[2] : '';
+  const days = /daily/i.test(daysOrType) ? null : parseInt(daysOrType, 10) || 0;
+
+  const isGlobal = regionPrefix === 'GL' || regionPrefix === 'GLOBAL';
+
+  return {
+    regionPrefix,
+    regionName: entry[lang] || entry.ru,
+    countryCount: isNaN(countryCount) ? 0 : countryCount,
+    isGlobal,
+    dataAmount,
+    days,
+    isDaily: /daily/i.test(daysOrType),
+  };
+};
+
+/**
+ * Generate a localized title for a regional/global package card.
+ * E.g. "Южная Америка 5GB / 30 дней"
+ *
+ * @param {object} plan - Plan object with slug, data, days
+ * @param {string} lang - Language code
+ * @returns {string|null} Localized title, or null if not a regional/global package
+ */
+export const getLocalizedPackageTitle = (plan, lang = 'ru') => {
+  const info = parseRegionalSlug(plan.slug || plan.id, lang);
+  if (!info) return null;
+
+  const dataDisplay = plan.data || (info.dataAmount >= 1 ? `${info.dataAmount}GB` : `${Math.round(info.dataAmount * 1024)}MB`);
+  const daysDisplay = plan.days || info.days || '';
+  const daysLabel = lang === 'uz' ? 'kun' : 'дней';
+
+  return `${info.regionName} ${dataDisplay} / ${daysDisplay} ${daysLabel}`;
 };
 
 /**
