@@ -473,7 +473,12 @@ export const fetchRegionalAndGlobalForCountry = async (countryCode, lang = DEFAU
         console.log(`✅ Found ${matchingRegional.length} regional packages covering ${countryCode}`);
 
         matchingRegional.forEach(pkg => {
-          const regionCode = detectRegion(pkg.locationCode);
+          console.log(`[PLANS] Regional pkg locationCode: "${pkg.locationCode}", name: "${pkg.name}", slug: "${pkg.slug}"`);
+          let regionCode = detectRegion(pkg.locationCode);
+          // Fallback: try to detect region from slug or name if locationCode didn't match
+          if (regionCode === 'OTHER') {
+            regionCode = detectRegion(pkg.slug) || detectRegion(pkg.name) || 'OTHER';
+          }
           const regionDef = REGION_DEFINITIONS[regionCode];
           const countryCount = pkg.locationNetworkList ? pkg.locationNetworkList.length : 0;
 

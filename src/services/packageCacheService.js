@@ -18,49 +18,49 @@ export const REGION_DEFINITIONS = {
     name: 'Europe',
     nameRu: 'Европа',
     nameUz: 'Yevropa',
-    patterns: ['EU-', 'EUROPE-'],
+    patterns: ['EU-', 'EU_', 'EUROPE-', 'EUROPE_'],
     icon: '🇪🇺'
   },
   'ASIA': {
     name: 'Asia',
     nameRu: 'Азия',
     nameUz: 'Osiyo',
-    patterns: ['ASIA-', 'AS-'],
+    patterns: ['ASIA-', 'ASIA_', 'AS-', 'AS_'],
     icon: '🌏'
   },
   'ME': {
     name: 'Middle East',
     nameRu: 'Ближний Восток',
     nameUz: 'Yaqin Sharq',
-    patterns: ['ME-', 'MIDDLEEAST-'],
+    patterns: ['ME-', 'ME_', 'MIDDLEEAST-', 'MIDDLEEAST_'],
     icon: '🕌'
   },
   'AM': {
     name: 'Americas',
     nameRu: 'Америка',
     nameUz: 'Amerika',
-    patterns: ['AM-', 'AMERICAS-', 'LATAM-'],
+    patterns: ['AM-', 'AM_', 'AMERICAS-', 'AMERICAS_', 'LATAM-', 'LATAM_'],
     icon: '🌎'
   },
   'AF': {
     name: 'Africa',
     nameRu: 'Африка',
     nameUz: 'Afrika',
-    patterns: ['AF-', 'AFRICA-'],
+    patterns: ['AF-', 'AF_', 'AFRICA-', 'AFRICA_'],
     icon: '🌍'
   },
   'OC': {
     name: 'Oceania',
     nameRu: 'Океания',
     nameUz: 'Okeaniya',
-    patterns: ['OC-', 'OCEANIA-', 'PACIFIC-'],
+    patterns: ['OC-', 'OC_', 'OCEANIA-', 'OCEANIA_', 'PACIFIC-', 'PACIFIC_'],
     icon: '🏝️'
   },
   'GLOBAL': {
     name: 'Global',
     nameRu: 'Глобальный',
     nameUz: 'Global',
-    patterns: ['!GL', 'GLOBAL-'],
+    patterns: ['GL', 'GLOBAL-', 'GLOBAL_'],
     icon: '🌐'
   },
   'OTHER': {
@@ -80,9 +80,13 @@ export const REGION_DEFINITIONS = {
 export const detectRegion = (locationCode) => {
   if (!locationCode) return 'OTHER';
 
+  // Strip leading '!' prefix used by eSIM Access API for regional/global codes
+  const normalizedCode = locationCode.startsWith('!') ? locationCode.substring(1) : locationCode;
+
   for (const [regionCode, regionDef] of Object.entries(REGION_DEFINITIONS)) {
     for (const pattern of regionDef.patterns) {
-      if (locationCode.startsWith(pattern)) {
+      const normalizedPattern = pattern.startsWith('!') ? pattern.substring(1) : pattern;
+      if (normalizedCode.startsWith(normalizedPattern) || locationCode.startsWith(pattern)) {
         return regionCode;
       }
     }
