@@ -729,11 +729,13 @@ const HeroSection = () => {
             display="flex"
             justifyContent="center"
             alignItems="flex-end"
+            overflow="visible"
           >
             <Box
               position="relative"
               w="100%"
-              maxW={{ base: '400px', lg: '560px' }}
+              maxW={{ base: '420px', lg: '600px' }}
+              mb={{ base: '-60px', md: '-80px', lg: '-100px' }}
               sx={{ animation: 'heroFadeRight 0.8s ease-out 0.3s both',
                 '@keyframes heroFadeRight': {
                   from: { opacity: 0, transform: 'translateX(40px)' },
@@ -741,7 +743,7 @@ const HeroSection = () => {
                 },
               }}
             >
-              {/* People image - sits above wave, wave crops the bottom */}
+              {/* People image */}
               <Image
                 src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
                 alt="People using eSIM"
@@ -752,12 +754,12 @@ const HeroSection = () => {
                 zIndex={1}
               />
 
-              {/* FIX #3: UI Card 1 - top right - ui-screenshot1.png (Европа 10/30), 30% BIGGER */}
+              {/* UI Card 1 - top right (Европа 10/30) - BIGGER */}
               <Box
                 position="absolute"
-                top={{ base: '2%', lg: '5%' }}
-                right={{ base: '-8%', lg: '-16%' }}
-                w={{ base: '180px', md: '230px', lg: '270px' }}
+                top={{ base: '-2%', lg: '0%' }}
+                right={{ base: '-15%', lg: '-30%' }}
+                w={{ base: '200px', md: '280px', lg: '340px' }}
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat1 0.7s ease-out 0.7s both',
@@ -777,12 +779,12 @@ const HeroSection = () => {
                 />
               </Box>
 
-              {/* FIX #3: UI Card 2 - bottom right - ui-screenshot2.png (Германия 20 дней), smaller */}
+              {/* UI Card 2 - bottom right (Германия 20 дней) - large */}
               <Box
                 position="absolute"
-                bottom={{ base: '15%', lg: '18%' }}
-                right={{ base: '-10%', lg: '-22%' }}
-                w={{ base: '160px', md: '200px', lg: '240px' }}
+                bottom={{ base: '18%', lg: '22%' }}
+                right={{ base: '-18%', lg: '-35%' }}
+                w={{ base: '220px', md: '300px', lg: '380px' }}
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat2 0.7s ease-out 0.9s both',
@@ -806,38 +808,28 @@ const HeroSection = () => {
         </Grid>
       </Container>
 
-      {/* Wave SVG - gentle concave curve, lifted up to crop people image */}
+      {/* Smooth wide elliptical curve + solid fill to crop people image */}
       <Box
         position="absolute"
-        bottom={{ base: '40px', md: '60px', lg: '80px' }}
+        bottom="0"
         left="0"
         right="0"
+        h={{ base: '120px', md: '160px', lg: '200px' }}
         zIndex={4}
-        lineHeight="0"
+        overflow="hidden"
       >
-        <svg
-          viewBox="0 0 1440 80"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="none"
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        >
-          <path
-            d="M0 0C360 60 720 80 720 80C720 80 1080 60 1440 0V80H0V0Z"
-            fill="#FFCFC0"
-          />
-        </svg>
+        <Box
+          position="absolute"
+          bottom="0"
+          left="50%"
+          transform="translateX(-50%)"
+          w="160%"
+          h="100%"
+          bg="#FFCFC0"
+          borderTopLeftRadius="50%"
+          borderTopRightRadius="50%"
+        />
       </Box>
-      {/* Solid fill below the wave to cover remaining gap */}
-      <Box
-        position="absolute"
-        bottom="-1px"
-        left="0"
-        right="0"
-        h={{ base: '50px', md: '70px', lg: '90px' }}
-        bg="#FFCFC0"
-        zIndex={4}
-      />
     </Box>
   );
 };
