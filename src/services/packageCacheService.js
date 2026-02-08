@@ -211,7 +211,6 @@ export const getGlobalPackageMarketingName = (plan, lang = 'ru') => {
   const info = parseRegionalSlug(plan.slug || plan.id, lang);
   const dataGB = plan.dataGB || (info?.dataAmount) || 0;
   const days = plan.days || plan.duration || info?.days || 0;
-  const countryCount = info?.countryCount || plan.coveredCountries?.length || 0;
   const isDaily = info?.isDaily || false;
 
   // Marketing tier names based on data volume and duration
