@@ -24,6 +24,11 @@ import {
   IconButton,
   Image,
   Flex,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from '@chakra-ui/react';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { calculateFinalPriceUSD, formatPrice } from '../config/pricing';
@@ -518,126 +523,15 @@ const PackagePage = () => {
                     {packageType}
                   </Text>
                 </HStack>
-              </HStack>
-            </Box>
 
-            {/* Provider & Coverage Info */}
-            <Box
-              bg="white"
-              borderRadius="32px"
-              p={{ base: 6, md: 8 }}
-              mb={6}
-              boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
-            >
-              <Text fontSize="18px" fontWeight="700" color="#1C1C1E" mb={4}>
-                {isRegionalPlan || isGlobalPlan
-                  ? t('packagePage.provider.coverageTitle')
-                  : t('packagePage.provider.title')}
-              </Text>
-
-              <VStack align="stretch" spacing={0} divider={<Divider borderColor="#F2F2F7" />}>
-                {/* Operator - only for single country */}
-                {!isRegionalPlan && !isGlobalPlan && (
-                  <DetailRow
-                    icon={Radio}
-                    label={t('packagePage.provider.operator')}
-                    value={operatorName}
-                  />
-                )}
-
-                {/* Coverage */}
-                <DetailRow
-                  icon={Globe}
-                  label={t('packagePage.provider.coverage')}
-                  value={
-                    isGlobalPlan || isRegionalPlan
-                      ? `${countryList.length} ${t('packagePage.provider.countries')}`
-                      : getCountryName(countryCode, currentLanguage)
-                  }
-                />
-
-                {/* Speed */}
-                <DetailRow
-                  icon={Wifi}
-                  label={t('packagePage.provider.speed')}
-                  value={plan.speed || '4G/LTE'}
-                  badge
-                />
-              </VStack>
-
-              {/* Covered countries list */}
-              {(isRegionalPlan || isGlobalPlan) && countryList.length > 0 && (
-                <Box mt={5}>
-                  <HStack justify="space-between" align="center" mb={3}>
-                    <Text fontSize="15px" fontWeight="600" color="#1C1C1E">
-                      {t('packagePage.provider.coveredCountries')}
-                    </Text>
-                    <Box bg="#FFF4F0" px={3} py={1} borderRadius="10px">
-                      <Text fontSize="13px" fontWeight="700" color="#FE4F18">
-                        {countryList.length} {t('packagePage.provider.countries')}
-                      </Text>
-                    </Box>
-                  </HStack>
-                  <Box
-                    maxH="360px"
-                    overflowY="auto"
-                    pr={1}
-                    css={{
-                      '&::-webkit-scrollbar': { width: '4px' },
-                      '&::-webkit-scrollbar-track': { background: 'transparent' },
-                      '&::-webkit-scrollbar-thumb': { background: '#D1D3D9', borderRadius: '10px' },
-                    }}
-                  >
-                    <Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={2.5}>
-                      {countryList.map((code) => (
-                        <HStack
-                          key={code}
-                          spacing={2.5}
-                          bg="#F2F2F7"
-                          px={3}
-                          py={2.5}
-                          borderRadius="14px"
-                        >
-                          <Box
-                            borderRadius="6px"
-                            overflow="hidden"
-                            width="24px"
-                            height="18px"
-                            flexShrink={0}
-                            border="1px solid #E8E9EE"
-                          >
-                            <CountryFlag
-                              code={code}
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                          </Box>
-                          <Text fontSize="13px" fontWeight="600" color="#1C1C1E">
-                            {getCountryName(code, currentLanguage)}
-                          </Text>
-                        </HStack>
-                      ))}
-                    </Grid>
-                  </Box>
-                </Box>
-              )}
-
-              {/* Multiple operators */}
-              {!isRegionalPlan && !isGlobalPlan && plan.operatorList && plan.operatorList.length > 1 && (
-                <Box mt={4}>
-                  <Text fontSize="14px" fontWeight="600" color="#8E8E93" mb={2}>
-                    {t('packagePage.provider.allOperators')}
+                {/* Operator name badge */}
+                <HStack spacing={2} px={4} py={2.5} borderRadius="14px" bg="#F2F2F7">
+                  <Radio size={16} color="#8E8E93" />
+                  <Text fontSize="14px" fontWeight="500" color="#1C1C1E">
+                    {operatorName}
                   </Text>
-                  <HStack flexWrap="wrap" gap={2}>
-                    {plan.operatorList.map((op, idx) => (
-                      <Box key={idx} bg="#F2F2F7" px={3} py={1.5} borderRadius="10px">
-                        <Text fontSize="13px" fontWeight="600" color="#1C1C1E">
-                          {op.operatorName} {op.networkType && `(${op.networkType})`}
-                        </Text>
-                      </Box>
-                    ))}
-                  </HStack>
-                </Box>
-              )}
+                </HStack>
+              </HStack>
             </Box>
 
             {/* Daily Limit Explanation */}
@@ -699,32 +593,128 @@ const PackagePage = () => {
                 {t('packagePage.installation.title')}
               </Text>
 
-              <VStack align="stretch" spacing={4}>
-                {installationSteps.map((step, index) => (
-                  <HStack key={index} spacing={4} align="flex-start">
-                    <Box
-                      bg="#F2F2F7"
-                      minW="44px"
-                      h="44px"
-                      borderRadius="14px"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      flexShrink={0}
-                    >
-                      <step.icon size={20} color="#1C1C1E" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0} pt={1}>
-                      <Text fontSize="13px" fontWeight="600" color="#FE4F18">
-                        {t('packagePage.installation.step')} {index + 1}
+              <Tabs variant="unstyled">
+                <TabList
+                  bg="#F2F2F7"
+                  borderRadius="16px"
+                  p={1}
+                  mb={5}
+                >
+                  <Tab
+                    flex={1}
+                    borderRadius="14px"
+                    fontWeight="600"
+                    fontSize="14px"
+                    color="#8E8E93"
+                    py={2.5}
+                    _selected={{
+                      bg: 'white',
+                      color: '#1C1C1E',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                    }}
+                  >
+                    {t('packagePage.installation.tabFast')}
+                  </Tab>
+                  <Tab
+                    flex={1}
+                    borderRadius="14px"
+                    fontWeight="600"
+                    fontSize="14px"
+                    color="#8E8E93"
+                    py={2.5}
+                    _selected={{
+                      bg: 'white',
+                      color: '#1C1C1E',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                    }}
+                  >
+                    {t('packagePage.installation.tabQr')}
+                  </Tab>
+                </TabList>
+
+                <TabPanels>
+                  {/* Fast Installation Tab */}
+                  <TabPanel p={0}>
+                    <VStack align="stretch" spacing={5}>
+                      <Text fontSize="15px" fontWeight="500" color="#6B7280" lineHeight="1.6">
+                        {t('packagePage.installation.fastDescription')}
                       </Text>
-                      <Text fontSize="15px" fontWeight="500" color="#1C1C1E">
-                        {step.text}
-                      </Text>
+
+                      <Box>
+                        <Text fontSize="15px" fontWeight="700" color="#1C1C1E" mb={3}>
+                          {t('packagePage.installation.osRequirements')}
+                        </Text>
+                        <VStack align="stretch" spacing={3}>
+                          <HStack spacing={4} align="flex-start">
+                            <Box
+                              bg="#F2F2F7"
+                              minW="44px"
+                              h="44px"
+                              borderRadius="14px"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              flexShrink={0}
+                            >
+                              <Smartphone size={20} color="#1C1C1E" />
+                            </Box>
+                            <Text fontSize="14px" fontWeight="500" color="#1C1C1E" pt={2.5}>
+                              {t('packagePage.installation.androidReq')}
+                            </Text>
+                          </HStack>
+                          <HStack spacing={4} align="flex-start">
+                            <Box
+                              bg="#F2F2F7"
+                              minW="44px"
+                              h="44px"
+                              borderRadius="14px"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              flexShrink={0}
+                            >
+                              <Smartphone size={20} color="#1C1C1E" />
+                            </Box>
+                            <Text fontSize="14px" fontWeight="500" color="#1C1C1E" pt={2.5}>
+                              {t('packagePage.installation.iosReq')}
+                            </Text>
+                          </HStack>
+                        </VStack>
+                      </Box>
                     </VStack>
-                  </HStack>
-                ))}
-              </VStack>
+                  </TabPanel>
+
+                  {/* QR Code Tab */}
+                  <TabPanel p={0}>
+                    <VStack align="stretch" spacing={4}>
+                      {installationSteps.map((step, index) => (
+                        <HStack key={index} spacing={4} align="flex-start">
+                          <Box
+                            bg="#F2F2F7"
+                            minW="44px"
+                            h="44px"
+                            borderRadius="14px"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            flexShrink={0}
+                          >
+                            <step.icon size={20} color="#1C1C1E" />
+                          </Box>
+                          <VStack align="flex-start" spacing={0} pt={1}>
+                            <Text fontSize="13px" fontWeight="600" color="#FE4F18">
+                              {t('packagePage.installation.step')} {index + 1}
+                            </Text>
+                            <Text fontSize="15px" fontWeight="500" color="#1C1C1E">
+                              {step.text}
+                            </Text>
+                          </VStack>
+                        </HStack>
+                      ))}
+                    </VStack>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
             </Box>
           </Box>
 

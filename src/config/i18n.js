@@ -752,7 +752,7 @@ export const TRANSLATIONS = {
     },
     packagePage: {
       back: 'Назад',
-      esimFor: 'eSIM для',
+      esimFor: 'для',
       notFound: 'Пакет не найден',
       notFoundDescription: 'Информация о пакете недоступна',
       backToHome: 'Вернуться на главную',
@@ -784,6 +784,12 @@ export const TRANSLATIONS = {
         step3: 'Отсканируйте QR-код',
         step4: 'Установите профиль eSIM',
         step5: 'Активируйте и начните использовать',
+        tabFast: 'Быстрая установка',
+        tabQr: 'Установка через QR-код',
+        fastDescription: 'Просто нажмите кнопку "Быстрая установка" для вашего устройства, если операционная система соответствует требованиям.',
+        osRequirements: 'Требования к ОС',
+        androidReq: 'Android 10 или новее — поддерживает установку eSIM в одно нажатие по ссылке',
+        iosReq: 'iOS 17.4 или новее — позволяет установить eSIM, нажав на ссылку от оператора',
       },
       purchase: {
         packagePrice: 'Стоимость пакета',
@@ -1339,7 +1345,7 @@ export const TRANSLATIONS = {
     },
     packagePage: {
       back: 'Ortga',
-      esimFor: 'eSIM uchun',
+      esimFor: 'uchun',
       notFound: 'Paket topilmadi',
       notFoundDescription: 'Paket ma\'lumotlari mavjud emas',
       backToHome: 'Bosh sahifaga qaytish',
@@ -1371,6 +1377,12 @@ export const TRANSLATIONS = {
         step3: 'QR-kodni skanerlang',
         step4: 'eSIM profilini o\'rnating',
         step5: 'Faollashtiring va foydalanishni boshlang',
+        tabFast: 'Tez o\'rnatish',
+        tabQr: 'QR-kod orqali o\'rnatish',
+        fastDescription: 'Qurilmangiz uchun "Tez o\'rnatish" tugmasini bosing, operatsion tizim talablarga javob bersa.',
+        osRequirements: 'OT talablari',
+        androidReq: 'Android 10 yoki undan yangi — havola orqali bir bosishda eSIM o\'rnatishni qo\'llab-quvvatlaydi',
+        iosReq: 'iOS 17.4 yoki undan yangi — operator havolasini bosib eSIM o\'rnatish imkonini beradi',
       },
       purchase: {
         packagePrice: 'Paket narxi',
