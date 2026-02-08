@@ -663,28 +663,30 @@ const HeroSection = () => {
       position="relative"
       bg="radial-gradient(100% 86.35% at 49.97% 0%, #FF9472 0%, #F1511F 52.6%, #F04E1B 100%)"
       h={{ base: 'auto', lg: '720px' }}           /* CONTROL: hero section height */
-      pb={{ base: '100px', lg: '0' }}
-      zIndex={1}
+      pb={{ base: '140px', lg: '0' }}
+      /* ============================================================
+         CURVE CONTROLLER
+         The curve is created via ::after pseudo-element (peach ellipse at bottom).
+         - w / left: controls curve width
+         - h: controls curve height/roundness
+         - borderRadius: 50% = full ellipse
+         ============================================================ */
       sx={{
-        /* ============================================================
-           CURVE CONTROLLER (clip-path ellipse approach)
-           - First value (120%): horizontal radius — bigger = wider/shallower curve
-           - Second value (100%): vertical radius — controls how tall the ellipse is
-           - "at 50% 0%": anchor point — 50% centers it, 0% pins to top
-
-           Examples:
-             ellipse(120% 100% at 50% 0%)  — default, nice curve
-             ellipse(150% 100% at 50% 0%)  — flatter/wider curve
-             ellipse(100% 100% at 50% 0%)  — more rounded curve
-             ellipse(120% 90% at 50% 0%)   — shorter ellipse, more clipping
-           ============================================================ */
-        clipPath: {
-          base: 'ellipse(180% 100% at 50% 0%)',   /* CONTROL: mobile curve */
-          lg: 'ellipse(120% 100% at 50% 0%)',      /* CONTROL: desktop curve */
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: { base: '-20px', lg: '-40px' },   /* CONTROL: how far down the curve sits */
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: { base: '200%', lg: '160%' },      /* CONTROL: curve width — bigger = shallower */
+          height: { base: '100px', lg: '120px' },    /* CONTROL: curve height — bigger = more prominent */
+          bg: '#FFCFC0',
+          borderRadius: '50%',
+          zIndex: 5,
         },
       }}
     >
-      <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '84px', md: '90px', lg: '96px' }}>
+      <Container maxW="8xl" position="relative" zIndex={10} pt={{ base: '84px', md: '90px', lg: '96px' }}>
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           justify="space-between"
@@ -777,63 +779,6 @@ const HeroSection = () => {
               transform="translateY(-18%) scale(0.92)"  /* CONTROL: translateY = vertical shift (negative = up), scale = size */
             />
 
-            {/* ============================================================
-               UI CARD 1 CONTROLLER (top right — Европа 10/30)
-               - Position: adjust top and right values
-               - Scale/size: adjust w (width) values per breakpoint
-               ============================================================ */}
-            <Box
-              position="absolute"
-              top={{ base: '-2%', lg: '0%' }}      /* CONTROL: vertical position */
-              right={{ base: '-15%', lg: '-10%' }}  /* CONTROL: horizontal position */
-              w={{ base: '200px', md: '280px', lg: '340px' }}  /* CONTROL: card size/scale */
-              zIndex={3}
-              sx={{
-                animation: 'cardFloat1 0.7s ease-out 0.7s both',
-                '@keyframes cardFloat1': {
-                  from: { opacity: 0, transform: 'translateY(20px)' },
-                  to: { opacity: 1, transform: 'translateY(0)' },
-                },
-              }}
-            >
-              <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot1.png"
-                alt="Europe 10/30 plan"
-                w="100%"
-                h="auto"
-                loading="lazy"
-                borderRadius="16px"
-              />
-            </Box>
-
-            {/* ============================================================
-               UI CARD 2 CONTROLLER (bottom right — Германия 20 дней)
-               - Position: adjust bottom and right values
-               - Scale/size: adjust w (width) values per breakpoint
-               ============================================================ */}
-            <Box
-              position="absolute"
-              bottom={{ base: '18%', lg: '22%' }}  /* CONTROL: vertical position */
-              right={{ base: '-18%', lg: '-15%' }}  /* CONTROL: horizontal position */
-              w={{ base: '220px', md: '300px', lg: '380px' }}  /* CONTROL: card size/scale */
-              zIndex={3}
-              sx={{
-                animation: 'cardFloat2 0.7s ease-out 0.9s both',
-                '@keyframes cardFloat2': {
-                  from: { opacity: 0, transform: 'translateY(20px)' },
-                  to: { opacity: 1, transform: 'translateY(0)' },
-                },
-              }}
-            >
-              <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot2.png"
-                alt="Germany 20 days order"
-                w="100%"
-                h="auto"
-                loading="lazy"
-                borderRadius="16px"
-              />
-            </Box>
           </Box>
         </Flex>
       </Container>
@@ -1016,7 +961,7 @@ const HomePage = () => {
   return (
     <>
       {/* Wrapper with peach bg so no white gap shows behind the hero clip-path curve */}
-      <Box bg="#FFCFC0">
+      <Box bg="#FFCFC0" position="relative" zIndex={10}>
         <HeroSection />
       </Box>
       <PopularDestinations
