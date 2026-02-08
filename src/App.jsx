@@ -774,7 +774,7 @@ const HeroSection = () => {
               position="relative"
               zIndex={2}
               transformOrigin="bottom center"
-              transform="translateY(40px) scale(0.92)"  /* CONTROL: translateY = vertical shift, scale = size */
+              transform="translateY(-18%) scale(0.92)"  /* CONTROL: translateY = vertical shift (negative = up), scale = size */
             />
 
             {/* ============================================================
