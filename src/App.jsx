@@ -741,23 +741,16 @@ const HeroSection = () => {
                 },
               }}
             >
-              {/* People image - FIX #2: mask bottom to blend into wave curve */}
-              <Box
+              {/* People image - sits above wave, wave crops the bottom */}
+              <Image
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
+                alt="People using eSIM"
+                w="100%"
+                h="auto"
+                loading="lazy"
                 position="relative"
                 zIndex={1}
-                sx={{
-                  maskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)',
-                  WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)',
-                }}
-              >
-                <Image
-                  src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
-                  alt="People using eSIM"
-                  w="100%"
-                  h="auto"
-                  loading="lazy"
-                />
-              </Box>
+              />
 
               {/* FIX #3: UI Card 1 - top right - ui-screenshot1.png (Европа 10/30), 30% BIGGER */}
               <Box
@@ -813,28 +806,38 @@ const HeroSection = () => {
         </Grid>
       </Container>
 
-      {/* FIX #1: Wave SVG - convex (arching upward) dome shape */}
+      {/* Wave SVG - gentle concave curve, lifted up to crop people image */}
       <Box
         position="absolute"
-        bottom="-1px"
+        bottom={{ base: '40px', md: '60px', lg: '80px' }}
         left="0"
         right="0"
-        zIndex={3}
+        zIndex={4}
         lineHeight="0"
       >
         <svg
-          viewBox="0 0 1440 160"
+          viewBox="0 0 1440 80"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="none"
           style={{ width: '100%', height: 'auto', display: 'block' }}
         >
           <path
-            d="M0 0C240 120 480 160 720 160C960 160 1200 120 1440 0V160H0V0Z"
+            d="M0 0C360 60 720 80 720 80C720 80 1080 60 1440 0V80H0V0Z"
             fill="#FFCFC0"
           />
         </svg>
       </Box>
+      {/* Solid fill below the wave to cover remaining gap */}
+      <Box
+        position="absolute"
+        bottom="-1px"
+        left="0"
+        right="0"
+        h={{ base: '50px', md: '70px', lg: '90px' }}
+        bg="#FFCFC0"
+        zIndex={4}
+      />
     </Box>
   );
 };
