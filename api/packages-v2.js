@@ -164,12 +164,30 @@ async function handleCountryPackages(countryCode, res) {
   return res.json({ success: true, data: packages, count: packages.length });
 }
 
+// Reverse mapping: canonical region code -> all prefixes that belong to it
+function getPrefixesForRegion(canonicalRegion) {
+  const prefixes = [];
+  for (const [prefix, region] of Object.entries(PREFIX_TO_REGION)) {
+    if (region === canonicalRegion) {
+      prefixes.push(prefix);
+    }
+  }
+  // If no mapping found, use the region code itself as prefix
+  return prefixes.length > 0 ? prefixes : [canonicalRegion];
+}
+
 // Handler: Regional packages
 async function handleRegionalPackages(regionCode, res) {
   console.log(`📦 [PACKAGES-V2] Fetching regional packages for: ${regionCode}`);
 
-  // Query packages where location_code starts with regionCode
-  // e.g., "EU" matches "EU", "EU-42", "EU-28", etc.
+  // Get all location_code prefixes that map to this region
+  // e.g., "AM" -> ["AM", "SA", "NA", "LATAM", "CB", "CARIBBEAN"]
+  const prefixes = getPrefixesForRegion(regionCode.toUpperCase());
+  console.log(`📦 [PACKAGES-V2] Searching prefixes for ${regionCode}: ${prefixes.join(', ')}`);
+
+  // Build OR filter for all prefixes: location_code.like.AM%,location_code.like.SA%,...
+  const likeFilters = prefixes.map(p => `location_code.like.${p}%`).join(',');
+
   const { data, error} = await supabase
     .from('esim_packages')
     .select(`
@@ -189,7 +207,7 @@ async function handleRegionalPackages(regionCode, res) {
       is_featured,
       popularity_score
     `)
-    .like('location_code', `${regionCode.toUpperCase()}%`)
+    .or(likeFilters)
     .eq('location_type', 'regional')
     .eq('is_active', true)
     .eq('is_hidden', false)
