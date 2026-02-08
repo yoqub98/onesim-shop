@@ -661,21 +661,39 @@ const HeroSection = () => {
       as="section"
       id="home"
       position="relative"
-      overflow="hidden"
       bg="radial-gradient(100% 86.35% at 49.97% 0%, #FF9472 0%, #F1511F 52.6%, #F04E1B 100%)"
-      minH={{ base: 'auto', lg: '100vh' }}
-      pb={{ base: '100px', md: '120px' }}
+      h={{ base: 'auto', lg: '720px' }}           /* CONTROL: hero section height */
+      pb={{ base: '100px', lg: '0' }}
+      zIndex={1}
+      sx={{
+        /* ============================================================
+           CURVE CONTROLLER (clip-path ellipse approach)
+           - First value (120%): horizontal radius — bigger = wider/shallower curve
+           - Second value (100%): vertical radius — controls how tall the ellipse is
+           - "at 50% 0%": anchor point — 50% centers it, 0% pins to top
+
+           Examples:
+             ellipse(120% 100% at 50% 0%)  — default, nice curve
+             ellipse(150% 100% at 50% 0%)  — flatter/wider curve
+             ellipse(100% 100% at 50% 0%)  — more rounded curve
+             ellipse(120% 90% at 50% 0%)   — shorter ellipse, more clipping
+           ============================================================ */
+        clipPath: {
+          base: 'ellipse(180% 100% at 50% 0%)',   /* CONTROL: mobile curve */
+          lg: 'ellipse(120% 100% at 50% 0%)',      /* CONTROL: desktop curve */
+        },
+      }}
     >
-      {/* Hero content area - FIX #4: reduced top padding for compact spacing */}
       <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '84px', md: '90px', lg: '96px' }}>
-        <Grid
-          templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+        <Flex
+          direction={{ base: 'column', lg: 'row' }}
+          justify="space-between"
+          align="center"
+          minH={{ base: 'auto', lg: 'calc(720px - 96px)' }}
           gap={{ base: 8, lg: 4 }}
-          alignItems="center"
-          minH={{ base: 'auto', lg: 'calc(100vh - 240px)' }}
         >
           {/* Left: Text content */}
-          <GridItem>
+          <Box flex={{ base: '1', lg: '0 0 45%' }} zIndex={10}>
             <VStack align="flex-start" spacing={{ base: 5, md: 7 }} maxW="620px">
               <Heading
                 as="h1"
@@ -721,137 +739,103 @@ const HeroSection = () => {
 
               <HeroSearch animDelay="0.5s" />
             </VStack>
-          </GridItem>
+          </Box>
 
           {/* Right: People image with floating cards */}
-          <GridItem
+          <Box
+            flex={{ base: '1', lg: '0 0 55%' }}
             position="relative"
             display="flex"
-            justifyContent="center"
             alignItems="flex-end"
-            overflow="visible"
+            justifyContent="center"
+            h="100%"
+            ml={{ base: 0, lg: '-120px' }}         /* CONTROL: overlap with text column */
+            sx={{ animation: 'heroFadeRight 0.8s ease-out 0.3s both',
+              '@keyframes heroFadeRight': {
+                from: { opacity: 0, transform: 'translateX(40px)' },
+                to: { opacity: 1, transform: 'translateX(0)' },
+              },
+            }}
           >
-            <Box
+            {/* ============================================================
+               PEOPLE IMAGE CONTROLLER
+               - height: controls how tall the image is (105% = slightly overflows)
+               - transform translateY: positive = push down (overflow past curve)
+               - transform scale: shrink/grow (0.92 = 92% size)
+               - transformOrigin: "bottom center" keeps feet anchored
+               ============================================================ */}
+            <Image
+              src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
+              alt="People using eSIM"
+              h={{ base: '90%', lg: '105%' }}       /* CONTROL: image height (% of container) */
+              w="auto"
+              loading="lazy"
               position="relative"
-              w="100%"
-              maxW={{ base: '420px', lg: '600px' }}
-              mb={{ base: '-60px', md: '-80px', lg: '-100px' }}
-              sx={{ animation: 'heroFadeRight 0.8s ease-out 0.3s both',
-                '@keyframes heroFadeRight': {
-                  from: { opacity: 0, transform: 'translateX(40px)' },
-                  to: { opacity: 1, transform: 'translateX(0)' },
+              zIndex={2}
+              transformOrigin="bottom center"
+              transform="translateY(40px) scale(0.92)"  /* CONTROL: translateY = vertical shift, scale = size */
+            />
+
+            {/* ============================================================
+               UI CARD 1 CONTROLLER (top right — Европа 10/30)
+               - Position: adjust top and right values
+               - Scale/size: adjust w (width) values per breakpoint
+               ============================================================ */}
+            <Box
+              position="absolute"
+              top={{ base: '-2%', lg: '0%' }}      /* CONTROL: vertical position */
+              right={{ base: '-15%', lg: '-10%' }}  /* CONTROL: horizontal position */
+              w={{ base: '200px', md: '280px', lg: '340px' }}  /* CONTROL: card size/scale */
+              zIndex={3}
+              sx={{
+                animation: 'cardFloat1 0.7s ease-out 0.7s both',
+                '@keyframes cardFloat1': {
+                  from: { opacity: 0, transform: 'translateY(20px)' },
+                  to: { opacity: 1, transform: 'translateY(0)' },
                 },
               }}
             >
-              {/* ============================================================
-                 PEOPLE IMAGE CONTROLLER
-                 - Move horizontally: adjust left (e.g. left="10px" or left="-10px")
-                 - Move vertically: adjust top (e.g. top="-20px" moves up)
-                 - Scale: adjust transform scale (e.g. scale(1.1) = 110%)
-                 ============================================================ */}
               <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
-                alt="People using eSIM"
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot1.png"
+                alt="Europe 10/30 plan"
                 w="100%"
                 h="auto"
                 loading="lazy"
-                position="relative"
-                zIndex={1}
-                top="0px"           /* CONTROL: move people image up(-) / down(+) */
-                left="0px"          /* CONTROL: move people image left(-) / right(+) */
-                transform="scale(1)"  /* CONTROL: scale people image (1 = 100%, 1.2 = 120%) */
+                borderRadius="16px"
               />
-
-              {/* ============================================================
-                 UI CARD 1 CONTROLLER (top right — Европа 10/30)
-                 - Position: adjust top and right values
-                 - Scale/size: adjust w (width) values per breakpoint
-                 ============================================================ */}
-              <Box
-                position="absolute"
-                top={{ base: '-2%', lg: '0%' }}      /* CONTROL: vertical position */
-                right={{ base: '-15%', lg: '-30%' }}  /* CONTROL: horizontal position */
-                w={{ base: '200px', md: '280px', lg: '340px' }}  /* CONTROL: card size/scale */
-                zIndex={3}
-                sx={{
-                  animation: 'cardFloat1 0.7s ease-out 0.7s both',
-                  '@keyframes cardFloat1': {
-                    from: { opacity: 0, transform: 'translateY(20px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' },
-                  },
-                }}
-              >
-                <Image
-                  src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot1.png"
-                  alt="Europe 10/30 plan"
-                  w="100%"
-                  h="auto"
-                  loading="lazy"
-                  borderRadius="16px"
-                />
-              </Box>
-
-              {/* ============================================================
-                 UI CARD 2 CONTROLLER (bottom right — Германия 20 дней)
-                 - Position: adjust bottom and right values
-                 - Scale/size: adjust w (width) values per breakpoint
-                 ============================================================ */}
-              <Box
-                position="absolute"
-                bottom={{ base: '18%', lg: '22%' }}  /* CONTROL: vertical position */
-                right={{ base: '-18%', lg: '-35%' }}  /* CONTROL: horizontal position */
-                w={{ base: '220px', md: '300px', lg: '380px' }}  /* CONTROL: card size/scale */
-                zIndex={3}
-                sx={{
-                  animation: 'cardFloat2 0.7s ease-out 0.9s both',
-                  '@keyframes cardFloat2': {
-                    from: { opacity: 0, transform: 'translateY(20px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' },
-                  },
-                }}
-              >
-                <Image
-                  src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot2.png"
-                  alt="Germany 20 days order"
-                  w="100%"
-                  h="auto"
-                  loading="lazy"
-                  borderRadius="16px"
-                />
-              </Box>
             </Box>
-          </GridItem>
-        </Grid>
-      </Container>
 
-      {/* ============================================================
-         CURVE CONTROLLER
-         - Curve height: adjust h={{ base: '120px', md: '160px', lg: '200px' }}
-         - Curve width (wider = shallower): adjust w="160%"
-         - Curve roundness: adjust borderBottomLeftRadius / borderBottomRightRadius (50% = full ellipse)
-         - Curve vertical position: adjust top value (e.g. top="-100%" pushes it up)
-         ============================================================ */}
-      <Box
-        position="absolute"
-        bottom="0"
-        left="0"
-        right="0"
-        h={{ base: '120px', md: '160px', lg: '200px' }}  /* CONTROL: curve container height */
-        zIndex={4}
-        overflow="hidden"
-      >
-        <Box
-          position="absolute"
-          top="-100%"              /* CONTROL: pushes ellipse up so only bottom arc shows (concave) */
-          left="50%"
-          transform="translateX(-50%)"
-          w="160%"                 /* CONTROL: curve width — bigger = shallower/wider curve */
-          h="100%"
-          bg="#FFCFC0"             /* CONTROL: curve fill color */
-          borderBottomLeftRadius="50%"   /* CONTROL: roundness — 50% = full ellipse, lower = flatter */
-          borderBottomRightRadius="50%"  /* CONTROL: roundness — keep same as left for symmetry */
-        />
-      </Box>
+            {/* ============================================================
+               UI CARD 2 CONTROLLER (bottom right — Германия 20 дней)
+               - Position: adjust bottom and right values
+               - Scale/size: adjust w (width) values per breakpoint
+               ============================================================ */}
+            <Box
+              position="absolute"
+              bottom={{ base: '18%', lg: '22%' }}  /* CONTROL: vertical position */
+              right={{ base: '-18%', lg: '-15%' }}  /* CONTROL: horizontal position */
+              w={{ base: '220px', md: '300px', lg: '380px' }}  /* CONTROL: card size/scale */
+              zIndex={3}
+              sx={{
+                animation: 'cardFloat2 0.7s ease-out 0.9s both',
+                '@keyframes cardFloat2': {
+                  from: { opacity: 0, transform: 'translateY(20px)' },
+                  to: { opacity: 1, transform: 'translateY(0)' },
+                },
+              }}
+            >
+              <Image
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot2.png"
+                alt="Germany 20 days order"
+                w="100%"
+                h="auto"
+                loading="lazy"
+                borderRadius="16px"
+              />
+            </Box>
+          </Box>
+        </Flex>
+      </Container>
     </Box>
   );
 };
