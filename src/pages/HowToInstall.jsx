@@ -3,11 +3,9 @@ import { useState } from 'react';
 import {
   Box,
   Container,
-  Heading,
   Text,
   VStack,
   HStack,
-  Button,
   Grid,
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
@@ -55,89 +53,73 @@ const HowToInstall = () => {
   const currentSteps = activeOS === 'iOS' ? iosSteps : androidSteps;
 
   // V-shape offsets: outer phones higher, center phone lower
-  // Index: 0, 1, 2, 3, 4 -> offsets create shallow V
   const getVerticalOffset = (index) => {
-    const offsets = [0, 15, 30, 15, 0]; // pixels from top
+    const offsets = [0, 15, 30, 15, 0];
     return offsets[index] || 0;
   };
 
   return (
     <Box
       minH="100vh"
-      background="linear-gradient(180deg, #F4F2FF 0%, #FFFFFF 70%)"
+      bg="#F9F9F9"
+      fontFamily="'Manrope', sans-serif"
       py={{ base: 10, md: 16, lg: 20 }}
     >
       <Container maxW="1300px">
         <VStack spacing={{ base: 8, md: 10, lg: 12 }} align="center">
           {/* Header Section */}
           <VStack spacing={4} textAlign="center">
-            <Heading
+            <Text
               fontSize={{ base: '32px', md: '44px', lg: '52px' }}
-              fontWeight="700"
-              color="#1E1E2F"
-              lineHeight="1.2"
+              fontWeight="800"
+              color="#1C1C1E"
+              lineHeight="1.15"
             >
               {t('howToInstall.title.part1')}{' '}
-              <Box as="span" color="#7A4DFF">
+              <Box as="span" color="#FE4F18">
                 {t('howToInstall.title.highlight')}
               </Box>{' '}
               {t('howToInstall.title.part2')}
-            </Heading>
+            </Text>
             <Text
-              fontSize={{ base: '16px', md: '18px', lg: '20px' }}
-              color="#6B6B7A"
+              fontSize={{ base: '16px', md: '18px' }}
+              color="#8E8E93"
               fontWeight="500"
+              maxW="500px"
             >
               {t('howToInstall.subtitle')}
             </Text>
           </VStack>
 
           {/* OS Tabs */}
-          <HStack spacing={3} mt={4}>
-            <Button
-              onClick={() => setActiveOS('iOS')}
-              bg={
-                activeOS === 'iOS'
-                  ? 'linear-gradient(90deg, #A686F6 0%, #B35AB2 100%)'
-                  : '#ECE9FF'
-              }
-              color={activeOS === 'iOS' ? 'white' : '#555'}
-              borderRadius="999px"
-              px={8}
-              py={6}
-              fontSize="16px"
-              fontWeight="600"
-              transition="all 0.3s"
-              _hover={{
-                opacity: activeOS === 'iOS' ? 0.9 : 1,
-                bg: activeOS === 'iOS' ? undefined : '#DDD7FF',
-              }}
-              _active={{ transform: 'scale(0.98)' }}
-            >
-              iOS
-            </Button>
-            <Button
-              onClick={() => setActiveOS('ANDROID')}
-              bg={
-                activeOS === 'ANDROID'
-                  ? 'linear-gradient(90deg, #A686F6 0%, #B35AB2 100%)'
-                  : '#ECE9FF'
-              }
-              color={activeOS === 'ANDROID' ? 'white' : '#555'}
-              borderRadius="999px"
-              px={8}
-              py={6}
-              fontSize="16px"
-              fontWeight="600"
-              transition="all 0.3s"
-              _hover={{
-                opacity: activeOS === 'ANDROID' ? 0.9 : 1,
-                bg: activeOS === 'ANDROID' ? undefined : '#DDD7FF',
-              }}
-              _active={{ transform: 'scale(0.98)' }}
-            >
-              ANDROID
-            </Button>
+          <HStack
+            bg="#F2F2F7"
+            borderRadius="20px"
+            p={1.5}
+            spacing={1}
+          >
+            {['iOS', 'ANDROID'].map((os) => (
+              <Box
+                key={os}
+                as="button"
+                onClick={() => setActiveOS(os)}
+                bg={activeOS === os ? 'white' : 'transparent'}
+                color={activeOS === os ? '#1C1C1E' : '#8E8E93'}
+                borderRadius="16px"
+                px={8}
+                py={3}
+                fontSize="15px"
+                fontWeight="700"
+                transition="all 0.25s ease"
+                boxShadow={activeOS === os ? '0 2px 8px rgba(0, 0, 0, 0.08)' : 'none'}
+                _hover={{
+                  color: activeOS === os ? '#1C1C1E' : '#6B7280',
+                }}
+                _active={{ transform: 'scale(0.97)' }}
+              >
+                {os === 'iOS' ? 'iOS' : 'Android'}
+              </Box>
+            ))}
           </HStack>
 
           {/* Steps Grid */}
@@ -149,7 +131,7 @@ const HowToInstall = () => {
             }}
             gap={{ base: 8, md: 6, lg: 8 }}
             w="full"
-            mt={{ base: 8, md: 10, lg: 12 }}
+            mt={{ base: 4, md: 6, lg: 8 }}
             px={{ base: 4, md: 0 }}
             alignItems="flex-start"
           >
@@ -189,39 +171,39 @@ const HowToInstall = () => {
                     />
                   </Box>
 
-                  {/* Step Card - Fixed height for consistency */}
+                  {/* Step Card */}
                   <Box
                     w="full"
-                    h={{ base: '200px', md: '220px', lg: '240px' }}
+                    minH={{ base: '160px', md: '180px', lg: '190px' }}
                     borderRadius="24px"
-                    background="linear-gradient(180deg, rgba(166, 134, 246, 0.54) 0%, rgba(179, 90, 178, 0.00) 100%)"
-                    p={6}
-                    position="relative"
+                    bg="white"
+                    boxShadow="0 4px 12px rgba(0, 0, 0, 0.06)"
+                    p={5}
                     display="flex"
                     flexDirection="column"
                   >
-                    <VStack align="flex-start" spacing={3} h="full">
+                    <VStack align="flex-start" spacing={3}>
                       {/* Step Number Badge */}
                       <Box
-                        w="45px"
-                        h="45px"
-                        minH="45px"
-                        borderRadius="50%"
-                        background="linear-gradient(180deg, rgba(156, 80, 207, 0.79) 0%, rgba(180, 74, 154, 0.79) 100%)"
+                        w="42px"
+                        h="42px"
+                        minH="42px"
+                        borderRadius="14px"
+                        bg="#FFF4F0"
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        fontWeight="700"
-                        fontSize="18px"
-                        color="white"
+                        fontWeight="800"
+                        fontSize="16px"
+                        color="#FE4F18"
                       >
                         {step.number}
                       </Box>
 
                       {/* Step Description */}
                       <Text
-                        color="#2D2D44"
-                        fontSize="15px"
+                        color="#1C1C1E"
+                        fontSize="14px"
                         fontWeight="600"
                         lineHeight="1.6"
                       >
