@@ -1014,7 +1014,10 @@ const HomePage = () => {
 
   return (
     <>
-      <HeroSection />
+      {/* Wrapper with peach bg so no white gap shows behind the hero clip-path curve */}
+      <Box bg="#FFCFC0">
+        <HeroSection />
+      </Box>
       <PopularDestinations
         scrollToSection={navigationState.scrollToDestinations}
         initialTab={navigationState.activeTab}
