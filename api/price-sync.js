@@ -175,9 +175,65 @@ export default async function handler(req, res) {
           // Determine location type (country codes are 2 letters, regional are longer)
           const locationType = locationCode.length === 2 ? 'country' : 'regional';
 
-          // Extract data volume and duration from new_value
-          const dataVolume = change.new_value?.volume || null; // bytes
-          const duration = change.new_value?.duration || null; // days
+          // Fetch full package details from eSIM Access API (price change events lack volume/duration)
+          let dataVolume = change.new_value?.volume || null;
+          let duration = change.new_value?.duration || null;
+          let packageName = change.product_name;
+          let speed = null;
+
+          if (!dataVolume || !duration) {
+            console.log(`📡 [${logId}] Fetching full details for ${packageCode} (slug: ${change.slug})...`);
+            try {
+              const pkgResponse = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
+                method: 'POST',
+                headers: {
+                  'RT-AccessCode': ESIMACCESS_API_KEY,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  locationCode: '',
+                  type: '',
+                  slug: change.slug,
+                  packageCode: '',
+                  iccid: '',
+                }),
+              });
+
+              if (pkgResponse.ok) {
+                const pkgData = await pkgResponse.json();
+                const pkgList = pkgData?.obj?.packageList || [];
+                const matchedPkg = pkgList.find(p => p.packageCode === packageCode) || pkgList[0];
+
+                if (matchedPkg) {
+                  dataVolume = matchedPkg.volume || dataVolume;
+                  duration = matchedPkg.duration || duration;
+                  packageName = matchedPkg.name || packageName;
+                  speed = matchedPkg.speed || null;
+                  console.log(`✅ [${logId}] Got details for ${packageCode}: volume=${dataVolume}, duration=${duration}`);
+                } else {
+                  console.warn(`⚠️ [${logId}] API returned no matching package for slug ${change.slug}`);
+                }
+              } else {
+                console.warn(`⚠️ [${logId}] Package list API returned ${pkgResponse.status} for slug ${change.slug}`);
+              }
+            } catch (fetchErr) {
+              console.error(`❌ [${logId}] Failed to fetch package details for ${packageCode}:`, fetchErr.message);
+            }
+          }
+
+          // Skip import if we still don't have required fields
+          if (!dataVolume || !duration) {
+            console.error(`❌ [${logId}] Cannot import ${packageCode}: missing data_volume (${dataVolume}) or duration (${duration})`);
+            notFound++;
+            missingPackages.push({
+              package_code: packageCode,
+              product_name: change.product_name,
+              slug: change.slug,
+              new_price_usd: newPriceUSD.toFixed(2),
+              error: `Missing required fields: ${!dataVolume ? 'data_volume' : ''} ${!duration ? 'duration' : ''}`.trim(),
+            });
+            continue;
+          }
 
           // Import the package
           const { data: importedPkg, error: importError } = await supabase
@@ -185,15 +241,16 @@ export default async function handler(req, res) {
             .insert({
               package_code: packageCode,
               slug: change.slug,
-              product_name: change.product_name,
+              product_name: packageName,
               location_code: locationCode,
               location_type: locationType,
               api_price: newPrice,
               final_price_usd: newPriceUSD * 1.5, // Apply 50% default margin
               data_volume: dataVolume,
-              duration: duration, // Column is 'duration', not 'duration_days'
+              duration: duration,
               duration_unit: 'DAY',
-              is_active: change.new_value?.is_active !== false, // Active unless explicitly false
+              speed: speed,
+              is_active: true,
               is_featured: false,
               popularity_score: 0,
               view_count: 0,
