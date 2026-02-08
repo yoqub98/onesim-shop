@@ -1,5 +1,6 @@
 // src/App.jsx (FULL FILE - copy entire thing)
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -505,13 +506,27 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   useOutsideClick({
     ref: dropdownRef,
     handler: () => setShowDropdown(false),
   });
+
+  // Update dropdown position when it opens (portal needs absolute coords)
+  useEffect(() => {
+    if (showDropdown && wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, [showDropdown, searchQuery]);
 
   const allCountries = useMemo(() => {
     const countries = COUNTRY_TRANSLATIONS[currentLanguage] || {};
@@ -557,7 +572,7 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
   return (
     <Box
       position="relative"
-      ref={dropdownRef}
+      ref={(el) => { dropdownRef.current = el; wrapperRef.current = el; }}
       w="100%"
       maxW="480px"
       sx={{
@@ -593,19 +608,19 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
         />
       </InputGroup>
 
-      {showDropdown && filteredCountries.length > 0 && (
+      {/* Dropdown rendered via Portal so it escapes the hero clip-path */}
+      {showDropdown && filteredCountries.length > 0 && createPortal(
         <Box
           position="absolute"
-          top="100%"
-          left={0}
-          right={0}
-          mt={2}
+          top={`${dropdownPos.top}px`}
+          left={`${dropdownPos.left}px`}
+          width={`${dropdownPos.width}px`}
           bg="white"
           borderRadius="20px"
           boxShadow="0 12px 40px rgba(0, 0, 0, 0.15)"
           maxH="320px"
           overflowY="auto"
-          zIndex={1000}
+          zIndex={9999}
           border="1px solid #E8E9EE"
           css={{
             '&::-webkit-scrollbar': { width: '6px' },
@@ -645,7 +660,8 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
               </ListItem>
             ))}
           </List>
-        </Box>
+        </Box>,
+        document.body
       )}
     </Box>
   );
@@ -663,30 +679,22 @@ const HeroSection = () => {
       position="relative"
       bg="radial-gradient(100% 86.35% at 49.97% 0%, #FF9472 0%, #F1511F 52.6%, #F04E1B 100%)"
       h={{ base: 'auto', lg: '720px' }}           /* CONTROL: hero section height */
-      pb={{ base: '140px', lg: '0' }}
+      pb={{ base: '100px', lg: '0' }}
+      zIndex={1}
       /* ============================================================
-         CURVE CONTROLLER
-         The curve is created via ::after pseudo-element (peach ellipse at bottom).
-         - w / left: controls curve width
-         - h: controls curve height/roundness
-         - borderRadius: 50% = full ellipse
+         CURVE CONTROLLER (clip-path ellipse)
+         - First value (120%): horizontal radius — bigger = wider/shallower curve
+         - Second value (100%): vertical radius — controls how tall the ellipse is
+         - "at 50% 0%": anchor point — 50% centers horizontally, 0% pins to top
          ============================================================ */
       sx={{
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: { base: '-20px', lg: '-40px' },   /* CONTROL: how far down the curve sits */
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: { base: '200%', lg: '160%' },      /* CONTROL: curve width — bigger = shallower */
-          height: { base: '100px', lg: '120px' },    /* CONTROL: curve height — bigger = more prominent */
-          bg: '#FFCFC0',
-          borderRadius: '50%',
-          zIndex: 5,
+        clipPath: {
+          base: 'ellipse(180% 100% at 50% 0%)',   /* CONTROL: mobile curve */
+          lg: 'ellipse(120% 100% at 50% 0%)',      /* CONTROL: desktop curve */
         },
       }}
     >
-      <Container maxW="8xl" position="relative" zIndex={10} pt={{ base: '84px', md: '90px', lg: '96px' }}>
+      <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '84px', md: '90px', lg: '96px' }}>
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           justify="space-between"
@@ -961,7 +969,7 @@ const HomePage = () => {
   return (
     <>
       {/* Wrapper with peach bg so no white gap shows behind the hero clip-path curve */}
-      <Box bg="#FFCFC0" position="relative" zIndex={10}>
+      <Box bg="#FFCFC0">
         <HeroSection />
       </Box>
       <PopularDestinations
