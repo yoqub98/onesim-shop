@@ -7,6 +7,45 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
+// Map location code prefixes to canonical region codes (matching REGION_DEFINITIONS in packageCacheService.js)
+const PREFIX_TO_REGION = {
+  'EU': 'EU',
+  'EUROPE': 'EU',
+  'ASIA': 'ASIA',
+  'AS': 'ASIA',
+  'SEA': 'ASIA',
+  'ME': 'ME',
+  'MENA': 'ME',
+  'AM': 'AM',
+  'SA': 'AM',
+  'NA': 'AM',
+  'LATAM': 'AM',
+  'CB': 'AM',
+  'CARIBBEAN': 'AM',
+  'AF': 'AF',
+  'AFRICA': 'AF',
+  'OC': 'OC',
+  'OCEANIA': 'OC',
+  'PACIFIC': 'OC',
+  'AUNZ': 'OC',
+  'GL': 'GLOBAL',
+  'GLOBAL': 'GLOBAL',
+  'CIS': 'EU',
+  'BALKANS': 'EU',
+  'NORDIC': 'EU',
+  'SGMYTH': 'ASIA',
+};
+
+function normalizeRegionCode(locationCode) {
+  if (!locationCode) return 'OTHER';
+  // Strip number suffix: "EU-42" → "EU", "SA-18" → "SA", "AS-12" → "AS"
+  let prefix = locationCode;
+  if (prefix.includes('-')) {
+    prefix = prefix.split('-')[0];
+  }
+  return PREFIX_TO_REGION[prefix.toUpperCase()] || 'OTHER';
+}
+
 // CORS headers
 const setCORS = (res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -198,11 +237,10 @@ async function handleAllRegionalPackages(res) {
 
   const regionGroups = {};
   for (const pkg of data) {
-    // Normalize region code: "EU-42" -> "EU", "SA-19" -> "SA"
-    let regionCode = pkg.location_code;
-    if (regionCode && regionCode.includes('-')) {
-      regionCode = regionCode.split('-')[0];
-    }
+    // Map location code to canonical region: "SA-19" -> "AM", "AS-12" -> "ASIA", "EU-42" -> "EU"
+    const regionCode = normalizeRegionCode(pkg.location_code);
+    // Skip global packages (GL- prefix) - they're shown in the Global tab
+    if (regionCode === 'GLOBAL') continue;
     if (!regionGroups[regionCode]) {
       regionGroups[regionCode] = {
         packageCount: 0,
@@ -236,6 +274,7 @@ async function handleAllRegionalPackages(res) {
 async function handleGlobalPackages(res) {
   console.log('📦 [PACKAGES-V2] Fetching global packages');
 
+  // Global packages may be stored as location_type='global' OR as regional with GL- prefix
   const { data, error } = await supabase
     .from('esim_packages')
     .select(`
@@ -254,13 +293,15 @@ async function handleGlobalPackages(res) {
       is_featured,
       popularity_score
     `)
-    .eq('location_type', 'global')
+    .or('location_type.eq.global,location_code.like.GL%')
     .eq('is_active', true)
     .eq('is_hidden', false)
     .order('popularity_score', { ascending: false })
     .order('final_price_usd', { ascending: true });
 
   if (error) throw error;
+
+  console.log(`📦 [PACKAGES-V2] Found ${data.length} global packages`);
 
   const packages = data.map(pkg => ({
     id: pkg.slug,

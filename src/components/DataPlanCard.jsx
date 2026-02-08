@@ -145,14 +145,17 @@ const DataPlanCard = ({ plan, lang, onClick, showTitle = false, showLabels = fal
   // Get highest network speed
   const networkType = parseHighestSpeed(plan.speed);
 
-  // Format operators - only for single country plans
+  // Detect if this is a regional/global plan
   const isRegionalOrGlobal = plan.countryCode === 'GLOBAL' ||
-                              (plan.countryCode && REGION_DEFINITIONS[plan.countryCode]);
+                              (plan.countryCode && REGION_DEFINITIONS[plan.countryCode]) ||
+                              (plan.coveredCountries && plan.coveredCountries.length > 1);
+  // Only show operators for single country plans
   const operatorsText = !isRegionalOrGlobal ? formatOperatorsList(plan.operatorList) : '';
 
   // Calculate country coverage for regional/global plans
-  const countryCoverage = (isRegionalOrGlobal && plan.rawPackage?.locationNetworkList)
-    ? plan.rawPackage.locationNetworkList.length
+  // Use coveredCountries array first, fall back to operatorList length (which is location_network_list)
+  const countryCoverage = isRegionalOrGlobal
+    ? (plan.coveredCountries?.length || plan.operatorList?.length || 0)
     : 0;
 
   // Calculate prices with margin

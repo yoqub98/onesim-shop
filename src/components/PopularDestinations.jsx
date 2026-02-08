@@ -513,47 +513,58 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
   const navigate = useNavigate();
   const t = (key) => getTranslation(lang, key);
 
-  // Extract package details
-  const dataGB = Math.round(pkg.volume / 1073741824);
-  const priceUSD = (pkg.price / 10000).toFixed(2);
-  const days = pkg.duration;
+  // Extract package details - handle both raw API format and DB format
+  const dataGB = pkg.dataGB || (pkg.volume ? Math.round(pkg.volume / 1073741824) : 0);
+  const priceUSD = pkg.priceUSD || (pkg.price ? (pkg.price / 10000).toFixed(2) : '0.00');
+  const days = pkg.days || pkg.duration;
 
-  // Get covered countries count
-  const coveredCountries = new Set();
-  if (pkg.locationNetworkList && Array.isArray(pkg.locationNetworkList)) {
-    pkg.locationNetworkList.forEach(loc => {
-      if (loc.locationCode && !loc.locationCode.startsWith('!')) {
-        coveredCountries.add(loc.locationCode);
+  // Get covered countries count - handle both DB format (coveredCountries array) and raw API format
+  let countryCount = 0;
+  let displayFlags = [];
+
+  if (pkg.coveredCountries && Array.isArray(pkg.coveredCountries) && pkg.coveredCountries.length > 0) {
+    countryCount = pkg.coveredCountries.length;
+    displayFlags = pkg.coveredCountries.slice(0, 5).map(c => c.code || c);
+  } else if (pkg.operatorList && Array.isArray(pkg.operatorList)) {
+    const countryCodes = new Set();
+    pkg.operatorList.forEach(loc => {
+      const code = loc.locationCode || loc.code;
+      if (code && !code.startsWith('!')) {
+        countryCodes.add(code);
       }
     });
+    countryCount = countryCodes.size;
+    displayFlags = Array.from(countryCodes).slice(0, 5);
+  } else if (pkg.locationNetworkList && Array.isArray(pkg.locationNetworkList)) {
+    const countryCodes = new Set();
+    pkg.locationNetworkList.forEach(loc => {
+      if (loc.locationCode && !loc.locationCode.startsWith('!')) {
+        countryCodes.add(loc.locationCode);
+      }
+    });
+    countryCount = countryCodes.size;
+    displayFlags = Array.from(countryCodes).slice(0, 5);
   }
 
-  const countryCount = coveredCountries.size;
-  const displayFlags = Array.from(coveredCountries).slice(0, 5);
-
   const handleViewPlan = () => {
-    // Transform package data to match expected format
-    const planData = {
-      id: `${pkg.packageCode}_${pkg.slug}`,
-      packageCode: pkg.packageCode,
-      slug: pkg.slug,
-      country: 'Global',
-      countryCode: 'GLOBAL',
-      data: dataGB >= 1 ? `${dataGB}GB` : `${Math.round(pkg.volume / 1048576)}MB`,
-      dataGB: dataGB,
-      days: days,
-      speed: pkg.speed || '4G/5G',
-      priceUSD: parseFloat(priceUSD),
-      originalPrice: pkg.price,
-      description: pkg.description || pkg.name,
-      name: pkg.name,
-      operatorList: pkg.locationNetworkList || [],
-      rawPackage: pkg
-    };
-
     navigate(`/package/${pkg.slug}`, {
       state: {
-        plan: planData,
+        plan: {
+          id: pkg.id || `${pkg.packageCode}_${pkg.slug}`,
+          packageCode: pkg.packageCode,
+          slug: pkg.slug,
+          country: 'Global',
+          countryCode: 'GLOBAL',
+          data: pkg.data || (dataGB >= 1 ? `${dataGB}GB` : `${Math.round((pkg.volume || 0) / 1048576)}MB`),
+          dataGB: dataGB,
+          days: days,
+          speed: pkg.speed || '4G/5G',
+          priceUSD: parseFloat(priceUSD),
+          description: pkg.description || pkg.name,
+          name: pkg.name,
+          operatorList: pkg.operatorList || pkg.locationNetworkList || [],
+          coveredCountries: pkg.coveredCountries || [],
+        },
         countryCode: 'GLOBAL'
       }
     });
@@ -708,6 +719,8 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
   const [globalPackages, setGlobalPackages] = useState([]);
   const [isLoadingRegional, setIsLoadingRegional] = useState(false);
   const [isLoadingGlobal, setIsLoadingGlobal] = useState(false);
+  const [hasFetchedRegional, setHasFetchedRegional] = useState(false);
+  const [hasFetchedGlobal, setHasFetchedGlobal] = useState(false);
 
   // Create ref for scrolling
   const sectionRef = React.useRef(null);
@@ -734,8 +747,9 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
 
   // Fetch regional packages when Regional tab is selected
   useEffect(() => {
-    if (activeTab === 1 && Object.keys(regionalPackages).length === 0) {
+    if (activeTab === 1 && !hasFetchedRegional) {
       setIsLoadingRegional(true);
+      setHasFetchedRegional(true);
       fetchAllRegionalPackages()
         .then(data => {
           console.log('✅ Regional packages loaded:', data);
@@ -743,17 +757,19 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
         })
         .catch(error => {
           console.error('❌ Error loading regional packages:', error);
+          setHasFetchedRegional(false); // Allow retry on error
         })
         .finally(() => {
           setIsLoadingRegional(false);
         });
     }
-  }, [activeTab, regionalPackages]);
+  }, [activeTab, hasFetchedRegional]);
 
   // Fetch global packages when Global tab is selected
   useEffect(() => {
-    if (activeTab === 2 && globalPackages.length === 0) {
+    if (activeTab === 2 && !hasFetchedGlobal) {
       setIsLoadingGlobal(true);
+      setHasFetchedGlobal(true);
       fetchGlobalPackages()
         .then(data => {
           console.log('✅ Global packages loaded:', data);
@@ -761,12 +777,13 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
         })
         .catch(error => {
           console.error('❌ Error loading global packages:', error);
+          setHasFetchedGlobal(false); // Allow retry on error
         })
         .finally(() => {
           setIsLoadingGlobal(false);
         });
     }
-  }, [activeTab, globalPackages]);
+  }, [activeTab, hasFetchedGlobal]);
 
   // Filter destinations based on search query - first letter must match
   const filteredDestinations = POPULAR_DESTINATIONS.filter(destination => {
