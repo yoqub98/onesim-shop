@@ -688,7 +688,8 @@ const HeroSection = () => {
         <Flex
           direction={{ base: 'column', lg: 'row' }}
           justify="space-between"
-          align="center"
+          align={{ base: 'center', lg: 'flex-start' }}
+          pt={{ base: 0, lg: '60px' }}
           minH={{ base: 'auto', lg: 'calc(720px - 96px)' }}
           gap={{ base: 8, lg: 4 }}
         >
@@ -720,7 +721,7 @@ const HeroSection = () => {
                 sx={{ animation: 'heroFadeUp 0.7s ease-out 0.3s both' }}
               >
                 <Text
-                  fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+                  fontSize={{ base: 'sm', md: 'md', lg: 'lg' }}
                   color="rgba(255, 255, 255, 0.88)"
                   lineHeight="1.7"
                   fontWeight="500"
@@ -728,7 +729,7 @@ const HeroSection = () => {
                   {t('hero.subtitle1')}
                 </Text>
                 <Text
-                  fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+                  fontSize={{ base: 'sm', md: 'md', lg: 'lg' }}
                   color="rgba(255, 255, 255, 0.88)"
                   lineHeight="1.7"
                   fontWeight="500"
