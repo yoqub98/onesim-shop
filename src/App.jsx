@@ -507,14 +507,23 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
-  const dropdownRef = useRef(null);
+  const portalDropdownRef = useRef(null);
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
 
-  useOutsideClick({
-    ref: dropdownRef,
-    handler: () => setShowDropdown(false),
-  });
+  // Close dropdown on outside click (checks both wrapper and portaled dropdown)
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (
+        wrapperRef.current && !wrapperRef.current.contains(e.target) &&
+        portalDropdownRef.current && !portalDropdownRef.current.contains(e.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Update dropdown position when it opens (portal needs absolute coords)
   useEffect(() => {
@@ -572,7 +581,7 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
   return (
     <Box
       position="relative"
-      ref={(el) => { dropdownRef.current = el; wrapperRef.current = el; }}
+      ref={wrapperRef}
       w="100%"
       maxW="480px"
       sx={{
@@ -611,6 +620,7 @@ const HeroSearch = ({ animDelay = '0.6s' }) => {
       {/* Dropdown rendered via Portal so it escapes the hero clip-path */}
       {showDropdown && filteredCountries.length > 0 && createPortal(
         <Box
+          ref={portalDropdownRef}
           position="absolute"
           top={`${dropdownPos.top}px`}
           left={`${dropdownPos.left}px`}
