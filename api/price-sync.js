@@ -176,80 +176,90 @@ export default async function handler(req, res) {
           const locationType = locationCode.length === 2 ? 'country' : 'regional';
 
           // Fetch full package details from eSIM Access API (price change events lack volume/duration)
-          let dataVolume = change.new_value?.volume || null;
-          let duration = change.new_value?.duration || null;
-          let packageName = change.product_name;
-          let speed = null;
+          // Fetch full package details from eSIM Access API (price change events lack volume/duration)
+          console.log(`📡 [${logId}] Fetching full details for ${packageCode} (slug: ${change.slug})...`);
+          let matchedPkg = null;
 
-          if (!dataVolume || !duration) {
-            console.log(`📡 [${logId}] Fetching full details for ${packageCode} (slug: ${change.slug})...`);
-            try {
-              const pkgResponse = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
-                method: 'POST',
-                headers: {
-                  'RT-AccessCode': ESIMACCESS_API_KEY,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  locationCode: '',
-                  type: '',
-                  slug: change.slug,
-                  packageCode: '',
-                  iccid: '',
-                }),
-              });
+          try {
+            const pkgResponse = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
+              method: 'POST',
+              headers: {
+                'RT-AccessCode': ESIMACCESS_API_KEY,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                locationCode: '',
+                type: '',
+                slug: change.slug,
+                packageCode: '',
+                iccid: '',
+              }),
+            });
 
-              if (pkgResponse.ok) {
-                const pkgData = await pkgResponse.json();
-                const pkgList = pkgData?.obj?.packageList || [];
-                const matchedPkg = pkgList.find(p => p.packageCode === packageCode) || pkgList[0];
+            if (pkgResponse.ok) {
+              const pkgData = await pkgResponse.json();
+              const pkgList = pkgData?.obj?.packageList || [];
+              matchedPkg = pkgList.find(p => p.packageCode === packageCode) || pkgList[0];
 
-                if (matchedPkg) {
-                  dataVolume = matchedPkg.volume || dataVolume;
-                  duration = matchedPkg.duration || duration;
-                  packageName = matchedPkg.name || packageName;
-                  speed = matchedPkg.speed || null;
-                  console.log(`✅ [${logId}] Got details for ${packageCode}: volume=${dataVolume}, duration=${duration}`);
-                } else {
-                  console.warn(`⚠️ [${logId}] API returned no matching package for slug ${change.slug}`);
-                }
+              if (matchedPkg) {
+                console.log(`✅ [${logId}] Got details for ${packageCode}: volume=${matchedPkg.volume}, duration=${matchedPkg.duration}`);
               } else {
-                console.warn(`⚠️ [${logId}] Package list API returned ${pkgResponse.status} for slug ${change.slug}`);
+                console.warn(`⚠️ [${logId}] API returned no matching package for slug ${change.slug}`);
               }
-            } catch (fetchErr) {
-              console.error(`❌ [${logId}] Failed to fetch package details for ${packageCode}:`, fetchErr.message);
+            } else {
+              console.warn(`⚠️ [${logId}] Package list API returned ${pkgResponse.status} for slug ${change.slug}`);
             }
+          } catch (fetchErr) {
+            console.error(`❌ [${logId}] Failed to fetch package details for ${packageCode}:`, fetchErr.message);
           }
 
-          // Skip import if we still don't have required fields
-          if (!dataVolume || !duration) {
-            console.error(`❌ [${logId}] Cannot import ${packageCode}: missing data_volume (${dataVolume}) or duration (${duration})`);
+          // Skip import if we couldn't get full package details
+          if (!matchedPkg || !matchedPkg.volume || !matchedPkg.duration) {
+            console.error(`❌ [${logId}] Cannot import ${packageCode}: could not fetch full package details from API`);
             notFound++;
             missingPackages.push({
               package_code: packageCode,
               product_name: change.product_name,
               slug: change.slug,
               new_price_usd: newPriceUSD.toFixed(2),
-              error: `Missing required fields: ${!dataVolume ? 'data_volume' : ''} ${!duration ? 'duration' : ''}`.trim(),
+              error: 'Could not fetch full package details from eSIM Access API',
             });
             continue;
           }
 
-          // Import the package
+          // Build covered_countries from locationNetworkList
+          const locationNetworkList = matchedPkg.locationNetworkList || [];
+          const coveredCountries = locationNetworkList.map(loc => ({
+            code: loc.locationCode,
+            name: loc.locationName,
+          }));
+
+          // Re-determine location type based on actual data
+          const actualLocationType = locationNetworkList.length > 1 ? 'regional' : 'country';
+
+          // Import the package with full data from API
           const { data: importedPkg, error: importError } = await supabase
             .from('esim_packages')
             .insert({
               package_code: packageCode,
               slug: change.slug,
-              product_name: packageName,
+              name: matchedPkg.name || change.product_name,
               location_code: locationCode,
-              location_type: locationType,
-              api_price: newPrice,
-              final_price_usd: newPriceUSD * 1.5, // Apply 50% default margin
-              data_volume: dataVolume,
-              duration: duration,
+              location_type: actualLocationType,
+              covered_countries: coveredCountries.length > 0 ? coveredCountries : null,
+              api_price: matchedPkg.price || newPrice,
+              data_volume: matchedPkg.volume,
+              duration: matchedPkg.duration,
               duration_unit: 'DAY',
-              speed: speed,
+              speed: matchedPkg.speed || null,
+              sms_status: matchedPkg.smsStatus || 0,
+              data_type: matchedPkg.dataType || null,
+              active_type: matchedPkg.activeType || null,
+              support_topup_type: matchedPkg.supportTopUpType || null,
+              unused_valid_time: matchedPkg.unusedValidTime || null,
+              location_network_list: locationNetworkList,
+              retail_price: matchedPkg.retailPrice || null,
+              currency_code: matchedPkg.currencyCode || 'USD',
               is_active: true,
               is_featured: false,
               popularity_score: 0,
