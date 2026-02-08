@@ -8,7 +8,6 @@ import {
   VStack,
   HStack,
   Grid,
-  Divider,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -226,22 +225,6 @@ const PackagePage = () => {
   };
   const packageType = getPackageTypeText();
 
-  // Extract covered countries for regional/global plans
-  const coveredCountries = new Set();
-  if (plan.operatorList && Array.isArray(plan.operatorList)) {
-    plan.operatorList.forEach(op => {
-      if (op.locationCode && !op.locationCode.startsWith('!')) {
-        let code = op.locationCode;
-        const hyphenIndex = code.indexOf('-');
-        if (hyphenIndex > 0) {
-          code = code.substring(hyphenIndex + 1);
-        }
-        coveredCountries.add(code);
-      }
-    });
-  }
-  const countryList = Array.from(coveredCountries);
-
   // Parse data value and unit
   const parseDataValue = (data) => {
     if (!data) return { value: plan.dataGB || '0', unit: 'GB' };
@@ -349,34 +332,6 @@ const PackagePage = () => {
       setIsOrdering(false);
     }
   };
-
-  // --- Detail row component ---
-  const DetailRow = ({ icon: Icon, label, value, iconColor = '#FE4F18', badge = false }) => (
-    <HStack justify="space-between" py={3}>
-      <HStack spacing={3}>
-        <Box
-          bg="#F2F2F7"
-          p={2}
-          borderRadius="12px"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Icon size={18} color={iconColor} />
-        </Box>
-        <Text fontSize="15px" fontWeight="500" color="#8E8E93">
-          {label}
-        </Text>
-      </HStack>
-      {badge ? (
-        <Box bg="#F2F2F7" px={3} py={1.5} borderRadius="10px">
-          <Text fontSize="14px" fontWeight="700" color="#1C1C1E">{value}</Text>
-        </Box>
-      ) : (
-        <Text fontSize="15px" fontWeight="700" color="#1C1C1E">{value}</Text>
-      )}
-    </HStack>
-  );
 
   return (
     <Box minH="100vh" bg="#F9F9F9" fontFamily="'Manrope', sans-serif">
