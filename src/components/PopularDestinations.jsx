@@ -28,7 +28,7 @@ import { getCountryName, getTranslation } from '../config/i18n';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fetchAllRegionalPackages, fetchGlobalPackages } from '../services/packageService.js';
-import { getRegionName } from '../services/packageCacheService.js';
+import { getRegionName, getGlobalPackageMarketingName } from '../services/packageCacheService.js';
 
 // Custom Arrow Circle SVG Component
 const ArrowCircleSvg = () => (
@@ -627,14 +627,14 @@ const GlobalCard = ({ pkg, delay = 0, lang }) => {
             </Text>
           </HStack>
 
-          {/* Package Name */}
+          {/* Package Name - Creative marketing name */}
           <Heading
             fontSize="24px"
             fontWeight="800"
             color="gray.900"
             fontFamily="'Manrope', sans-serif"
           >
-            {pkg.name}
+            {getGlobalPackageMarketingName(pkg, lang)}
           </Heading>
 
           {/* Package Details */}

@@ -200,6 +200,71 @@ export const getLocalizedPackageTitle = (plan, lang = 'ru') => {
 };
 
 /**
+ * Generate a creative marketing name for global package cards.
+ * Parses the slug (e.g. "GL-120_20_30") and creates an appealing localized title.
+ *
+ * @param {object} plan - Plan object with slug, data/dataGB, days/duration
+ * @param {string} lang - Language code (ru, uz)
+ * @returns {string} Marketing-focused name
+ */
+export const getGlobalPackageMarketingName = (plan, lang = 'ru') => {
+  const info = parseRegionalSlug(plan.slug || plan.id, lang);
+  const dataGB = plan.dataGB || (info?.dataAmount) || 0;
+  const days = plan.days || plan.duration || info?.days || 0;
+  const countryCount = info?.countryCount || plan.coveredCountries?.length || 0;
+  const isDaily = info?.isDaily || false;
+
+  // Marketing tier names based on data volume and duration
+  const tierNames = {
+    ru: {
+      // By data size
+      explorer:   'Путешественник',     // 5GB
+      adventurer: 'Кругосветка',         // 10GB
+      nomad:      'Цифровой кочевник',   // 20GB
+      // Duration modifiers
+      short:      'Лайт',               // ≤15 days
+      standard:   '',                    // 30 days (default, no modifier)
+      extended:   'Макс',               // 90 days
+      annual:     'Год без границ',      // 365 days
+      daily:      'Безлимит',            // daily plans
+    },
+    uz: {
+      explorer:   'Sayohatchi',
+      adventurer: 'Dunyo sayohati',
+      nomad:      'Raqamli ko\'chmanchi',
+      short:      'Layt',
+      standard:   '',
+      extended:   'Maks',
+      annual:     'Chegarasiz yil',
+      daily:      'Cheksiz',
+    },
+  };
+
+  const t = tierNames[lang] || tierNames.ru;
+
+  // Determine tier by data
+  let tierName;
+  if (dataGB >= 20) tierName = t.nomad;
+  else if (dataGB >= 10) tierName = t.adventurer;
+  else tierName = t.explorer;
+
+  // Determine duration modifier
+  let durationMod = '';
+  if (isDaily) {
+    durationMod = t.daily;
+  } else if (days >= 365) {
+    return t.annual; // Special standalone name for annual plans
+  } else if (days >= 90) {
+    durationMod = t.extended;
+  } else if (days <= 15 && days > 0) {
+    durationMod = t.short;
+  }
+
+  // Combine: "Кругосветка Макс" or just "Путешественник"
+  return durationMod ? `${tierName} ${durationMod}` : tierName;
+};
+
+/**
  * Extract covered countries from packages
  * @param {Array} packages - Array of packages
  * @returns {Array} Array of unique country objects {code, name, logo}

@@ -296,6 +296,8 @@ async function handleGlobalPackages(res) {
     .or('location_type.eq.global,location_code.like.GL%')
     .eq('is_active', true)
     .eq('is_hidden', false)
+    .gte('data_gb', 5)       // Only show packages with 5GB+
+    .gte('duration', 15)     // Only show packages with 15+ days
     .order('popularity_score', { ascending: false })
     .order('final_price_usd', { ascending: true });
 
