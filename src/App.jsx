@@ -830,7 +830,7 @@ const HeroSection = () => {
           style={{ width: '100%', height: 'auto', display: 'block' }}
         >
           <path
-            d="M0 160V160C0 160 0 160 0 160H1440V160C1440 160 1440 160 1440 160C1200 40 960 0 720 0C480 0 240 40 0 160Z"
+            d="M0 0C240 120 480 160 720 160C960 160 1200 120 1440 0V160H0V0Z"
             fill="#FFCFC0"
           />
         </svg>
