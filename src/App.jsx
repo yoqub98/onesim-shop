@@ -743,7 +743,12 @@ const HeroSection = () => {
                 },
               }}
             >
-              {/* People image */}
+              {/* ============================================================
+                 PEOPLE IMAGE CONTROLLER
+                 - Move horizontally: adjust left (e.g. left="10px" or left="-10px")
+                 - Move vertically: adjust top (e.g. top="-20px" moves up)
+                 - Scale: adjust transform scale (e.g. scale(1.1) = 110%)
+                 ============================================================ */}
               <Image
                 src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
                 alt="People using eSIM"
@@ -752,14 +757,21 @@ const HeroSection = () => {
                 loading="lazy"
                 position="relative"
                 zIndex={1}
+                top="0px"           /* CONTROL: move people image up(-) / down(+) */
+                left="0px"          /* CONTROL: move people image left(-) / right(+) */
+                transform="scale(1)"  /* CONTROL: scale people image (1 = 100%, 1.2 = 120%) */
               />
 
-              {/* UI Card 1 - top right (Европа 10/30) - BIGGER */}
+              {/* ============================================================
+                 UI CARD 1 CONTROLLER (top right — Европа 10/30)
+                 - Position: adjust top and right values
+                 - Scale/size: adjust w (width) values per breakpoint
+                 ============================================================ */}
               <Box
                 position="absolute"
-                top={{ base: '-2%', lg: '0%' }}
-                right={{ base: '-15%', lg: '-30%' }}
-                w={{ base: '200px', md: '280px', lg: '340px' }}
+                top={{ base: '-2%', lg: '0%' }}      /* CONTROL: vertical position */
+                right={{ base: '-15%', lg: '-30%' }}  /* CONTROL: horizontal position */
+                w={{ base: '200px', md: '280px', lg: '340px' }}  /* CONTROL: card size/scale */
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat1 0.7s ease-out 0.7s both',
@@ -779,12 +791,16 @@ const HeroSection = () => {
                 />
               </Box>
 
-              {/* UI Card 2 - bottom right (Германия 20 дней) - large */}
+              {/* ============================================================
+                 UI CARD 2 CONTROLLER (bottom right — Германия 20 дней)
+                 - Position: adjust bottom and right values
+                 - Scale/size: adjust w (width) values per breakpoint
+                 ============================================================ */}
               <Box
                 position="absolute"
-                bottom={{ base: '18%', lg: '22%' }}
-                right={{ base: '-18%', lg: '-35%' }}
-                w={{ base: '220px', md: '300px', lg: '380px' }}
+                bottom={{ base: '18%', lg: '22%' }}  /* CONTROL: vertical position */
+                right={{ base: '-18%', lg: '-35%' }}  /* CONTROL: horizontal position */
+                w={{ base: '220px', md: '300px', lg: '380px' }}  /* CONTROL: card size/scale */
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat2 0.7s ease-out 0.9s both',
@@ -808,26 +824,32 @@ const HeroSection = () => {
         </Grid>
       </Container>
 
-      {/* Smooth wide elliptical curve + solid fill to crop people image */}
+      {/* ============================================================
+         CURVE CONTROLLER
+         - Curve height: adjust h={{ base: '120px', md: '160px', lg: '200px' }}
+         - Curve width (wider = shallower): adjust w="160%"
+         - Curve roundness: adjust borderBottomLeftRadius / borderBottomRightRadius (50% = full ellipse)
+         - Curve vertical position: adjust top value (e.g. top="-100%" pushes it up)
+         ============================================================ */}
       <Box
         position="absolute"
         bottom="0"
         left="0"
         right="0"
-        h={{ base: '120px', md: '160px', lg: '200px' }}
+        h={{ base: '120px', md: '160px', lg: '200px' }}  /* CONTROL: curve container height */
         zIndex={4}
         overflow="hidden"
       >
         <Box
           position="absolute"
-          bottom="0"
+          top="-100%"              /* CONTROL: pushes ellipse up so only bottom arc shows (concave) */
           left="50%"
           transform="translateX(-50%)"
-          w="160%"
+          w="160%"                 /* CONTROL: curve width — bigger = shallower/wider curve */
           h="100%"
-          bg="#FFCFC0"
-          borderTopLeftRadius="50%"
-          borderTopRightRadius="50%"
+          bg="#FFCFC0"             /* CONTROL: curve fill color */
+          borderBottomLeftRadius="50%"   /* CONTROL: roundness — 50% = full ellipse, lower = flatter */
+          borderBottomRightRadius="50%"  /* CONTROL: roundness — keep same as left for symmetry */
         />
       </Box>
     </Box>
