@@ -664,15 +664,15 @@ const HeroSection = () => {
       overflow="hidden"
       bg="radial-gradient(100% 86.35% at 49.97% 0%, #FF9472 0%, #F1511F 52.6%, #F04E1B 100%)"
       minH={{ base: 'auto', lg: '100vh' }}
-      pb={{ base: 16, md: 0 }}
+      pb={{ base: '100px', md: '120px' }}
     >
-      {/* Hero content area */}
-      <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '100px', md: '110px', lg: '120px' }}>
+      {/* Hero content area - FIX #4: reduced top padding for compact spacing */}
+      <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '84px', md: '90px', lg: '96px' }}>
         <Grid
           templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
           gap={{ base: 8, lg: 4 }}
           alignItems="center"
-          minH={{ base: 'auto', lg: 'calc(100vh - 200px)' }}
+          minH={{ base: 'auto', lg: 'calc(100vh - 240px)' }}
         >
           {/* Left: Text content */}
           <GridItem>
@@ -741,23 +741,30 @@ const HeroSection = () => {
                 },
               }}
             >
-              {/* People image */}
-              <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
-                alt="People using eSIM"
-                w="100%"
-                h="auto"
-                loading="lazy"
+              {/* People image - FIX #2: mask bottom to blend into wave curve */}
+              <Box
                 position="relative"
                 zIndex={1}
-              />
+                sx={{
+                  maskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 98%)',
+                }}
+              >
+                <Image
+                  src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
+                  alt="People using eSIM"
+                  w="100%"
+                  h="auto"
+                  loading="lazy"
+                />
+              </Box>
 
-              {/* UI Card 1 - top right (smaller) */}
+              {/* FIX #3: UI Card 1 - top right - ui-screenshot1.png (Европа 10/30), 30% BIGGER */}
               <Box
                 position="absolute"
-                top={{ base: '5%', lg: '8%' }}
-                right={{ base: '-5%', lg: '-12%' }}
-                w={{ base: '140px', md: '180px', lg: '210px' }}
+                top={{ base: '2%', lg: '5%' }}
+                right={{ base: '-8%', lg: '-16%' }}
+                w={{ base: '180px', md: '230px', lg: '270px' }}
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat1 0.7s ease-out 0.7s both',
@@ -777,12 +784,12 @@ const HeroSection = () => {
                 />
               </Box>
 
-              {/* UI Card 2 - bottom right (larger) */}
+              {/* FIX #3: UI Card 2 - bottom right - ui-screenshot2.png (Германия 20 дней), smaller */}
               <Box
                 position="absolute"
-                bottom={{ base: '10%', lg: '12%' }}
-                right={{ base: '-8%', lg: '-18%' }}
-                w={{ base: '180px', md: '230px', lg: '280px' }}
+                bottom={{ base: '15%', lg: '18%' }}
+                right={{ base: '-10%', lg: '-22%' }}
+                w={{ base: '160px', md: '200px', lg: '240px' }}
                 zIndex={3}
                 sx={{
                   animation: 'cardFloat2 0.7s ease-out 0.9s both',
@@ -806,7 +813,7 @@ const HeroSection = () => {
         </Grid>
       </Container>
 
-      {/* Wave SVG at bottom */}
+      {/* FIX #1: Wave SVG - convex (arching upward) dome shape */}
       <Box
         position="absolute"
         bottom="-1px"
@@ -816,14 +823,14 @@ const HeroSection = () => {
         lineHeight="0"
       >
         <svg
-          viewBox="0 0 1440 120"
+          viewBox="0 0 1440 160"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="none"
           style={{ width: '100%', height: 'auto', display: 'block' }}
         >
           <path
-            d="M0 120L0 80C240 30 480 0 720 10C960 20 1200 60 1440 80L1440 120L0 120Z"
+            d="M0 160V160C0 160 0 160 0 160H1440V160C1440 160 1440 160 1440 160C1200 40 960 0 720 0C480 0 240 40 0 160Z"
             fill="#FFCFC0"
           />
         </svg>
