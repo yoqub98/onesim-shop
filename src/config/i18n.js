@@ -573,7 +573,11 @@ export const TRANSLATIONS = {
     hero: {
       badge: 'Мгновенная активация eSIM',
       title: 'Путешествуйте без границ с',
+      titleAccent: 'OneSim',
+      subtitle1: 'Глобальное покрытие мобильной связи в более чем 190 странах мира.',
+      subtitle2: 'Оставайтесь на связи везде и всегда с нашими выгодными тарифами.',
       description: 'Глобальное покрытие мобильной связи в более чем 190 странах мира. Оставайтесь на связи везде и всегда с нашими выгодными тарифами.',
+      searchPlaceholder: 'Где вам нужен eSIM?',
       features: {
         coverage: '190+ стран покрытия',
         activation: 'Мгновенная активация за 2 минуты',
@@ -1166,7 +1170,11 @@ export const TRANSLATIONS = {
     hero: {
       badge: 'eSIM ni bir zumda faollashtirish',
       title: 'Chegara siz sayohat qiling',
+      titleAccent: 'OneSim',
+      subtitle1: 'Dunyoning 190 dan ortiq mamlakatida global mobil aloqa.',
+      subtitle2: 'Qulay tariflarimiz bilan har doim va har joyda aloqada bo\'ling.',
       description: 'Dunyoning 190 dan ortiq mamlakatida global mobil aloqa. Qulay tariflarimiz bilan har doim va har joyda aloqada bo\'ling.',
+      searchPlaceholder: 'eSIM qayerda kerak?',
       features: {
         coverage: '190+ mamlakat qamrovi',
         activation: '2 daqiqada tezkor faollashtirish',

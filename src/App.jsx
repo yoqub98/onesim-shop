@@ -1,6 +1,6 @@
 // src/App.jsx (FULL FILE - copy entire thing)
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -25,23 +25,27 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  List,
+  ListItem,
+  useOutsideClick,
 } from '@chakra-ui/react';
 import {
-  ChevronRightIcon,
   Bars3Icon,
   XMarkIcon,
-  GlobeAltIcon,
-  BoltIcon,
-  ShieldCheckIcon,
   ChevronDownIcon,
   UserIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 import Flag from 'react-world-flags';
 import 'animate.css';
 import PlansSection from './components/PlansSection';
 import PopularDestinations from './components/PopularDestinations';
 import FeaturesSection from './components/FeaturesSection';
+import CountryFlag from './components/CountryFlag';
 import CountryPage from './pages/CountryPage.jsx';
 import PackagePage from './pages/PackagePage.jsx';
 import PlansPage from './pages/PlansPage.jsx';
@@ -60,7 +64,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext.jsx';
 import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { FavoritesProvider } from './contexts/FavoritesContext.jsx';
-import { getTranslation, LANGUAGES } from './config/i18n.js';
+import { getTranslation, LANGUAGES, COUNTRY_TRANSLATIONS, getCountrySearchNames } from './config/i18n.js';
 // Logo imports
 import logoWhite from './assets/images/logo-white.svg';
 import logoColored from './assets/new-logo.svg';
@@ -74,6 +78,8 @@ const Navigation = () => {
   const { user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,27 +97,47 @@ const Navigation = () => {
     }
   };
 
+  // On homepage: transparent on top, glassmorphism dark on scroll
+  // On other pages: white background
+  const navBg = isHomePage
+    ? (scrolled ? 'rgba(21, 22, 24, 0.85)' : 'transparent')
+    : (scrolled ? 'rgba(255, 255, 255, 0.95)' : 'white');
+  const navTextColor = isHomePage ? 'white' : 'gray.700';
+  const navHoverColor = isHomePage ? 'whiteAlpha.200' : 'gray.50';
+  const navBorderColor = isHomePage
+    ? (scrolled ? 'whiteAlpha.100' : 'transparent')
+    : (scrolled ? 'gray.200' : 'transparent');
+
   return (
     <Box
       as="nav"
-      position="sticky"
+      position={isHomePage ? 'fixed' : 'sticky'}
       top="0"
-      bg={scrolled ? 'rgba(255, 255, 255, 0.95)' : 'white'}
-      backdropFilter={scrolled ? 'blur(10px)' : 'none'}
+      left="0"
+      right="0"
+      bg={navBg}
+      backdropFilter={scrolled || isHomePage ? 'blur(20px)' : 'none'}
+      css={{ WebkitBackdropFilter: scrolled || isHomePage ? 'blur(20px)' : 'none' }}
       borderBottom="1px solid"
-      borderColor={scrolled ? 'gray.200' : 'transparent'}
+      borderColor={navBorderColor}
       zIndex="1000"
-      shadow={scrolled ? 'lg' : 'none'}
+      shadow={scrolled && !isHomePage ? 'lg' : 'none'}
       transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-      className="animate__animated animate__fadeInDown"
+      sx={{
+        animation: 'navSlideDown 0.6s ease-out',
+        '@keyframes navSlideDown': {
+          from: { opacity: 0, transform: 'translateY(-20px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        },
+      }}
     >
       <Container maxW="8xl">
-        <Flex h="80px" alignItems="center" justifyContent="space-between">
+        <Flex h="72px" alignItems="center" justifyContent="space-between">
           <Link href="/" textDecoration="none">
             <Image
-              src={logoColored}
+              src={isHomePage ? logoWhite : logoColored}
               alt="OneSIM"
-              h="32px"
+              h="30px"
               cursor="pointer"
               transition="all 0.3s"
               _hover={{ transform: 'scale(1.05)' }}
@@ -122,11 +148,11 @@ const Navigation = () => {
             <Link
               href="/#home"
               fontWeight="600"
-              color="gray.700"
+              color={navTextColor}
               fontSize="md"
               position="relative"
               _hover={{
-                color: '#FE4F18',
+                color: isHomePage ? 'white' : '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -136,7 +162,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: '#FE4F18',
+                bg: isHomePage ? 'white' : '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -145,11 +171,11 @@ const Navigation = () => {
             <Link
               href="/plans"
               fontWeight="600"
-              color="gray.700"
+              color={navTextColor}
               fontSize="md"
               position="relative"
               _hover={{
-                color: '#FE4F18',
+                color: isHomePage ? 'white' : '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -159,7 +185,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: '#FE4F18',
+                bg: isHomePage ? 'white' : '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -168,11 +194,11 @@ const Navigation = () => {
             <Link
               href="/how-to-install"
               fontWeight="600"
-              color="gray.700"
+              color={navTextColor}
               fontSize="md"
               position="relative"
               _hover={{
-                color: '#FE4F18',
+                color: isHomePage ? 'white' : '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -182,7 +208,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: '#FE4F18',
+                bg: isHomePage ? 'white' : '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -191,11 +217,11 @@ const Navigation = () => {
             <Link
               href="/#contacts"
               fontWeight="600"
-              color="gray.700"
+              color={navTextColor}
               fontSize="md"
               position="relative"
               _hover={{
-                color: '#FE4F18',
+                color: isHomePage ? 'white' : '#FE4F18',
                 _after: { width: '100%' }
               }}
               _after={{
@@ -205,7 +231,7 @@ const Navigation = () => {
                 left: 0,
                 width: 0,
                 height: '2px',
-                bg: '#FE4F18',
+                bg: isHomePage ? 'white' : '#FE4F18',
                 transition: 'width 0.3s ease',
               }}
             >
@@ -219,7 +245,7 @@ const Navigation = () => {
                 variant="ghost"
                 size="sm"
                 px={2}
-                _hover={{ bg: 'gray.50' }}
+                _hover={{ bg: navHoverColor }}
               >
                 <HStack spacing={1}>
                   <Box
@@ -228,7 +254,7 @@ const Navigation = () => {
                     borderRadius="sm"
                     overflow="hidden"
                     border="1px solid"
-                    borderColor="gray.200"
+                    borderColor={isHomePage ? 'whiteAlpha.400' : 'gray.200'}
                     flexShrink={0}
                   >
                     <Flag
@@ -236,10 +262,10 @@ const Navigation = () => {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   </Box>
-                  <Text fontSize="sm" fontWeight="600">
+                  <Text fontSize="sm" fontWeight="600" color={navTextColor}>
                     {currentLanguage === 'uz' ? 'UZ' : 'RU'}
                   </Text>
-                  <ChevronDownIcon className="w-3.5 h-3.5" />
+                  <ChevronDownIcon className="w-3.5 h-3.5" style={{ color: isHomePage ? 'white' : undefined }} />
                 </HStack>
               </MenuButton>
               <MenuList minW="120px">
@@ -289,9 +315,9 @@ const Navigation = () => {
                   size="md"
                   variant="ghost"
                   fontWeight="600"
-                  color="gray.700"
-                  _hover={{ bg: 'gray.50' }}
-                  leftIcon={<UserIcon className="w-[18px] h-[18px]" />}
+                  color={navTextColor}
+                  _hover={{ bg: navHoverColor }}
+                  leftIcon={<UserIcon className="w-[18px] h-[18px]" style={{ color: isHomePage ? 'white' : undefined }} />}
                 >
                   {t('nav.myPage')}
                 </Button>
@@ -301,8 +327,8 @@ const Navigation = () => {
                     variant="ghost"
                     px={3}
                     py={2}
-                    _hover={{ bg: 'gray.50' }}
-                    _active={{ bg: 'gray.100' }}
+                    _hover={{ bg: navHoverColor }}
+                    _active={{ bg: isHomePage ? 'whiteAlpha.300' : 'gray.100' }}
                   >
                     <HStack spacing={2}>
                       <Avatar
@@ -311,10 +337,10 @@ const Navigation = () => {
                         bg="purple.500"
                         color="white"
                       />
-                      <Text fontWeight="600" color="gray.700">
+                      <Text fontWeight="600" color={navTextColor}>
                         {profile.first_name} {profile.last_name}
                       </Text>
-                      <ChevronDownIcon className="w-[18px] h-[18px]" />
+                      <ChevronDownIcon className="w-[18px] h-[18px]" style={{ color: isHomePage ? 'white' : undefined }} />
                     </HStack>
                   </MenuButton>
                   <MenuList>
@@ -331,14 +357,14 @@ const Navigation = () => {
                   href="/signup"
                   size="md"
                   variant="outline"
-                  borderColor="#E8E9EE"
-                  color="#151618"
+                  borderColor={isHomePage ? 'whiteAlpha.400' : '#E8E9EE'}
+                  color={navTextColor}
                   fontWeight="700"
                   borderWidth="2px"
                   borderRadius="full"
                   _hover={{
-                    bg: '#F5F6F8',
-                    borderColor: '#D1D3D9',
+                    bg: isHomePage ? 'whiteAlpha.200' : '#F5F6F8',
+                    borderColor: isHomePage ? 'whiteAlpha.600' : '#D1D3D9',
                   }}
                 >
                   Регистрация
@@ -347,14 +373,14 @@ const Navigation = () => {
                   as="a"
                   href="/login"
                   size="md"
-                  bg="#FE4F18"
-                  color="white"
+                  bg={isHomePage ? 'white' : '#FE4F18'}
+                  color={isHomePage ? '#FE4F18' : 'white'}
                   fontWeight="700"
                   borderRadius="full"
                   _hover={{
-                    bg: '#FF6B3D',
+                    bg: isHomePage ? 'whiteAlpha.900' : '#FF6B3D',
                     transform: 'translateY(-2px)',
-                    shadow: '0 10px 30px rgba(254, 79, 24, 0.3)',
+                    shadow: isHomePage ? '0 10px 30px rgba(255, 255, 255, 0.3)' : '0 10px 30px rgba(254, 79, 24, 0.3)',
                   }}
                 >
                   {t('nav.login')}
@@ -368,26 +394,32 @@ const Navigation = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             variant="ghost"
             aria-label="Toggle menu"
-            color="gray.700"
-            _hover={{ bg: 'gray.100' }}
+            color={navTextColor}
+            _hover={{ bg: navHoverColor }}
           >
             {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </IconButton>
         </Flex>
 
         {mobileMenuOpen && (
-          <Box display={{ base: 'block', md: 'none' }} pb={4} className="animate__animated animate__fadeInDown animate__faster">
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            pb={4}
+            bg={isHomePage ? 'rgba(21, 22, 24, 0.9)' : 'white'}
+            borderRadius="0 0 16px 16px"
+            className="animate__animated animate__fadeInDown animate__faster"
+          >
             <VStack spacing={2} align="stretch">
-              <Link href="/#home" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/#home" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.home')}
               </Link>
-              <Link href="/plans" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/plans" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.plans')}
               </Link>
-              <Link href="/how-to-install" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/how-to-install" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.howToInstall')}
               </Link>
-              <Link href="/#contacts" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/#contacts" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                 {t('nav.contacts')}
               </Link>
 
@@ -396,9 +428,10 @@ const Navigation = () => {
                 <Button
                   size="sm"
                   variant={currentLanguage === 'ru' ? 'solid' : 'ghost'}
-                  colorScheme={currentLanguage === 'ru' ? 'purple' : 'gray'}
+                  colorScheme={currentLanguage === 'ru' ? 'orange' : 'gray'}
                   onClick={() => changeLanguage(LANGUAGES.RU)}
                   flex={1}
+                  color={currentLanguage === 'ru' ? 'white' : navTextColor}
                   leftIcon={
                     <Box
                       width="20px"
@@ -417,9 +450,10 @@ const Navigation = () => {
                 <Button
                   size="sm"
                   variant={currentLanguage === 'uz' ? 'solid' : 'ghost'}
-                  colorScheme={currentLanguage === 'uz' ? 'purple' : 'gray'}
+                  colorScheme={currentLanguage === 'uz' ? 'orange' : 'gray'}
                   onClick={() => changeLanguage(LANGUAGES.UZ)}
                   flex={1}
+                  color={currentLanguage === 'uz' ? 'white' : navTextColor}
                   leftIcon={
                     <Box
                       width="20px"
@@ -439,19 +473,19 @@ const Navigation = () => {
 
               {user && profile ? (
                 <>
-                  <Link href="/mypage" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/mypage" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                     {t('nav.myPage')}
                   </Link>
-                  <Button onClick={handleLogout} variant="ghost" justifyContent="flex-start" fontWeight="600" color="red.600">
+                  <Button onClick={handleLogout} variant="ghost" justifyContent="flex-start" fontWeight="600" color="red.400">
                     {t('nav.logout')}
                   </Button>
                 </>
               ) : (
                 <>
-                  <Link href="/signup" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/signup" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                     Регистрация
                   </Link>
-                  <Link href="/login" fontWeight="600" py={3} px={4} borderRadius="lg" _hover={{ bg: 'gray.50' }} onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/login" fontWeight="600" color={navTextColor} py={3} px={4} borderRadius="lg" _hover={{ bg: navHoverColor }} onClick={() => setMobileMenuOpen(false)}>
                     {t('nav.login')}
                   </Link>
                 </>
@@ -460,6 +494,159 @@ const Navigation = () => {
           </Box>
         )}
       </Container>
+    </Box>
+  );
+};
+
+// Hero Search Component
+const HeroSearch = ({ animDelay = '0.6s' }) => {
+  const { currentLanguage } = useLanguage();
+  const t = (key) => getTranslation(currentLanguage, key);
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useOutsideClick({
+    ref: dropdownRef,
+    handler: () => setShowDropdown(false),
+  });
+
+  const allCountries = useMemo(() => {
+    const countries = COUNTRY_TRANSLATIONS[currentLanguage] || {};
+    return Object.entries(countries)
+      .filter(([code]) => code.length === 2)
+      .map(([code, name]) => ({ code, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [currentLanguage]);
+
+  const filteredCountries = useMemo(() => {
+    if (!searchQuery) return allCountries.slice(0, 8);
+    const search = searchQuery.toLowerCase();
+    return allCountries.filter(country => {
+      const searchNames = getCountrySearchNames(country.code, currentLanguage);
+      return searchNames.some(name => name.toLowerCase().includes(search));
+    }).slice(0, 8);
+  }, [allCountries, searchQuery, currentLanguage]);
+
+  const highlightText = useCallback((text, search) => {
+    if (!search) return text;
+    const index = text.toLowerCase().indexOf(search.toLowerCase());
+    if (index === -1) return text;
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + search.length);
+    const after = text.substring(index + search.length);
+    return (
+      <>
+        {before}
+        <Text as="span" bg="rgba(254, 79, 24, 0.2)" color="#FE4F18" fontWeight="700">
+          {match}
+        </Text>
+        {after}
+      </>
+    );
+  }, []);
+
+  const handleCountrySelect = (countryCode) => {
+    setShowDropdown(false);
+    setSearchQuery('');
+    navigate(`/country/${countryCode}`);
+  };
+
+  return (
+    <Box
+      position="relative"
+      ref={dropdownRef}
+      w="100%"
+      maxW="480px"
+      sx={{
+        animation: `heroFadeUp 0.7s ease-out ${animDelay} both`,
+      }}
+    >
+      <InputGroup size="lg">
+        <InputLeftElement pointerEvents="none" h="56px" pl={2}>
+          <MagnifyingGlassIcon style={{ width: '22px', height: '22px', color: 'rgba(255,255,255,0.6)' }} />
+        </InputLeftElement>
+        <Input
+          ref={inputRef}
+          placeholder={t('hero.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
+          h="56px"
+          pl="52px"
+          borderRadius="full"
+          bg="rgba(255, 255, 255, 0.18)"
+          backdropFilter="blur(10px)"
+          css={{ WebkitBackdropFilter: 'blur(10px)' }}
+          border="1.5px solid rgba(255, 255, 255, 0.25)"
+          color="white"
+          fontWeight="500"
+          fontSize="16px"
+          _placeholder={{ color: 'rgba(255, 255, 255, 0.6)' }}
+          _hover={{ bg: 'rgba(255, 255, 255, 0.24)', borderColor: 'rgba(255, 255, 255, 0.4)' }}
+          _focus={{ bg: 'rgba(255, 255, 255, 0.24)', borderColor: 'rgba(255, 255, 255, 0.5)', boxShadow: '0 0 0 1px rgba(255,255,255,0.3)' }}
+        />
+      </InputGroup>
+
+      {showDropdown && filteredCountries.length > 0 && (
+        <Box
+          position="absolute"
+          top="100%"
+          left={0}
+          right={0}
+          mt={2}
+          bg="white"
+          borderRadius="20px"
+          boxShadow="0 12px 40px rgba(0, 0, 0, 0.15)"
+          maxH="320px"
+          overflowY="auto"
+          zIndex={1000}
+          border="1px solid #E8E9EE"
+          css={{
+            '&::-webkit-scrollbar': { width: '6px' },
+            '&::-webkit-scrollbar-track': { background: '#F5F6F8', borderRadius: '10px' },
+            '&::-webkit-scrollbar-thumb': { background: '#FE4F18', borderRadius: '10px' },
+          }}
+        >
+          <List spacing={0} py={2}>
+            {filteredCountries.map((country) => (
+              <ListItem
+                key={country.code}
+                onClick={() => handleCountrySelect(country.code)}
+                cursor="pointer"
+                px={4}
+                py={3}
+                _hover={{ bg: '#FFF4F0' }}
+                transition="all 0.15s"
+              >
+                <HStack spacing={3}>
+                  <Box
+                    width="32px"
+                    height="24px"
+                    borderRadius="6px"
+                    overflow="hidden"
+                    border="1px solid #E8E9EE"
+                    flexShrink={0}
+                  >
+                    <CountryFlag
+                      code={country.code}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </Box>
+                  <Text fontWeight="500" color="gray.800" fontSize="15px">
+                    {highlightText(country.name, searchQuery)}
+                  </Text>
+                </HStack>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
     </Box>
   );
 };
@@ -473,118 +660,174 @@ const HeroSection = () => {
     <Box
       as="section"
       id="home"
-      bg="#F5F6F8"
-      pt={0}
-      pb={{ base: 20, md: 28 }}
-      minH="calc(100vh - 80px)"
-      display="flex"
-      alignItems="center"
       position="relative"
       overflow="hidden"
+      bg="radial-gradient(100% 86.35% at 49.97% 0%, #FF9472 0%, #F1511F 52.6%, #F04E1B 100%)"
+      minH={{ base: 'auto', lg: '100vh' }}
+      pb={{ base: 16, md: 0 }}
     >
-      <Box position="absolute" top="-50%" right="-20%" width="600px" height="600px" bg="#FFF4F0" borderRadius="full" filter="blur(100px)" opacity="0.5" pointerEvents="none" />
-      <Box position="absolute" bottom="-30%" left="-10%" width="500px" height="500px" bg="#E8E9EE" borderRadius="full" filter="blur(100px)" opacity="0.4" pointerEvents="none" />
-
-      <Container maxW="8xl" position="relative">
-        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={16} alignItems="center">
-          <GridItem className="animate__animated animate__fadeInLeft">
-            <VStack align="flex-start" spacing={8}>
+      {/* Hero content area */}
+      <Container maxW="8xl" position="relative" zIndex={2} pt={{ base: '100px', md: '110px', lg: '120px' }}>
+        <Grid
+          templateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+          gap={{ base: 8, lg: 4 }}
+          alignItems="center"
+          minH={{ base: 'auto', lg: 'calc(100vh - 200px)' }}
+        >
+          {/* Left: Text content */}
+          <GridItem>
+            <VStack align="flex-start" spacing={{ base: 5, md: 7 }} maxW="620px">
               <Heading
                 as="h1"
-                fontSize={{ base: '2.5rem', md: '3rem', lg: '3.6rem' }}
+                fontSize={{ base: '2.4rem', md: '3.2rem', lg: '3.8rem', xl: '4.2rem' }}
                 fontWeight="800"
-                lineHeight="1.1"
-                color="gray.900"
-                letterSpacing="tight"
+                lineHeight="1.08"
+                color="white"
+                letterSpacing="-0.02em"
                 sx={{
-                  WebkitTextStroke: '0.5px #151618',
+                  animation: 'heroFadeUp 0.7s ease-out 0.15s both',
+                  '@keyframes heroFadeUp': {
+                    from: { opacity: 0, transform: 'translateY(24px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
                 }}
               >
                 {t('hero.title')}{' '}
-                <Box as="span" color="#FE4F18" display="inline" sx={{ WebkitTextStroke: '0.5px #FE4F18' }}>
-                  OneSIM
+                <Box as="span" fontWeight="900" display="inline">
+                  {t('hero.titleAccent')}
                 </Box>
               </Heading>
 
-              <Text fontSize={{ base: 'lg', md: 'xl' }} color="gray.600" lineHeight="1.8" fontWeight="500">
-                {t('hero.description')}
-              </Text>
-
-              <VStack align="flex-start" spacing={4} mt={2}>
-                <HStack spacing={3}>
-                  <Box bg="#FEEADE" p={3} borderRadius="lg">
-                    <Box as={GlobeAltIcon} w="24px" h="24px" color="#FE4F18" />
-                  </Box>
-                  <Text fontWeight="600" color="gray.700">{t('hero.features.coverage')}</Text>
-                </HStack>
-                <HStack spacing={3}>
-                  <Box bg="#FEEADE" p={3} borderRadius="lg">
-                    <Box as={BoltIcon} w="24px" h="24px" color="#FE4F18" />
-                  </Box>
-                  <Text fontWeight="600" color="gray.700">{t('hero.features.activation')}</Text>
-                </HStack>
-                <HStack spacing={3}>
-                  <Box bg="#FEEADE" p={3} borderRadius="lg">
-                    <Box as={ShieldCheckIcon} w="24px" h="24px" color="#FE4F18" />
-                  </Box>
-                  <Text fontWeight="600" color="gray.700">{t('hero.features.secure')}</Text>
-                </HStack>
+              <VStack align="flex-start" spacing={1}
+                sx={{ animation: 'heroFadeUp 0.7s ease-out 0.3s both' }}
+              >
+                <Text
+                  fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+                  color="rgba(255, 255, 255, 0.88)"
+                  lineHeight="1.7"
+                  fontWeight="500"
+                >
+                  {t('hero.subtitle1')}
+                </Text>
+                <Text
+                  fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+                  color="rgba(255, 255, 255, 0.88)"
+                  lineHeight="1.7"
+                  fontWeight="500"
+                >
+                  {t('hero.subtitle2')}
+                </Text>
               </VStack>
 
-              <Button
-                size="lg"
-                bg="#151618"
-                color="white"
-                px={10}
-                py={7}
-                fontSize="lg"
-                fontWeight="700"
-                borderRadius="full"
-                _hover={{
-                  bg: '#2D2F33',
-                  transform: 'translateY(-3px)',
-                  shadow: '0 20px 40px rgba(21, 22, 24, 0.4)',
-                }}
-                _active={{ transform: 'translateY(-1px)' }}
-                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                shadow="0 10px 30px rgba(21, 22, 24, 0.3)"
-              >
-                {t('hero.cta')}
-                <ChevronRightIcon className="w-5 h-5 ml-2" />
-              </Button>
+              <HeroSearch animDelay="0.5s" />
             </VStack>
           </GridItem>
 
-          <GridItem className="animate__animated animate__fadeInRight">
+          {/* Right: People image with floating cards */}
+          <GridItem
+            position="relative"
+            display="flex"
+            justifyContent="center"
+            alignItems="flex-end"
+          >
             <Box
               position="relative"
-              overflow="visible"
+              w="100%"
+              maxW={{ base: '400px', lg: '560px' }}
+              sx={{ animation: 'heroFadeRight 0.8s ease-out 0.3s both',
+                '@keyframes heroFadeRight': {
+                  from: { opacity: 0, transform: 'translateX(40px)' },
+                  to: { opacity: 1, transform: 'translateX(0)' },
+                },
+              }}
             >
-              {/* Gradient rectangle decoration behind the image */}
-              <Box
-                position="absolute"
-                bottom="-30px"
-                right="-30px"
-                width="100%"
-                height="100%"
-                bgGradient="linear(137deg, #FD916A 6.42%, #7D7571 57.11%, #727272 100%)"
-                opacity={0.2}
-                borderRadius="3xl"
-                zIndex={0}
-              />
+              {/* People image */}
               <Image
-                src="https://ik.imagekit.io/php1jcf0t/OneSim/banner-image.png"
-                alt="OneSIM Global Coverage"
-                borderRadius="3xl"
-                w="full"
+                src="https://ik.imagekit.io/php1jcf0t/OneSim/img-people.png"
+                alt="People using eSIM"
+                w="100%"
+                h="auto"
+                loading="lazy"
                 position="relative"
                 zIndex={1}
-                display="block"
               />
+
+              {/* UI Card 1 - top right (smaller) */}
+              <Box
+                position="absolute"
+                top={{ base: '5%', lg: '8%' }}
+                right={{ base: '-5%', lg: '-12%' }}
+                w={{ base: '140px', md: '180px', lg: '210px' }}
+                zIndex={3}
+                sx={{
+                  animation: 'cardFloat1 0.7s ease-out 0.7s both',
+                  '@keyframes cardFloat1': {
+                    from: { opacity: 0, transform: 'translateY(20px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
+                }}
+              >
+                <Image
+                  src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot1.png"
+                  alt="Europe 10/30 plan"
+                  w="100%"
+                  h="auto"
+                  loading="lazy"
+                  borderRadius="16px"
+                />
+              </Box>
+
+              {/* UI Card 2 - bottom right (larger) */}
+              <Box
+                position="absolute"
+                bottom={{ base: '10%', lg: '12%' }}
+                right={{ base: '-8%', lg: '-18%' }}
+                w={{ base: '180px', md: '230px', lg: '280px' }}
+                zIndex={3}
+                sx={{
+                  animation: 'cardFloat2 0.7s ease-out 0.9s both',
+                  '@keyframes cardFloat2': {
+                    from: { opacity: 0, transform: 'translateY(20px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
+                }}
+              >
+                <Image
+                  src="https://ik.imagekit.io/php1jcf0t/OneSim/ui-screenshot2.png"
+                  alt="Germany 20 days order"
+                  w="100%"
+                  h="auto"
+                  loading="lazy"
+                  borderRadius="16px"
+                />
+              </Box>
             </Box>
           </GridItem>
         </Grid>
       </Container>
+
+      {/* Wave SVG at bottom */}
+      <Box
+        position="absolute"
+        bottom="-1px"
+        left="0"
+        right="0"
+        zIndex={3}
+        lineHeight="0"
+      >
+        <svg
+          viewBox="0 0 1440 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        >
+          <path
+            d="M0 120L0 80C240 30 480 0 720 10C960 20 1200 60 1440 80L1440 120L0 120Z"
+            fill="#FFCFC0"
+          />
+        </svg>
+      </Box>
     </Box>
   );
 };
@@ -764,13 +1007,13 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
-      <FeaturesSection />
-      <FAQSection />
-      <PlansSection />
       <PopularDestinations
         scrollToSection={navigationState.scrollToDestinations}
         initialTab={navigationState.activeTab}
       />
+      <FeaturesSection />
+      <FAQSection />
+      <PlansSection />
       <PriceSyncDebug />
     </>
   );

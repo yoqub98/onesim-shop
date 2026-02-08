@@ -827,7 +827,7 @@ const PopularDestinations = ({ scrollToSection = false, initialTab = null }) => 
   }, [filteredDestinations]);
 
   return (
-    <Box as="section" ref={sectionRef} py={24} bg="#F5F6F8" position="relative">
+    <Box as="section" ref={sectionRef} py={24} bg="linear-gradient(175deg, #FFCFC0 6.2%, #FFF8F6 51%, #FFF 95.74%)" position="relative">
       {/* Background decoration */}
       <Box
         position="absolute"
