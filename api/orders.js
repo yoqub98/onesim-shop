@@ -281,38 +281,31 @@ async function getTopupPlans(req, res) {
 
     const exchangeRate = await getExchangeRate();
 
-    console.log('💳 [TOPUP-PLANS] Sample plan from API:', apiData.obj.packageList[0]);
+    console.log('💳 [TOPUP-PLANS] Sample plan from API:', JSON.stringify(apiData.obj.packageList[0], null, 2));
 
     const plans = apiData.obj.packageList.map((plan) => {
       // Price is in cents (10000 = $1.00)
       const priceUsd = plan.price / 10000;
       const priceUzs = Math.round(priceUsd * exchangeRate);
 
-      // dataVolume might be in bytes or already in MB/GB - check the value
+      // Check for volume field (from actual API response)
+      // volume is in bytes (1073741824 = 1GB)
       let dataGB = 0;
-      if (plan.dataVolume) {
-        // If dataVolume is a large number (> 1000000), it's in bytes
-        if (plan.dataVolume > 1000000) {
-          dataGB = (plan.dataVolume / (1024 * 1024 * 1024)).toFixed(2);
-        } else {
-          // Otherwise it might already be in MB or GB
-          dataGB = (plan.dataVolume / 1024).toFixed(2);
-        }
-      } else if (plan.dataMB) {
-        // Some APIs return dataMB instead
-        dataGB = (plan.dataMB / 1024).toFixed(2);
-      } else if (plan.dataGB) {
-        // Or dataGB directly
-        dataGB = parseFloat(plan.dataGB).toFixed(2);
+      const volumeField = plan.volume || plan.dataVolume;
+
+      if (volumeField && volumeField > 0) {
+        // Convert bytes to GB
+        dataGB = (volumeField / (1024 * 1024 * 1024)).toFixed(2);
       }
 
       console.log('💳 [TOPUP-PLANS] Plan transformation:', {
         packageCode: plan.packageCode,
+        packageName: plan.packageName,
+        rawVolume: plan.volume,
         rawDataVolume: plan.dataVolume,
-        rawDataMB: plan.dataMB,
-        rawDataGB: plan.dataGB,
         calculatedGB: dataGB,
         duration: plan.duration,
+        price: plan.price,
         priceUsd,
         priceUzs,
       });
@@ -320,8 +313,8 @@ async function getTopupPlans(req, res) {
       return {
         packageCode: plan.packageCode,
         slug: plan.slug,
-        name: `${dataGB}GB for ${plan.duration} days`,
-        dataVolume: plan.dataVolume,
+        name: plan.packageName || `${dataGB}GB for ${plan.duration} days`,
+        dataVolume: volumeField,
         dataGB: parseFloat(dataGB),
         duration: plan.duration,
         durationUnit: plan.durationUnit || 'DAY',

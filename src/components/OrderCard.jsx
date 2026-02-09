@@ -57,9 +57,16 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
       try {
         // Fetch profile data (status, QR code, etc.)
+        console.log('📡 [OrderCard LIVE] Calling queryEsimProfile API...');
         const profileResponse = await queryEsimProfile(order.order_no);
 
-        console.log('✅ [OrderCard LIVE] Profile response received:', profileResponse);
+        console.log('✅ [OrderCard LIVE] Profile response received:', {
+          success: profileResponse?.success,
+          hasObj: !!profileResponse?.obj,
+          hasEsimList: !!profileResponse?.obj?.esimList,
+          esimListLength: profileResponse?.obj?.esimList?.length,
+          fullResponse: profileResponse,
+        });
 
         if (profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0) {
           const esimData = profileResponse.obj.esimList[0];
@@ -68,51 +75,35 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
             expiredTime: esimData.expiredTime,
+            activateTime: esimData.activateTime,
             iccid: esimData.iccid,
+            totalVolume: esimData.totalVolume,
+            orderUsage: esimData.orderUsage,
           });
 
           const liveDataObj = {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
             expiredTime: esimData.expiredTime,
+            activateTime: esimData.activateTime,
             iccid: esimData.iccid,
             qrCodeUrl: esimData.qrCodeUrl,
             activationCode: esimData.ac,
+            totalVolume: esimData.totalVolume || 0,
+            orderUsage: esimData.orderUsage || 0,
           };
-
-          // Fetch usage data separately if eSIM should show usage
-          if (shouldShowUsage(esimData.esimStatus, esimData.smdpStatus)) {
-            try {
-              console.log('📊 [OrderCard LIVE] Fetching usage data...');
-              const usageResponse = await queryEsimUsage(order.order_no);
-
-              if (usageResponse && usageResponse.success && usageResponse.obj?.esimList?.length > 0) {
-                const usageData = usageResponse.obj.esimList[0];
-
-                console.log('📊 [OrderCard LIVE] Live usage data:', {
-                  totalVolume: usageData.totalVolume,
-                  orderUsage: usageData.orderUsage,
-                });
-
-                liveDataObj.totalVolume = usageData.totalVolume;
-                liveDataObj.orderUsage = usageData.orderUsage;
-              } else {
-                console.log('⚠️ [OrderCard LIVE] No usage data in response');
-              }
-            } catch (usageErr) {
-              console.error('❌ [OrderCard LIVE] Failed to fetch usage data:', usageErr.message);
-              // Don't fail the whole operation if usage fetch fails
-            }
-          } else {
-            console.log('📊 [OrderCard LIVE] Skipping usage fetch - not applicable for status:', esimData.esimStatus);
-          }
 
           setLiveData(liveDataObj);
         } else {
           console.log('⚠️ [OrderCard LIVE] No eSIM data in profile response');
         }
       } catch (err) {
-        console.error('❌ [OrderCard LIVE] Failed to fetch live data:', err.message);
+        console.error('❌ [OrderCard LIVE] Failed to fetch live data:', {
+          error: err.message,
+          stack: err.stack,
+          orderId: order.id,
+          orderNo: order.order_no,
+        });
       } finally {
         setLoadingLiveData(false);
       }
@@ -164,10 +155,10 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
   const countryName = getCountryName(order.country_code, currentLanguage);
 
-  // Format expiry date for duration display
-  const formatExpiryDate = (expiryDateString) => {
-    if (!expiryDateString) return null;
-    const date = new Date(expiryDateString);
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
     const locale = currentLanguage === 'uz' ? 'uz-UZ' : 'ru-RU';
     return date.toLocaleDateString(locale, {
       day: 'numeric',
@@ -176,14 +167,19 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
     });
   };
 
-  const expiryDate = formatExpiryDate(liveData?.expiredTime || order.expiry_date);
+  // Get activation and expiry dates from live data or DB
+  const activationDate = formatDate(liveData?.activateTime || order.activate_time || order.created_at);
+  const expiryDate = formatDate(liveData?.expiredTime || order.expiry_date);
 
-  // Debug log for activation date
-  console.log('📅 [OrderCard] Activation Date Debug:', {
-    orderId: order.id,
+  // Debug log for dates
+  console.log('📅 [OrderCard] Dates Debug:', {
+    orderId: order.id.slice(0, 8),
+    liveActivateTime: liveData?.activateTime,
     liveExpiredTime: liveData?.expiredTime,
+    dbActivateTime: order.activate_time,
     dbExpiryDate: order.expiry_date,
-    formattedDate: expiryDate,
+    formattedActivation: activationDate,
+    formattedExpiry: expiryDate,
   });
 
   // Format bytes to MB/GB
@@ -446,7 +442,7 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
             <HStack spacing={1.5}>
               <CalendarIcon style={{ width: '16px', height: '16px', color: '#F97316' }} />
               <Text fontSize={{ base: '16px', md: '18px' }} fontWeight="800" color="gray.900" noOfLines={1}>
-                {expiryDate || '-'}
+                {activationDate || '-'}
               </Text>
             </HStack>
           </VStack>
