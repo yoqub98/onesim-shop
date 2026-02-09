@@ -129,8 +129,7 @@ const MyPage = () => {
   }, [user?.id]);
 
   useEffect(() => {
-    // Fetch with live status on initial load
-    fetchOrders(true);
+    fetchOrders();
   }, [fetchOrders]);
 
   // AUTO-CHECK PENDING ORDERS - Poll every 10 seconds
@@ -161,8 +160,8 @@ const MyPage = () => {
 
           if (result.success && result.data.order_status === 'ALLOCATED') {
             console.log('✅ [AUTO-CHECK] Order allocated! Refreshing orders list...');
-            // Refresh orders list with live status to show updated data
-            fetchOrders(true);
+            // Refresh orders list to show updated status
+            fetchOrders();
             break; // Exit loop and let the next interval handle remaining orders
           }
         } catch (err) {
@@ -260,8 +259,8 @@ const MyPage = () => {
   // Handle top-up success
   const handleTopupSuccess = () => {
     console.log('✅ [MyPage] Top-up successful');
-    // Refresh orders with live status to show updated data
-    fetchOrders(true);
+    // Refresh orders to show updated data
+    fetchOrders();
     setSelectedTopupOrder(null);
     setSelectedTopupPlan(null);
   };
@@ -391,7 +390,7 @@ const MyPage = () => {
                 error={error}
                 checkingStatus={checkingStatus}
                 cancellingOrder={cancellingOrder}
-                fetchOrders={() => fetchOrders(true)}
+                fetchOrders={fetchOrders}
                 handleViewQr={handleViewQr}
                 handleViewDetails={handleViewDetails}
                 handleCancelClick={handleCancelClick}
@@ -817,8 +816,8 @@ const MyPage = () => {
                       onClick={async () => {
                         try {
                           await suspendEsim(selectedOrder.iccid);
-                          // Refresh orders with live status after suspend
-                          fetchOrders(true);
+                          // Refresh orders after suspend
+                          fetchOrders();
                           onDetailsModalClose();
                         } catch (error) {
                           console.error('Failed to suspend:', error);
@@ -848,8 +847,8 @@ const MyPage = () => {
                         onClick={async () => {
                           try {
                             await cancelEsimProfile(selectedOrder.esim_tran_no);
-                            // Refresh orders with live status after cancel
-                            fetchOrders(true);
+                            // Refresh orders after cancel
+                            fetchOrders();
                             onDetailsModalClose();
                           } catch (error) {
                             console.error('Failed to cancel:', error);
