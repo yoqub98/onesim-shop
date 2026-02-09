@@ -183,10 +183,12 @@ async function getTopupPlans(req, res) {
   const { orderId, userId } = req.body;
 
   if (!orderId || !userId) {
-    return res.status(400).json({ error: 'orderId and userId are required' });
+    return res.status(400).json({ success: false, error: 'orderId and userId are required' });
   }
 
   try {
+    console.log('💳 [TOPUP-PLANS] Fetching order:', { orderId, userId });
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*')
@@ -195,22 +197,45 @@ async function getTopupPlans(req, res) {
       .single();
 
     if (orderError || !order) {
-      return res.status(404).json({ error: 'Order not found' });
+      console.error('💳 [TOPUP-PLANS] Order not found:', orderError);
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
+
+    console.log('💳 [TOPUP-PLANS] Order found:', {
+      id: order.id,
+      package_code: order.package_code,
+      iccid: order.iccid,
+      esim_status: order.esim_status,
+    });
 
     if (!order.iccid) {
-      return res.status(400).json({ error: 'eSIM not yet activated. ICCID is required for top-up.' });
+      console.error('💳 [TOPUP-PLANS] No ICCID found for order');
+      return res.status(400).json({ success: false, error: 'eSIM not yet activated. ICCID is required for top-up.' });
     }
 
-    const { data: topupCount } = await supabase.rpc('get_order_topup_count', { p_order_id: orderId });
+    const { data: topupCount, error: rpcError } = await supabase.rpc('get_order_topup_count', { p_order_id: orderId });
+
+    if (rpcError) {
+      console.error('💳 [TOPUP-PLANS] RPC error:', rpcError);
+      return res.status(500).json({ success: false, error: 'Failed to get top-up count', details: rpcError.message });
+    }
+
+    console.log('💳 [TOPUP-PLANS] Current top-up count:', topupCount);
 
     if (topupCount >= 10) {
       return res.status(400).json({
+        success: false,
         error: 'Maximum top-up limit reached (10 top-ups per eSIM)',
         topupCount,
         maxTopups: 10,
       });
     }
+
+    console.log('💳 [TOPUP-PLANS] Calling eSIMAccess API with:', {
+      type: 'TOPUP',
+      packageCode: order.package_code,
+      iccid: order.iccid,
+    });
 
     const apiResponse = await fetch(`${ESIMACCESS_API_URL}/package/list`, {
       method: 'POST',
@@ -227,10 +252,31 @@ async function getTopupPlans(req, res) {
       }),
     });
 
+    console.log('💳 [TOPUP-PLANS] API response status:', apiResponse.status);
+
     const apiData = await apiResponse.json();
 
+    console.log('💳 [TOPUP-PLANS] API response data:', {
+      success: apiData.success,
+      errorCode: apiData.errorCode,
+      errorMsg: apiData.errorMsg,
+      hasPackageList: !!apiData.obj?.packageList,
+      packageCount: apiData.obj?.packageList?.length || 0,
+    });
+
     if (!apiData.success || !apiData.obj?.packageList) {
-      return res.status(500).json({ error: 'Failed to fetch top-up plans' });
+      console.error('💳 [TOPUP-PLANS] API returned error:', {
+        success: apiData.success,
+        errorCode: apiData.errorCode,
+        errorMsg: apiData.errorMsg,
+        fullResponse: apiData,
+      });
+      return res.status(500).json({
+        success: false,
+        error: apiData.errorMsg || 'Failed to fetch top-up plans from eSIMAccess',
+        errorCode: apiData.errorCode,
+        details: apiData,
+      });
     }
 
     const exchangeRate = await getExchangeRate();
@@ -257,6 +303,8 @@ async function getTopupPlans(req, res) {
       };
     });
 
+    console.log('💳 [TOPUP-PLANS] Returning plans:', { planCount: plans.length, topupCount: topupCount || 0 });
+
     return res.status(200).json({
       success: true,
       plans,
@@ -271,8 +319,13 @@ async function getTopupPlans(req, res) {
       },
     });
   } catch (error) {
-    console.error('Failed to get top-up plans:', error);
-    return res.status(500).json({ error: 'Internal server error', message: error.message });
+    console.error('💳 [TOPUP-PLANS] Unexpected error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
   }
 }
 
@@ -281,7 +334,7 @@ async function processTopup(req, res) {
   const { orderId, userId, packageCode, priceUzs, priceUsd, dataAmount, validityDays, packageName } = req.body;
 
   if (!orderId || !userId || !packageCode) {
-    return res.status(400).json({ error: 'orderId, userId, and packageCode are required' });
+    return res.status(400).json({ success: false, error: 'orderId, userId, and packageCode are required' });
   }
 
   try {
@@ -293,17 +346,23 @@ async function processTopup(req, res) {
       .single();
 
     if (orderError || !order) {
-      return res.status(404).json({ error: 'Order not found' });
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
     if (!order.iccid && !order.esim_tran_no) {
-      return res.status(400).json({ error: 'eSIM not yet activated. Cannot process top-up.' });
+      return res.status(400).json({ success: false, error: 'eSIM not yet activated. Cannot process top-up.' });
     }
 
-    const { data: topupCount } = await supabase.rpc('get_order_topup_count', { p_order_id: orderId });
+    const { data: topupCount, error: rpcError } = await supabase.rpc('get_order_topup_count', { p_order_id: orderId });
+
+    if (rpcError) {
+      console.error('💳 [TOPUP] RPC error:', rpcError);
+      return res.status(500).json({ success: false, error: 'Failed to get top-up count', details: rpcError.message });
+    }
 
     if (topupCount >= 10) {
       return res.status(400).json({
+        success: false,
         error: 'Maximum top-up limit reached (10 top-ups per eSIM)',
         topupCount,
         maxTopups: 10,
@@ -397,8 +456,13 @@ async function processTopup(req, res) {
       message: 'Top-up completed successfully',
     });
   } catch (error) {
-    console.error('Failed to process top-up:', error);
-    return res.status(500).json({ error: 'Internal server error', message: error.message });
+    console.error('💳 [TOPUP] Unexpected error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
   }
 }
 
@@ -426,13 +490,18 @@ export default async function handler(req, res) {
         case 'topup':
           return await processTopup(req, res);
         default:
-          return res.status(400).json({ error: 'Invalid action parameter' });
+          return res.status(400).json({ success: false, error: 'Invalid action parameter' });
       }
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   } catch (error) {
-    console.error('❌ [ORDERS] Error:', error);
-    return res.status(500).json({ error: 'Internal server error', message: error.message });
+    console.error('❌ [ORDERS] Unexpected error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
   }
 }
