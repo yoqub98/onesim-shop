@@ -56,7 +56,7 @@ export const createOrder = async (orderData) => {
  */
 export const getUserOrders = async (userId) => {
   try {
-    const response = await fetch(`${API_URL}/orders/${userId}`, {
+    const response = await fetch(`${API_URL}/orders?userId=${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -85,8 +85,8 @@ export const getUserOrders = async (userId) => {
 export const queryEsimProfile = async (orderNo) => {
   try {
     console.log('🔍 [SERVICE] Querying eSIM profile for orderNo:', orderNo);
-    
-    const response = await fetch(`${API_URL}/esim/query`, {
+
+    const response = await fetch(`${API_URL}/esim?action=query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export const queryEsimProfile = async (orderNo) => {
     });
 
     const data = await response.json();
-    
+
     console.log('🔍 [SERVICE] Profile response:', {
       success: data.success,
       hasEsimList: !!data.obj?.esimList,
@@ -121,7 +121,7 @@ export const queryEsimProfile = async (orderNo) => {
  */
 export const cancelOrder = async (orderId, userId) => {
   try {
-    const response = await fetch(`${API_URL}/order/cancel`, {
+    const response = await fetch(`${API_URL}/orders?action=cancel`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export const cancelOrder = async (orderId, userId) => {
  */
 export const checkOrderStatus = async (orderId) => {
   try {
-    const response = await fetch(`${API_URL}/order/check-status`, {
+    const response = await fetch(`${API_URL}/orders?action=check-status`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -409,7 +409,7 @@ export const queryEsimUsage = async (orderNo) => {
   try {
     console.log('📊 [SERVICE] Querying usage for orderNo:', orderNo);
 
-    const response = await fetch(`${API_URL}/esim/usage`, {
+    const response = await fetch(`${API_URL}/esim?action=usage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -453,7 +453,7 @@ export const suspendEsim = async (iccid) => {
   try {
     console.log('⏸️ [SERVICE] Suspending eSIM:', iccid);
 
-    const response = await fetch(`${API_URL}/esim/suspend`, {
+    const response = await fetch(`${API_URL}/esim?action=suspend`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -494,7 +494,7 @@ export const cancelEsimProfile = async (esimTranNo) => {
   try {
     console.log('🚫 [SERVICE] Cancelling eSIM profile:', esimTranNo);
 
-    const response = await fetch(`${API_URL}/esim/cancel`, {
+    const response = await fetch(`${API_URL}/esim?action=cancel`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -535,7 +535,7 @@ export const getTopupPlans = async (orderId, userId) => {
   try {
     console.log('💳 [SERVICE] Fetching top-up plans for order:', orderId);
 
-    const response = await fetch(`${API_URL}/order/topup-plans`, {
+    const response = await fetch(`${API_URL}/orders?action=topup-plans`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -587,7 +587,7 @@ export const processTopup = async (topupData) => {
   try {
     console.log('💳 [SERVICE] Processing top-up:', topupData);
 
-    const response = await fetch(`${API_URL}/order/topup`, {
+    const response = await fetch(`${API_URL}/orders?action=topup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
