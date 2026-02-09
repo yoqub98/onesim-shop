@@ -1,5 +1,4 @@
 // src/components/OrderCard.jsx
-import { useState, useEffect } from 'react';
 import {
   Box,
   Text,
@@ -8,7 +7,6 @@ import {
   Badge,
   Button,
   Grid,
-  Spinner,
 } from '@chakra-ui/react';
 import {
   CircleStackIcon,
@@ -25,7 +23,6 @@ import {
   getOrderStatusColor,
   getEsimStatusText,
   getEsimStatusColor,
-  queryEsimProfile,
   shouldShowUsage,
   canTopup,
 } from '../services/orderService';
@@ -34,141 +31,27 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
 
-  // State for LIVE data from API
-  const [liveData, setLiveData] = useState(null);
-  const [loadingLiveData, setLoadingLiveData] = useState(false);
-
-  // Fetch LIVE data for all orders that have an order_no
-  useEffect(() => {
-    console.log('🎯 [OrderCard LIVE] useEffect triggered for order:', order.id.slice(0, 8));
-
-    const fetchLiveData = async () => {
-      // Skip if no order_no or if order is cancelled
-      if (!order.order_no || order.order_status === 'CANCELLED') {
-        console.log('⏭️ [OrderCard LIVE] Skipping fetch - no order_no or CANCELLED:', {
-          orderId: order.id,
-          status: order.order_status,
-          orderNo: order.order_no,
-          hasOrderNo: !!order.order_no,
-          isCancelled: order.order_status === 'CANCELLED',
-        });
-        return;
-      }
-
-      console.log('✅ [OrderCard LIVE] Conditions met, proceeding with fetch');
-
-
-      console.log('🔄 [OrderCard LIVE] ========== FETCHING LIVE DATA ==========');
-      console.log('🔄 [OrderCard LIVE] Order No:', order.order_no);
-      console.log('🔄 [OrderCard LIVE] Order ID:', order.id);
-      setLoadingLiveData(true);
-
-      try {
-        // Fetch profile data (status, QR code, etc.)
-        console.log('📡 [OrderCard LIVE] Calling queryEsimProfile API...');
-        const profileResponse = await queryEsimProfile(order.order_no);
-
-        console.log('✅ [OrderCard LIVE] RAW Profile response:', profileResponse);
-        console.log('✅ [OrderCard LIVE] Profile response breakdown:', {
-          typeOfResponse: typeof profileResponse,
-          isNull: profileResponse === null,
-          isUndefined: profileResponse === undefined,
-          success: profileResponse?.success,
-          hasObj: !!profileResponse?.obj,
-          hasEsimList: !!profileResponse?.obj?.esimList,
-          esimListLength: profileResponse?.obj?.esimList?.length,
-          esimListFirstItem: profileResponse?.obj?.esimList?.[0],
-        });
-
-        console.log('🔍 [OrderCard LIVE] Condition check:', {
-          hasResponse: !!profileResponse,
-          isSuccess: profileResponse?.success,
-          hasObj: !!profileResponse?.obj,
-          hasEsimList: !!profileResponse?.obj?.esimList,
-          esimListLength: profileResponse?.obj?.esimList?.length,
-          willEnterIf: !!(profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0),
-        });
-
-        if (profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0) {
-          const esimData = profileResponse.obj.esimList[0];
-
-          console.log('📊 [OrderCard LIVE] ✅ CONDITION MET - Extracting eSIM data');
-          console.log('📊 [OrderCard LIVE] Live eSIM profile data:', {
-            esimStatus: esimData.esimStatus,
-            smdpStatus: esimData.smdpStatus,
-            expiredTime: esimData.expiredTime,
-            activateTime: esimData.activateTime,
-            iccid: esimData.iccid,
-            totalVolume: esimData.totalVolume,
-            orderUsage: esimData.orderUsage,
-          });
-
-          const liveDataObj = {
-            esimStatus: esimData.esimStatus,
-            smdpStatus: esimData.smdpStatus,
-            expiredTime: esimData.expiredTime,
-            activateTime: esimData.activateTime,
-            iccid: esimData.iccid,
-            qrCodeUrl: esimData.qrCodeUrl,
-            activationCode: esimData.ac,
-            totalVolume: esimData.totalVolume || 0,
-            orderUsage: esimData.orderUsage || 0,
-          };
-
-          console.log('💾 [OrderCard LIVE] Setting liveData state with:', liveDataObj);
-          setLiveData(liveDataObj);
-          console.log('✅ [OrderCard LIVE] liveData state updated successfully');
-        } else {
-          console.error('❌ [OrderCard LIVE] CONDITION NOT MET - Cannot extract eSIM data');
-          console.error('❌ [OrderCard LIVE] Reason:', {
-            noResponse: !profileResponse,
-            notSuccess: !profileResponse?.success,
-            noObj: !profileResponse?.obj,
-            noEsimList: !profileResponse?.obj?.esimList,
-            emptyEsimList: profileResponse?.obj?.esimList?.length === 0,
-          });
-        }
-      } catch (err) {
-        console.error('❌ [OrderCard LIVE] Failed to fetch live data:', {
-          error: err.message,
-          stack: err.stack,
-          orderId: order.id,
-          orderNo: order.order_no,
-        });
-      } finally {
-        setLoadingLiveData(false);
-      }
-    };
-
-    fetchLiveData();
-  }, [order.order_no, order.order_status, order.id]);
-
-  // Use LIVE status if available, otherwise fall back to database status
-  const esimStatus = liveData?.esimStatus || order.esim_status;
-  const smdpStatus = liveData?.smdpStatus || order.smdp_status;
+  // Use status directly from order prop (now contains live data from backend)
+  const esimStatus = order.esim_status;
+  const smdpStatus = order.smdp_status;
 
   // Debug logging for status
-  console.log(`🔍 [OrderCard] ========== STATUS RESOLUTION ==========`);
+  console.log(`🔍 [OrderCard] ========== STATUS from ORDER PROP ==========`);
   console.log(`🔍 [OrderCard] Order: ${order.id.slice(0, 8)} (${order.order_no})`);
-  console.log(`🔍 [OrderCard] liveData object:`, liveData);
-  console.log(`🔍 [OrderCard] Status breakdown:`, {
-    'DB esimStatus': order.esim_status,
-    'DB smdpStatus': order.smdp_status,
-    'LIVE esimStatus': liveData?.esimStatus,
-    'LIVE smdpStatus': liveData?.smdpStatus,
-    'FINAL esimStatus (used)': esimStatus,
-    'FINAL smdpStatus (used)': smdpStatus,
-    'Has liveData?': !!liveData,
-    'liveData is null?': liveData === null,
-    'liveData is undefined?': liveData === undefined,
+  console.log(`🔍 [OrderCard] Status:`, {
+    esimStatus: order.esim_status,
+    smdpStatus: order.smdp_status,
+    orderUsage: order.order_usage,
+    totalVolume: order.total_volume,
+    iccid: order.iccid,
   });
 
-  // Determine what to show based on LIVE status
+  // Determine what to show based on status
   const showUsage = shouldShowUsage(esimStatus, smdpStatus);
 
-  // Usage data from live response
-  const totalVolume = liveData?.totalVolume || 0;
-  const rawOrderUsage = liveData?.orderUsage || 0;
+  // Usage data from order prop (updated by backend)
+  const totalVolume = order.total_volume || 0;
+  const rawOrderUsage = order.order_usage || 0;
 
   // Cap orderUsage at totalVolume to prevent showing more than 100%
   const orderUsage = Math.min(rawOrderUsage, totalVolume);
@@ -202,17 +85,15 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
     });
   };
 
-  // Get activation and expiry dates from live data or DB
-  const activationDate = formatDate(liveData?.activateTime || order.activate_time || order.created_at);
-  const expiryDate = formatDate(liveData?.expiredTime || order.expiry_date);
+  // Get activation and expiry dates from order
+  const activationDate = formatDate(order.activation_date || order.created_at);
+  const expiryDate = formatDate(order.expiry_date);
 
   // Debug log for dates
   console.log('📅 [OrderCard] Dates Debug:', {
     orderId: order.id.slice(0, 8),
-    liveActivateTime: liveData?.activateTime,
-    liveExpiredTime: liveData?.expiredTime,
-    dbActivateTime: order.activate_time,
-    dbExpiryDate: order.expiry_date,
+    activation_date: order.activation_date,
+    expiry_date: order.expiry_date,
     formattedActivation: activationDate,
     formattedExpiry: expiryDate,
   });
@@ -229,7 +110,7 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
   // Show QR button only for non-cancelled and non-deleted eSIMs
   const showQrButton =
-    (order.qr_code_url || order.activation_code || liveData?.qrCodeUrl) &&
+    (order.qr_code_url || order.activation_code) &&
     esimStatus !== 'CANCEL' &&
     smdpStatus !== 'DELETED';
 
@@ -359,27 +240,18 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
                 </Badge>
               )}
 
-              {/* Status Badge or Loading */}
-              {loadingLiveData ? (
-                <HStack spacing={2}>
-                  <Spinner size="xs" color="purple.500" />
-                  <Text fontSize="xs" color="gray.500">
-                    {t('myPage.orders.loadingUsage') || 'Загрузка...'}
-                  </Text>
-                </HStack>
-              ) : (
-                <Badge
-                  bg={badgeStyles.bg}
-                  color={badgeStyles.color}
-                  fontSize={{ base: 'xs', md: 'sm' }}
-                  px={{ base: 3, md: 4 }}
-                  py={{ base: 1.5, md: 2 }}
-                  borderRadius="full"
-                  fontWeight="700"
-                >
-                  {statusText}
-                </Badge>
-              )}
+              {/* Status Badge */}
+              <Badge
+                bg={badgeStyles.bg}
+                color={badgeStyles.color}
+                fontSize={{ base: 'xs', md: 'sm' }}
+                px={{ base: 3, md: 4 }}
+                py={{ base: 1.5, md: 2 }}
+                borderRadius="full"
+                fontWeight="700"
+              >
+                {statusText}
+              </Badge>
             </HStack>
           </HStack>
 
@@ -425,19 +297,17 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
             )}
 
             {/* Status Badge - Mobile */}
-            {!loadingLiveData && (
-              <Badge
-                bg={badgeStyles.bg}
-                color={badgeStyles.color}
-                fontSize="xs"
-                px={3}
-                py={1.5}
-                borderRadius="full"
-                fontWeight="700"
-              >
-                {statusText}
-              </Badge>
-            )}
+            <Badge
+              bg={badgeStyles.bg}
+              color={badgeStyles.color}
+              fontSize="xs"
+              px={3}
+              py={1.5}
+              borderRadius="full"
+              fontWeight="700"
+            >
+              {statusText}
+            </Badge>
           </HStack>
         </VStack>
 
@@ -497,7 +367,7 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
         </Grid>
 
         {/* Data Usage Progress Bar - show for active eSIMs */}
-        {!loadingLiveData && showUsage && totalVolume > 0 && (
+        {showUsage && totalVolume > 0 && (
           <Box width="full" mb={{ base: 3, md: 4 }}>
             <VStack spacing={2} align="stretch">
               <HStack justify="space-between" fontSize={{ base: 'xs', md: 'sm' }} color="gray.600">
