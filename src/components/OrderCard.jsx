@@ -40,18 +40,27 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
   // Fetch LIVE data for all orders that have an order_no
   useEffect(() => {
+    console.log('🎯 [OrderCard LIVE] useEffect triggered for order:', order.id.slice(0, 8));
+
     const fetchLiveData = async () => {
       // Skip if no order_no or if order is cancelled
       if (!order.order_no || order.order_status === 'CANCELLED') {
-        console.log('⏭️ [OrderCard LIVE] Skipping - no order_no or CANCELLED:', {
+        console.log('⏭️ [OrderCard LIVE] Skipping fetch - no order_no or CANCELLED:', {
           orderId: order.id,
           status: order.order_status,
           orderNo: order.order_no,
+          hasOrderNo: !!order.order_no,
+          isCancelled: order.order_status === 'CANCELLED',
         });
         return;
       }
 
-      console.log('🔄 [OrderCard LIVE] Fetching live data for Order No:', order.order_no);
+      console.log('✅ [OrderCard LIVE] Conditions met, proceeding with fetch');
+
+
+      console.log('🔄 [OrderCard LIVE] ========== FETCHING LIVE DATA ==========');
+      console.log('🔄 [OrderCard LIVE] Order No:', order.order_no);
+      console.log('🔄 [OrderCard LIVE] Order ID:', order.id);
       setLoadingLiveData(true);
 
       try {
@@ -59,17 +68,31 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
         console.log('📡 [OrderCard LIVE] Calling queryEsimProfile API...');
         const profileResponse = await queryEsimProfile(order.order_no);
 
-        console.log('✅ [OrderCard LIVE] Profile response received:', {
+        console.log('✅ [OrderCard LIVE] RAW Profile response:', profileResponse);
+        console.log('✅ [OrderCard LIVE] Profile response breakdown:', {
+          typeOfResponse: typeof profileResponse,
+          isNull: profileResponse === null,
+          isUndefined: profileResponse === undefined,
           success: profileResponse?.success,
           hasObj: !!profileResponse?.obj,
           hasEsimList: !!profileResponse?.obj?.esimList,
           esimListLength: profileResponse?.obj?.esimList?.length,
-          fullResponse: profileResponse,
+          esimListFirstItem: profileResponse?.obj?.esimList?.[0],
+        });
+
+        console.log('🔍 [OrderCard LIVE] Condition check:', {
+          hasResponse: !!profileResponse,
+          isSuccess: profileResponse?.success,
+          hasObj: !!profileResponse?.obj,
+          hasEsimList: !!profileResponse?.obj?.esimList,
+          esimListLength: profileResponse?.obj?.esimList?.length,
+          willEnterIf: !!(profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0),
         });
 
         if (profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0) {
           const esimData = profileResponse.obj.esimList[0];
 
+          console.log('📊 [OrderCard LIVE] ✅ CONDITION MET - Extracting eSIM data');
           console.log('📊 [OrderCard LIVE] Live eSIM profile data:', {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
@@ -92,9 +115,18 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
             orderUsage: esimData.orderUsage || 0,
           };
 
+          console.log('💾 [OrderCard LIVE] Setting liveData state with:', liveDataObj);
           setLiveData(liveDataObj);
+          console.log('✅ [OrderCard LIVE] liveData state updated successfully');
         } else {
-          console.log('⚠️ [OrderCard LIVE] No eSIM data in profile response');
+          console.error('❌ [OrderCard LIVE] CONDITION NOT MET - Cannot extract eSIM data');
+          console.error('❌ [OrderCard LIVE] Reason:', {
+            noResponse: !profileResponse,
+            notSuccess: !profileResponse?.success,
+            noObj: !profileResponse?.obj,
+            noEsimList: !profileResponse?.obj?.esimList,
+            emptyEsimList: profileResponse?.obj?.esimList?.length === 0,
+          });
         }
       } catch (err) {
         console.error('❌ [OrderCard LIVE] Failed to fetch live data:', {
@@ -116,15 +148,19 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   const smdpStatus = liveData?.smdpStatus || order.smdp_status;
 
   // Debug logging for status
-  console.log(`🔍 [OrderCard] Status for order ${order.id.slice(0, 8)}:`, {
-    orderNo: order.order_no,
-    dbEsimStatus: order.esim_status,
-    dbSmdpStatus: order.smdp_status,
-    liveEsimStatus: liveData?.esimStatus,
-    liveSmdpStatus: liveData?.smdpStatus,
-    finalEsimStatus: esimStatus,
-    finalSmdpStatus: smdpStatus,
-    hasLiveData: !!liveData,
+  console.log(`🔍 [OrderCard] ========== STATUS RESOLUTION ==========`);
+  console.log(`🔍 [OrderCard] Order: ${order.id.slice(0, 8)} (${order.order_no})`);
+  console.log(`🔍 [OrderCard] liveData object:`, liveData);
+  console.log(`🔍 [OrderCard] Status breakdown:`, {
+    'DB esimStatus': order.esim_status,
+    'DB smdpStatus': order.smdp_status,
+    'LIVE esimStatus': liveData?.esimStatus,
+    'LIVE smdpStatus': liveData?.smdpStatus,
+    'FINAL esimStatus (used)': esimStatus,
+    'FINAL smdpStatus (used)': smdpStatus,
+    'Has liveData?': !!liveData,
+    'liveData is null?': liveData === null,
+    'liveData is undefined?': liveData === undefined,
   });
 
   // Determine what to show based on LIVE status

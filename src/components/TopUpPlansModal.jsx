@@ -163,28 +163,29 @@ const TopUpPlansModal = ({ isOpen, onClose, order, userId, onSelectPlan }) => {
                         transition="all 0.2s"
                         _hover={{ borderColor: '#FE4F18', bg: 'orange.50' }}
                       >
-                        <HStack justify="space-between" align="start">
+                        <HStack justify="space-between" align="center">
                           <HStack spacing={3} flex="1">
                             <Radio value={plan.packageCode} colorScheme="orange" />
-                            <VStack align="start" spacing={1} flex="1">
-                              <Text fontWeight="700" fontSize="md" color="gray.900">
-                                {plan.name}
-                              </Text>
-                              <HStack spacing={4} flexWrap="wrap">
-                                <HStack spacing={1}>
-                                  <WifiIcon style={{ width: '14px', height: '14px', color: '#F97316' }} />
-                                  <Text fontSize="sm" color="gray.600">
-                                    {plan.dataGB} GB
-                                  </Text>
-                                </HStack>
-                                <HStack spacing={1}>
-                                  <ClockIcon style={{ width: '14px', height: '14px', color: '#F97316' }} />
-                                  <Text fontSize="sm" color="gray.600">
-                                    {plan.duration} {t('myPage.orders.days')}
-                                  </Text>
-                                </HStack>
+                            <HStack spacing={6} flex="1">
+                              <HStack spacing={2}>
+                                <WifiIcon style={{ width: '18px', height: '18px', color: '#F97316' }} />
+                                <Text fontSize="xl" fontWeight="800" color="gray.900">
+                                  {plan.dataGB}
+                                </Text>
+                                <Text fontSize="md" fontWeight="600" color="gray.600">
+                                  GB
+                                </Text>
                               </HStack>
-                            </VStack>
+                              <HStack spacing={2}>
+                                <ClockIcon style={{ width: '18px', height: '18px', color: '#F97316' }} />
+                                <Text fontSize="xl" fontWeight="800" color="gray.900">
+                                  {plan.duration}
+                                </Text>
+                                <Text fontSize="md" fontWeight="600" color="gray.600">
+                                  {t('myPage.orders.days')}
+                                </Text>
+                              </HStack>
+                            </HStack>
                           </HStack>
                           <VStack align="end" spacing={0}>
                             <Text fontSize="lg" fontWeight="800" color="gray.900">
