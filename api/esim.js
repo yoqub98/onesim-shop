@@ -27,7 +27,7 @@ async function queryEsimProfile(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `query_${Date.now()}`,
       },
       body: JSON.stringify(requestBody),
@@ -79,7 +79,7 @@ async function queryEsimUsage(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `usage_query_${Date.now()}`,
       },
       body: JSON.stringify({ orderNo }),
@@ -101,7 +101,7 @@ async function queryEsimUsage(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `usage_${Date.now()}`,
       },
       body: JSON.stringify({ esimTranNo }),
@@ -151,7 +151,7 @@ async function suspendEsim(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `suspend_${Date.now()}`,
       },
       body: JSON.stringify({ iccid }),
@@ -198,7 +198,7 @@ async function cancelEsimProfile(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `cancel_${Date.now()}`,
       },
       body: JSON.stringify({ esimTranNo }),

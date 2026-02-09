@@ -143,7 +143,7 @@ async function checkOrderStatus(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `check_${Date.now()}`,
       },
       body: JSON.stringify({ orderNo: order.order_no }),
@@ -241,7 +241,7 @@ async function getTopupPlans(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `topup_plans_${Date.now()}`,
       },
       body: JSON.stringify({
@@ -375,7 +375,7 @@ async function processTopup(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'RT-AccessKey': ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': transactionId,
       },
       body: JSON.stringify({

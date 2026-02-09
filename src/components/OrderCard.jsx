@@ -26,6 +26,7 @@ import {
   getEsimStatusText,
   getEsimStatusColor,
   queryEsimProfile,
+  queryEsimUsage,
   shouldShowUsage,
   canTopup,
 } from '../services/orderService';
@@ -54,33 +55,60 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
       setLoadingLiveData(true);
 
       try {
-        const response = await queryEsimProfile(order.order_no);
+        // Fetch profile data (status, QR code, etc.)
+        const profileResponse = await queryEsimProfile(order.order_no);
 
-        console.log('✅ [OrderCard LIVE] Response received:', response);
+        console.log('✅ [OrderCard LIVE] Profile response received:', profileResponse);
 
-        if (response && response.success && response.obj?.esimList?.length > 0) {
-          const esimData = response.obj.esimList[0];
+        if (profileResponse && profileResponse.success && profileResponse.obj?.esimList?.length > 0) {
+          const esimData = profileResponse.obj.esimList[0];
 
-          console.log('📊 [OrderCard LIVE] Live eSIM data:', {
+          console.log('📊 [OrderCard LIVE] Live eSIM profile data:', {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
-            totalVolume: esimData.totalVolume,
-            orderUsage: esimData.orderUsage,
             expiredTime: esimData.expiredTime,
+            iccid: esimData.iccid,
           });
 
-          setLiveData({
+          const liveDataObj = {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
-            totalVolume: esimData.totalVolume,
-            orderUsage: esimData.orderUsage,
             expiredTime: esimData.expiredTime,
             iccid: esimData.iccid,
             qrCodeUrl: esimData.qrCodeUrl,
             activationCode: esimData.ac,
-          });
+          };
+
+          // Fetch usage data separately if eSIM should show usage
+          if (shouldShowUsage(esimData.esimStatus, esimData.smdpStatus)) {
+            try {
+              console.log('📊 [OrderCard LIVE] Fetching usage data...');
+              const usageResponse = await queryEsimUsage(order.order_no);
+
+              if (usageResponse && usageResponse.success && usageResponse.obj?.esimList?.length > 0) {
+                const usageData = usageResponse.obj.esimList[0];
+
+                console.log('📊 [OrderCard LIVE] Live usage data:', {
+                  totalVolume: usageData.totalVolume,
+                  orderUsage: usageData.orderUsage,
+                });
+
+                liveDataObj.totalVolume = usageData.totalVolume;
+                liveDataObj.orderUsage = usageData.orderUsage;
+              } else {
+                console.log('⚠️ [OrderCard LIVE] No usage data in response');
+              }
+            } catch (usageErr) {
+              console.error('❌ [OrderCard LIVE] Failed to fetch usage data:', usageErr.message);
+              // Don't fail the whole operation if usage fetch fails
+            }
+          } else {
+            console.log('📊 [OrderCard LIVE] Skipping usage fetch - not applicable for status:', esimData.esimStatus);
+          }
+
+          setLiveData(liveDataObj);
         } else {
-          console.log('⚠️ [OrderCard LIVE] No eSIM data in response');
+          console.log('⚠️ [OrderCard LIVE] No eSIM data in profile response');
         }
       } catch (err) {
         console.error('❌ [OrderCard LIVE] Failed to fetch live data:', err.message);
