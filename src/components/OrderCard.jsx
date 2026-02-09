@@ -26,7 +26,6 @@ import {
   getEsimStatusText,
   getEsimStatusColor,
   queryEsimProfile,
-  queryEsimUsage,
   shouldShowUsage,
   canTopup,
 } from '../services/orderService';
