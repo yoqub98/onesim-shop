@@ -52,11 +52,18 @@ export const createOrder = async (orderData) => {
 /**
  * Get all orders for a user
  * @param {string} userId - User ID
+ * @param {boolean} live - If true, fetch live status from eSIM Access API
  * @returns {Promise<Array>} Array of user orders
  */
-export const getUserOrders = async (userId) => {
+export const getUserOrders = async (userId, live = false) => {
   try {
-    const response = await fetch(`${API_URL}/orders?userId=${userId}`, {
+    const url = live
+      ? `${API_URL}/orders?userId=${userId}&live=true`
+      : `${API_URL}/orders?userId=${userId}`;
+
+    console.log('📥 [getUserOrders] Fetching orders with live=' + live);
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

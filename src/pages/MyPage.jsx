@@ -88,19 +88,19 @@ const MyPage = () => {
   const [selectedTopupPlan, setSelectedTopupPlan] = useState(null);
 
   // Fetch user orders
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (fetchLiveStatus = false) => {
     if (!user?.id) {
       console.log('⏭️ [FETCH-ORDERS] No user ID, skipping fetch');
       return;
     }
 
     console.log('📥 [FETCH-ORDERS] ========== FETCHING USER ORDERS ==========');
-    console.log('📥 [FETCH-ORDERS] User ID:', user.id);
+    console.log('📥 [FETCH-ORDERS] User ID:', user.id, 'Live status:', fetchLiveStatus);
     setIsLoading(true);
     setError(null);
 
     try {
-      const userOrders = await getUserOrders(user.id);
+      const userOrders = await getUserOrders(user.id, fetchLiveStatus);
       console.log('✅ [FETCH-ORDERS] Received', userOrders.length, 'order(s)');
 
       // Log each order's status
@@ -114,6 +114,8 @@ const MyPage = () => {
           has_qr_code: !!order.qr_code_url,
           has_short_url: !!order.short_url,
           iccid: order.iccid || 'NOT SET',
+          order_usage: order.order_usage,
+          total_volume: order.total_volume,
         });
       });
 
@@ -127,7 +129,8 @@ const MyPage = () => {
   }, [user?.id]);
 
   useEffect(() => {
-    fetchOrders();
+    // Fetch with live status on initial load
+    fetchOrders(true);
   }, [fetchOrders]);
 
   // AUTO-CHECK PENDING ORDERS - Poll every 10 seconds
@@ -158,8 +161,8 @@ const MyPage = () => {
 
           if (result.success && result.data.order_status === 'ALLOCATED') {
             console.log('✅ [AUTO-CHECK] Order allocated! Refreshing orders list...');
-            // Refresh orders list to show updated status
-            fetchOrders();
+            // Refresh orders list with live status to show updated data
+            fetchOrders(true);
             break; // Exit loop and let the next interval handle remaining orders
           }
         } catch (err) {
@@ -257,8 +260,8 @@ const MyPage = () => {
   // Handle top-up success
   const handleTopupSuccess = () => {
     console.log('✅ [MyPage] Top-up successful');
-    // Refresh orders to show updated data
-    fetchOrders();
+    // Refresh orders with live status to show updated data
+    fetchOrders(true);
     setSelectedTopupOrder(null);
     setSelectedTopupPlan(null);
   };
@@ -388,7 +391,7 @@ const MyPage = () => {
                 error={error}
                 checkingStatus={checkingStatus}
                 cancellingOrder={cancellingOrder}
-                fetchOrders={fetchOrders}
+                fetchOrders={() => fetchOrders(true)}
                 handleViewQr={handleViewQr}
                 handleViewDetails={handleViewDetails}
                 handleCancelClick={handleCancelClick}
@@ -814,8 +817,8 @@ const MyPage = () => {
                       onClick={async () => {
                         try {
                           await suspendEsim(selectedOrder.iccid);
-                          // Refresh orders after suspend
-                          fetchOrders();
+                          // Refresh orders with live status after suspend
+                          fetchOrders(true);
                           onDetailsModalClose();
                         } catch (error) {
                           console.error('Failed to suspend:', error);
@@ -845,8 +848,8 @@ const MyPage = () => {
                         onClick={async () => {
                           try {
                             await cancelEsimProfile(selectedOrder.esim_tran_no);
-                            // Refresh orders after cancel
-                            fetchOrders();
+                            // Refresh orders with live status after cancel
+                            fetchOrders(true);
                             onDetailsModalClose();
                           } catch (error) {
                             console.error('Failed to cancel:', error);

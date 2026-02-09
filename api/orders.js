@@ -40,9 +40,9 @@ async function getExchangeRate() {
   }
 }
 
-// Route: GET /api/orders?userId=xxx - Get user orders
+// Route: GET /api/orders?userId=xxx&live=true - Get user orders
 async function getUserOrders(req, res) {
-  const { userId } = req.query;
+  const { userId, live } = req.query;
 
   if (!userId) {
     return res.status(400).json({ success: false, error: 'userId is required' });
@@ -56,6 +56,93 @@ async function getUserOrders(req, res) {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
+
+    // If live=true, fetch live status from eSIM Access API for allocated orders
+    if (live === 'true' && orders && orders.length > 0) {
+      console.log('📡 [GET-ORDERS] Fetching live status for', orders.length, 'orders');
+
+      const updatedOrders = await Promise.all(
+        orders.map(async (order) => {
+          // Only query live status for orders with order_no (allocated orders)
+          if (!order.order_no || order.order_status === 'CANCELLED') {
+            return order;
+          }
+
+          try {
+            console.log('📡 [GET-ORDERS] Querying live status for order:', order.order_no);
+
+            // Query eSIM Access API for live status
+            const apiResponse = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'RT-AccessCode': ESIMACCESS_API_KEY,
+                'RT-RequestID': `live_status_${Date.now()}_${order.id}`,
+              },
+              body: JSON.stringify({
+                orderNo: order.order_no,
+                pager: { pageNum: 1, pageSize: 1 }
+              }),
+            });
+
+            const apiData = await apiResponse.json();
+
+            if (apiData.success && apiData.obj?.esimList?.[0]) {
+              const esim = apiData.obj.esimList[0];
+
+              console.log('✅ [GET-ORDERS] Live status received:', {
+                orderNo: order.order_no,
+                esimStatus: esim.esimStatus,
+                smdpStatus: esim.smdpStatus,
+                orderUsage: esim.orderUsage,
+                totalVolume: esim.totalVolume,
+              });
+
+              // Update data in Supabase
+              const updateData = {
+                esim_status: esim.esimStatus,
+                smdp_status: esim.smdpStatus,
+                iccid: esim.iccid,
+                order_usage: esim.orderUsage,
+                total_volume: esim.totalVolume,
+                total_duration: esim.totalDuration,
+                activation_date: esim.activateTime,
+                installation_date: esim.installationTime,
+                expiry_date: esim.expiredTime,
+                esim_tran_no: esim.esimTranNo,
+                updated_at: new Date().toISOString(),
+              };
+
+              // Only update order_status if it's still PENDING
+              if (order.order_status === 'PENDING') {
+                updateData.order_status = 'ALLOCATED';
+              }
+
+              // Update in database
+              await supabase
+                .from('orders')
+                .update(updateData)
+                .eq('id', order.id);
+
+              // Return updated order object
+              return { ...order, ...updateData };
+            }
+
+            // If API call failed or no data, return original order
+            console.log('⚠️ [GET-ORDERS] No live data for order:', order.order_no);
+            return order;
+
+          } catch (apiError) {
+            console.error('❌ [GET-ORDERS] Failed to fetch live status for order:', order.order_no, apiError);
+            // Return original order if API call fails
+            return order;
+          }
+        })
+      );
+
+      console.log('✅ [GET-ORDERS] Live status update complete');
+      return res.status(200).json({ success: true, data: updatedOrders || [] });
+    }
 
     return res.status(200).json({ success: true, data: orders || [] });
   } catch (error) {
