@@ -31,7 +31,6 @@ import {
   InputLeftElement,
   List,
   ListItem,
-  useOutsideClick,
 } from '@chakra-ui/react';
 import {
   Bars3Icon,

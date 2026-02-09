@@ -1,5 +1,5 @@
 // src/components/TopUpPlansModal.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -18,7 +18,6 @@ import {
   Spinner,
   Alert,
   AlertIcon,
-  Badge,
 } from '@chakra-ui/react';
 import { BoltIcon, WifiIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -36,14 +35,9 @@ const TopUpPlansModal = ({ isOpen, onClose, order, userId, onSelectPlan }) => {
   const [topupCount, setTopupCount] = useState(0);
   const [maxTopups] = useState(10);
 
-  // Fetch available top-up plans when modal opens
-  useEffect(() => {
-    if (isOpen && order && userId) {
-      fetchPlans();
-    }
-  }, [isOpen, order, userId]);
+  const fetchPlans = useCallback(async () => {
+    if (!order || !userId) return;
 
-  const fetchPlans = async () => {
     setIsLoading(true);
     setError(null);
     setPlans([]);
@@ -67,7 +61,14 @@ const TopUpPlansModal = ({ isOpen, onClose, order, userId, onSelectPlan }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [order, userId, t]);
+
+  // Fetch available top-up plans when modal opens
+  useEffect(() => {
+    if (isOpen && order && userId) {
+      fetchPlans();
+    }
+  }, [isOpen, order, userId, fetchPlans]);
 
   const handleConfirm = () => {
     const selectedPlan = plans.find((p) => p.packageCode === selectedPlanId);
