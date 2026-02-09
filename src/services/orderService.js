@@ -522,3 +522,141 @@ export const cancelEsimProfile = async (esimTranNo) => {
     throw error;
   }
 };
+
+/**
+ * Get available top-up plans for an order
+ * Queries eSIMAccess API for compatible top-up packages
+ *
+ * @param {string} orderId - Order ID (UUID)
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} Available top-up plans and metadata
+ */
+export const getTopupPlans = async (orderId, userId) => {
+  try {
+    console.log('💳 [SERVICE] Fetching top-up plans for order:', orderId);
+
+    const response = await fetch(`${API_URL}/order/topup-plans`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ orderId, userId }),
+    });
+
+    const data = await response.json();
+
+    console.log('💳 [SERVICE] Top-up plans response:', {
+      success: data.success,
+      plansCount: data.plans?.length || 0,
+      topupCount: data.topupCount,
+    });
+
+    if (!response.ok) {
+      console.error('💳 [SERVICE] HTTP error:', response.status);
+      throw new Error(data.error || 'Failed to fetch top-up plans');
+    }
+
+    if (!data.success) {
+      console.error('💳 [SERVICE] API error:', data.error);
+      throw new Error(data.error || 'Failed to fetch top-up plans');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('💳 [SERVICE] Get top-up plans failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Process eSIM top-up
+ * Adds data and validity to an existing eSIM
+ *
+ * @param {Object} topupData - Top-up details
+ * @param {string} topupData.orderId - Order ID (UUID)
+ * @param {string} topupData.userId - User ID
+ * @param {string} topupData.packageCode - Top-up package code
+ * @param {number} topupData.priceUzs - Price in UZS
+ * @param {number} topupData.priceUsd - Price in USD
+ * @param {string} topupData.dataAmount - Data amount (e.g., '1GB')
+ * @param {number} topupData.validityDays - Validity in days
+ * @param {string} topupData.packageName - Package name
+ * @returns {Promise<Object>} Top-up result
+ */
+export const processTopup = async (topupData) => {
+  try {
+    console.log('💳 [SERVICE] Processing top-up:', topupData);
+
+    const response = await fetch(`${API_URL}/order/topup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(topupData),
+    });
+
+    const data = await response.json();
+
+    console.log('💳 [SERVICE] Top-up response:', {
+      success: data.success,
+      transactionId: data.data?.transactionId,
+    });
+
+    if (!response.ok) {
+      console.error('💳 [SERVICE] HTTP error:', response.status);
+      throw new Error(data.error || 'Failed to process top-up');
+    }
+
+    if (!data.success) {
+      console.error('💳 [SERVICE] API error:', data.error);
+      throw new Error(data.error || 'Failed to process top-up');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('💳 [SERVICE] Top-up processing failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if order supports top-up
+ * Based on order status and eSIM state
+ *
+ * @param {Object} order - Order object
+ * @returns {boolean} Whether order can be topped up
+ */
+export const canTopup = (order) => {
+  if (!order) return false;
+
+  // Must have ICCID (eSIM must be allocated)
+  if (!order.iccid && !order.esim_tran_no) {
+    console.log('💳 [canTopup] No ICCID or esimTranNo -> false');
+    return false;
+  }
+
+  // Check eSIM status - only allow top-up for active states
+  const { esim_status, smdp_status } = order;
+
+  // Don't allow top-up for deleted or cancelled eSIMs
+  if (smdp_status === 'DELETED' || esim_status === 'CANCEL') {
+    console.log('💳 [canTopup] DELETED or CANCEL -> false');
+    return false;
+  }
+
+  // Allow top-up for: New (GOT_RESOURCE), In Use, Depleted
+  const allowedStatuses = ['GOT_RESOURCE', 'IN_USE', 'USED_UP'];
+  if (!allowedStatuses.includes(esim_status)) {
+    console.log('💳 [canTopup] Status not allowed -> false');
+    return false;
+  }
+
+  // Don't allow if already expired
+  if (esim_status === 'USED_EXPIRED') {
+    console.log('💳 [canTopup] EXPIRED -> false');
+    return false;
+  }
+
+  console.log('💳 [canTopup] All checks passed -> true');
+  return true;
+};
