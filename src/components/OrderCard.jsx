@@ -15,7 +15,7 @@ import {
   CalendarIcon,
   SignalIcon,
   ClockIcon,
-
+  BoltIcon,
 } from '@heroicons/react/24/outline';
 import CountryFlag from './CountryFlag';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
@@ -27,9 +27,10 @@ import {
   getEsimStatusColor,
   queryEsimProfile,
   shouldShowUsage,
+  canTopup,
 } from '../services/orderService';
 
-const OrderCard = ({ order, onActivate, onViewDetails }) => {
+const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   const { currentLanguage } = useLanguage();
   const t = (key) => getTranslation(currentLanguage, key);
 
@@ -190,6 +191,13 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
 
   const badgeStyles = getBadgeStyles();
 
+  // Check if top-up is supported
+  const supportsTopup = canTopup(order);
+
+  // Check if this package supports top-up (based on supportTopUpType)
+  // supportTopUpType: 1 means reloadable, others mean non-reloadable
+  const packageSupportsTopup = order.support_topup_type === 1 || !order.support_topup_type;
+
   return (
     <Box
       bg="white"
@@ -238,46 +246,127 @@ const OrderCard = ({ order, onActivate, onViewDetails }) => {
               </VStack>
             </HStack>
 
-            {/* Status Badge - Hide on mobile, show below */}
-            {loadingLiveData ? (
-              <HStack spacing={2} display={{ base: 'none', md: 'flex' }}>
-                <Spinner size="xs" color="purple.500" />
-                <Text fontSize="xs" color="gray.500">
-                  {t('myPage.orders.loadingUsage') || 'Загрузка...'}
-                </Text>
-              </HStack>
-            ) : (
+            {/* Top Up Button + Status Badge - Desktop */}
+            <HStack spacing={2} display={{ base: 'none', md: 'flex' }}>
+              {/* Top Up Button */}
+              {supportsTopup && packageSupportsTopup && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderWidth="2px"
+                  borderColor="gray.300"
+                  color="gray.700"
+                  bg="white"
+                  borderRadius="full"
+                  leftIcon={<BoltIcon style={{ width: '16px', height: '16px' }} />}
+                  onClick={() => onTopup && onTopup(order)}
+                  fontWeight="700"
+                  fontSize="sm"
+                  px={4}
+                  py={2}
+                  h="auto"
+                  _hover={{ bg: 'gray.50', borderColor: 'gray.400' }}
+                  transition="all 0.2s"
+                >
+                  {t('myPage.orders.topup')}
+                </Button>
+              )}
+
+              {/* Not Reloadable Badge */}
+              {supportsTopup && !packageSupportsTopup && (
+                <Badge
+                  bg="gray.100"
+                  color="gray.600"
+                  fontSize="sm"
+                  px={4}
+                  py={2}
+                  borderRadius="full"
+                  fontWeight="700"
+                >
+                  {t('myPage.orders.notReloadable')}
+                </Badge>
+              )}
+
+              {/* Status Badge or Loading */}
+              {loadingLiveData ? (
+                <HStack spacing={2}>
+                  <Spinner size="xs" color="purple.500" />
+                  <Text fontSize="xs" color="gray.500">
+                    {t('myPage.orders.loadingUsage') || 'Загрузка...'}
+                  </Text>
+                </HStack>
+              ) : (
+                <Badge
+                  bg={badgeStyles.bg}
+                  color={badgeStyles.color}
+                  fontSize={{ base: 'xs', md: 'sm' }}
+                  px={{ base: 3, md: 4 }}
+                  py={{ base: 1.5, md: 2 }}
+                  borderRadius="full"
+                  fontWeight="700"
+                >
+                  {statusText}
+                </Badge>
+              )}
+            </HStack>
+          </HStack>
+
+          {/* Top Up Button + Status Badge - Mobile */}
+          <HStack spacing={2} display={{ base: 'flex', md: 'none' }} flexWrap="wrap">
+            {/* Top Up Button - Mobile */}
+            {supportsTopup && packageSupportsTopup && (
+              <Button
+                size="sm"
+                variant="outline"
+                borderWidth="2px"
+                borderColor="gray.300"
+                color="gray.700"
+                bg="white"
+                borderRadius="full"
+                leftIcon={<BoltIcon style={{ width: '14px', height: '14px' }} />}
+                onClick={() => onTopup && onTopup(order)}
+                fontWeight="700"
+                fontSize="xs"
+                px={3}
+                py={1.5}
+                h="auto"
+                _hover={{ bg: 'gray.50', borderColor: 'gray.400' }}
+                transition="all 0.2s"
+              >
+                {t('myPage.orders.topup')}
+              </Button>
+            )}
+
+            {/* Not Reloadable Badge - Mobile */}
+            {supportsTopup && !packageSupportsTopup && (
+              <Badge
+                bg="gray.100"
+                color="gray.600"
+                fontSize="xs"
+                px={3}
+                py={1.5}
+                borderRadius="full"
+                fontWeight="700"
+              >
+                {t('myPage.orders.notReloadable')}
+              </Badge>
+            )}
+
+            {/* Status Badge - Mobile */}
+            {!loadingLiveData && (
               <Badge
                 bg={badgeStyles.bg}
                 color={badgeStyles.color}
-                fontSize={{ base: 'xs', md: 'sm' }}
-                px={{ base: 3, md: 4 }}
-                py={{ base: 1.5, md: 2 }}
+                fontSize="xs"
+                px={3}
+                py={1.5}
                 borderRadius="full"
                 fontWeight="700"
-                display={{ base: 'none', md: 'inline-flex' }}
               >
                 {statusText}
               </Badge>
             )}
           </HStack>
-
-          {/* Status Badge - Mobile Only */}
-          {!loadingLiveData && (
-            <Badge
-              bg={badgeStyles.bg}
-              color={badgeStyles.color}
-              fontSize="xs"
-              px={3}
-              py={1.5}
-              borderRadius="full"
-              fontWeight="700"
-              display={{ base: 'inline-flex', md: 'none' }}
-              alignSelf="flex-start"
-            >
-              {statusText}
-            </Badge>
-          )}
         </VStack>
 
         {/* Stats Grid - 4 columns on desktop, 2x2 on mobile */}

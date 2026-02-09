@@ -59,6 +59,8 @@ import {
 import MyProfile from './MyProfile.jsx';
 import MyEsims from './MyEsims.jsx';
 import MyFavorites from './MyFavorites.jsx';
+import TopUpPlansModal from '../components/TopUpPlansModal.jsx';
+import TopUpConfirmModal from '../components/TopUpConfirmModal.jsx';
 
 const MyPage = () => {
   console.log('🔵 MyPage component rendering...');
@@ -79,6 +81,11 @@ const MyPage = () => {
   const { isOpen: isDetailsModalOpen, onOpen: onDetailsModalOpen, onClose: onDetailsModalClose } = useDisclosure();
   const { isOpen: isCancelModalOpen, onOpen: onCancelModalOpen, onClose: onCancelModalClose } = useDisclosure();
   const { isOpen: isCancelSuccessOpen, onOpen: onCancelSuccessOpen, onClose: onCancelSuccessClose } = useDisclosure();
+  const { isOpen: isTopupPlansOpen, onOpen: onTopupPlansOpen, onClose: onTopupPlansClose } = useDisclosure();
+  const { isOpen: isTopupConfirmOpen, onOpen: onTopupConfirmOpen, onClose: onTopupConfirmClose } = useDisclosure();
+
+  const [selectedTopupOrder, setSelectedTopupOrder] = useState(null);
+  const [selectedTopupPlan, setSelectedTopupPlan] = useState(null);
 
   // Fetch user orders
   const fetchOrders = useCallback(async () => {
@@ -232,6 +239,46 @@ const MyPage = () => {
     }
   };
 
+  // Handle top-up button click
+  const handleTopupClick = (order) => {
+    console.log('💳 [MyPage] Top-up clicked for order:', order.id);
+    setSelectedTopupOrder(order);
+    onTopupPlansOpen();
+  };
+
+  // Handle plan selection
+  const handlePlanSelected = (plan) => {
+    console.log('💳 [MyPage] Plan selected:', plan);
+    setSelectedTopupPlan(plan);
+    onTopupPlansClose();
+    onTopupConfirmOpen();
+  };
+
+  // Handle top-up success
+  const handleTopupSuccess = () => {
+    console.log('✅ [MyPage] Top-up successful');
+    // Refresh orders to show updated data
+    fetchOrders();
+    setSelectedTopupOrder(null);
+    setSelectedTopupPlan(null);
+  };
+
+  // Handle top-up modals close
+  const handleTopupPlansClose = () => {
+    setSelectedTopupOrder(null);
+    setSelectedTopupPlan(null);
+    onTopupPlansClose();
+  };
+
+  const handleTopupConfirmClose = () => {
+    setSelectedTopupPlan(null);
+    onTopupConfirmClose();
+    // Re-open plans modal if user cancels confirmation
+    if (selectedTopupOrder) {
+      setTimeout(() => onTopupPlansOpen(), 100);
+    }
+  };
+
   console.log('🎨 About to render MyPage JSX, orders count:', orders.length);
 
   return (
@@ -346,6 +393,7 @@ const MyPage = () => {
                 handleViewDetails={handleViewDetails}
                 handleCancelClick={handleCancelClick}
                 handleCheckStatus={handleCheckStatus}
+                handleTopup={handleTopupClick}
               />
             </TabPanel>
 
@@ -927,6 +975,25 @@ const MyPage = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Top-up Plans Modal */}
+      <TopUpPlansModal
+        isOpen={isTopupPlansOpen}
+        onClose={handleTopupPlansClose}
+        order={selectedTopupOrder}
+        userId={user?.id}
+        onSelectPlan={handlePlanSelected}
+      />
+
+      {/* Top-up Confirm Modal */}
+      <TopUpConfirmModal
+        isOpen={isTopupConfirmOpen}
+        onClose={handleTopupConfirmClose}
+        order={selectedTopupOrder}
+        userId={user?.id}
+        selectedPlan={selectedTopupPlan}
+        onSuccess={handleTopupSuccess}
+      />
     </Box>
   );
 };
