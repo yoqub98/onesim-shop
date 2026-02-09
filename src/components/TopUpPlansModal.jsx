@@ -26,7 +26,7 @@ import { getTopupPlans } from '../services/orderService';
 
 const TopUpPlansModal = ({ isOpen, onClose, order, userId, onSelectPlan }) => {
   const { currentLanguage } = useLanguage();
-  const t = (key) => getTranslation(currentLanguage, key);
+  const t = useCallback((key) => getTranslation(currentLanguage, key), [currentLanguage]);
 
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
