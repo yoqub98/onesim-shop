@@ -188,10 +188,10 @@ const TopUpPlansModal = ({ isOpen, onClose, order, userId, onSelectPlan }) => {
                           </HStack>
                           <VStack align="end" spacing={0}>
                             <Text fontSize="lg" fontWeight="800" color="gray.900">
-                              {plan.priceUzs.toLocaleString('ru-RU')}
+                              ${plan.priceUsd}
                             </Text>
                             <Text fontSize="xs" color="gray.500">
-                              UZS
+                              {plan.priceUzs.toLocaleString('ru-RU')} UZS
                             </Text>
                           </VStack>
                         </HStack>

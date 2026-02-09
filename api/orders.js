@@ -281,10 +281,41 @@ async function getTopupPlans(req, res) {
 
     const exchangeRate = await getExchangeRate();
 
+    console.log('💳 [TOPUP-PLANS] Sample plan from API:', apiData.obj.packageList[0]);
+
     const plans = apiData.obj.packageList.map((plan) => {
+      // Price is in cents (10000 = $1.00)
       const priceUsd = plan.price / 10000;
       const priceUzs = Math.round(priceUsd * exchangeRate);
-      const dataGB = (plan.dataVolume / (1024 * 1024 * 1024)).toFixed(2);
+
+      // dataVolume might be in bytes or already in MB/GB - check the value
+      let dataGB = 0;
+      if (plan.dataVolume) {
+        // If dataVolume is a large number (> 1000000), it's in bytes
+        if (plan.dataVolume > 1000000) {
+          dataGB = (plan.dataVolume / (1024 * 1024 * 1024)).toFixed(2);
+        } else {
+          // Otherwise it might already be in MB or GB
+          dataGB = (plan.dataVolume / 1024).toFixed(2);
+        }
+      } else if (plan.dataMB) {
+        // Some APIs return dataMB instead
+        dataGB = (plan.dataMB / 1024).toFixed(2);
+      } else if (plan.dataGB) {
+        // Or dataGB directly
+        dataGB = parseFloat(plan.dataGB).toFixed(2);
+      }
+
+      console.log('💳 [TOPUP-PLANS] Plan transformation:', {
+        packageCode: plan.packageCode,
+        rawDataVolume: plan.dataVolume,
+        rawDataMB: plan.dataMB,
+        rawDataGB: plan.dataGB,
+        calculatedGB: dataGB,
+        duration: plan.duration,
+        priceUsd,
+        priceUzs,
+      });
 
       return {
         packageCode: plan.packageCode,

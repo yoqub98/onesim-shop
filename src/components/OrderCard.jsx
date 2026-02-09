@@ -39,11 +39,12 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   const [liveData, setLiveData] = useState(null);
   const [loadingLiveData, setLoadingLiveData] = useState(false);
 
-  // Fetch LIVE data for ALLOCATED orders
+  // Fetch LIVE data for all orders that have an order_no
   useEffect(() => {
     const fetchLiveData = async () => {
-      if (order.order_status !== 'ALLOCATED' || !order.order_no) {
-        console.log('⏭️ [OrderCard LIVE] Skipping - not ALLOCATED or no order_no:', {
+      // Skip if no order_no or if order is cancelled
+      if (!order.order_no || order.order_status === 'CANCELLED') {
+        console.log('⏭️ [OrderCard LIVE] Skipping - no order_no or CANCELLED:', {
           orderId: order.id,
           status: order.order_status,
           orderNo: order.order_no,
@@ -123,6 +124,18 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   // Use LIVE status if available, otherwise fall back to database status
   const esimStatus = liveData?.esimStatus || order.esim_status;
   const smdpStatus = liveData?.smdpStatus || order.smdp_status;
+
+  // Debug logging for status
+  console.log(`🔍 [OrderCard] Status for order ${order.id.slice(0, 8)}:`, {
+    orderNo: order.order_no,
+    dbEsimStatus: order.esim_status,
+    dbSmdpStatus: order.smdp_status,
+    liveEsimStatus: liveData?.esimStatus,
+    liveSmdpStatus: liveData?.smdpStatus,
+    finalEsimStatus: esimStatus,
+    finalSmdpStatus: smdpStatus,
+    hasLiveData: !!liveData,
+  });
 
   // Determine what to show based on LIVE status
   const showUsage = shouldShowUsage(esimStatus, smdpStatus);
