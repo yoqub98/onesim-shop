@@ -314,13 +314,13 @@ const MyPage = () => {
     };
   }, [isDetailsModalOpen, selectedOrder?.id, user?.id]);
 
-  const getLocale = () => {
+  const getLocale = useCallback(() => {
     if (currentLanguage === 'uz') return 'uz-UZ';
     if (currentLanguage === 'en') return 'en-US';
     return 'ru-RU';
-  };
+  }, [currentLanguage]);
 
-  const formatDateTime = (value) => {
+  const formatDateTime = useCallback((value) => {
     if (!value) return '-';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '-';
@@ -332,9 +332,9 @@ const MyPage = () => {
       minute: '2-digit',
       timeZoneName: 'short',
     });
-  };
+  }, [getLocale]);
 
-  const formatCurrency = (value, currency) => {
+  const formatCurrency = useCallback((value, currency) => {
     if (value === null || value === undefined || value === '') return null;
     const amount = Number(value);
     if (Number.isNaN(amount)) return null;
@@ -343,7 +343,7 @@ const MyPage = () => {
       currency,
       maximumFractionDigits: currency === 'UZS' ? 0 : 2,
     }).format(amount);
-  };
+  }, [getLocale]);
 
   const actionItems = useMemo(() => {
     if (!selectedOrder) return [];
@@ -419,7 +419,7 @@ const MyPage = () => {
     });
 
     return items.sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [selectedOrder, actionLogs, currentLanguage]);
+  }, [selectedOrder, actionLogs, currentLanguage, formatCurrency]);
 
   console.log('🎨 About to render MyPage JSX, orders count:', orders.length);
 
