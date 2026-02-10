@@ -1,5 +1,5 @@
 // src/pages/MyPage.jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -55,6 +55,7 @@ import {
   suspendEsim,
   cancelEsimProfile,
   canCancelEsim,
+  getOrderActionLogs,
 } from '../services/orderService';
 import MyProfile from './MyProfile.jsx';
 import MyEsims from './MyEsims.jsx';
@@ -76,6 +77,9 @@ const MyPage = () => {
   const [checkingStatus, setCheckingStatus] = useState(null); // orderId being checked
   const [cancellingOrder, setCancellingOrder] = useState(null); // orderId being cancelled
   const [orderToCancel, setOrderToCancel] = useState(null); // order for confirmation modal
+  const [actionLogs, setActionLogs] = useState([]);
+  const [actionLogsLoading, setActionLogsLoading] = useState(false);
+  const [actionLogsError, setActionLogsError] = useState(null);
 
   const { isOpen: isQrModalOpen, onOpen: onQrModalOpen, onClose: onQrModalClose } = useDisclosure();
   const { isOpen: isDetailsModalOpen, onOpen: onDetailsModalOpen, onClose: onDetailsModalClose } = useDisclosure();
@@ -280,6 +284,142 @@ const MyPage = () => {
       setTimeout(() => onTopupPlansOpen(), 100);
     }
   };
+
+  useEffect(() => {
+    if (!isDetailsModalOpen || !selectedOrder?.id || !user?.id) return;
+
+    let isMounted = true;
+    const loadActionLogs = async () => {
+      try {
+        setActionLogsLoading(true);
+        setActionLogsError(null);
+        const logs = await getOrderActionLogs(selectedOrder.id, user.id);
+        if (isMounted) {
+          setActionLogs(logs);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setActionLogsError(err?.message || 'Failed to load action logs');
+        }
+      } finally {
+        if (isMounted) {
+          setActionLogsLoading(false);
+        }
+      }
+    };
+
+    loadActionLogs();
+    return () => {
+      isMounted = false;
+    };
+  }, [isDetailsModalOpen, selectedOrder?.id, user?.id]);
+
+  const getLocale = () => {
+    if (currentLanguage === 'uz') return 'uz-UZ';
+    if (currentLanguage === 'en') return 'en-US';
+    return 'ru-RU';
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString(getLocale(), {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+  };
+
+  const formatCurrency = (value, currency) => {
+    if (value === null || value === undefined || value === '') return null;
+    const amount = Number(value);
+    if (Number.isNaN(amount)) return null;
+    return new Intl.NumberFormat(getLocale(), {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: currency === 'UZS' ? 0 : 2,
+    }).format(amount);
+  };
+
+  const actionItems = useMemo(() => {
+    if (!selectedOrder) return [];
+
+    const items = [];
+    const t = (key) => getTranslation(currentLanguage, key);
+
+    if (selectedOrder.created_at) {
+      const paidUsd = formatCurrency(selectedOrder.price_usd, 'USD');
+      const paidUzs = formatCurrency(selectedOrder.price_uzs, 'UZS');
+      items.push({
+        id: `order-${selectedOrder.id}`,
+        date: selectedOrder.created_at,
+        title: t('myPage.orders.actionTypes.orderPlaced'),
+        rows: [
+          {
+            label: t('myPage.orders.actions.package'),
+            value: selectedOrder.package_name || selectedOrder.package_code || '-',
+          },
+          paidUsd || paidUzs
+            ? {
+                label: t('myPage.orders.actions.paid'),
+                value: paidUsd || paidUzs,
+              }
+            : null,
+        ].filter(Boolean),
+      });
+    }
+
+    if (selectedOrder.activation_date) {
+      items.push({
+        id: `activation-${selectedOrder.id}`,
+        date: selectedOrder.activation_date,
+        title: t('myPage.orders.actionTypes.activated'),
+      });
+    }
+
+    actionLogs.forEach((log) => {
+      const actionKey = log.action_type ? log.action_type.toLowerCase() : 'unknown';
+      const logTitle = t(`myPage.orders.actionTypes.${actionKey}`) || log.action_type;
+
+      const paidUsd = formatCurrency(log.topup_price_usd, 'USD');
+      const paidUzs = formatCurrency(log.topup_price_uzs, 'UZS');
+
+      const rows = [];
+      if (log.topup_package_name || log.topup_package_code) {
+        rows.push({
+          label: t('myPage.orders.actions.package'),
+          value: log.topup_package_name || log.topup_package_code,
+        });
+      }
+      if (log.topup_data_added) {
+        const days = log.topup_days_added ? ` / ${log.topup_days_added} ${t('myPage.orders.days')}` : '';
+        rows.push({
+          label: t('myPage.orders.actions.added'),
+          value: `${log.topup_data_added}${days}`,
+        });
+      }
+      if (paidUsd || paidUzs) {
+        rows.push({
+          label: t('myPage.orders.actions.paid'),
+          value: paidUsd || paidUzs,
+        });
+      }
+
+      items.push({
+        id: log.id,
+        date: log.created_at,
+        title: logTitle,
+        status: log.status,
+        rows,
+      });
+    });
+
+    return items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [selectedOrder, actionLogs, currentLanguage]);
 
   console.log('🎨 About to render MyPage JSX, orders count:', orders.length);
 
@@ -653,6 +793,38 @@ const MyPage = () => {
           </ModalHeader>
           <ModalCloseButton top={{ base: 4, md: 3 }} right={{ base: 4, md: 3 }} />
           <ModalBody pb={{ base: 6, md: 8 }} px={{ base: 5, md: 8 }} overflowY="auto">
+            <Tabs variant="unstyled">
+              <TabList
+                mb={{ base: 4, md: 5 }}
+                bg="gray.50"
+                p={1}
+                borderRadius={{ base: 'lg', md: 'xl' }}
+                border="1px solid"
+                borderColor="gray.100"
+              >
+                <Tab
+                  flex={1}
+                  fontWeight="700"
+                  fontSize={{ base: 'sm', md: 'md' }}
+                  borderRadius={{ base: 'md', md: 'lg' }}
+                  color="gray.600"
+                  _selected={{ bg: '#FE4F18', color: 'white' }}
+                >
+                  {getTranslation(currentLanguage, 'myPage.orders.detailsTab')}
+                </Tab>
+                <Tab
+                  flex={1}
+                  fontWeight="700"
+                  fontSize={{ base: 'sm', md: 'md' }}
+                  borderRadius={{ base: 'md', md: 'lg' }}
+                  color="gray.600"
+                  _selected={{ bg: '#FE4F18', color: 'white' }}
+                >
+                  {getTranslation(currentLanguage, 'myPage.orders.actionsTab')}
+                </Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel p={0}>
             {selectedOrder && (
               <VStack spacing={{ base: 4, md: 5 }} align="stretch">
                 {/* Package Name */}
@@ -880,7 +1052,86 @@ const MyPage = () => {
                 </VStack>
               </VStack>
             )}
-          </ModalBody>
+          </TabPanel>
+          <TabPanel p={0}>
+            {selectedOrder && (
+              <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+                {actionLogsLoading && (
+                  <Text fontSize="sm" color="gray.600">
+                    {getTranslation(currentLanguage, 'myPage.orders.actionsLoading')}
+                  </Text>
+                )}
+                {actionLogsError && (
+                  <Alert status="error" borderRadius="lg">
+                    <AlertIcon />
+                    <Text fontSize="sm">
+                      {getTranslation(currentLanguage, 'myPage.orders.actionsError')}
+                    </Text>
+                  </Alert>
+                )}
+                {!actionLogsLoading && !actionLogsError && actionItems.length === 0 && (
+                  <Text fontSize="sm" color="gray.600">
+                    {getTranslation(currentLanguage, 'myPage.orders.actionsEmpty')}
+                  </Text>
+                )}
+                {!actionLogsLoading && !actionLogsError && actionItems.length > 0 && (
+                  <VStack spacing={3} align="stretch">
+                    {actionItems.map((item, index) => (
+                      <Box
+                        key={`${item.id}-${index}`}
+                        bg="white"
+                        border="1px solid"
+                        borderColor="gray.100"
+                        borderRadius="xl"
+                        p={{ base: 4, md: 5 }}
+                        shadow="sm"
+                      >
+                        <HStack justify="space-between" align="start" mb={2}>
+                          <Text fontSize="md" fontWeight="700" color="gray.800">
+                            {item.title}
+                          </Text>
+                          <Text fontSize="xs" color="gray.500">
+                            {formatDateTime(item.date)}
+                          </Text>
+                        </HStack>
+                        {item.rows?.map((row, rowIndex) => (
+                          <HStack key={`${item.id}-row-${rowIndex}`} justify="space-between">
+                            <Text fontSize="sm" color="gray.500">
+                              {row.label}
+                            </Text>
+                            <Text fontSize="sm" fontWeight="600" color="gray.800">
+                              {row.value}
+                            </Text>
+                          </HStack>
+                        ))}
+                        {item.status && (
+                          <HStack justify="space-between" mt={2}>
+                            <Text fontSize="sm" color="gray.500">
+                              {getTranslation(currentLanguage, 'myPage.orders.actions.status')}
+                            </Text>
+                            <Badge
+                              colorScheme={
+                                item.status === 'FAILED' ? 'red' : item.status === 'PENDING' ? 'yellow' : 'green'
+                              }
+                              borderRadius="full"
+                              px={2}
+                              fontSize="xs"
+                              fontWeight="700"
+                            >
+                              {item.status}
+                            </Badge>
+                          </HStack>
+                        )}
+                      </Box>
+                    ))}
+                  </VStack>
+                )}
+              </VStack>
+            )}
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </ModalBody>
         </ModalContent>
       </Modal>
 
@@ -1001,3 +1252,6 @@ const MyPage = () => {
 };
 
 export default MyPage;
+
+
+

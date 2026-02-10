@@ -2,6 +2,7 @@
 // Service for handling eSIM orders
 
 import { getTranslation } from '../config/i18n.js';
+import { supabase } from '../lib/supabaseClient.js';
 
 const getApiUrl = () => {
   if (process.env.NODE_ENV === 'production') {
@@ -79,6 +80,34 @@ export const getUserOrders = async (userId, live = false) => {
     return data.data || [];
   } catch (error) {
     console.error('Failed to fetch orders:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get action logs for a specific order
+ * @param {string} orderId - Order ID (UUID)
+ * @param {string} userId - User ID
+ * @returns {Promise<Array>} Array of action logs
+ */
+export const getOrderActionLogs = async (orderId, userId) => {
+  try {
+    if (!orderId || !userId) return [];
+
+    const { data, error } = await supabase
+      .from('order_action_logs')
+      .select('*')
+      .eq('order_id', orderId)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch order action logs:', error);
     throw error;
   }
 };
