@@ -6,7 +6,7 @@ const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 // Route: POST /api/esim?action=query - Query eSIM profile
 async function queryEsimProfile(req, res) {
-  const { orderNo, iccid, esimTranNo } = req.body;
+  const { orderNo, iccid, esimTranNo, pager } = req.body;
 
   console.log('🔍 [ESIM-QUERY] Request:', { orderNo, iccid, esimTranNo });
 
@@ -22,6 +22,7 @@ async function queryEsimProfile(req, res) {
     if (orderNo) requestBody.orderNo = orderNo;
     if (iccid) requestBody.iccid = iccid;
     if (esimTranNo) requestBody.esimTranNo = esimTranNo;
+    requestBody.pager = pager || { pageNum: 1, pageSize: 50 };
 
     const response = await fetch(`${ESIMACCESS_API_URL}/esim/query`, {
       method: 'POST',
@@ -82,7 +83,10 @@ async function queryEsimUsage(req, res) {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `usage_query_${Date.now()}`,
       },
-      body: JSON.stringify({ orderNo }),
+      body: JSON.stringify({
+        orderNo,
+        pager: { pageNum: 1, pageSize: 50 },
+      }),
     });
 
     const queryData = await queryResponse.json();
@@ -104,7 +108,7 @@ async function queryEsimUsage(req, res) {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `usage_${Date.now()}`,
       },
-      body: JSON.stringify({ esimTranNo }),
+      body: JSON.stringify({ esimTranNoList: [esimTranNo] }),
     });
 
     const usageData = await usageResponse.json();
@@ -201,7 +205,7 @@ async function cancelEsimProfile(req, res) {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'RT-RequestID': `cancel_${Date.now()}`,
       },
-      body: JSON.stringify({ esimTranNo }),
+      body: JSON.stringify({ esimTranNoList: [esimTranNo] }),
     });
 
     const data = await response.json();
@@ -255,3 +259,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }
+
+
+

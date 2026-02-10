@@ -183,10 +183,10 @@ app.post('/api/order', async (req, res) => {
 // Query eSIM profile data
 app.post('/api/esim/query', async (req, res) => {
   try {
-    const { orderNo } = req.body;
+    const { orderNo, iccid, esimTranNo, pager } = req.body;
 
-    if (!orderNo) {
-      return res.status(400).json({ success: false, error: 'orderNo is required' });
+    if (!orderNo && !iccid && !esimTranNo) {
+      return res.status(400).json({ success: false, error: 'orderNo, iccid, or esimTranNo is required' });
     }
 
     console.log('🔍 Querying eSIM profile for order:', orderNo);
@@ -197,7 +197,7 @@ app.post('/api/esim/query', async (req, res) => {
         'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderNo }),
+      body: JSON.stringify({ orderNo, iccid, esimTranNo, pager: pager || { pageNum: 1, pageSize: 50 } }),
     });
 
     const data = await response.json();
@@ -213,10 +213,10 @@ app.post('/api/esim/query', async (req, res) => {
 // Query eSIM usage data by first getting esimTranNo, then querying usage
 app.post('/api/esim/usage', async (req, res) => {
   try {
-    const { orderNo } = req.body;
+    const { orderNo, iccid, esimTranNo, pager } = req.body;
 
-    if (!orderNo) {
-      return res.status(400).json({ success: false, error: 'orderNo is required' });
+    if (!orderNo && !iccid && !esimTranNo) {
+      return res.status(400).json({ success: false, error: 'orderNo, iccid, or esimTranNo is required' });
     }
 
     console.log('📊 Step 1: Querying eSIM details for orderNo:', orderNo);
@@ -352,7 +352,7 @@ app.post('/api/webhook/esim', async (req, res) => {
           'RT-AccessCode': ESIMACCESS_API_KEY,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ orderNo }),
+        body: JSON.stringify({ orderNo, pager: { pageNum: 1, pageSize: 50 } }),
       });
 
       const queryData = await queryResponse.json();
@@ -523,3 +523,5 @@ app.listen(PORT, () => {
   console.log(`🔗 API endpoint: http://localhost:${PORT}/api/packages`);
   console.log('\n');
 });
+
+
