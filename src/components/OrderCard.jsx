@@ -142,6 +142,7 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
     };
 
     fetchLiveData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order.order_no, order.order_status, order.id]);
 
   // Use LIVE status if available, otherwise fall back to database status
