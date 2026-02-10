@@ -98,7 +98,11 @@ export const queryEsimProfile = async (orderNo) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderNo }),
+      body: JSON.stringify({
+        orderNo,
+        iccid: '',
+        pager: { pageNum: 1, pageSize: 50 },
+      }),
     });
 
     const data = await response.json();
@@ -446,7 +450,11 @@ export const queryEsimUsage = async (orderNo) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ orderNo }),
+      body: JSON.stringify({
+        orderNo,
+        iccid: '',
+        pager: { pageNum: 1, pageSize: 50 },
+      }),
     });
 
     const data = await response.json();
