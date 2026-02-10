@@ -103,19 +103,68 @@ export const queryEsimProfile = async (orderNo) => {
 
     const data = await response.json();
 
-    console.log('🔍 [SERVICE] Profile response:', {
-      success: data.success,
-      hasEsimList: !!data.obj?.esimList,
-      esimCount: data.obj?.esimList?.length || 0
-    });
+    console.log('🔍 [SERVICE] RAW API Response:', JSON.stringify(data, null, 2));
+
+    // FIX 3: Normalize response structure - handle multiple possible formats
+    // Backend might wrap the eSIMAccess response in different ways
+    let normalizedData = null;
+
+    // Try format 1: response.obj.esimList (direct eSIMAccess passthrough)
+    if (data.obj?.esimList) {
+      console.log('✅ [SERVICE] Found esimList at: data.obj.esimList');
+      normalizedData = data;
+    }
+    // Try format 2: response.data.obj.esimList (double wrapped)
+    else if (data.data?.obj?.esimList) {
+      console.log('✅ [SERVICE] Found esimList at: data.data.obj.esimList');
+      normalizedData = {
+        success: data.success || data.data.success,
+        obj: data.data.obj,
+        errorCode: data.errorCode || data.data.errorCode,
+        errorMsg: data.errorMsg || data.data.errorMsg,
+      };
+    }
+    // Try format 3: response.data.esimList (backend wraps in data)
+    else if (data.data?.esimList) {
+      console.log('✅ [SERVICE] Found esimList at: data.data.esimList');
+      normalizedData = {
+        success: data.success || data.data.success,
+        obj: data.data,
+        errorCode: data.errorCode || data.data.errorCode,
+        errorMsg: data.errorMsg || data.data.errorMsg,
+      };
+    }
+    // Try format 4: response.esimList (flat structure)
+    else if (data.esimList) {
+      console.log('✅ [SERVICE] Found esimList at: data.esimList (flat)');
+      normalizedData = {
+        success: data.success,
+        obj: { esimList: data.esimList },
+        errorCode: data.errorCode,
+        errorMsg: data.errorMsg,
+      };
+    }
+    else {
+      console.error('❌ [SERVICE] Could not find esimList in any expected location');
+      console.error('❌ [SERVICE] Available keys:', Object.keys(data));
+    }
+
+    if (normalizedData) {
+      console.log('🔍 [SERVICE] Normalized response:', {
+        success: normalizedData.success,
+        hasEsimList: !!normalizedData.obj?.esimList,
+        esimCount: normalizedData.obj?.esimList?.length || 0
+      });
+    }
 
     if (!response.ok || !data.success) {
       throw new Error(data.error || 'Failed to query eSIM profile');
     }
 
-    return data;
+    // Return normalized data so all consumers get consistent structure
+    return normalizedData || data;
   } catch (error) {
-    console.error('eSIM query failed:', error);
+    console.error('❌ [SERVICE] eSIM query failed:', error);
     throw error;
   }
 };
@@ -633,8 +682,21 @@ export const processTopup = async (topupData) => {
  * @param {Object} order - Order object
  * @returns {boolean} Whether order can be topped up
  */
-export const canTopup = (order) => {
+/**
+ * FIX 2: Check if order can be topped up (using live data if available)
+ * @param {Object} order - Order data from database
+ * @param {Object} liveData - Live data from eSIM Access API (optional)
+ * @returns {boolean}
+ */
+export const canTopup = (order, liveData = null) => {
   if (!order) return false;
+
+  console.log('💳 [canTopup] Checking with:', {
+    orderId: order.id?.slice(0, 8),
+    hasLiveData: !!liveData,
+    dbStatus: order.esim_status,
+    liveStatus: liveData?.esimStatus,
+  });
 
   // Must have ICCID (eSIM must be allocated)
   if (!order.iccid && !order.esim_tran_no) {
@@ -642,8 +704,15 @@ export const canTopup = (order) => {
     return false;
   }
 
-  // Check eSIM status - only allow top-up for active states
-  const { esim_status, smdp_status } = order;
+  // FIX 2: Use live data if available, otherwise fall back to DB
+  const esim_status = liveData?.esimStatus || order.esim_status;
+  const smdp_status = liveData?.smdpStatus || order.smdp_status;
+
+  console.log('💳 [canTopup] Using statuses:', {
+    esim_status,
+    smdp_status,
+    source: liveData?.esimStatus ? 'LIVE' : 'DB',
+  });
 
   // Don't allow top-up for deleted or cancelled eSIMs
   if (smdp_status === 'DELETED' || esim_status === 'CANCEL') {

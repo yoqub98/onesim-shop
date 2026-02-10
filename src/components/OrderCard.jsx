@@ -41,35 +41,77 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   // Fetch LIVE data for ALLOCATED orders
   useEffect(() => {
     const fetchLiveData = async () => {
+      console.log('🎯 [OrderCard DEBUG] ========== USEEFFECT TRIGGERED ==========');
+      console.log('🎯 [OrderCard DEBUG] Order ID:', order.id);
+      console.log('🎯 [OrderCard DEBUG] Order No:', order.order_no);
+      console.log('🎯 [OrderCard DEBUG] Order Status:', order.order_status);
+      console.log('🎯 [OrderCard DEBUG] DB eSIM Status:', order.esim_status);
+      console.log('🎯 [OrderCard DEBUG] DB SMDP Status:', order.smdp_status);
+
       if (order.order_status !== 'ALLOCATED' || !order.order_no) {
-        console.log('⏭️ [OrderCard LIVE] Skipping - not ALLOCATED or no order_no:', {
+        console.log('⏭️ [OrderCard LIVE] ❌ SKIPPING FETCH - Condition failed:', {
           orderId: order.id,
           status: order.order_status,
           orderNo: order.order_no,
+          isNotAllocated: order.order_status !== 'ALLOCATED',
+          hasNoOrderNo: !order.order_no,
+        });
+        console.log('⚠️ [OrderCard LIVE] Will use DB status:', {
+          dbEsimStatus: order.esim_status,
+          dbSmdpStatus: order.smdp_status,
         });
         return;
       }
 
-      console.log('🔄 [OrderCard LIVE] Fetching live data for Order No:', order.order_no);
+      console.log('🔄 [OrderCard LIVE] ✅ Condition passed - Fetching live data for Order No:', order.order_no);
       setLoadingLiveData(true);
 
       try {
+        console.log('📡 [OrderCard LIVE] Calling queryEsimProfile API...');
         const response = await queryEsimProfile(order.order_no);
 
-        console.log('✅ [OrderCard LIVE] Response received:', response);
+        console.log('✅ [OrderCard LIVE] ========== API RESPONSE RECEIVED ==========');
+        console.log('✅ [OrderCard LIVE] Full Response:', JSON.stringify(response, null, 2));
 
-        if (response && response.success && response.obj?.esimList?.length > 0) {
-          const esimData = response.obj.esimList[0];
+        // FIX 1: Multi-format response parsing - check 4 possible structures
+        let esimList = null;
 
-          console.log('📊 [OrderCard LIVE] Live eSIM data:', {
-            esimStatus: esimData.esimStatus,
-            smdpStatus: esimData.smdpStatus,
-            totalVolume: esimData.totalVolume,
-            orderUsage: esimData.orderUsage,
-            expiredTime: esimData.expiredTime,
-          });
+        // Format 1: response.obj.esimList (normalized by orderService)
+        if (response?.obj?.esimList?.length > 0) {
+          console.log('✅ [OrderCard LIVE] Found esimList at: response.obj.esimList');
+          esimList = response.obj.esimList;
+        }
+        // Format 2: response.data.obj.esimList (double wrapped)
+        else if (response?.data?.obj?.esimList?.length > 0) {
+          console.log('✅ [OrderCard LIVE] Found esimList at: response.data.obj.esimList');
+          esimList = response.data.obj.esimList;
+        }
+        // Format 3: response.data.esimList (backend wraps in data)
+        else if (response?.data?.esimList?.length > 0) {
+          console.log('✅ [OrderCard LIVE] Found esimList at: response.data.esimList');
+          esimList = response.data.esimList;
+        }
+        // Format 4: response.esimList (flat)
+        else if (response?.esimList?.length > 0) {
+          console.log('✅ [OrderCard LIVE] Found esimList at: response.esimList (flat)');
+          esimList = response.esimList;
+        }
 
-          setLiveData({
+        console.log('✅ [OrderCard LIVE] esimList found:', !!esimList);
+        console.log('✅ [OrderCard LIVE] esimList length:', esimList?.length || 0);
+
+        if (response && response.success && esimList && esimList.length > 0) {
+          const esimData = esimList[0];
+
+          console.log('📊 [OrderCard LIVE] ========== LIVE ESIM DATA EXTRACTED ==========');
+          console.log('📊 [OrderCard LIVE] esimStatus:', esimData.esimStatus);
+          console.log('📊 [OrderCard LIVE] smdpStatus:', esimData.smdpStatus);
+          console.log('📊 [OrderCard LIVE] totalVolume:', esimData.totalVolume);
+          console.log('📊 [OrderCard LIVE] orderUsage:', esimData.orderUsage);
+          console.log('📊 [OrderCard LIVE] expiredTime:', esimData.expiredTime);
+          console.log('📊 [OrderCard LIVE] iccid:', esimData.iccid);
+
+          const liveDataToSet = {
             esimStatus: esimData.esimStatus,
             smdpStatus: esimData.smdpStatus,
             totalVolume: esimData.totalVolume,
@@ -78,9 +120,19 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
             iccid: esimData.iccid,
             qrCodeUrl: esimData.qrCodeUrl,
             activationCode: esimData.ac,
-          });
+          };
+
+          console.log('💾 [OrderCard LIVE] About to call setLiveData with:', liveDataToSet);
+          setLiveData(liveDataToSet);
+          console.log('✅ [OrderCard LIVE] setLiveData called successfully');
         } else {
-          console.log('⚠️ [OrderCard LIVE] No eSIM data in response');
+          console.log('❌ [OrderCard LIVE] ========== NO ESIM DATA IN RESPONSE ==========');
+          console.log('❌ [OrderCard LIVE] Reason breakdown:');
+          console.log('❌ [OrderCard LIVE] - response exists?', !!response);
+          console.log('❌ [OrderCard LIVE] - response.success?', response?.success);
+          console.log('❌ [OrderCard LIVE] - response.obj exists?', !!response?.obj);
+          console.log('❌ [OrderCard LIVE] - response.obj.esimList exists?', !!response?.obj?.esimList);
+          console.log('❌ [OrderCard LIVE] - esimList.length > 0?', (response?.obj?.esimList?.length || 0) > 0);
         }
       } catch (err) {
         console.error('❌ [OrderCard LIVE] Failed to fetch live data:', err.message);
@@ -93,8 +145,21 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
   }, [order.order_no, order.order_status, order.id]);
 
   // Use LIVE status if available, otherwise fall back to database status
+  console.log('🔍 [OrderCard] ========== STATUS RESOLUTION ==========');
+  console.log('🔍 [OrderCard] Order ID:', order.id.slice(0, 8));
+  console.log('🔍 [OrderCard] liveData state:', liveData);
+  console.log('🔍 [OrderCard] liveData?.esimStatus:', liveData?.esimStatus);
+  console.log('🔍 [OrderCard] order.esim_status (DB):', order.esim_status);
+  console.log('🔍 [OrderCard] liveData?.smdpStatus:', liveData?.smdpStatus);
+  console.log('🔍 [OrderCard] order.smdp_status (DB):', order.smdp_status);
+
   const esimStatus = liveData?.esimStatus || order.esim_status;
   const smdpStatus = liveData?.smdpStatus || order.smdp_status;
+
+  console.log('🔍 [OrderCard] FINAL esimStatus (will use):', esimStatus);
+  console.log('🔍 [OrderCard] FINAL smdpStatus (will use):', smdpStatus);
+  console.log('🔍 [OrderCard] Using liveData?', !!liveData?.esimStatus);
+  console.log('🔍 [OrderCard] Using DB fallback?', !liveData?.esimStatus && !!order.esim_status);
 
   // Determine what to show based on LIVE status
   const showUsage = shouldShowUsage(esimStatus, smdpStatus);
@@ -114,12 +179,23 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
   // Determine status display
   const useEsimStatus = order.order_status === 'ALLOCATED' && esimStatus;
+
+  console.log('🏷️ [OrderCard] ========== STATUS TEXT GENERATION ==========');
+  console.log('🏷️ [OrderCard] order.order_status:', order.order_status);
+  console.log('🏷️ [OrderCard] esimStatus:', esimStatus);
+  console.log('🏷️ [OrderCard] smdpStatus:', smdpStatus);
+  console.log('🏷️ [OrderCard] useEsimStatus?:', useEsimStatus);
+  console.log('🏷️ [OrderCard] currentLanguage:', currentLanguage);
+
   let statusText = useEsimStatus
     ? getEsimStatusText(esimStatus, smdpStatus, currentLanguage)
     : getOrderStatusText(order.order_status, currentLanguage);
   let statusColor = useEsimStatus
     ? getEsimStatusColor(esimStatus, smdpStatus)
     : getOrderStatusColor(order.order_status);
+
+  console.log('🏷️ [OrderCard] FINAL statusText:', statusText);
+  console.log('🏷️ [OrderCard] FINAL statusColor:', statusColor);
 
   const countryName = getCountryName(order.country_code, currentLanguage);
 
@@ -183,12 +259,22 @@ const OrderCard = ({ order, onActivate, onViewDetails, onTopup }) => {
 
   const badgeStyles = getBadgeStyles();
 
-  // Check if top-up is supported
-  const supportsTopup = canTopup(order);
+  // FIX 2: Check if top-up is supported (pass live data)
+  const supportsTopup = canTopup(order, liveData);
 
-  // Check if this package supports top-up (based on supportTopUpType)
-  // supportTopUpType: 1 means reloadable, others mean non-reloadable
-  const packageSupportsTopup = order.support_topup_type === 1 || !order.support_topup_type;
+  // FIX 2: Check if this package supports top-up (based on supportTopUpType)
+  // supportTopUpType: 1 = reloadable only same package, 2 = reloadable any package
+  // According to eSIM Access API docs and your Postman response showing value 2
+  const packageSupportsTopup =
+    order.support_topup_type === 1 ||
+    order.support_topup_type === 2 ||
+    !order.support_topup_type;
+
+  console.log('💳 [OrderCard] Top-up support:', {
+    supportsTopup,
+    support_topup_type: order.support_topup_type,
+    packageSupportsTopup,
+  });
 
   return (
     <Box
