@@ -29,7 +29,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userId, userEmail, packageCode, packageName, countryCode, dataAmount, validityDays, priceUzs, priceUsd } = req.body;
+    const {
+      userId, userEmail, packageCode, packageName, countryCode, dataAmount, validityDays, priceUzs, priceUsd,
+      // B2C fields (optional but recommended)
+      source_type, end_customer_id, end_customer_type, discount_applicable
+    } = req.body;
 
     console.log('🛒 [ORDER] New order request received');
     console.log('🛒 [ORDER] User:', { userId, userEmail });
@@ -82,6 +86,12 @@ export default async function handler(req, res) {
       .from('orders')
       .insert({
         user_id: userId,
+        // B2C fields for clarity and future-proofing
+        source_type: source_type || 'b2c',
+        end_customer_id: end_customer_id || userId,
+        end_customer_type: end_customer_type || 'b2c',
+        discount_applicable: discount_applicable ?? false,
+        // Standard order fields
         order_no: orderNo,
         transaction_id: transactionId,
         package_code: packageCode,

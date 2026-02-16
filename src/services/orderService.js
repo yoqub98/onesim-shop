@@ -29,12 +29,21 @@ const API_URL = getApiUrl();
  */
 export const createOrder = async (orderData) => {
   try {
+    // Add B2C-specific fields for clarity and future-proofing
+    const enrichedOrderData = {
+      ...orderData,
+      source_type: 'b2c',                    // B2C order from shop
+      end_customer_id: orderData.userId,      // Same as user_id for B2C
+      end_customer_type: 'b2c',               // B2C customer type
+      discount_applicable: false,             // B2C gets no discount
+    };
+
     const response = await fetch(`${API_URL}/order`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(orderData),
+      body: JSON.stringify(enrichedOrderData),
     });
 
     const data = await response.json();
