@@ -27,7 +27,7 @@ jobs:
           CI: false
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
-          # REACT_APP_API_BASE intentionally NOT set — defaults to /api (relative)
+          REACT_APP_API_BASE: https://onesim-shop.vercel.app/api
 
       - name: Deploy to cPanel production via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
