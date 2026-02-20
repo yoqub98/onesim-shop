@@ -1,18 +1,5 @@
 // src/config/pricing.js
-
-// DEPRECATED: Static rate is no longer used. Exchange rate is now fetched dynamically from CBU API via currencyService.js
-// Keeping this for backwards compatibility and fallback purposes only
-export const PRICING_CONFIG = {
-  USD_TO_UZS_RATE: parseInt(process.env.REACT_APP_USD_TO_UZS_RATE) || 12000, // Fallback rate
-  PROFIT_MARGIN: parseInt(process.env.REACT_APP_PROFIT_MARGIN) || 50, // percentage
-};
-
-// API configuration
-// NOTE: API keys are now ONLY in backend (api/* files), never exposed to frontend
-export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_ESIMACCESS_API_URL || 'https://api.esimaccess.com/api/v1/open',
-  // ACCESS_CODE and SECRET_KEY removed for security - only backend should have these
-};
+// Pricing is computed server-side. Frontend only formats and displays values.
 
 // ============================================
 // HANDPICKED PLAN SLUGS - For homepage "Best Plans" section
@@ -44,40 +31,32 @@ export const POPULAR_DESTINATIONS = [
 ];
 
 /**
- * Calculate final price with margin
- * @deprecated Use useCurrency().convertToUZS() instead for dynamic rates
- * This function now uses the static fallback rate and should only be used as fallback
+ * Legacy helper kept for compatibility with existing components.
+ * Frontend no longer applies margin; value is treated as already-final USD.
  * @param {number} usdPrice - Price in USD (from API, already divided by 10000)
- * @returns {number} Final price in UZS with margin applied
+ * @returns {number} Rounded numeric value
  */
 export const calculateFinalPrice = (usdPrice) => {
-  const uzsPrice = usdPrice * PRICING_CONFIG.USD_TO_UZS_RATE;
-  const margin = (uzsPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
-  return Math.round(uzsPrice + margin);
+  return Math.round(Number(usdPrice) || 0);
 };
 
 /**
- * Calculate final price with margin using dynamic exchange rate
- * @param {number} usdPrice - Price in USD (from API, already divided by 10000)
- * @param {number} exchangeRate - Current exchange rate from CBU (already includes 1% markup)
- * @returns {number} Final price in UZS with margin applied
+ * Legacy helper kept for compatibility with existing components.
+ * Frontend no longer applies margin; value is treated as already-final USD.
+ * @param {number} usdPrice - Price in USD
+ * @returns {number} Rounded numeric value
  */
-export const calculateFinalPriceWithRate = (usdPrice, exchangeRate) => {
-  // Exchange rate from CBU already includes 1% markup, so just convert
-  const uzsPrice = usdPrice * exchangeRate;
-  // Apply profit margin
-  const margin = (uzsPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
-  return Math.round(uzsPrice + margin);
+export const calculateFinalPriceWithRate = (usdPrice) => {
+  return Math.round(Number(usdPrice) || 0);
 };
 
 /**
- * Calculate USD price with margin applied
- * @param {number} usdPrice - Original price in USD (from API)
- * @returns {number} USD price with margin applied, rounded to 2 decimal places
+ * Return already-final USD price without applying frontend margin.
+ * @param {number} usdPrice - Final price in USD from backend
+ * @returns {number} Rounded to 2 decimals
  */
 export const calculateFinalPriceUSD = (usdPrice) => {
-  const margin = (usdPrice * PRICING_CONFIG.PROFIT_MARGIN) / 100;
-  return Math.round((usdPrice + margin) * 100) / 100; // Round to 2 decimal places
+  return Math.round((Number(usdPrice) || 0) * 100) / 100;
 };
 
 /**

@@ -59,7 +59,9 @@
       "Bash(npx react-scripts build:*)",
       "Bash(if [ -f \"D:\\webapp\\onesim-shop\\.claude\\doneByOpus\\MyPage.jsx\" ])",
       "Bash(then cp \"D:\\webapp\\onesim-shop\\.claude\\doneByOpus\\MyPage.jsx\" \"D:\\webapp\\onesim-shop\\src\\pages\\MyPage.jsx\")",
-      "Bash(else echo \"ℹ️ No MyPage.jsx in doneByOpus folder\")"
+      "Bash(else echo \"ℹ️ No MyPage.jsx in doneByOpus folder\")",
+      "WebFetch(domain:docs.click.uz)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

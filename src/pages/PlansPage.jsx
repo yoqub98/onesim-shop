@@ -52,6 +52,7 @@ import { getTranslation, getCountryName, getCountrySearchNames, COUNTRY_TRANSLAT
 import { parseRegionalSlug as parseRegionalSlugShared } from '../services/packageCacheService.js';
 import { useLanguage } from '../contexts/LanguageContext';
 import { isDailyUnlimited, getDailyDataAmount, getDataTypeLabel } from '../utils/dailyUnlimited';
+import { API_BASE } from '../config/api.js';
 
 // Package cache - stores fetched packages by country code
 const packageCache = new Map();
@@ -208,7 +209,7 @@ const PlansPage = () => {
       console.log('🔍 [PLANS] Fetching packages for country:', countryCode);
 
       // Fetch from API
-      const response = await fetch('/api/packages', {
+      const response = await fetch(`${API_BASE}/packages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ locationCode: countryCode }),

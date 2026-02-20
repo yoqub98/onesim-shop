@@ -4,6 +4,7 @@ import { Box, HStack, VStack, Text, IconButton, Collapse, Button, useToast } fro
 import { ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTranslation, TRANSLATIONS } from '../config/i18n';
+import { API_BASE } from '../config/api.js';
 
 /**
  * PriceSyncDebug - Shows price sync status and last update info
@@ -26,7 +27,7 @@ const PriceSyncDebug = () => {
   const fetchSyncStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/sync-status');
+      const response = await fetch(`${API_BASE}/sync-status`);
       const result = await response.json();
 
       if (result.success && result.data) {
@@ -101,7 +102,7 @@ const PriceSyncDebug = () => {
     try {
       setSyncing(true);
 
-      const response = await fetch('/api/price-sync', {
+      const response = await fetch(`${API_BASE}/price-sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

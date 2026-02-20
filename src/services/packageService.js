@@ -1,14 +1,8 @@
 // src/services/packageService.js
 // New service for fetching packages from our own database via API
+import { API_BASE } from '../config/api.js';
 
-const getApiUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return '/api';
-  }
-  return process.env.REACT_APP_PROXY_URL || 'http://localhost:5000/api';
-};
-
-const API_URL = getApiUrl();
+const API_URL = API_BASE;
 
 /**
  * Fetch packages for a specific country

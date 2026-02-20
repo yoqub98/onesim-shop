@@ -14,13 +14,13 @@ const PORT = 5000;
 
 // Supabase client with service role for backend operations
 const supabase = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
+  process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
 // eSIMAccess API configuration
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 // Email transporter (configure with your SMTP settings)
 const emailTransporter = nodemailer.createTransport({
@@ -72,7 +72,7 @@ app.post('/api/packages', async (req, res) => {
     const response = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
       method: 'POST',
       headers: {
-        'RT-AccessCode': process.env.REACT_APP_ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),

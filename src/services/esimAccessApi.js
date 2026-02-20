@@ -2,16 +2,9 @@
 
 import { getCountryName, DEFAULT_LANGUAGE } from '../config/i18n.js';
 import { detectRegion, REGION_DEFINITIONS } from './packageCacheService.js';
+import { API_BASE } from '../config/api.js';
 
-// Smart API URL detection
-const getApiUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return '/api';
-  }
-  return process.env.REACT_APP_PROXY_URL || 'http://localhost:5000/api';
-};
-
-const API_URL = getApiUrl();
+const API_URL = API_BASE;
 
 console.log('🔗 [INIT] API URL:', API_URL);
 
