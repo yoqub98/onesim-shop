@@ -36,5 +36,5 @@ jobs:
           username: ${{ secrets.FTP_USER_STAGING }}
           password: ${{ secrets.FTP_PASS_STAGING }}
           local-dir: ./build/
-          server-dir: /public_html/staging/
+          server-dir: /
           dangerous-clean-slate: false
