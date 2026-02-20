@@ -29,6 +29,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fetchAllRegionalPackages, fetchGlobalPackages } from '../services/packageService.js';
 import { getRegionName, getGlobalPackageMarketingName } from '../services/packageCacheService.js';
+import { API_BASE } from '../config/api.js';
 
 // Custom Arrow Circle SVG Component
 const ArrowCircleSvg = () => (
@@ -157,7 +158,7 @@ const DestinationCard = ({ countryCode, delay = 0, lang }) => {
   useEffect(() => {
     const fetchPackageCount = async () => {
       try {
-        const response = await fetch(`/api/packages-v2?type=country&country=${countryCode}`);
+        const response = await fetch(`${API_BASE}/packages-v2?type=country&country=${countryCode}`);
         if (response.ok) {
           const result = await response.json();
           setPackageCount(result.data?.length || 0);
