@@ -1,5 +1,4 @@
 {
-  "_comment_cors": "CORS origin is currently '*' because vercel.json headers are static. Tighten to explicit domains once runtime-aware origin handling is applied in API code.",
   "rewrites": [
     {
       "source": "/api/:path*",
