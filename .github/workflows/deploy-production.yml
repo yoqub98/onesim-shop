@@ -33,8 +33,8 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER_PROD }}
-          password: ${{ secrets.FTP_PASS_PROD }}
+          username: ${{ secrets.FTP_USER_MAIN }}
+          password: ${{ secrets.FTP_PASS_MAIN }}
           local-dir: ./build/
-          server-dir: /
+          server-dir: /public_html/
           dangerous-clean-slate: false
