@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 const CBU_API_URL = process.env.CBU_API_URL || 'https://cbu.uz/ru/arkhiv-kursov-valyut/json';
 
 // Cache for exchange rates (1 hour)
@@ -579,6 +579,16 @@ async function processTopup(req, res) {
 
 // Main router
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   const { action } = req.query;
 
   console.log('🔄 [ORDERS] Request:', req.method, action || 'get-user-orders');

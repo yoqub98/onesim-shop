@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 const generateTransactionId = () => {
   return `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;

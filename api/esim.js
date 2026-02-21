@@ -2,7 +2,7 @@
 // Handles all eSIM-related operations to reduce serverless function count
 
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 // Route: POST /api/esim?action=query - Query eSIM profile
 async function queryEsimProfile(req, res) {
@@ -233,6 +233,16 @@ async function cancelEsimProfile(req, res) {
 
 // Main router
 export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   const { action } = req.query;
 
   console.log('🔄 [ESIM] Request:', req.method, action);
@@ -259,6 +269,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 }
-
 
 

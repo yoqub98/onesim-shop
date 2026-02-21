@@ -2,6 +2,8 @@
 // Vercel Serverless Function - API Proxy for esimAccess
 
 export default async function handler(req, res) {
+  const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
+
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,12 +22,19 @@ export default async function handler(req, res) {
   }
 
   try {
+    if (!ESIMACCESS_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'Missing ESIMACCESS_API_KEY server environment variable',
+      });
+    }
+
     console.log('🔍 [PACKAGES-API] Request body:', JSON.stringify(req.body));
 
     const response = await fetch('https://api.esimaccess.com/api/v1/open/package/list', {
       method: 'POST',
       headers: {
-        'RT-AccessCode': process.env.REACT_APP_ESIMACCESS_API_KEY,
+        'RT-AccessCode': ESIMACCESS_API_KEY,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(req.body),
