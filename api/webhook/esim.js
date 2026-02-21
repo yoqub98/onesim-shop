@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 const ESIMACCESS_API_URL = 'https://api.esimaccess.com/api/v1/open';
-const ESIMACCESS_API_KEY = process.env.REACT_APP_ESIMACCESS_API_KEY;
+const ESIMACCESS_API_KEY = process.env.ESIMACCESS_API_KEY || process.env.REACT_APP_ESIMACCESS_API_KEY;
 
 // NOTE: Email sending temporarily disabled until domain is ready
 // Orders are saved to database and users can access QR codes via "My eSIMs" page
