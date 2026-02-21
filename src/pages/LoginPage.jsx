@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { ENABLE_GOOGLE_AUTH } from '../config/features';
 import { useLanguage } from '../contexts/LanguageContext.jsx';
 import { getTranslation } from '../config/i18n';
 import { toaster } from '../components/ui/toaster';
@@ -190,12 +191,14 @@ const LoginPage = () => {
                   </StyledButton>
 
                   {/* Google Sign In */}
-                  <GoogleSignInButton
-                    onClick={handleGoogleSignIn}
-                    isLoading={googleLoading}
-                  >
-                    {t('auth.login.googleButton')}
-                  </GoogleSignInButton>
+                  {ENABLE_GOOGLE_AUTH && (
+                    <GoogleSignInButton
+                      onClick={handleGoogleSignIn}
+                      isLoading={googleLoading}
+                    >
+                      {t('auth.login.googleButton')}
+                    </GoogleSignInButton>
+                  )}
 
                   {/* Sign Up Link */}
                   <Text fontSize="sm" color="gray.600" textAlign="center">
